@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="NovaWing/NovaWing.vcxproj" />
+  <Project Path="NovaWing/NovaWing.vcxproj" Id="852938be-fd87-448b-8c0d-50274b8f80d3" />
 </Solution>
