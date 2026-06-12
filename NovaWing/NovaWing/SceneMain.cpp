@@ -68,8 +68,8 @@ void SceneMain::Draw()
 	//カプセルを表示するテスト
 	//DrawCapsule3D(VGet(320.0f, 100.0f, 0.0f), VGet(320.0f, 300.0f, 0.0f) , 40.0f, 8, 0x00ff00, 0x00ff00, false);
 
-	DrawString(0, 0, "SceneMain", GetColor(255, 255, 255));
-	DrawFormatString(0, 16, GetColor(255, 255, 255), "FRAME:%d", m_frameCount);
+	DrawString(0, 0, L"SceneMain", GetColor(255, 255, 255));
+	DrawFormatString(0, 16, GetColor(255, 255, 255), L"FRAME:%d", m_frameCount);
 
-	DrawFormatString(0, 32, 0xffffff, "fov %f度", m_fov / DX_PI_F * 180.0f);
+	DrawFormatString(0, 32, 0xffffff, L"fov %f度", m_fov / DX_PI_F * 180.0f);
 }

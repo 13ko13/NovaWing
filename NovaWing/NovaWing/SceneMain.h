@@ -15,4 +15,3 @@ private:
 	//ƒJƒƒ‰‚Ì‹–ìŠp
 	float m_fov;	//field of view(‹–ìŠp)
 };
-
