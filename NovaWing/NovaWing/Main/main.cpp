@@ -1,6 +1,6 @@
 #include "DxLib.h"
-#include "game.h"
-#include "SceneMain.h"
+#include "../Constants/Game.h"
+#include "../Scene/SceneMain.h"
 #include <memory>
 
 // ƒvƒƒOƒ‰ƒ€‚Í WinMain ‚©‚çn‚Ü‚è‚Ü‚·

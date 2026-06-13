@@ -1,6 +1,6 @@
 #pragma once
-#include "Vector3.h"
-#include "Quaternion.h"
+#include "../Utility/Vector3.h"
+#include "../Utility/Quaternion.h"
 
 class Actor
 {
@@ -11,7 +11,6 @@ public:
 	//純粋仮想関数
 	virtual void Update() = 0;//更新
 	virtual void Draw() = 0;//描画
-	virtual void TakeDamage(int damage) = 0;//ダメージを受ける
 
 	//セッター
 	void SetPos(const Position3& pos) { m_position = pos; }//位置を指定
@@ -22,7 +21,6 @@ public:
 	Position3 GetPos() const { return m_position; }//位置を取得
 	Vector3 GetVel() const { return m_velocity; }//速度を取得
 	Quaternion GetRotation() const { return m_rotation; }//回転を取得
-	int GetHealth() const { return m_health; }//HPを取得
 
 	//操作
 	void Rotate(const Vector3& axis, float angle);//回転を加える
@@ -31,10 +29,11 @@ public:
 private:
 
 protected:
+	int m_modelHandle = -1;
+	bool m_isDead = false;//死んでいるか
+
 	Position3 m_position;//3D座標
 	Quaternion m_rotation;//回転
 	Vector3 m_velocity;//速度
-	int m_health;//体力
-	bool m_isDead;//死んでいるか
 };
 
