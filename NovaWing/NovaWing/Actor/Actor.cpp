@@ -1,10 +1,5 @@
 #include "Actor.h"
 
-namespace
-{
-	constexpr int max_health = 100;
-}
-
 Actor::Actor() :
 	m_position(0.0f, 0.0f, 0.0f),
 	m_rotation(),

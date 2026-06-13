@@ -1,7 +1,10 @@
 #pragma once
+#include <memory>
+
 #include "../Utility/Vector3.h"
 #include "../Utility/Quaternion.h"
 
+class ModelAnimator;
 class Actor
 {
 public:
@@ -21,19 +24,22 @@ public:
 	Position3 GetPos() const { return m_position; }//位置を取得
 	Vector3 GetVel() const { return m_velocity; }//速度を取得
 	Quaternion GetRotation() const { return m_rotation; }//回転を取得
+	bool IsDead() const { return m_isDead; }//死んでいるかを返す
 
 	//操作
 	void Rotate(const Vector3& axis, float angle);//回転を加える
-	bool IsDead() const;//死の条件
 
 private:
 
 protected:
-	int m_modelHandle = -1;
+	//機体情報
+	int m_modelHandle = -1;//モデルハンドル
 	bool m_isDead = false;//死んでいるか
-
 	Position3 m_position;//3D座標
 	Quaternion m_rotation;//回転
 	Vector3 m_velocity;//速度
+
+	//モデルのアニメーター
+	std::shared_ptr<ModelAnimator> m_pAnimator;
 };
 
