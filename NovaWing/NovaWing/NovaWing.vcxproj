@@ -138,22 +138,40 @@
   <ItemGroup>
     <ClCompile Include="Actor\Actor.cpp" />
     <ClCompile Include="Actor\Charactor.cpp" />
+    <ClCompile Include="Actor\Player\IPlayerState.cpp" />
+    <ClCompile Include="BulletManager.cpp" />
+    <ClCompile Include="Main\Application.cpp" />
     <ClCompile Include="Main\main.cpp" />
-    <ClCompile Include="Actor\Player.cpp" />
+    <ClCompile Include="Actor\Player\Player.cpp" />
+    <ClCompile Include="Manager\ResourceLoader.cpp" />
+    <ClCompile Include="Actor\Player\NormalState.cpp" />
+    <ClCompile Include="Scene\Scene.cpp" />
+    <ClCompile Include="Scene\SceneController.cpp" />
+    <ClCompile Include="Utility\Fade.cpp" />
     <ClCompile Include="Utility\Matrix4x4.cpp" />
     <ClCompile Include="Utility\Quaternion.cpp" />
-    <ClCompile Include="Scene\SceneMain.cpp" />
+    <ClCompile Include="Scene\GameScene.cpp" />
     <ClCompile Include="Utility\Vector2.cpp" />
     <ClCompile Include="Utility\Vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor\Actor.h" />
     <ClInclude Include="Actor\Charactor.h" />
+    <ClInclude Include="BulletManager.h" />
     <ClInclude Include="Constants\Game.h" />
-    <ClInclude Include="Actor\Player.h" />
+    <ClInclude Include="Actor\Player\Player.h" />
+    <ClInclude Include="Actor\Player\IPlayerState.h" />
+    <ClInclude Include="Main\Application.h" />
+    <ClInclude Include="Manager\ResourceLoader.h" />
+    <ClInclude Include="Actor\Player\NormalState.h" />
+    <ClInclude Include="Scene\Scene.h" />
+    <ClInclude Include="Scene\SceneController.h" />
+    <ClInclude Include="Utility\Fade.h" />
     <ClInclude Include="Utility\Matrix4x4.h" />
     <ClInclude Include="Utility\Quaternion.h" />
-    <ClInclude Include="Scene\SceneMain.h" />
+    <ClInclude Include="Scene\GameScene.h" />
+    <ClInclude Include="Utility\Size.h" />
+    <ClInclude Include="Utility\SmartPointerHelper.h" />
     <ClInclude Include="Utility\Vector2.h" />
     <ClInclude Include="Utility\Vector3.h" />
   </ItemGroup>
