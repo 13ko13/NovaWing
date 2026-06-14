@@ -4,6 +4,7 @@
 #include <string>
 
 #include "../Utility/Vector3.h"
+#include "../Utility/Vector2.h"
 
 /// <summary>
 /// 周辺機器種別
@@ -24,7 +25,7 @@ struct InputState
 };
 
 /// <summary>
-/// 入力を抽象化するためのクラス
+/// 入力を抽象化するためのシングルトンクラス
 /// </summary>
 class InputManager
 {
@@ -39,13 +40,24 @@ private:
 	int m_bufY;
 
 	//右スティックの入力方向(正規化済)と入力強度を保持する
-	Vector3 m_rightStickDir;
+	Vector2 m_rightStickDir;
 
-public:
+private:
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
 	InputManager();
+
+public:
+	/// <summary>
+	/// InputManagerのインスタンスを取得する
+	/// </summary>
+	/// <returns></returns>
+	static InputManager& GetInstance();
+
+	//コピーと代入を禁止する(消す)
+	InputManager(const InputManager&) = delete;
+	InputManager& operator=(const InputManager&) = delete;
 
 	/// <summary>
 	/// 毎フレーム呼び出して、
@@ -91,5 +103,5 @@ public:
 	/// 入力強度を取得する
 	/// </summary>
 	/// <returns>右スティックの倒している入力方向(正規化済み)と入力強度</returns>
-	Vector3 const GetRightStickDir() const {return m_rightStickDir;}
+	Vector2 const GetRightStickDir() const {return m_rightStickDir;}
 };

@@ -1,6 +1,5 @@
 ﻿#include "InputManager.h"
 #include "DxLib.h"
-#include "../Math/Vector3.h"
 
 namespace
 {
@@ -14,7 +13,7 @@ InputManager::InputManager() :
 	m_inputTable{},
 	m_bufX(0),
 	m_bufY(0),
-	m_rightStickDir({ 0.0f,0.0f,0.0f })
+	m_rightStickDir({ 0.0f,0.0f })
 {
 	//イベント名を添え時にして、右辺値に実際の入力種別と押されたボタンの配列を置く
 	m_inputTable["ok"] = { {PeripheralType::keyboard,KEY_INPUT_A},	//キーボード:エンターキー
@@ -113,7 +112,7 @@ void InputManager::Update()
 	GetJoypadXInputState(DX_INPUT_PAD1, &input);
 
 	//右スティックの値をfloatに変換する
-	Vector3 result = {
+	Vector2 result = {
 		static_cast<float>(input.ThumbRX),
 		static_cast<float>(input.ThumbRY) };
 
@@ -151,6 +150,13 @@ void InputManager::Update()
 
 	//結果を保存する
 	m_inputData["anyKey"] = anyPressed;
+}
+
+InputManager& InputManager::GetInstance()
+{
+	//staticでインスタンスを宣言してそれを返す
+	static InputManager instance;
+	return instance;
 }
 
 bool InputManager::IsPressed(const char* name)const
