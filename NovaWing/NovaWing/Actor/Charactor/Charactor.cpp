@@ -19,5 +19,5 @@ Charactor::~Charactor()
 void Charactor::Update()
 {
 	//位置の更新
-	m_position += m_velocity;
+	m_pos += m_velocity;
 }
