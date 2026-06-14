@@ -1,7 +1,7 @@
 #include "Player.h"
 #include "IPlayerState.h"
 #include "NormalState.h"
-#include "../../Utility/SmartPointerHelper.h"
+#include "../../../Utility/SmartPointerHelper.h"
 
 Player::Player(
 	std::shared_ptr<BulletManager> bulletManager) :
@@ -17,6 +17,9 @@ Player::~Player()
 
 void Player::Init()
 {
+	//親クラスのInitを呼ぶ
+	Actor::Init();
+
 	//Normalステートに初期化
 	//Nullチェック
 	m_pCurrentState = std::make_shared<NormalState>(shared_from_this());
