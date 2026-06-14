@@ -21,7 +21,7 @@ public:
 	/// <summary>
 	/// シーンの更新処理
 	/// </summary>
-	virtual void Update(InputManager& input) abstract;
+	virtual void Update() abstract;
 
 	/// <summary>
 	/// シーンの描画
