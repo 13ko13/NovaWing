@@ -7,13 +7,15 @@
 #include <algorithm>
 
 #include "../Actor/Actor.h"
-#include "../Actor/Charactor.h"
-#include "../Actor/Player/Player.h"
+#include "../Actor/Charactor/Charactor.h"
+#include "../Actor/Charactor/Player/Player.h"
 #include "GameScene.h"
 #include "../Manager/InputManager.h"
 #include "SceneController.h"
 #include "../Main/Application.h"
-#include "../BulletManager.h"
+#include "../Manager/BulletManager.h"
+#include "../Actor/Camera/Camera.h"
+#include "../Manager/ActorManager.h"
 
 namespace
 {
@@ -60,10 +62,7 @@ void GameScene::Init()
 	//プレイヤーの初期化処理
 	m_pPlayer->Init();
 	//カメラの実体を確保
-	//m_pCamera = std::make_shared<Camera>(camera_target_pos);
-
-	//全てのActorを格納する
-	PushAllActor();
+	m_pCamera = std::make_shared<Camera>(m_pPlayer);
 }
 
 void GameScene::Update()
@@ -75,10 +74,7 @@ void GameScene::Update()
 	//m_pCamera->Update(m_pPlayer->GetTargetPos(), input);
 
 	//全ActorのUpdateを呼ぶ
-	for (std::shared_ptr<Actor>& actor : m_pActors)
-	{
-		actor->Update();
-	}
+	ActorManager::GetInstance().UpdateAll();
 }
 
 void GameScene::Draw()
@@ -91,9 +87,8 @@ void GameScene::Draw()
 	DrawFormatString(0, 16, 0xffffff, L"FRAME:%d", m_frameCount);
 #endif //DEBUG
 
-	//文字の描画(仮)
-	//ウィンドウサイズを取得する
-	auto& windowSize = Application::GetInstance().GetWindowSize();
+	//全ActorのDrawを呼ぶ
+	ActorManager::GetInstance().DrawAll();
 }
 
 void GameScene::DrawGrid()
@@ -121,16 +116,4 @@ void GameScene::DrawGrid()
 		DrawLine3D(startPos, endPos, 0x0000ff);
 	}
 #endif
-
-	//全ActorのUpdateを呼ぶ
-	for (std::shared_ptr<Actor>& actor : m_pActors)
-	{
-		actor->Draw();
-	}
-}
-
-void GameScene::PushAllActor()
-{
-	//キャラクターを継承しているオブジェクトを格納
-	m_pActors.push_back(m_pPlayer);
 }

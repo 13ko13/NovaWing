@@ -26,17 +26,9 @@ private:
 	/// </summary>
 	void DrawGrid();
 
-	/// <summary>
-	/// Actorを継承しているオブジェクトをすべて格納する
-	/// </summary>
-	void PushAllActor();
-
 private:
 	//フレームカウンター
 	int m_frameCount;
-
-	//Actorをすべて格納したもの
-	std::vector<std::shared_ptr<Actor>> m_pActors;
 
 	//プレイヤーの実体
 	std::shared_ptr<Player> m_pPlayer;
