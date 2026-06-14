@@ -6,12 +6,14 @@
 #include <cmath>
 #include <algorithm>
 
+#include "../Actor/Actor.h"
 #include "../Actor/Charactor.h"
 #include "../Actor/Player/Player.h"
 #include "GameScene.h"
 #include "../Manager/InputManager.h"
 #include "SceneController.h"
 #include "../Main/Application.h"
+#include "../BulletManager.h"
 
 namespace
 {
@@ -36,6 +38,8 @@ GameScene::GameScene(SceneController& controller) :
 	Scene(controller),
 	m_frameCount(0)
 {
+	//BulletManagerを生成
+	m_pBuletManager = std::make_shared<BulletManager>();
 }
 
 GameScene::~GameScene()
@@ -50,9 +54,10 @@ void GameScene::Init()
 
 	//TODO:ResourceLoaderから必要なリソースを取得して初期化する
 	//auto& resourceLoader = ResourceLoader::GetInstance();
-
-	//プレイヤーの実体を確保
-	m_pPlayer = std::make_shared<Player>();
+	
+	//プレイヤーを生成
+	m_pPlayer = std::make_shared<Player>(m_pBuletManager);
+	//プレイヤーの初期化処理
 	m_pPlayer->Init();
 	//カメラの実体を確保
 	//m_pCamera = std::make_shared<Camera>(camera_target_pos);
@@ -61,13 +66,19 @@ void GameScene::Init()
 	PushAllActor();
 }
 
-void GameScene::Update(InputManager& input)
+void GameScene::Update()
 {
 	//フレームカウンターの更新
 	m_frameCount++;
 
 	//カメラの更新
 	//m_pCamera->Update(m_pPlayer->GetTargetPos(), input);
+
+	//全ActorのUpdateを呼ぶ
+	for (std::shared_ptr<Actor>& actor : m_pActors)
+	{
+		actor->Update();
+	}
 }
 
 void GameScene::Draw()
@@ -110,6 +121,12 @@ void GameScene::DrawGrid()
 		DrawLine3D(startPos, endPos, 0x0000ff);
 	}
 #endif
+
+	//全ActorのUpdateを呼ぶ
+	for (std::shared_ptr<Actor>& actor : m_pActors)
+	{
+		actor->Draw();
+	}
 }
 
 void GameScene::PushAllActor()

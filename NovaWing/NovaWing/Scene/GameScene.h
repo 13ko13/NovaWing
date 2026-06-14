@@ -8,14 +8,16 @@
 class Player;
 class InputManager;
 class Camera;
+class Actor;
+class BulletManager;
 class GameScene :public Scene
 {
 public:
-	GameScene(SceneController& controller,InputManager& input);
+	GameScene(SceneController& controller);
 	~GameScene();
 
 	void Init() override;
-	void Update(InputManager& input) override;
+	void Update() override;
 	void Draw() override;
 
 private:
@@ -43,5 +45,5 @@ private:
 	std::shared_ptr<Camera> m_pCamera;
 
 	//バレットマネージャーの実体
-	std::shared_ptr
+	std::shared_ptr<BulletManager> m_pBuletManager;
 };
