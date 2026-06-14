@@ -5,13 +5,15 @@
 #include "../Utility/Quaternion.h"
 
 class ModelAnimator;
-class Actor
+class Actor :
+	public std::enable_shared_from_this<Actor>//自分自身のポインタを返すため
 {
 public:
 	Actor();
 	virtual ~Actor();
 
 	//純粋仮想関数
+	virtual void Init();//初期化
 	virtual void Update() = 0;//更新
 	virtual void Draw() = 0;//描画
 

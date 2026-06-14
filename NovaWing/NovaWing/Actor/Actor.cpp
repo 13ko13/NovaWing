@@ -1,4 +1,5 @@
 #include "Actor.h"
+#include "../Manager/ActorManager.h"
 
 Actor::Actor() :
 	m_pos(0.0f, 0.0f, 0.0f),
@@ -6,11 +7,17 @@ Actor::Actor() :
 	m_velocity(0.0f, 0.0f, 0.0f),
 	m_isDead(false)
 {
+	
 }
 
 Actor::~Actor()
 {
 	//処理なし
+}
+
+void Actor::Init()
+{
+	ActorManager::GetInstance().Register(shared_from_this());
 }
 
 void Actor::Rotate(const Vector3& axis, float angle)
