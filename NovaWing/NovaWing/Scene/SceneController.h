@@ -44,7 +44,7 @@ public:
 	/// 内部に持ってるシーンのUpdateを呼び出す
 	/// </summary>
 	/// <param name="input"></param>
-	void Update(InputManager& input);
+	void Update();
 
 	/// <summary>
 	/// 内部に持ってるシーンのDrawを呼び出す

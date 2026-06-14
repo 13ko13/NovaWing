@@ -1,5 +1,6 @@
 ﻿#include "SceneController.h"
 #include "Scene.h"
+#include "../Manager/InputManager.h"
 
 void SceneController::ResetScene(std::shared_ptr<Scene> scene)
 {
@@ -44,7 +45,7 @@ void SceneController::Init()
 	m_scenes.back()->Init();
 }
 
-void SceneController::Update(InputManager& input)
+void SceneController::Update()
 {
 	//フェードマネージャーの更新
 	m_fade.Update();
@@ -65,7 +66,7 @@ void SceneController::Update(InputManager& input)
 	else
 	{
 		//末尾の要素に対してUpdateする
-		m_scenes.back()->Update(input);
+		m_scenes.back()->Update();
 	}
 }
 
