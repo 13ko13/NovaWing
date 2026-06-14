@@ -1,7 +1,7 @@
 #include "Actor.h"
 
 Actor::Actor() :
-	m_position(0.0f, 0.0f, 0.0f),
+	m_pos(0.0f, 0.0f, 0.0f),
 	m_rotation(),
 	m_velocity(0.0f, 0.0f, 0.0f),
 	m_isDead(false)

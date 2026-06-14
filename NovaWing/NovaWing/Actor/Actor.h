@@ -16,12 +16,12 @@ public:
 	virtual void Draw() = 0;//描画
 
 	//セッター
-	void SetPos(const Position3& pos) { m_position = pos; }//位置を指定
+	void SetPos(const Position3& pos) { m_pos = pos; }//位置を指定
 	void SetVel(const Vector3& vel) { m_velocity = vel; };//速度を指定
 	void SetRotation(const Quaternion& rot) { m_rotation = rot; };//回転を指定
 
 	//ゲッター
-	Position3 GetPos() const { return m_position; }//位置を取得
+	Position3 GetPos() const { return m_pos; }//位置を取得
 	Vector3 GetVel() const { return m_velocity; }//速度を取得
 	Quaternion GetRotation() const { return m_rotation; }//回転を取得
 	bool IsDead() const { return m_isDead; }//死んでいるかを返す
@@ -35,7 +35,7 @@ protected:
 	//機体情報
 	int m_modelHandle = -1;//モデルハンドル
 	bool m_isDead = false;//死んでいるか
-	Position3 m_position;//3D座標
+	Position3 m_pos;//3D座標
 	Quaternion m_rotation;//回転
 	Vector3 m_velocity;//速度
 
