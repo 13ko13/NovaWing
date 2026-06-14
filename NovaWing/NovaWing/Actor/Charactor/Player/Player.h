@@ -10,8 +10,7 @@ class Player : public Charactor,
 	public std::enable_shared_from_this<Player>//自分自身のポインタを返すため
 {
 public:
-	Player(std::shared_ptr<InputManager> inputManager, 
-		std::shared_ptr<BulletManager> bulletManager);
+	Player(std::shared_ptr<BulletManager> bulletManager);
 	~Player();
 
 	void Init();
@@ -29,8 +28,7 @@ private:
 	float m_brakeSpeed = 0;//ブレーキ時のスピード
 
 	//外部クラス参照
-	//この二つは借りてくるだけなのでweak_ptrにする
-	std::weak_ptr<InputManager> m_pInputManager;
+	//借りてくるだけなのでweak_ptrにする
 	std::weak_ptr<BulletManager> m_pBulletManager;
 
 	//現在のステートを持つ

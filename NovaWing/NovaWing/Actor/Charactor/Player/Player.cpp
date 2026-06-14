@@ -3,12 +3,11 @@
 #include "NormalState.h"
 #include "../../Utility/SmartPointerHelper.h"
 
-Player::Player(std::shared_ptr<InputManager> inputManager,
+Player::Player(
 	std::shared_ptr<BulletManager> bulletManager) :
-	m_pInputManager(inputManager),
 	m_pBulletManager(bulletManager)
 {
-	
+
 }
 
 Player::~Player()
@@ -19,13 +18,8 @@ Player::~Player()
 void Player::Init()
 {
 	//Normalステートに初期化
-	//shared_ptrに変換
-	std::shared_ptr<InputManager> pInput = WeakToShared(m_pInputManager);
 	//Nullチェック
-	if (pInput)
-	{
-		m_pCurrentState = std::make_shared<NormalState>(pInput, shared_from_this());
-	}
+	m_pCurrentState = std::make_shared<NormalState>(shared_from_this());
 }
 
 void Player::Update()
@@ -39,6 +33,7 @@ void Player::Update()
 
 void Player::Draw()
 {
+
 }
 
 void Player::TakeDamage(int damage)
