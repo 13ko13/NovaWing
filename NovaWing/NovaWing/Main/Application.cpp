@@ -7,6 +7,7 @@
 #include "../Scene/SceneController.h"
 #include "../Constants/Game.h"
 #include "../Manager/ResourceLoader.h"
+#include "../Scene/GameScene.h"
 
 namespace
 {
@@ -34,7 +35,7 @@ Application& Application::GetInstance()
 bool Application::Init()
 {
 	//ウィンドウモード設定
-	ChangeWindowMode(false);
+	ChangeWindowMode(true);
 	//ゲーム名
 	SetMainWindowText(L"NovaWing");
 	//画面サイズと色数を設定
@@ -64,19 +65,19 @@ bool Application::Init()
 void Application::Run()
 {
 	SetDrawScreen(DX_SCREEN_BACK);
-	InputManager input;//入力のためのオブジェクト 
 	SceneController controller;//シーンを管理するオブジェクト
-	//TODO:GameSceneを作成してChangeSceneで読み込む
+	//GameSceneを作成してChangeSceneで読み込む
+	controller.ChangeScene(std::make_shared<GameScene>(controller), 60.0f);
 
 	while (ProcessMessage() != -1)
 	{
 		auto startTime = GetNowHiPerformanceCount();
 
 		ClearDrawScreen();
-		input.Update();//入力状態の更新
+		InputManager::GetInstance().Update();
 
 		//シーンの更新
-		controller.Update(input);
+		controller.Update();
 		//シーンの描画
 		controller.Draw();
 		ScreenFlip();
