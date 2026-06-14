@@ -1,23 +1,19 @@
 ﻿#pragma once
-#include "../GameObjects/GameObject.h"
+#include "../Actor.h"
 
 class Input;
-class Camera : public GameObject
+class Player;
+class Camera : public Actor
 {
 public:
-	Camera(const Vector3& targetPos);
+	Camera(const std::shared_ptr<Player> pPlayer);
 	~Camera();
-
-	/// <summary>
-	/// 更新処理
-	/// </summary>
-	void Update() override;
 
 	/// <summary>
 	/// ターゲットの位置を受け取って、カメラの位置を更新する処理
 	/// </summary>
 	/// <param name="targetPos">注視点の位置</param>
-	void Update(const Vector3& targetPos,const Input input);
+	void Update() override;
 
 	/// <summary>
 	/// 描画処理
@@ -52,7 +48,11 @@ private:
 	int m_shakeFrame = 0;//揺れの持続フレーム数
 
 	//ターゲットの位置
-	Vector3 m_targetPos;
+	Position3 m_targetPos;
+	Position3 m_prevTargetPos;
+
+	//プレイヤーは借りてくるだけなのでweak_ptrで持っておく
+	std::weak_ptr<Player> m_pPlayer;
 
 private:
 	/// <summary>
@@ -60,4 +60,9 @@ private:
 	/// </summary>
 	/// <returns>揺れの速度ベクトル</returns>
 	Vector3 UpdateShake();
+
+	/// <summary>
+	/// ターゲットの位置を更新する
+	/// </summary>
+	void UpdateTargetPos();
 };
