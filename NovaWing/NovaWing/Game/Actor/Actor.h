@@ -1,8 +1,8 @@
 #pragma once
 #include <memory>
 
-#include "../Utility/Vector3.h"
-#include "../Utility/Quaternion.h"
+#include "../../Utility/Vector3.h"
+#include "../../Utility/Quaternion.h"
 
 class ModelAnimator;
 class Actor :
@@ -12,8 +12,11 @@ public:
 	Actor();
 	virtual ~Actor();
 
+	//ActorのInitは絶対に呼ばれるようにしたいのでfinalオーバーライドできないようにする
+	virtual void Init() final;//初期化
+	//Actorを継承したクラスが独自のInit処理を書く
+	virtual void OnInit() {};
 	//純粋仮想関数
-	virtual void Init();//初期化
 	virtual void Update() = 0;//更新
 	virtual void Draw() = 0;//描画
 

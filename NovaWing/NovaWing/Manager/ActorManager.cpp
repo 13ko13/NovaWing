@@ -1,5 +1,5 @@
 #include "ActorManager.h"
-#include "../Actor/Actor.h"
+#include "../Game/Actor/Actor.h"
 
 ActorManager& ActorManager::GetInstance()
 {

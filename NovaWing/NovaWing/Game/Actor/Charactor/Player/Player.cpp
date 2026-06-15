@@ -22,7 +22,8 @@ void Player::Init()
 
 	//Normalステートに初期化
 	//Nullチェック
-	m_pCurrentState = std::make_shared<NormalState>(shared_from_this());
+	//shared_from_thisがPlayerではなくActor型なのでPlayerにキャストする
+	m_pCurrentState = std::make_shared<NormalState>(static_pointer_cast<Player>(shared_from_this()));
 }
 
 void Player::Update()

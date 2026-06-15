@@ -1,24 +1,26 @@
 ﻿#pragma once
-#include "../Actor.h"
+#include <memory>
+
+#include "../../Utility/Vector3.h"
 
 class Input;
 class Player;
-class Camera : public Actor
+class CameraBase
 {
 public:
-	Camera(const std::shared_ptr<Player> pPlayer);
-	~Camera();
+	CameraBase(const std::shared_ptr<Player> pPlayer);
+	~CameraBase();
 
 	/// <summary>
 	/// ターゲットの位置を受け取って、カメラの位置を更新する処理
 	/// </summary>
 	/// <param name="targetPos">注視点の位置</param>
-	void Update() override;
+	virtual void Update();
 
 	/// <summary>
 	/// 描画処理
 	/// </summary>
-	void Draw() override;
+	virtual void Draw();
 
 	/// <summary>
 	/// Y軸回転角を取得する

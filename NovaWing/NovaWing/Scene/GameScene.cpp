@@ -6,15 +6,15 @@
 #include <cmath>
 #include <algorithm>
 
-#include "../Actor/Actor.h"
-#include "../Actor/Charactor/Charactor.h"
-#include "../Actor/Charactor/Player/Player.h"
+#include "../Game/Actor/Actor.h"
+#include "../Game/Actor/Charactor/Charactor.h"
+#include "../Game/Actor/Charactor/Player/Player.h"
 #include "GameScene.h"
 #include "../Manager/InputManager.h"
 #include "SceneController.h"
 #include "../Main/Application.h"
 #include "../Manager/BulletManager.h"
-#include "../Actor/Camera/Camera.h"
+#include "../Game/Camera/CameraBase.h"
 #include "../Manager/ActorManager.h"
 
 namespace
@@ -41,7 +41,7 @@ GameScene::GameScene(SceneController& controller) :
 	m_frameCount(0)
 {
 	//BulletManagerを生成
-	m_pBuletManager = std::make_shared<BulletManager>();
+	m_pBulletManager = std::make_shared<BulletManager>();
 }
 
 GameScene::~GameScene()
@@ -58,7 +58,7 @@ void GameScene::Init()
 	//auto& resourceLoader = ResourceLoader::GetInstance();
 	
 	//プレイヤーを生成
-	m_pPlayer = std::make_shared<Player>(m_pBuletManager);
+	m_pPlayer = std::make_shared<Player>(m_pBulletManager);
 	//プレイヤーの初期化処理
 	m_pPlayer->Init();
 	//カメラの実体を確保

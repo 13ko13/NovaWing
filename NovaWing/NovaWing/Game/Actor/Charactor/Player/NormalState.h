@@ -4,6 +4,7 @@
 #include "IPlayerState.h"
 
 class InputManager;
+class Player;
 class NormalState : public IPlayerState
 {
 public:

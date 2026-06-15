@@ -6,8 +6,7 @@
 class InputManager;
 class BulletManager;
 class IPlayerState;
-class Player : public Charactor,
-	public std::enable_shared_from_this<Player>//自分自身のポインタを返すため
+class Player : public Charactor
 {
 public:
 	Player(std::shared_ptr<BulletManager> bulletManager);

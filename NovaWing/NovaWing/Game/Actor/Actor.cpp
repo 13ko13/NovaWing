@@ -17,7 +17,10 @@ Actor::~Actor()
 
 void Actor::Init()
 {
+	//ActorManagerに登録する
 	ActorManager::GetInstance().Register(shared_from_this());
+	//Actorを継承したクラスの独自のInit処理を呼ぶ
+	OnInit();
 }
 
 void Actor::Rotate(const Vector3& axis, float angle)

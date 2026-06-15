@@ -1,8 +1,8 @@
-﻿#include "Camera.h"
+﻿#include "CameraBase.h"
 #include "../../Manager/InputManager.h"
 #include "../../Utility/Matrix4x4.h"
 #include "../../Utility/SmartPointerHelper.h"
-#include "../Charactor/Player/Player.h"
+#include "../Actor/Charactor/Player/Player.h"
 
 namespace
 {
@@ -26,7 +26,7 @@ namespace
 	constexpr float lerp_t = 0.2f;
 }
 
-Camera::Camera(const std::shared_ptr<Player> pPlayer)
+CameraBase::CameraBase(const std::shared_ptr<Player> pPlayer)
 {
 	//受け取ったshared_ptrプレイヤーをweakプレイヤーに入れる
 	m_pPlayer = pPlayer;
@@ -47,12 +47,12 @@ Camera::Camera(const std::shared_ptr<Player> pPlayer)
 	m_angleX = -DX_PI_F / 9.0f;
 }
 
-Camera::~Camera()
+CameraBase::~CameraBase()
 {
 
 }
 
-void Camera::Update()
+void CameraBase::Update()
 {
 	InputManager& input = InputManager::GetInstance();
 
@@ -117,26 +117,26 @@ void Camera::Update()
 #endif // _DEBUG
 }
 
-void Camera::Draw()
+void CameraBase::Draw()
 {
 #ifdef _DEBUG
 	//DrawFormatString((int)0.0f, (int)30.0f, 0xffffff, "angleX : %f,Y : %f", m_angleX,m_angleY);
 #endif // _DEBUG
 }
 
-Vector3 const Camera::GetForward() const
+Vector3 const CameraBase::GetForward() const
 {
 	//カメラの正面ベクトルは、注視点からカメラ位置に向かうベクトルの逆向きになる
 	return (m_targetPos - m_pos).Normalized();
 }
 
-void Camera::OnShake(float power, int frame)
+void CameraBase::OnShake(float power, int frame)
 {
 	m_shakePower = power;
 	m_shakeFrame = frame;
 }
 
-Vector3 Camera::UpdateShake()
+Vector3 CameraBase::UpdateShake()
 {
 	if (m_shakeFrame < 0)
 	{
@@ -156,7 +156,7 @@ Vector3 Camera::UpdateShake()
 	return shakeVec;
 }
 
-void Camera::UpdateTargetPos()
+void CameraBase::UpdateTargetPos()
 {
 	//仮でプレイヤーの位置を取得
 	std::shared_ptr<Player> pPlayer = WeakToShared<Player>(m_pPlayer);

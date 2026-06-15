@@ -37,5 +37,5 @@ private:
 	std::shared_ptr<Camera> m_pCamera;
 
 	//バレットマネージャーの実体
-	std::shared_ptr<BulletManager> m_pBuletManager;
+	std::shared_ptr<BulletManager> m_pBulletManager;
 };
