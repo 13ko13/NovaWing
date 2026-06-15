@@ -18,6 +18,9 @@ void ResourceLoader::LoadAll()
 {
 	//モデルを読み込んでハンドルを保存する
 	int handle = -1;
+	handle = MV1LoadModel(L"Data/Model/Player.mv1");
+	assert(handle >= 0); 
+	m_modelHandles[ModelID::Player] = handle;
 }
 
 void ResourceLoader::ReleaseAll()

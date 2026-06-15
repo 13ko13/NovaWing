@@ -1,10 +1,12 @@
 #include "Player.h"
 #include "IPlayerState.h"
 #include "NormalState.h"
-#include "../../../../Utility/SmartPointerHelper.h"
+#include "../../../../../Utility/SmartPointerHelper.h"
 
 Player::Player(
-	std::shared_ptr<BulletManager> bulletManager) :
+	std::shared_ptr<BulletManager> bulletManager,
+	ResourceLoader::ModelID modelID):
+	Charactor(modelID),
 	m_pBulletManager(bulletManager)
 {
 
@@ -34,7 +36,8 @@ void Player::Update()
 
 void Player::Draw()
 {
-
+	//プレイヤーのモデルを描画する
+	MV1DrawModel(m_modelHandle);
 }
 
 void Player::TakeDamage(int damage)

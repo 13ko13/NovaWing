@@ -9,7 +9,8 @@ class IPlayerState;
 class Player : public Charactor
 {
 public:
-	Player(std::shared_ptr<BulletManager> bulletManager);
+	Player(std::shared_ptr<BulletManager> bulletManager,
+		ResourceLoader::ModelID modelID);
 	~Player();
 
 	void OnInit() override;

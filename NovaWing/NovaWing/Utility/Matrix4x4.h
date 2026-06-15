@@ -2,7 +2,7 @@
 #include <DxLib.h>
 
 //前方宣言
-class Vector3;
+struct Vector3;
 
 /// <summary>
 /// 4x4行列クラス

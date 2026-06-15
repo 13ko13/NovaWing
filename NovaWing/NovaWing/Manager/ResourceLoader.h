@@ -7,7 +7,7 @@ public:
 	//モデルの種類
 	enum class ModelID : int
 	{
-		
+		Player, //プレイヤー
 	};
 
 	//グラフィックの種類

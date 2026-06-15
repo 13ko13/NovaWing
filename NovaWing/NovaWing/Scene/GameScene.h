@@ -6,9 +6,7 @@
 
 //前方宣言
 class Player;
-class InputManager;
-class Camera;
-class Actor;
+class CameraBase;
 class BulletManager;
 class GameScene :public Scene
 {
@@ -34,7 +32,7 @@ private:
 	std::shared_ptr<Player> m_pPlayer;
 
 	//カメラの実体
-	std::shared_ptr<Camera> m_pCamera;
+	std::shared_ptr<CameraBase> m_pCamera;
 
 	//バレットマネージャーの実体
 	std::shared_ptr<BulletManager> m_pBulletManager;

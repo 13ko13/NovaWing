@@ -4,7 +4,7 @@
 class Charactor : public Actor
 {
 public:
-	Charactor();
+	Charactor(ResourceLoader::ModelID modelId);
 	virtual ~Charactor();
 	virtual void Update() override;
 	virtual void Draw() = 0;
@@ -13,6 +13,7 @@ public:
 	int GetHealth() const { return m_health; }//HPを取得
 
 protected:
+	//機体情報
 	int m_health = 100;//体力
 	float m_attackPower = 1.0f;//攻撃力
 };

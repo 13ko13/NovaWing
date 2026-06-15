@@ -21,7 +21,7 @@
     <ClCompile Include="Scene\GameScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Actor\Actor.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Actor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Utility\Matrix4x4.cpp">
@@ -36,10 +36,10 @@
     <ClCompile Include="Utility\Quaternion.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Actor\Charactor\Charactor.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Charactor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Actor\Charactor\Player\Player.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Main\Application.cpp">
@@ -54,13 +54,13 @@
     <ClCompile Include="Manager\ResourceLoader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Actor\Charactor\Player\NormalState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\NormalState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Utility\Fade.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Actor\Charactor\Player\IPlayerState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IPlayerState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Manager\BulletManager.cpp">
@@ -72,13 +72,13 @@
     <ClCompile Include="Utility\ModelAnimator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Camera\CameraBase.cpp">
+    <ClCompile Include="Game\GameObjects\Camera\CameraBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Manager\ActorManager.cpp">
+    <ClCompile Include="Manager\GameObjectManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject.cpp">
+    <ClCompile Include="Game\GameObjects\GameObject.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -89,7 +89,7 @@
     <ClInclude Include="Scene\GameScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Actor\Actor.h">
+    <ClInclude Include="Game\GameObjects\Actors\Actor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Utility\Matrix4x4.h">
@@ -104,10 +104,10 @@
     <ClInclude Include="Utility\Quaternion.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Actor\Charactor\Charactor.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Charactor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Actor\Charactor\Player\Player.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Main\Application.h">
@@ -125,10 +125,10 @@
     <ClInclude Include="Manager\ResourceLoader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Actor\Charactor\Player\IPlayerState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IPlayerState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Actor\Charactor\Player\NormalState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\NormalState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Utility\SmartPointerHelper.h">
@@ -146,13 +146,13 @@
     <ClInclude Include="Utility\ModelAnimator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Camera\CameraBase.h">
+    <ClInclude Include="Game\GameObjects\Camera\CameraBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Manager\ActorManager.h">
+    <ClInclude Include="Manager\GameObjectManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="GameObject.h">
+    <ClInclude Include="Game\GameObjects\GameObject.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

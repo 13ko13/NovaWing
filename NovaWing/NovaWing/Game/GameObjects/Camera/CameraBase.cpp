@@ -1,8 +1,10 @@
 ﻿#include "CameraBase.h"
-#include "../../Manager/InputManager.h"
-#include "../../Utility/Matrix4x4.h"
-#include "../../Utility/SmartPointerHelper.h"
-#include "../Actor/Charactor/Player/Player.h"
+#include "../../../Manager/InputManager.h"
+#include "../../../Utility/Matrix4x4.h"
+#include "../../../Utility/SmartPointerHelper.h"
+#include "../Actors/Charactor/Player/Player.h"
+#include "../../../Utility/Vector3.h"
+#include "../../../Utility/Quaternion.h"
 
 namespace
 {

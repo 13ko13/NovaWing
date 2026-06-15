@@ -6,16 +6,17 @@
 #include <cmath>
 #include <algorithm>
 
-#include "../Game/Actor/Actor.h"
-#include "../Game/Actor/Charactor/Charactor.h"
-#include "../Game/Actor/Charactor/Player/Player.h"
+#include "../Game/GameObjects/Actors/Actor.h"
+#include "../Game/GameObjects/Actors/Charactor/Charactor.h"
+#include "../Game/GameObjects/Actors/Charactor/Player/Player.h"
 #include "GameScene.h"
 #include "../Manager/InputManager.h"
 #include "SceneController.h"
 #include "../Main/Application.h"
 #include "../Manager/BulletManager.h"
-#include "../Game/Camera/CameraBase.h"
-#include "../Manager/ActorManager.h"
+#include "../Game/GameObjects/Camera/CameraBase.h"
+#include "../Manager/GameObjectManager.h"
+#include "../Manager/ResourceLoader.h"
 
 namespace
 {
@@ -54,15 +55,19 @@ void GameScene::Init()
 	//カリングの設定
 	SetUseBackCulling(true);
 
-	//TODO:ResourceLoaderから必要なリソースを取得して初期化する
-	//auto& resourceLoader = ResourceLoader::GetInstance();
+	//ResourceLoaderから必要なリソースを取得して初期化する
+	ResourceLoader& resourceLoader = ResourceLoader::GetInstance();
+	resourceLoader.LoadAll();
 	
 	//プレイヤーを生成
-	m_pPlayer = std::make_shared<Player>(m_pBulletManager);
+	m_pPlayer = std::make_shared<Player>(
+		m_pBulletManager,ResourceLoader::ModelID::Player);
 	//プレイヤーの初期化処理
 	m_pPlayer->Init();
 	//カメラの実体を確保
-	m_pCamera = std::make_shared<Camera>(m_pPlayer);
+	m_pCamera = std::make_shared<CameraBase>(m_pPlayer);
+	//カメラの初期化処理
+	m_pCamera->Init();
 }
 
 void GameScene::Update()
@@ -70,11 +75,8 @@ void GameScene::Update()
 	//フレームカウンターの更新
 	m_frameCount++;
 
-	//カメラの更新
-	//m_pCamera->Update(m_pPlayer->GetTargetPos(), input);
-
-	//全ActorのUpdateを呼ぶ
-	ActorManager::GetInstance().UpdateAll();
+	//全GameObjectのUpdateを呼ぶ
+	GameObjectManager::GetInstance().UpdateAll();
 }
 
 void GameScene::Draw()
@@ -87,8 +89,8 @@ void GameScene::Draw()
 	DrawFormatString(0, 16, 0xffffff, L"FRAME:%d", m_frameCount);
 #endif //DEBUG
 
-	//全ActorのDrawを呼ぶ
-	ActorManager::GetInstance().DrawAll();
+	//全GameObjectのDrawを呼ぶ
+	GameObjectManager::GetInstance().DrawAll();
 }
 
 void GameScene::DrawGrid()
@@ -106,13 +108,13 @@ void GameScene::DrawGrid()
 		z <= static_cast<int>(stage_size.m_z); z += 100)
 	{
 		startPos = VGet(-stage_size.m_x, 0.0f, static_cast<float>(z));
-		endPos = VGet(-stage_size.m_x, 0.0f, static_cast<float>(z));
+		endPos = VGet(stage_size.m_x, 0.0f, static_cast<float>(z));
 		DrawLine3D(startPos, endPos, 0xff0000);
 	}
 	for (int x = static_cast<int>(-stage_size.m_x); x <= static_cast<int>(stage_size.m_x); x += 100)
 	{
 		startPos = VGet(static_cast<float>(x), 0.0f, -stage_size.m_z);
-		endPos = VGet(static_cast<float>(x), 0.0f, -stage_size.m_z);
+		endPos = VGet(static_cast<float>(x), 0.0f, stage_size.m_z);
 		DrawLine3D(startPos, endPos, 0x0000ff);
 	}
 #endif
