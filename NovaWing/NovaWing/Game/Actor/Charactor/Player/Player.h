@@ -12,7 +12,7 @@ public:
 	Player(std::shared_ptr<BulletManager> bulletManager);
 	~Player();
 
-	void Init();
+	void OnInit() override;
 	void Update() override;
 	void Draw() override;
 	void TakeDamage(int damage) override;

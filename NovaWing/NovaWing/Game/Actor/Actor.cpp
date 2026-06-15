@@ -1,5 +1,5 @@
 #include "Actor.h"
-#include "../Manager/ActorManager.h"
+#include "../../Manager/ActorManager.h"
 
 Actor::Actor() :
 	m_pos(0.0f, 0.0f, 0.0f),

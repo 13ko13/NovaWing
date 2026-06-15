@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "../../Utility/Vector3.h"
+#include "../../Utility/Quaternion.h"
 
 class Input;
 class Player;
@@ -42,6 +43,12 @@ public:
 	void OnShake(float power, int frame);
 	
 private:
+
+	//自身の位置
+	Position3 m_pos;//3D座標
+	Quaternion m_rotation;//回転
+	Vector3 m_velocity;//速度
+
 	float m_angleX = 0.0f;//カメラの回転角横
 	float m_angleY = 0.0f;//カメラの回転角縦
 
