@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Vector3.h"
 
+class Matrix4x4;
 class Quaternion
 {
 public:
@@ -18,9 +19,13 @@ public:
 	Quaternion Normalize();//クォータニオンを正規化する
 	Quaternion Inverse() const;//クォータニオンの逆数を計算する
 	float Length() const;//長さを求める
+	static Quaternion Lerp(const Quaternion& q1, const Quaternion& q2, float t);//線形補完
 
 	//クォータニオン同士の演算
 	Quaternion operator*(const Quaternion& other) const;//クォータニオンの乗算
 	Vector3 operator*(const Vector3& vec) const;//クォータニオンとベクトルの乗算(回転)
+
+	//Matrix4x4に変換する
+	Matrix4x4 ToMatrix4x4() const;
 };
 

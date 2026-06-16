@@ -35,7 +35,7 @@ private:
 	std::map<std::string, bool>m_inputData;///実際に入力されたかどうかのデータ
 	std::map<std::string, bool>m_lastInputData;///前のフレームに入力されたかどうかのデータ
 
-	//コントローラーのスティックを倒したときの値を保持するもの
+	//コントローラーの左スティックを倒したときの値を保持するもの
 	int m_bufX;
 	int m_bufY;
 

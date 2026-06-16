@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "Quaternion.h"
+#include "../Utility/Matrix4x4.h"
 
 Quaternion::Quaternion() :
 	m_w(1.0f), m_x(0.0f), m_y(0.0f), m_z(0.0f)
@@ -44,7 +45,7 @@ Quaternion Quaternion::Normalize()
 Quaternion Quaternion::Inverse() const
 {
 	//虚部の符号を反転させる
-	return Quaternion(m_w, m_x, m_y, m_z);
+	return Quaternion(m_w, -m_x, -m_y, -m_z);
 }
 
 float Quaternion::Length() const
@@ -57,6 +58,18 @@ float Quaternion::Length() const
 					m_z * m_z);
 
 	return len;
+}
+
+Quaternion Quaternion::Lerp(const Quaternion& q1, const Quaternion& q2, float t)
+{
+	Quaternion q;
+	q.m_w = q1.m_w * (1 - t) + q2.m_w * t;
+	q.m_x = q1.m_x * (1 - t) + q2.m_x * t;
+	q.m_y = q1.m_y * (1 - t) + q2.m_y * t;
+	q.m_z = q1.m_z * (1 - t) + q2.m_z * t;
+
+	//正規化して返す
+	return q.Normalize();
 }
 
 Quaternion Quaternion::operator*(const Quaternion& other) const
@@ -84,4 +97,28 @@ Vector3 Quaternion::operator*(const Vector3& vec) const
 
 	//結果の虚部だけを取り出して、Vector3で返す
 	return Vector3(result.m_x, result.m_y, result.m_z);
+}
+
+Matrix4x4 Quaternion::ToMatrix4x4() const
+{
+	Matrix4x4 mat = Matrix4x4(
+		1 - 2 * (m_y * m_y + m_z * m_z),
+		2 * (m_x * m_y + m_w * m_z),
+		2 * (m_x * m_z - m_w * m_y),
+		0,
+
+		2 * (m_x * m_y - m_w * m_z),
+		1 - 2 * (m_x * m_x + m_z * m_z),
+		2 * (m_y * m_z + m_w * m_x),
+		0,
+
+		2 * (m_x * m_z + m_w * m_y),
+		2 * (m_y * m_z - m_w * m_x),
+		1 - 2 * (m_x * m_x + m_y * m_y),
+		0,
+
+		0, 0, 0, 1
+	);
+
+	return mat;
 }

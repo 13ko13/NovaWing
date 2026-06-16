@@ -31,7 +31,7 @@ namespace
 	const Vector3 ground_pos = { 0.0f, -50.0f, 0.0f };
 
 	//フェードにかけるフレーム数
-	constexpr float fade_frame = 60.0f;
+	constexpr float fade_frame = 30.0f;
 
 	//1秒あたりのフレーム数
 	constexpr int frame_per_second = 60;

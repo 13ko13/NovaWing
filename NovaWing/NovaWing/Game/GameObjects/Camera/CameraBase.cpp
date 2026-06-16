@@ -10,9 +10,9 @@ namespace
 {
 	constexpr float camera_near = 200.0f;//カメラのNear
 	constexpr float camera_far = 3500.0f;//カメラのFar
-	const Vector3 first_pos = { 0.0f,300.0f,-700.0f };
+	const Vector3 first_pos = { 0.0f,300.0f,700.0f };
 	//注視点からカメラ位置に向かうベクトル
-	const Vector3 target_to_camera = { 0.0f,0.0f,-935.0f };
+	const Vector3 target_to_camera = { 0.0f,200.0f,635.0f };
 	//右スティックを動かしたときのカメラの回転角の増減量
 	constexpr float camera_rotate_speed = 0.04f;
 	//カメラが回転するまでのデッドゾーン
@@ -44,9 +44,6 @@ CameraBase::CameraBase(const std::shared_ptr<Player> pPlayer)
 	SetupCamera_Perspective(fov);
 	//カメラの遠近感の範囲を設定する
 	SetCameraNearFar(camera_near, camera_far);
-
-	//最初のカメラの上下回転角を-20度にする
-	m_angleX = -DX_PI_F / 9.0f;
 }
 
 CameraBase::~CameraBase()
@@ -113,16 +110,13 @@ void CameraBase::Update()
 
 	//カメラの位置とターゲットの位置をセットする
 	SetCameraPositionAndTarget_UpVecY(m_pos.ToDxLib(), m_targetPos.ToDxLib());
-
-#ifdef _DEBUG
-	//DrawFormatString((int)0.0f, (int)0.0f, 0xffffff, "rightStickX : %f,Y : %f", input.GetRightStickDir().m_x, input.GetRightStickDir().m_y);
-#endif // _DEBUG
 }
 
 void CameraBase::Draw()
 {
 #ifdef _DEBUG
 	//DrawFormatString((int)0.0f, (int)30.0f, 0xffffff, "angleX : %f,Y : %f", m_angleX,m_angleY);
+	DrawFormatString((int)0.0f, (int)30.0f, 0xffffff, L"posX : %f,posY:%f,posZ:%f", m_pos.m_x, m_pos.m_y,m_pos.m_z);
 #endif // _DEBUG
 }
 

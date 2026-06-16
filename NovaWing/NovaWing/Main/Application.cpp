@@ -67,7 +67,7 @@ void Application::Run()
 	SetDrawScreen(DX_SCREEN_BACK);
 	SceneController controller;//シーンを管理するオブジェクト
 	//GameSceneを作成してChangeSceneで読み込む
-	controller.ChangeScene(std::make_shared<GameScene>(controller), 60.0f);
+	controller.ChangeScene(std::make_shared<GameScene>(controller), 0.0f);
 
 	while (ProcessMessage() != -1)
 	{
