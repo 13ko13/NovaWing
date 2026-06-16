@@ -4,7 +4,7 @@
 
 namespace
 {
-	constexpr float move_speed = 2.0f;
+	constexpr float move_speed = 4.0f;
 }
 
 NormalState::NormalState(std::shared_ptr<Player> pPlayer) :
@@ -53,7 +53,11 @@ void NormalState::Update()
 	else
 	{
 		//Lerpをかけて回転を決める
-		Quaternion rotation = Quaternion::Lerp(m_pPlayer->GetRotation(), Quaternion(), 0.03f);
+		Quaternion rotation = Quaternion::Lerp(
+			m_pPlayer->GetRotation(),
+			m_pPlayer->GetInitRotation(),
+			0.03f);
+
 	    m_pPlayer->SetRotation(rotation);
 	}
 
@@ -63,7 +67,7 @@ void NormalState::Update()
 		axis = Vector3(0.0f, 1.0f, 0.0f);
 		m_pPlayer->Rotate(axis, stickX * 0.015f);
 		//画面右に動く
-		velX = -move_speed;
+		velX = move_speed;
 	}
 	//左入力
 	else if (stickX < -0.2f)
@@ -71,17 +75,11 @@ void NormalState::Update()
 		axis = Vector3(0.0f, 1.0f, 0.0f);
 		m_pPlayer->Rotate(axis, stickX * 0.015f);
 		//画面左に動く
-		velX = move_speed;
-	}
-	else
-	{
-		//Lerpをかけて回転を決める
-		Quaternion rotation = Quaternion::Lerp(m_pPlayer->GetRotation(), Quaternion(), 0.03f);
-		m_pPlayer->SetRotation(rotation);
+		velX = -move_speed;
 	}
 
 	//進むときのスピードを設定する
-	Vector3 vel = Vector3(velX, velY, -move_speed);
+	Vector3 vel = Vector3(velX, velY, move_speed);
 	m_pPlayer->SetVel(vel);
 
 #ifdef _DEBUG

@@ -18,6 +18,10 @@ public:
 	void Draw() override;
 	void TakeDamage(int damage) override;
 
+	//プレイヤーのモデルが逆向きなので
+	//初期回転を常に保存しておく
+	Quaternion GetInitRotation() const { return m_initRotation; }
+
 private:
 	void ChangeState(std::shared_ptr<IPlayerState> pNextState);
 
@@ -33,5 +37,9 @@ private:
 
 	//現在のステートを持つ
 	std::shared_ptr<IPlayerState> m_pCurrentState;
+
+	//プレイヤーの向きが逆向きなので
+	//プレイヤーの初期回転を保存する
+	Quaternion m_initRotation;
 };
 

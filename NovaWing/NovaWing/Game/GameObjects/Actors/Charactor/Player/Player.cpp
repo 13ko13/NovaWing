@@ -37,6 +37,11 @@ void Player::OnInit()
 	//Nullチェック
 	//shared_from_thisがPlayerではなくActor型なのでPlayerにキャストする
 	m_pCurrentState = std::make_shared<NormalState>(static_pointer_cast<Player>(shared_from_this()));
+
+	//Y軸に180度回転する(モデルが反対を向いているので)
+	Vector3 axis = Vector3(0.0f, 1.0f, 0.0f);
+	Rotate(axis, DX_PI_F);
+	m_initRotation = m_rotation;
 }
 
 void Player::Update()

@@ -12,11 +12,14 @@ namespace
 	constexpr float camera_far = 3500.0f;//カメラのFar
 	const Vector3 first_pos = { 0.0f,300.0f,700.0f };
 	//注視点からカメラ位置に向かうベクトル
-	const Vector3 target_to_camera = { 0.0f,200.0f,635.0f };
+	const Vector3 target_to_camera = { 0.0f,200.0f,-1200.0f };
 	//右スティックを動かしたときのカメラの回転角の増減量
 	constexpr float camera_rotate_speed = 0.04f;
 	//カメラが回転するまでのデッドゾーン
 	constexpr float camera_rot_dead_zone = 0.5f;
+	//カメラの固定Y位置
+	constexpr float camera_fixed_y = 200.0f;
+
 	//カメラの視野角
 	constexpr float fov = DX_PI_F / 3.0f;
 
@@ -98,15 +101,22 @@ void CameraBase::Update()
 	//回転させたカメラへのベクトルとターゲットの位置を足して、
 	//カメラの位置を求める
 	m_pos += tempCameraPos;
+	//XとYは固定値にする
+	m_pos.m_x = 0.0f;
+	m_pos.m_y = camera_fixed_y;
 
 	//カメラの揺れを更新して、カメラの位置に加算する
 	m_pos += UpdateShake();
 
-	//ターゲットの位置も補間する
-	m_targetPos = Vector3::Lerp(m_prevTargetPos, m_targetPos, lerp_t);
+	//前のターゲットの位置を保存
+	m_prevTargetPos = m_targetPos;
 
 	//ターゲットの位置を更新
 	UpdateTargetPos();
+
+	//ターゲットの位置も補間する
+	m_targetPos = Vector3::Lerp(m_prevTargetPos, m_targetPos, lerp_t);
+
 
 	//カメラの位置とターゲットの位置をセットする
 	SetCameraPositionAndTarget_UpVecY(m_pos.ToDxLib(), m_targetPos.ToDxLib());
@@ -154,10 +164,14 @@ Vector3 CameraBase::UpdateShake()
 
 void CameraBase::UpdateTargetPos()
 {
-	//仮でプレイヤーの位置を取得
+	//注視点X、Yは固定
+	m_targetPos.m_x = 0.0f;
+	m_targetPos.m_y = 0.0f;
+
+	//プレイヤーのZ位置を取得して、追従する
 	std::shared_ptr<Player> pPlayer = WeakToShared<Player>(m_pPlayer);
 	if(pPlayer != nullptr)//Nullチェック
 	{
-		m_targetPos = pPlayer->GetPos();
+		m_targetPos.m_z = pPlayer->GetPos().m_z + 605.0f;
 	}
 }
