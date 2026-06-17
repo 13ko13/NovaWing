@@ -4,6 +4,9 @@
 #include "../../Utility/Vector3.h"
 #include "../../Utility/Quaternion.h"
 
+/// <summary>
+/// 位置を持つ全てのオブジェクト
+/// </summary>
 class GameObject:
 	public std::enable_shared_from_this<GameObject>//自分自身のポインタを返すため
 {

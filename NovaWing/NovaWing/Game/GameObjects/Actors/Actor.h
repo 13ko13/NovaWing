@@ -6,6 +6,9 @@
 #include "../GameObject.h"
 #include "../../../Manager/ResourceLoader.h"
 
+/// <summary>
+/// モデルを持ち、ゲーム世界に見えるオブジェクト
+/// </summary>
 class ModelAnimator;
 class Actor :public GameObject
 {
@@ -29,8 +32,5 @@ protected:
 	//機体情報
 	int m_modelHandle = -1;//モデルハンドル
 	Vector3 m_velocity;//速度
-
-	//モデルのアニメーター
-	std::shared_ptr<ModelAnimator> m_pAnimator;
 };
 

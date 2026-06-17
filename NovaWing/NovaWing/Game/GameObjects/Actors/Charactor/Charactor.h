@@ -1,6 +1,9 @@
 #pragma once
 #include "../Actor.h"
 
+/// <summary>
+/// HPを持つキャラクター
+/// </summary>
 class Charactor : public Actor
 {
 public:
@@ -17,4 +20,3 @@ protected:
 	int m_health = 100;//体力
 	float m_attackPower = 1.0f;//攻撃力
 };
-
