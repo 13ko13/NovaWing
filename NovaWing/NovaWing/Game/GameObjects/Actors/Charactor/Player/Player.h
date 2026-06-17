@@ -22,8 +22,19 @@ public:
 	//初期回転を常に保存しておく
 	Quaternion GetInitRotation() const { return m_initRotation; }
 
+	//上下回転
+	void RotateX(float angle);
+	//左右回転
+	void RotateY(float angle);
+
+	//Lerpを適用したRotation
+	void LerpRotation(float t);
+
 private:
+	//ステートの変更
 	void ChangeState(std::shared_ptr<IPlayerState> pNextState);
+	//回転の更新
+	void UpdateRotation();
 
 private:
 	//ブースト関連
@@ -41,5 +52,9 @@ private:
 	//プレイヤーの向きが逆向きなので
 	//プレイヤーの初期回転を保存する
 	Quaternion m_initRotation;
-};
 
+	//上下回転角
+	float m_rotationX = 0.0f;
+	//左右回転角
+	float m_rotationY = 0.0f;
+};

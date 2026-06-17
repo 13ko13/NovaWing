@@ -40,8 +40,8 @@ void Player::OnInit()
 
 	//Y軸に180度回転する(モデルが反対を向いているので)
 	Vector3 axis = Vector3(0.0f, 1.0f, 0.0f);
-	Rotate(axis, DX_PI_F);
-	m_initRotation = m_rotation;
+	m_rotationY = DX_PI_F;
+	UpdateRotation();
 }
 
 void Player::Update()
@@ -81,6 +81,36 @@ void Player::TakeDamage(int damage)
 
 }
 
+void Player::RotateX(float angle)
+{
+	//angleを加算する
+	m_rotationX += angle;
+	//角度を制限する
+	m_rotationX = std::clamp(m_rotationX, -DX_PI_F / 6.0f, DX_PI_F / 6);
+	//回転を適用する
+	UpdateRotation();
+}
+
+void Player::RotateY(float angle)
+{
+	//angleを加算する
+	m_rotationY += angle;
+	//角度を制限する
+	m_rotationY = std::clamp(m_rotationY, DX_PI_F -DX_PI_F / 6.0f, DX_PI_F + DX_PI_F / 6.0f);
+	//回転を適用する
+	UpdateRotation();
+}
+
+void Player::LerpRotation(float t)
+{
+	//0に向けてrotationXをLerpする
+	m_rotationX = m_rotationX* (1 - t) + 0 * t;
+	//DX_PI_Fに向けてrotationYをLerpする
+	m_rotationY = m_rotationY * (1 - t) + DX_PI_F * t;
+	//Rotationを適用する
+	UpdateRotation();
+}
+
 void Player::ChangeState(std::shared_ptr<IPlayerState> pNextState)
 {
 	//Nullチェック
@@ -94,4 +124,13 @@ void Player::ChangeState(std::shared_ptr<IPlayerState> pNextState)
 	m_pCurrentState = pNextState;
 	//そのステートの入った時の処理を呼ぶ
 	m_pCurrentState->Enter();
+}
+
+void Player::UpdateRotation()
+{
+	//XとYの回転角からQuaternionを生成
+	Quaternion rotX = Quaternion(Vector3(1.0f, 0.0f, 0.0f), m_rotationX);
+	Quaternion rotY = Quaternion(Vector3(0.0f, 1.0f, 0.0f), m_rotationY);
+	//掛け合わせたものをrotationとする
+	m_rotation = rotX * rotY;
 }

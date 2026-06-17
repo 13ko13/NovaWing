@@ -18,7 +18,7 @@ namespace
 	//カメラが回転するまでのデッドゾーン
 	constexpr float camera_rot_dead_zone = 0.5f;
 	//カメラの固定Y位置
-	constexpr float camera_fixed_y = 200.0f;
+	constexpr float camera_fixed_y = 100.0f;
 
 	//カメラの視野角
 	constexpr float fov = DX_PI_F / 3.0f;
@@ -57,30 +57,6 @@ CameraBase::~CameraBase()
 void CameraBase::Update()
 {
 	InputManager& input = InputManager::GetInstance();
-
-	//右スティックの入力に応じてカメラの回転角を更新する
-	if (input.GetRightStickDir().m_x > camera_rot_dead_zone)
-	{
-		m_angleY -= camera_rotate_speed;
-	}
-	else if (input.GetRightStickDir().m_x < -camera_rot_dead_zone)
-	{
-		m_angleY += camera_rotate_speed;
-	}
-
-	//上下入力時のカメラの回転角の更新
-	if (input.GetRightStickDir().m_y > camera_rot_dead_zone)
-	{
-		m_angleX += camera_rotate_speed;
-	}
-	else if (input.GetRightStickDir().m_y < -camera_rot_dead_zone)
-	{
-		m_angleX -= camera_rotate_speed;
-	}
-
-	//カメラの回転角を制限する
-	if (m_angleX > rot_rimit_up) m_angleX = rot_rimit_up;//真下向くときは60度以上回転しないようにする
-	if (m_angleX < rot_rimit_down) m_angleX = rot_rimit_down;//真上向くときは-30度以上回転しないようにする
 
 	//カメラの注視点
 	Vector3 target = m_targetPos;
