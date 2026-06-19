@@ -57,4 +57,15 @@ private:
 	float m_rotationX = 0.0f;
 	//左右回転角
 	float m_rotationY = 0.0f;
+
+	//シェーダに渡す情報
+	struct MatrixBuffer
+	{
+		MATRIX world;
+		MATRIX view;
+		MATRIX proj;
+	};
+
+	int m_cbufferMatrix = -1;
+	MatrixBuffer* m_pCbufferMatrixData = nullptr;
 };

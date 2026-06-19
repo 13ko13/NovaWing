@@ -6,6 +6,7 @@
 #include "../../../../../Utility/SmartPointerHelper.h"
 #include "../../../../../Utility/Quaternion.h"
 #include "../../../../../Utility/Matrix4x4.h"
+#include "../../../../../LightingManager.h"
 
 namespace
 {
@@ -19,7 +20,7 @@ namespace
 
 Player::Player(
 	std::shared_ptr<BulletManager> bulletManager,
-	ResourceLoader::ModelID modelID):
+	ResourceLoader::ModelID modelID) :
 	Charactor(modelID),
 	m_pBulletManager(bulletManager)
 {
@@ -42,6 +43,12 @@ void Player::OnInit()
 	Vector3 axis = Vector3(0.0f, 1.0f, 0.0f);
 	m_rotationY = DX_PI_F;
 	UpdateRotation();
+
+	m_cbufferMatrix = CreateShaderConstantBuffer(sizeof(MatrixBuffer));
+	m_pCbufferMatrixData = static_cast<MatrixBuffer*>(GetBufferShaderConstantBuffer(m_cbufferMatrix));
+
+	//ライトの方向ベクトルをセットする
+	LightingManager::GetInstance().SetLightDirection(Vector3(0.3f, -0.5f, 0.5f));
 }
 
 void Player::Update()
@@ -72,8 +79,22 @@ void Player::Draw()
 	mat = mat * transMat;
 	MV1SetMatrix(m_modelHandle, mat.ToDxLib());
 
+	m_pCbufferMatrixData->world = MV1GetLocalWorldMatrix(m_modelHandle);
+	m_pCbufferMatrixData->view = GetCameraViewMatrix();
+	m_pCbufferMatrixData->proj = GetCameraProjectionMatrix();
+
+	//シェーダを適用する
+	UpdateShaderConstantBuffer(m_cbufferMatrix);
+	SetShaderConstantBuffer(m_cbufferMatrix, DX_SHADERTYPE_VERTEX, 2);
+
+	LightingManager::GetInstance().ApplyShader();
+
 	//プレイヤーのモデルを描画する
 	MV1DrawModel(m_modelHandle);
+
+	//シェーダを解除
+	LightingManager::GetInstance().ResetShader();
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 2);
 }
 
 void Player::TakeDamage(int damage)
@@ -96,7 +117,7 @@ void Player::RotateY(float angle)
 	//angleを加算する
 	m_rotationY += angle;
 	//角度を制限する
-	m_rotationY = std::clamp(m_rotationY, DX_PI_F -DX_PI_F / 6.0f, DX_PI_F + DX_PI_F / 6.0f);
+	m_rotationY = std::clamp(m_rotationY, DX_PI_F - DX_PI_F / 6.0f, DX_PI_F + DX_PI_F / 6.0f);
 	//回転を適用する
 	UpdateRotation();
 }
@@ -104,7 +125,7 @@ void Player::RotateY(float angle)
 void Player::LerpRotation(float t)
 {
 	//0に向けてrotationXをLerpする
-	m_rotationX = m_rotationX* (1 - t) + 0 * t;
+	m_rotationX = m_rotationX * (1 - t) + 0 * t;
 	//DX_PI_Fに向けてrotationYをLerpする
 	m_rotationY = m_rotationY * (1 - t) + DX_PI_F * t;
 	//Rotationを適用する
