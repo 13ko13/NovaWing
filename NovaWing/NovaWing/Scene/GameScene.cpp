@@ -68,6 +68,8 @@ void GameScene::Init()
 	m_pCamera = std::make_shared<CameraBase>(m_pPlayer);
 	//カメラの初期化処理
 	m_pCamera->Init();
+	//プレイヤーにカメラを渡す
+	m_pPlayer->SetCamera(m_pCamera);
 }
 
 void GameScene::Update()

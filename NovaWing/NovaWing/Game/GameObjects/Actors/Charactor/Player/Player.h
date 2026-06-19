@@ -6,6 +6,7 @@
 class InputManager;
 class BulletManager;
 class IPlayerState;
+class CameraBase;
 class Player : public Charactor
 {
 public:
@@ -30,6 +31,9 @@ public:
 	//Lerpを適用したRotation
 	void LerpRotation(float t);
 
+	//GameSceneからカメラをセットさせる
+	void SetCamera(std::shared_ptr<CameraBase> pCamera) { m_pCamera = pCamera; }
+
 private:
 	//ステートの変更
 	void ChangeState(std::shared_ptr<IPlayerState> pNextState);
@@ -44,7 +48,8 @@ private:
 
 	//外部クラス参照
 	//借りてくるだけなのでweak_ptrにする
-	std::weak_ptr<BulletManager> m_pBulletManager;
+	std::weak_ptr<BulletManager> m_pBulletManager;//弾の管理
+	std::weak_ptr<CameraBase> m_pCamera;//カメラ
 
 	//現在のステートを持つ
 	std::shared_ptr<IPlayerState> m_pCurrentState;
@@ -61,11 +66,18 @@ private:
 	//シェーダに渡す情報
 	struct MatrixBuffer
 	{
-		MATRIX world;
-		MATRIX view;
-		MATRIX proj;
+		MATRIX world;//ワールド行列
+		MATRIX view;//ビュー行列
+		MATRIX proj;//プロジェクション行列
 	};
-
 	int m_cbufferMatrix = -1;
 	MatrixBuffer* m_pCbufferMatrixData = nullptr;
+
+	struct CameraBuffer
+	{
+		Vector3 cameraPos;//カメラの位置
+		float padding;
+	};
+	int m_cbufferCamera = -1;
+	CameraBuffer* m_pCbufferCameraData = nullptr;
 };

@@ -27,7 +27,7 @@ void LightingManager::ApplyShader()
 	//ピクセルシェーダをセットする
 	SetUsePixelShader(m_lightingPSH);
 	//定数バッファをシェーダにセットする
-	SetShaderConstantBuffer(m_cbufferLightInfo, DX_SHADERTYPE_PIXEL, 1);
+	SetShaderConstantBuffer(m_cbufferLightInfo, DX_SHADERTYPE_PIXEL, 0);
 }
 
 void LightingManager::ResetShader()
@@ -35,7 +35,7 @@ void LightingManager::ResetShader()
 	//シェーダを解除してデフォルトに戻す
 	SetUseVertexShader(-1);
 	SetUsePixelShader(-1);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 1);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 0);
 	MV1SetUseOrigShader(false);
 }
 

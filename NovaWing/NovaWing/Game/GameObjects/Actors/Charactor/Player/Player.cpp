@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 
 #include "Player.h"
 #include "IPlayerState.h"
@@ -7,6 +8,8 @@
 #include "../../../../../Utility/Quaternion.h"
 #include "../../../../../Utility/Matrix4x4.h"
 #include "../../../../../LightingManager.h"
+#include "../../../Camera/CameraBase.h"
+#include "../../../../../Utility/SmartPointerHelper.h"
 
 namespace
 {
@@ -47,8 +50,11 @@ void Player::OnInit()
 	m_cbufferMatrix = CreateShaderConstantBuffer(sizeof(MatrixBuffer));
 	m_pCbufferMatrixData = static_cast<MatrixBuffer*>(GetBufferShaderConstantBuffer(m_cbufferMatrix));
 
+	m_cbufferCamera = CreateShaderConstantBuffer(sizeof(CameraBuffer));
+	m_pCbufferCameraData = static_cast<CameraBuffer*>(GetBufferShaderConstantBuffer(m_cbufferCamera));
+
 	//ライトの方向ベクトルをセットする
-	LightingManager::GetInstance().SetLightDirection(Vector3(0.3f, -0.5f, 0.5f));
+	LightingManager::GetInstance().SetLightDirection(Vector3(0.0f, -1.0f, -1.0f));
 }
 
 void Player::Update()
@@ -82,6 +88,11 @@ void Player::Draw()
 	m_pCbufferMatrixData->world = MV1GetLocalWorldMatrix(m_modelHandle);
 	m_pCbufferMatrixData->view = GetCameraViewMatrix();
 	m_pCbufferMatrixData->proj = GetCameraProjectionMatrix();
+
+	//カメラの位置をMatrix情報に渡す
+	std::shared_ptr<CameraBase> camera = WeakToShared(m_pCamera);
+	assert(camera != nullptr);//Nullチェック
+	m_pCbufferCameraData->cameraPos = camera->GetPos();
 
 	//シェーダを適用する
 	UpdateShaderConstantBuffer(m_cbufferMatrix);
