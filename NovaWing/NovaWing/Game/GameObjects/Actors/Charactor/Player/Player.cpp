@@ -96,6 +96,7 @@ void Player::Draw()
 
 	//シェーダを適用する
 	UpdateShaderConstantBuffer(m_cbufferMatrix);
+	UpdateShaderConstantBuffer(m_cbufferCamera);
 	SetShaderConstantBuffer(m_cbufferMatrix, DX_SHADERTYPE_VERTEX, 2);
 
 	LightingManager::GetInstance().ApplyShader();
