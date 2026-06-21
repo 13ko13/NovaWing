@@ -49,6 +49,8 @@ InputManager::InputManager() :
 
 	m_inputTable["right"] = { {PeripheralType::keyboard,KEY_INPUT_RIGHT},//キーボード:右矢印
 							{PeripheralType::pad1,PAD_INPUT_RIGHT } };	 //パッド:スティック右又は十字右
+	m_inputTable["shader"] = { {PeripheralType::keyboard,KEY_INPUT_Q},//キーボード:Q
+							{PeripheralType::pad1,PAD_INPUT_RIGHT } };	 //パッド:スティック右又は十字右
 #endif // _DEBUG
 
 	//あらかじめ入力データのための枠を開けておく

@@ -21,6 +21,11 @@ void ResourceLoader::LoadAll()
 	handle = MV1LoadModel(L"Data/Model/Player.mv1");
 	assert(handle >= 0); 
 	m_modelHandles[ModelID::Player] = handle;
+
+	//画像を読み込んでハンドルを保存する
+	handle = LoadGraph(L"Data/Model/Player.fbm/StarSparrow_Normal.png");
+	assert(handle >= 0); 
+	m_graphicHandles[GraphicID::PlayerNormalMap] = handle;
 }
 
 void ResourceLoader::ReleaseAll()

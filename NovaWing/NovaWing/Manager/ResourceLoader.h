@@ -13,7 +13,7 @@ public:
 	//グラフィックの種類
 	enum class GraphicID : int
 	{
-		
+		PlayerNormalMap,//プレイヤーの法線マップ
 	};
 
 	//エフェクトの種類

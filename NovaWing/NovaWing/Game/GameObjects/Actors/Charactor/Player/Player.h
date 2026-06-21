@@ -17,6 +17,7 @@ public:
 	void OnInit() override;
 	void Update() override;
 	void Draw() override;
+	void ApplyMatrix();
 	void TakeDamage(int damage) override;
 
 	//プレイヤーのモデルが逆向きなので
@@ -39,6 +40,10 @@ private:
 	void ChangeState(std::shared_ptr<IPlayerState> pNextState);
 	//回転の更新
 	void UpdateRotation();
+	//シェーダを適用したプレイヤーの描画
+	void DrawPlayer();
+
+	void SetCbuffMatrixData();
 
 private:
 	//ブースト関連

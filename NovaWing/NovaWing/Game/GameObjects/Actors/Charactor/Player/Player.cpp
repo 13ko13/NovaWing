@@ -10,6 +10,8 @@
 #include "../../../../../LightingManager.h"
 #include "../../../Camera/CameraBase.h"
 #include "../../../../../Utility/SmartPointerHelper.h"
+#include "../../../../../Manager/InputManager.h"
+#include "../../../../../Manager/ResourceLoader.h"
 
 namespace
 {
@@ -54,7 +56,7 @@ void Player::OnInit()
 	m_pCbufferCameraData = static_cast<CameraBuffer*>(GetBufferShaderConstantBuffer(m_cbufferCamera));
 
 	//ライトの方向ベクトルをセットする
-	LightingManager::GetInstance().SetLightDirection(Vector3(0.0f, -1.0f, -1.0f));
+	LightingManager::GetInstance().SetLightDirection(Vector3(1.0f, -1.0f, -1.0f));
 }
 
 void Player::Update()
@@ -72,6 +74,18 @@ void Player::Update()
 
 void Player::Draw()
 {
+	//モデルに行列を適用
+	ApplyMatrix();
+
+	//シェーダに渡すバッファに行列情報を渡す
+	SetCbuffMatrixData();
+
+	//シェーダを適用したプレイヤーを描画
+	DrawPlayer();
+}
+
+void Player::ApplyMatrix()
+{
 	Matrix4x4 mat;
 	//拡大縮小行列
 	Matrix4x4 scaleMat = Matrix4x4::Scale(model_scale);
@@ -79,34 +93,61 @@ void Player::Draw()
 	//回転行列
 	//m_rotationをMatrix4x4に変換
 	Matrix4x4 rotMat = m_rotation.ToMatrix4x4();
-	mat = mat * rotMat;
+	mat = mat * rotMat;//合成
 	//移動行列
 	Matrix4x4 transMat = Matrix4x4::Translate(m_pos);
-	mat = mat * transMat;
+	mat = mat * transMat;//合成
+	//モデルに適用
 	MV1SetMatrix(m_modelHandle, mat.ToDxLib());
+}
 
+void Player::DrawPlayer()
+{
+	//シェーダを適用する
+	UpdateShaderConstantBuffer(m_cbufferMatrix);
+	UpdateShaderConstantBuffer(m_cbufferCamera);
+
+	//ResourceLoaderからPlayerの法線マップを取得
+	//ResourceLoaderのインスタンスを取得
+	const ResourceLoader& resourceLoader = ResourceLoader::GetInstance();
+	//法線マップ取得
+	const int normGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::PlayerNormalMap);
+
+#if TRUE
+	//法線マップをシェーダに渡す
+	SetUseTextureToShader(1, normGraphH);
+
+	LightingManager::GetInstance().ApplyShader();
+	SetShaderConstantBuffer(m_cbufferMatrix, DX_SHADERTYPE_VERTEX, 2);
+	SetShaderConstantBuffer(m_cbufferCamera, DX_SHADERTYPE_VERTEX, 3);
+	SetShaderConstantBuffer(m_cbufferCamera, DX_SHADERTYPE_PIXEL, 3);
+#endif
+	//プレイヤーのモデルを描画する
+	MV1DrawModel(m_modelHandle);
+
+	//法線マップをシェーダに渡す
+	SetUseTextureToShader(1, -1);//法線マップを解除
+	//シェーダを解除
+	LightingManager::GetInstance().ResetShader();
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 2);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 3);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 3);
+}
+
+void Player::SetCbuffMatrixData()
+{
+	//行列情報を入れる
 	m_pCbufferMatrixData->world = MV1GetLocalWorldMatrix(m_modelHandle);
 	m_pCbufferMatrixData->view = GetCameraViewMatrix();
 	m_pCbufferMatrixData->proj = GetCameraProjectionMatrix();
 
-	//カメラの位置をMatrix情報に渡す
+	//カメラの位置をMatrix情報に渡す]
+	//shared_ptrに変換
 	std::shared_ptr<CameraBase> camera = WeakToShared(m_pCamera);
 	assert(camera != nullptr);//Nullチェック
+	//カメラの位置も入れる
 	m_pCbufferCameraData->cameraPos = camera->GetPos();
-
-	//シェーダを適用する
-	UpdateShaderConstantBuffer(m_cbufferMatrix);
-	UpdateShaderConstantBuffer(m_cbufferCamera);
-	SetShaderConstantBuffer(m_cbufferMatrix, DX_SHADERTYPE_VERTEX, 2);
-
-	LightingManager::GetInstance().ApplyShader();
-
-	//プレイヤーのモデルを描画する
-	MV1DrawModel(m_modelHandle);
-
-	//シェーダを解除
-	LightingManager::GetInstance().ResetShader();
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 2);
 }
 
 void Player::TakeDamage(int damage)

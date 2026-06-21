@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include "../Utility/Vector3.h"
 #include "Scene.h"
 
 //‘O•ûéŒ¾
