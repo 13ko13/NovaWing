@@ -79,7 +79,7 @@ void InputManager::Update()
 	for (const auto& inputInfo : m_inputTable)
 	{
 		auto& input = m_inputData[inputInfo.first];//inputInfo.firstには"ok"等が入っている
-		//inputを書き換えると、inputDataのそのイベントが押されてるか同課を
+		//inputを書き換えると、inputDataのそのイベントが押されてるかどうかを
 		//書き換えることになる
 		for (const auto& state : inputInfo.second)//InputStateのベクタを回す
 		{

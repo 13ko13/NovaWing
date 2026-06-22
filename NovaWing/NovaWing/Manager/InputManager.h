@@ -41,7 +41,6 @@ private:
 
 	//右スティックの入力方向(正規化済)と入力強度を保持する
 	Vector2 m_rightStickDir;
-
 private:
 	/// <summary>
 	/// コンストラクタ

@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(DXLIB_DIR)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(DXLIB_DIR)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -126,7 +126,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(DXLIB_DIR)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(DXLIB_DIR)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -138,6 +138,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Game\GameObjects\GameObject.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IMovementState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IdleMovementState.cpp" />
     <ClCompile Include="LightingManager.cpp" />
     <ClCompile Include="Manager\GameObjectManager.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Actor.cpp" />
@@ -151,6 +153,7 @@
     <ClCompile Include="Manager\InputManager.cpp" />
     <ClCompile Include="Manager\ResourceLoader.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\NormalState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\MovingState.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="Scene\SceneController.cpp" />
     <ClCompile Include="Utility\Fade.cpp" />
@@ -163,6 +166,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\GameObjects\GameObject.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IMovementState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IdleMovementState.h" />
     <ClInclude Include="LightingManager.h" />
     <ClInclude Include="Manager\GameObjectManager.h" />
     <ClInclude Include="Game\GameObjects\Actors\Actor.h" />
@@ -176,6 +181,7 @@
     <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="Manager\ResourceLoader.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\NormalState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\MovingState.h" />
     <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="Scene\SceneController.h" />
     <ClInclude Include="Utility\Fade.h" />
