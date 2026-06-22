@@ -140,6 +140,8 @@
     <ClCompile Include="Game\GameObjects\GameObject.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IMovementState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IdleMovementState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\DefaultRotationState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IRotationState.cpp" />
     <ClCompile Include="LightingManager.cpp" />
     <ClCompile Include="Manager\GameObjectManager.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Actor.cpp" />
@@ -152,7 +154,6 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Player.cpp" />
     <ClCompile Include="Manager\InputManager.cpp" />
     <ClCompile Include="Manager\ResourceLoader.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\NormalState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\MovingState.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="Scene\SceneController.cpp" />
@@ -168,6 +169,8 @@
     <ClInclude Include="Game\GameObjects\GameObject.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IMovementState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IdleMovementState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\DefaultRotationState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IRotationState.h" />
     <ClInclude Include="LightingManager.h" />
     <ClInclude Include="Manager\GameObjectManager.h" />
     <ClInclude Include="Game\GameObjects\Actors\Actor.h" />
@@ -180,7 +183,6 @@
     <ClInclude Include="Main\Application.h" />
     <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="Manager\ResourceLoader.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\NormalState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\MovingState.h" />
     <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="Scene\SceneController.h" />

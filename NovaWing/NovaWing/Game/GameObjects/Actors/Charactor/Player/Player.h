@@ -7,6 +7,8 @@ class InputManager;
 class BulletManager;
 class IPlayerState;
 class CameraBase;
+class IMovementState;
+class IRotationState;
 class Player : public Charactor
 {
 public:
@@ -16,34 +18,34 @@ public:
 
 	void OnInit() override;
 	void Update() override;
+
 	void Draw() override;
-	void ApplyMatrix();
+	
 	void TakeDamage(int damage) override;
 
 	//プレイヤーのモデルが逆向きなので
 	//初期回転を常に保存しておく
 	Quaternion GetInitRotation() const { return m_initRotation; }
 
-	//上下回転
-	void RotateX(float angle);
-	//左右回転
-	void RotateY(float angle);
-
-	//Lerpを適用したRotation
-	void LerpRotation(float t);
+	//AngleXまでLerpする
+	void LerpToAngleX(float targetAngle,float t);
+	//AngleYまでLerpする
+	void LerpToAngleY(float targetAngle, float t);
 
 	//GameSceneからカメラをセットさせる
 	void SetCamera(std::shared_ptr<CameraBase> pCamera) { m_pCamera = pCamera; }
 
 private:
-	//ステートの変更
-	void ChangeState(std::shared_ptr<IPlayerState> pNextState);
 	//回転の更新
 	void UpdateRotation();
 	//シェーダを適用したプレイヤーの描画
 	void DrawPlayer();
-
+	//行列情報を定数バッファに設定する
 	void SetCbuffMatrixData();
+	//移動範囲を制限する
+	void ClampPosition();
+	//行列を適用する
+	void ApplyMatrix();
 
 private:
 	//ブースト関連
@@ -55,9 +57,6 @@ private:
 	//借りてくるだけなのでweak_ptrにする
 	std::weak_ptr<BulletManager> m_pBulletManager;//弾の管理
 	std::weak_ptr<CameraBase> m_pCamera;//カメラ
-
-	//現在のステートを持つ
-	std::shared_ptr<IPlayerState> m_pCurrentState;
 
 	//プレイヤーの向きが逆向きなので
 	//プレイヤーの初期回転を保存する
@@ -85,4 +84,9 @@ private:
 	};
 	int m_cbufferCamera = -1;
 	CameraBuffer* m_pCbufferCameraData = nullptr;
+
+	//移動系ステート
+	std::shared_ptr<IMovementState> m_pMovementState;
+	//回転系ステート
+	std::shared_ptr<IRotationState> m_pRotationState;
 };

@@ -9,9 +9,13 @@
 namespace
 {
 	constexpr float move_speed = 4.0f;
+
+	//移動制限範囲
+	constexpr float move_limit_x = 500.0f;
+	constexpr float move_limit_y = 300.0f;
 }
 
-MovingState::MovingState(const std::weak_ptr<Player> pPlayer):
+MovingState::MovingState(const std::weak_ptr<Player> pPlayer) :
 	IMovementState(pPlayer)
 {
 }
@@ -45,39 +49,29 @@ void MovingState::Update()
 	Vector3 vel;
 	Vector3 axis;
 	//下入力
-	if (stickY > 0.2f)
+	if (stickY > 0.01f)
 	{
 		//画面下に動く
-		vel.m_y = -move_speed;
+		vel.m_y = -stickY * move_speed;
 	}
 	//上入力
-	else if (stickY < -0.2f)
+	else if (stickY < -0.01f)
 	{
 		//画面上に動く
-		vel.m_y = move_speed;
-	}
-	//入力なし
-	else
-	{
-		
+		vel.m_y = -stickY * move_speed;
 	}
 
 	//右入力
-	if (stickX > 0.2f)
+	if (stickX > 0.01f)
 	{
 		//画面右に動く
-		vel.m_x = move_speed;
+		vel.m_x = stickX * move_speed;
 	}
 	//左入力
-	else if (stickX < -0.2f)
+	else if (stickX < -0.01f)
 	{
 		//画面左に動く
-		vel.m_x = -move_speed;
-	}
-	//入力なし
-	else
-	{
-		
+		vel.m_x = stickX * move_speed;
 	}
 
 	//進むときのスピードを設定する
@@ -92,8 +86,10 @@ void MovingState::Update()
 	{
 		ChangeState(std::make_shared<IdleMovementState>(m_pPlayer));
 	}
+
+
+	DrawFormatString(0, 100, 0xffffff, L"stickX:%f,stickY:%f", stickX, stickY);
 }
 
 void MovingState::Exit()
-{
-}
+{}

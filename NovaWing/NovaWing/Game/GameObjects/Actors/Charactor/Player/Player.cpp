@@ -3,15 +3,16 @@
 
 #include "Player.h"
 #include "IPlayerState.h"
-#include "NormalState.h"
-#include "../../../../../Utility/SmartPointerHelper.h"
-#include "../../../../../Utility/Quaternion.h"
-#include "../../../../../Utility/Matrix4x4.h"
-#include "../../../../../LightingManager.h"
-#include "../../../Camera/CameraBase.h"
-#include "../../../../../Utility/SmartPointerHelper.h"
-#include "../../../../../Manager/InputManager.h"
-#include "../../../../../Manager/ResourceLoader.h"
+#include "Utility/SmartPointerHelper.h"
+#include "Utility/Quaternion.h"
+#include "Utility/Matrix4x4.h"
+#include "LightingManager.h"
+#include "Game/GameObjects/Camera/CameraBase.h"
+#include "Utility/SmartPointerHelper.h"
+#include "Manager/InputManager.h"
+#include "Manager/ResourceLoader.h"
+#include "IdleMovementState.h"
+#include "DefaultRotationState.h"
 
 namespace
 {
@@ -39,11 +40,6 @@ Player::~Player()
 
 void Player::OnInit()
 {
-	//Normalステートに初期化
-	//Nullチェック
-	//shared_from_thisがPlayerではなくActor型なのでPlayerにキャストする
-	m_pCurrentState = std::make_shared<NormalState>(static_pointer_cast<Player>(shared_from_this()));
-
 	//Y軸に180度回転する(モデルが反対を向いているので)
 	Vector3 axis = Vector3(0.0f, 1.0f, 0.0f);
 	m_rotationY = DX_PI_F;
@@ -57,17 +53,68 @@ void Player::OnInit()
 
 	//ライトの方向ベクトルをセットする
 	LightingManager::GetInstance().SetLightDirection(Vector3(1.0f, -1.0f, -1.0f));
+
+	//MovementStateの初期化
+	//待機状態
+	m_pMovementState = 
+		std::make_shared<IdleMovementState>(
+			GameObjectToDerived<Player>(shared_from_this())
+		);
+
+	//RotationStateの初期化
+	//通常回転
+	m_pRotationState = 
+		std::make_shared<DefaultRotationState>(
+			GameObjectToDerived<Player>(shared_from_this())
+		);
 }
 
 void Player::Update()
 {
+	//移動系処理の更新処理
+	m_pMovementState->Update();
+	//回転系処理の更新処理
+	m_pRotationState->Update();
+
+	//キャラクターの更新処理
 	Charactor::Update();
 
-	//もしプレイヤーの現在のステートが存在するなら
-	if (m_pCurrentState)
+	ClampPosition();
+
+	//次のステートを取得
+	std::shared_ptr<IMovementState> pMoveNextState =
+		m_pMovementState->GetNextState();
+
+	//次のステートを確認して、nullじゃなければExitを呼ぶ
+	if (pMoveNextState != nullptr)
 	{
-		m_pCurrentState->Update();
+		//ステートを抜けるときの処理
+		m_pMovementState->Exit();
+		//ステートを差し替える
+		m_pMovementState = pMoveNextState;
+		//差し替えた後のステートの入るときの処理を呼ぶ
+		m_pMovementState->Enter();
 	}
+
+	//次のステートを取得
+	std::shared_ptr<IRotationState> pRotNextState =
+		m_pRotationState->GetNextState();
+
+	//次のステートを確認して、nullじゃなければExitを呼ぶ
+	if (pRotNextState != nullptr)
+	{
+		//ステートを抜けるときの処理
+		m_pRotationState->Exit();
+		//ステートを差し替える
+		m_pRotationState = pRotNextState;
+		//差し替えた後のステートの入るときの処理を呼ぶ
+		m_pRotationState->Enter();
+	}
+}
+
+void Player::ClampPosition()
+{
+	//移動範囲を制限する
 	m_pos.m_x = std::clamp(m_pos.m_x, -move_limit_x, move_limit_x);
 	m_pos.m_y = std::clamp(m_pos.m_y, -move_limit_y, move_limit_y);
 }
@@ -155,49 +202,20 @@ void Player::TakeDamage(int damage)
 
 }
 
-void Player::RotateX(float angle)
+void Player::LerpToAngleX(float targetAngle, float t)
 {
-	//angleを加算する
-	m_rotationX += angle;
-	//角度を制限する
-	m_rotationX = std::clamp(m_rotationX, -DX_PI_F / 6.0f, DX_PI_F / 6);
-	//回転を適用する
-	UpdateRotation();
-}
-
-void Player::RotateY(float angle)
-{
-	//angleを加算する
-	m_rotationY += angle;
-	//角度を制限する
-	m_rotationY = std::clamp(m_rotationY, DX_PI_F - DX_PI_F / 6.0f, DX_PI_F + DX_PI_F / 6.0f);
-	//回転を適用する
-	UpdateRotation();
-}
-
-void Player::LerpRotation(float t)
-{
-	//0に向けてrotationXをLerpする
-	m_rotationX = m_rotationX * (1 - t) + 0 * t;
-	//DX_PI_Fに向けてrotationYをLerpする
-	m_rotationY = m_rotationY * (1 - t) + DX_PI_F * t;
+	//targetAngleに向けてrotationXをLerpする
+	m_rotationX = m_rotationX * (1 - t) + targetAngle * t;
 	//Rotationを適用する
 	UpdateRotation();
 }
 
-void Player::ChangeState(std::shared_ptr<IPlayerState> pNextState)
+void Player::LerpToAngleY(float targetAngle, float t)
 {
-	//Nullチェック
-	if (m_pCurrentState != nullptr)
-	{
-		//現在のステートの出たときの処理を呼ぶ
-		m_pCurrentState->Exit();
-	}
-
-	//新しいステートに差し替える
-	m_pCurrentState = pNextState;
-	//そのステートの入った時の処理を呼ぶ
-	m_pCurrentState->Enter();
+	//targetAngleに向けてrotationYをLerpする
+	m_rotationY = m_rotationY * (1 - t) + targetAngle * t;
+	//Rotationを適用する
+	UpdateRotation();
 }
 
 void Player::UpdateRotation()

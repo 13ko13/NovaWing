@@ -1,4 +1,4 @@
-﻿#include "InputManager.h"
+﻿	#include "InputManager.h"
 #include "DxLib.h"
 
 namespace
