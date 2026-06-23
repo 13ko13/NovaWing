@@ -77,8 +77,7 @@ void MovingState::Update()
 	//進むときのスピードを設定する
 	vel.m_z = move_speed;
 
-	const std::shared_ptr<Player> pPlayer =
-		WeakToShared(m_pPlayer);
+	const std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	pPlayer->SetVel(vel);
 
 	//lengthが0.1以下ならIdleMovementStateに戻る

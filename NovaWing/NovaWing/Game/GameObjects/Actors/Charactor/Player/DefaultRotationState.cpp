@@ -54,7 +54,7 @@ void DefaultRotationState::Update()
 	}
 
 	//weak_ptrからshared_ptrに変換
-	std::shared_ptr<Player> pPlayer = WeakToShared(m_pPlayer);
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 
 	float targetAngle;
 

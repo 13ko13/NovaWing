@@ -5,7 +5,6 @@
 
 class InputManager;
 class BulletManager;
-class IPlayerState;
 class CameraBase;
 class IMovementState;
 class IRotationState;
@@ -46,6 +45,23 @@ private:
 	void ClampPosition();
 	//行列を適用する
 	void ApplyMatrix();
+	//ステートの更新
+	//テンプレート関数なのでヘッダに実装をかく
+	template <typename T>
+	void UpdateState(std::shared_ptr<T>& state)
+	{
+		//更新処理
+		state->Update();
+		//次のステートを取得してその中身がnullじゃなければ
+		std::shared_ptr<T> next = state->GetNextState();
+
+		if (next != nullptr)
+		{
+			state->Exit();
+			state = next;
+			state->Enter();
+		}
+	}
 
 private:
 	//ブースト関連

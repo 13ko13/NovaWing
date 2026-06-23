@@ -72,44 +72,14 @@ void Player::OnInit()
 void Player::Update()
 {
 	//移動系処理の更新処理
-	m_pMovementState->Update();
+	UpdateState(m_pMovementState);
 	//回転系処理の更新処理
-	m_pRotationState->Update();
+	UpdateState(m_pRotationState);
 
 	//キャラクターの更新処理
 	Charactor::Update();
 
 	ClampPosition();
-
-	//次のステートを取得
-	std::shared_ptr<IMovementState> pMoveNextState =
-		m_pMovementState->GetNextState();
-
-	//次のステートを確認して、nullじゃなければExitを呼ぶ
-	if (pMoveNextState != nullptr)
-	{
-		//ステートを抜けるときの処理
-		m_pMovementState->Exit();
-		//ステートを差し替える
-		m_pMovementState = pMoveNextState;
-		//差し替えた後のステートの入るときの処理を呼ぶ
-		m_pMovementState->Enter();
-	}
-
-	//次のステートを取得
-	std::shared_ptr<IRotationState> pRotNextState =
-		m_pRotationState->GetNextState();
-
-	//次のステートを確認して、nullじゃなければExitを呼ぶ
-	if (pRotNextState != nullptr)
-	{
-		//ステートを抜けるときの処理
-		m_pRotationState->Exit();
-		//ステートを差し替える
-		m_pRotationState = pRotNextState;
-		//差し替えた後のステートの入るときの処理を呼ぶ
-		m_pRotationState->Enter();
-	}
 }
 
 void Player::ClampPosition()
@@ -191,7 +161,7 @@ void Player::SetCbuffMatrixData()
 
 	//カメラの位置をMatrix情報に渡す]
 	//shared_ptrに変換
-	std::shared_ptr<CameraBase> camera = WeakToShared(m_pCamera);
+	std::shared_ptr<CameraBase> camera = m_pCamera.lock();
 	assert(camera != nullptr);//Nullチェック
 	//カメラの位置も入れる
 	m_pCbufferCameraData->cameraPos = camera->GetPos();

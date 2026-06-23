@@ -142,12 +142,12 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IdleMovementState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\DefaultRotationState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IRotationState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IShootState.cpp" />
     <ClCompile Include="LightingManager.cpp" />
     <ClCompile Include="Manager\GameObjectManager.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Actor.cpp" />
     <ClCompile Include="Game\GameObjects\Camera\CameraBase.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Charactor.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IPlayerState.cpp" />
     <ClCompile Include="Manager\BulletManager.cpp" />
     <ClCompile Include="Main\Application.cpp" />
     <ClCompile Include="Main\main.cpp" />
@@ -171,6 +171,7 @@
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IdleMovementState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\DefaultRotationState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IRotationState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IShootState.h" />
     <ClInclude Include="LightingManager.h" />
     <ClInclude Include="Manager\GameObjectManager.h" />
     <ClInclude Include="Game\GameObjects\Actors\Actor.h" />

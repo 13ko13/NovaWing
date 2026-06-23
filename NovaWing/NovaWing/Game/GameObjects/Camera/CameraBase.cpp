@@ -145,7 +145,7 @@ void CameraBase::UpdateTargetPos()
 	m_targetPos.m_y = 0.0f;
 
 	//プレイヤーのZ位置を取得して、追従する
-	std::shared_ptr<Player> pPlayer = WeakToShared<Player>(m_pPlayer);
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	if(pPlayer != nullptr)//Nullチェック
 	{
 		m_targetPos.m_z = pPlayer->GetPos().m_z + 605.0f;
