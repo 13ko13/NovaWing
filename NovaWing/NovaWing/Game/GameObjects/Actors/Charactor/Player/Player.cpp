@@ -11,6 +11,7 @@
 #include "Manager/ResourceLoader.h"
 #include "IdleMovementState.h"
 #include "DefaultRotationState.h"
+#include "NormalShootState.h"
 
 namespace
 {
@@ -65,6 +66,13 @@ void Player::OnInit()
 		std::make_shared<DefaultRotationState>(
 			std::static_pointer_cast<Player>(shared_from_this())
 		);
+
+	//ShootStateの初期化
+	//通常弾
+	m_pShootState =
+		std::make_shared<NormalShootState>(
+			std::static_pointer_cast<Player>(shared_from_this())
+		);
 }
 
 void Player::Update()
@@ -73,6 +81,8 @@ void Player::Update()
 	UpdateState(m_pMovementState);
 	//回転系処理の更新処理
 	UpdateState(m_pRotationState);
+	//弾撃ち系処理の更新処理
+	UpdateState(m_pShootState);
 
 	//キャラクターの更新処理
 	Charactor::Update();

@@ -1,5 +1,6 @@
 #include "NormalShootState.h"
 #include "Manager/InputManager.h"
+#include "ChargeShootState.h"
 
 NormalShootState::NormalShootState(const std::weak_ptr<Player> pPlayer) :
 	IShootState(pPlayer)
@@ -28,11 +29,12 @@ void NormalShootState::Update()
 	//ボタンが押され続けていたら
 	else if(input.IsPressed("shoot"))
 	{
-		//TODO:ChargeShootStateに遷移する
-
+		//ChargeShootStateに遷移する
+		ChangeState(std::make_shared<ChargeShootState>(m_pPlayer));
 	}
 }
 
 void NormalShootState::Enter()
 {
+
 }

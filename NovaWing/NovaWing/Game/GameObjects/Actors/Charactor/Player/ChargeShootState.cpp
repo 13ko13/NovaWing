@@ -1,6 +1,7 @@
 #include "ChargeShootState.h"
 #include "Manager/InputManager.h"
 #include "NormalShootState.h"
+#include "ChargeReadyState.h"
 
 namespace
 {
@@ -43,8 +44,8 @@ void ChargeShootState::Update()
 	//完了していたら
 	else if(m_chargeFrame >= charge_comp_frame)
 	{
-		//TODO:チャージショット待機ステートに遷移する
-
+		//チャージショット待機ステートに遷移する
+		ChangeState(std::make_shared<ChargeReadyState>(m_pPlayer));
 	}
 }
 

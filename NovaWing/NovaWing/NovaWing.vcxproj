@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BulletBase.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\ChargeReadyState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\ChargeShootState.cpp" />
     <ClCompile Include="Game\GameObjects\GameObject.cpp" />
@@ -169,6 +170,7 @@
     <ClCompile Include="Utility\Vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BulletBase.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\ChargeReadyState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\ChargeShootState.h" />
     <ClInclude Include="Game\GameObjects\GameObject.h" />

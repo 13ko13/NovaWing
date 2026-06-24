@@ -34,7 +34,8 @@ public:
 protected:
 	bool m_isDead = false;//死んでいるか
 
-	Position3 m_pos;
-	Quaternion m_rotation;
+	Position3 m_pos;//位置
+	Quaternion m_rotation;//回転
+	Vector3 m_velocity;//速度
 };
 

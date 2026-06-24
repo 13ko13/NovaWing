@@ -8,6 +8,7 @@ class BulletManager;
 class CameraBase;
 class IMovementState;
 class IRotationState;
+class IShootState;
 class Player : public Charactor
 {
 public:
@@ -105,4 +106,6 @@ private:
 	std::shared_ptr<IMovementState> m_pMovementState;
 	//回転系ステート
 	std::shared_ptr<IRotationState> m_pRotationState;
+	//弾撃ち系ステート
+	std::shared_ptr<IShootState> m_pShootState;
 };

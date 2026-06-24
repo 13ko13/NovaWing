@@ -31,6 +31,5 @@ private:
 protected:
 	//機体情報
 	int m_modelHandle = -1;//モデルハンドル
-	Vector3 m_velocity;//速度
 };
 
