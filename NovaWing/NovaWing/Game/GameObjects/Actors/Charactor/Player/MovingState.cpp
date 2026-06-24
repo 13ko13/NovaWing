@@ -2,13 +2,12 @@
 
 #include "MovingState.h"
 #include "Manager/InputManager.h"
-#include "Utility/SmartPointerHelper.h"
 #include "Player.h"
 #include "IdleMovementState.h"
 
 namespace
 {
-	constexpr float move_speed = 4.0f;
+	constexpr float move_speed = 6.0f;
 
 	//移動制限範囲
 	constexpr float move_limit_x = 500.0f;
@@ -86,8 +85,9 @@ void MovingState::Update()
 		ChangeState(std::make_shared<IdleMovementState>(m_pPlayer));
 	}
 
-
+#ifdef _DEBUG
 	DrawFormatString(0, 100, 0xffffff, L"stickX:%f,stickY:%f", stickX, stickY);
+#endif
 }
 
 void MovingState::Exit()

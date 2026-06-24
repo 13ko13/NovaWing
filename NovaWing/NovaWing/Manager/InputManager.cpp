@@ -19,23 +19,9 @@ InputManager::InputManager() :
 	m_inputTable["ok"] = { {PeripheralType::keyboard,KEY_INPUT_A},	//キーボード:エンターキー
 							{PeripheralType::pad1,PAD_INPUT_A } };	//パッド:A
 
-	m_inputTable["attack"] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
-							{PeripheralType::pad1,PAD_INPUT_C} };		//パッド:Xボタン
-
-	//m_inputTable["jump"] = { {PeripheralType::keyboard,KEY_INPUT_SPACE},//キーボード:スペースキー
-	//						{PeripheralType::pad1,PAD_INPUT_A	} };	//パッド:Aボタン
-
-	//m_inputTable["close"] = { {PeripheralType::keyboard,KEY_INPUT_ESCAPE},//キーボード:スペースキー
-	//						{PeripheralType::pad1,PAD_INPUT_B	} };	//パッド:Bボタン
-
-	//m_inputTable["next"] = { {PeripheralType::keyboard,KEY_INPUT_E},//キーボード:Eキー
-	//						{PeripheralType::pad1,PAD_INPUT_R	} };//パッド:R1ボタン
-
-	//m_inputTable["back"] = { {PeripheralType::keyboard,KEY_INPUT_Q},//キーボード:Qキー
-	//						{PeripheralType::pad1,PAD_INPUT_L	} };//パッド:L1ボタン
-
-	//m_inputTable["parry"] = { {PeripheralType::keyboard,KEY_INPUT_X},//キーボード:Xキー
-	//						{PeripheralType::pad1,PAD_INPUT_X	} };//パッド:Yボタン
+	m_inputTable["shoot"] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
+							{PeripheralType::pad1,PAD_INPUT_X} };		//パッド:?ボタン
+	
 #ifdef _DEBUG
 	//デバッグ用キー
 	m_inputTable["up"] = { {PeripheralType::keyboard,KEY_INPUT_UP},		//キーボード:上矢印

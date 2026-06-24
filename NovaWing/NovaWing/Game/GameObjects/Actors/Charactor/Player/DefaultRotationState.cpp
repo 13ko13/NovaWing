@@ -2,12 +2,11 @@
 
 #include "DefaultRotationState.h"
 #include "Manager/InputManager.h"
-#include "Utility/SmartPointerHelper.h"
 #include "Player.h"
 
 namespace
 {
-	constexpr float rot_lerp_t = 0.05f;//Lerpに使うtの値
+	constexpr float rot_lerp_t = 0.1f;//Lerpに使うtの値
 	constexpr float stick_dead_zone = 0.1f;//スティックのデッドゾーン
 }
 
@@ -60,14 +59,14 @@ void DefaultRotationState::Update()
 
 	//上下入力
 	//X軸回転
-	targetAngle = stick.m_y * (DX_PI_F / 4.0f);
+	targetAngle = stick.m_y * (DX_PI_F / 8.0f);
 	pPlayer->LerpToAngleX(targetAngle, rot_lerp_t);
 
 	//左右入力
 	//Y軸回転
 	//モデルの前後が逆なので180度回した状態を基準として
 	//回転を行う
-	targetAngle = DX_PI_F + (stick.m_x * (DX_PI_F / 4.0f));
+	targetAngle = DX_PI_F + (stick.m_x * (DX_PI_F / 8.0f));
 	pPlayer->LerpToAngleY(targetAngle, rot_lerp_t);
 }
 

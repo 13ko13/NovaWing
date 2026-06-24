@@ -137,13 +137,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\ChargeReadyState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\ChargeShootState.cpp" />
     <ClCompile Include="Game\GameObjects\GameObject.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IMovementState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IdleMovementState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\DefaultRotationState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IRotationState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IShootState.cpp" />
-    <ClCompile Include="LightingManager.cpp" />
+    <ClCompile Include="Manager\LightingManager.cpp" />
     <ClCompile Include="Manager\GameObjectManager.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Actor.cpp" />
     <ClCompile Include="Game\GameObjects\Camera\CameraBase.cpp" />
@@ -155,6 +157,7 @@
     <ClCompile Include="Manager\InputManager.cpp" />
     <ClCompile Include="Manager\ResourceLoader.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\MovingState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\NormalShootState.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="Scene\SceneController.cpp" />
     <ClCompile Include="Utility\Fade.cpp" />
@@ -166,13 +169,15 @@
     <ClCompile Include="Utility\Vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\ChargeReadyState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\ChargeShootState.h" />
     <ClInclude Include="Game\GameObjects\GameObject.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IMovementState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IdleMovementState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\DefaultRotationState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IRotationState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IShootState.h" />
-    <ClInclude Include="LightingManager.h" />
+    <ClInclude Include="Manager\LightingManager.h" />
     <ClInclude Include="Manager\GameObjectManager.h" />
     <ClInclude Include="Game\GameObjects\Actors\Actor.h" />
     <ClInclude Include="Game\GameObjects\Camera\CameraBase.h" />
@@ -185,6 +190,7 @@
     <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="Manager\ResourceLoader.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\MovingState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\NormalShootState.h" />
     <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="Scene\SceneController.h" />
     <ClInclude Include="Utility\Fade.h" />
@@ -193,7 +199,6 @@
     <ClInclude Include="Utility\Quaternion.h" />
     <ClInclude Include="Scene\GameScene.h" />
     <ClInclude Include="Utility\Size.h" />
-    <ClInclude Include="Utility\SmartPointerHelper.h" />
     <ClInclude Include="Utility\Vector2.h" />
     <ClInclude Include="Utility\Vector3.h" />
   </ItemGroup>

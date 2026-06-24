@@ -3,12 +3,10 @@
 
 #include "Player.h"
 #include "IPlayerState.h"
-#include "Utility/SmartPointerHelper.h"
 #include "Utility/Quaternion.h"
 #include "Utility/Matrix4x4.h"
-#include "LightingManager.h"
+#include "Manager/LightingManager.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
-#include "Utility/SmartPointerHelper.h"
 #include "Manager/InputManager.h"
 #include "Manager/ResourceLoader.h"
 #include "IdleMovementState.h"
@@ -58,14 +56,14 @@ void Player::OnInit()
 	//待機状態
 	m_pMovementState = 
 		std::make_shared<IdleMovementState>(
-			GameObjectToDerived<Player>(shared_from_this())
+			std::static_pointer_cast<Player>(shared_from_this())
 		);
 
 	//RotationStateの初期化
 	//通常回転
 	m_pRotationState = 
 		std::make_shared<DefaultRotationState>(
-			GameObjectToDerived<Player>(shared_from_this())
+			std::static_pointer_cast<Player>(shared_from_this())
 		);
 }
 
