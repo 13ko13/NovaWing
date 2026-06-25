@@ -1,15 +1,22 @@
 #include "ChargeReadyState.h"
 #include "Manager/InputManager.h"
 #include "NormalShootState.h"
+#include "Manager/BulletManager.h"
+#include "Player.h"
 
 namespace
 {
 	//チャージ弾を打てる許容時間
 	constexpr int can_shoot_frame = 60;//1秒
+	//弾の速度
+	constexpr float move_speed = 4.0f;
+	//攻撃力
+	constexpr int attack_power = 10;
 }
 
-ChargeReadyState::ChargeReadyState(const std::weak_ptr<Player> pPlayer) :
-	IShootState(pPlayer)
+ChargeReadyState::ChargeReadyState(const std::weak_ptr<Player> pPlayer,
+	std::weak_ptr<BulletManager> pBulletManager) :
+	IShootState(pPlayer,pBulletManager)
 {
 }
 
@@ -34,16 +41,24 @@ void ChargeReadyState::Update()
 	if (input.IsTriggered("shoot") &&
 		m_waitFrame < can_shoot_frame)
 	{
-		//TODO:BulletManagerにチャージ弾発射を依頼する
+		//BulletManagerにチャージ弾発射を依頼する
+		std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock();//一時的にshared_ptrに変換
+		std::shared_ptr<Player> pPlayer = m_pPlayer.lock();//一時的にshared_ptrに変換
+		const Vector3 pos = pPlayer->GetPos();//プレイヤーの位置
+		const Vector3 vel = pPlayer->GetForward() * move_speed;//速度
+		const ResourceLoader::ModelID id = ResourceLoader::ModelID::PlayerBullet;
+
+		pBulletManager->CreateBullet(BulletManager::BulletType::PlayerBullet,
+			pos, vel, attack_power, id);
 
 		//ノーマルステートに戻す
-		ChangeState(std::make_shared<NormalShootState>(m_pPlayer));
+		ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager));
 	}
 	//タイムアウトなら
 	else if (m_waitFrame > can_shoot_frame)
 	{
 		//何もせずにノーマルステートに戻す
-		ChangeState(std::make_shared<NormalShootState>(m_pPlayer));
+		ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager));
 	}
 }
 

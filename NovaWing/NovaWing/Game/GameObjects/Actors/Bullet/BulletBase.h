@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Manager/ResourceLoader.h"
-#include "Actor.h"
+#include "Game/GameObjects/Actors/Actor.h"
 #include "Utility/Sphere.h"
 
 class BulletBase : public Actor

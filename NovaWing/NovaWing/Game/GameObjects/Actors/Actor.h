@@ -26,6 +26,10 @@ public:
 	//ゲッター
 	Vector3 GetVel() const { return m_velocity; }//速度を取得
 
+	//行列を適用する
+	void ApplyMatrix(const Vector3& scale, const Vector3& pos,
+		Quaternion& rotation, int modelHandle);
+
 private:
 
 protected:

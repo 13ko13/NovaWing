@@ -79,6 +79,9 @@ void GameScene::Update()
 
 	//全GameObjectのUpdateを呼ぶ
 	GameObjectManager::GetInstance().UpdateAll();
+
+	//BulletManagerの更新処理
+	m_pBulletManager->Update();
 }
 
 void GameScene::Draw()
@@ -93,6 +96,8 @@ void GameScene::Draw()
 
 	//全GameObjectのDrawを呼ぶ
 	GameObjectManager::GetInstance().DrawAll();
+	//BulletManagerの描画処理
+	m_pBulletManager->Draw();
 }
 
 void GameScene::DrawGrid()

@@ -71,8 +71,8 @@ void Player::OnInit()
 	//通常弾
 	m_pShootState =
 		std::make_shared<NormalShootState>(
-			std::static_pointer_cast<Player>(shared_from_this())
-		);
+			std::static_pointer_cast<Player>(shared_from_this()),
+			m_pBulletManager);
 }
 
 void Player::Update()
@@ -100,30 +100,13 @@ void Player::ClampPosition()
 void Player::Draw()
 {
 	//モデルに行列を適用
-	ApplyMatrix();
+	ApplyMatrix(model_scale,m_pos,m_rotation,m_modelHandle);
 
 	//シェーダに渡すバッファに行列情報を渡す
 	SetCbuffMatrixData();
 
 	//シェーダを適用したプレイヤーを描画
 	DrawPlayer();
-}
-
-void Player::ApplyMatrix()
-{
-	Matrix4x4 mat;
-	//拡大縮小行列
-	Matrix4x4 scaleMat = Matrix4x4::Scale(model_scale);
-	mat = scaleMat;
-	//回転行列
-	//m_rotationをMatrix4x4に変換
-	Matrix4x4 rotMat = m_rotation.ToMatrix4x4();
-	mat = mat * rotMat;//合成
-	//移動行列
-	Matrix4x4 transMat = Matrix4x4::Translate(m_pos);
-	mat = mat * transMat;//合成
-	//モデルに適用
-	MV1SetMatrix(m_modelHandle, mat.ToDxLib());
 }
 
 void Player::DrawPlayer()

@@ -35,6 +35,9 @@ public:
 	//死亡時の処理
 	virtual void OnDead() { m_isDead = true; }
 
+	//オブジェクトの前方向を取得する
+	Vector3 GetForward() const;
+
 protected:
 	bool m_isDead = false;//死んでいるか
 

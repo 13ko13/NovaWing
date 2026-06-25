@@ -18,9 +18,13 @@ void ResourceLoader::LoadAll()
 {
 	//モデルを読み込んでハンドルを保存する
 	int handle = -1;
-	handle = MV1LoadModel(L"Data/Model/Player.mv1");
+	handle = MV1LoadModel(L"Data/Model/Player.mv1");//プレイヤー
 	assert(handle >= 0); 
 	m_modelHandles[ModelID::Player] = handle;
+
+	handle = MV1LoadModel(L"Data/Model/Bullet.mv1");
+	assert(handle >= 0); 
+	m_modelHandles[ModelID::PlayerBullet] = handle;
 
 	//画像を読み込んでハンドルを保存する
 	handle = LoadGraph(L"Data/Model/Player.fbm/StarSparrow_Normal.png");

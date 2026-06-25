@@ -29,3 +29,13 @@ void GameObject::Rotate(const Vector3& axis, float angle)
 	Quaternion q = Quaternion(axis, angle);
 	m_rotation = m_rotation * q;
 }
+
+Vector3 GameObject::GetForward() const
+{
+	//前方向のベクトル
+	const Vector3 forward = Vector3(0.0f, 0.0f, 1.0f);
+	//このベクトルをそれぞれが持っているm_rotationを使用して
+	//回転させたベクトルを返す
+	const Vector3 rotForward = m_rotation * forward;
+	return rotForward;
+}

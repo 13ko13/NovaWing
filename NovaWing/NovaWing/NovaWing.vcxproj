@@ -137,7 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Game\GameObjects\Actors\BulletBase.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Bullet\BulletBase.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\ChargeReadyState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\ChargeShootState.cpp" />
     <ClCompile Include="Game\GameObjects\GameObject.cpp" />
@@ -159,6 +159,7 @@
     <ClCompile Include="Manager\ResourceLoader.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\MovingState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\NormalShootState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Bullet\PlayerBullet.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="Scene\SceneController.cpp" />
     <ClCompile Include="Utility\Fade.cpp" />
@@ -171,7 +172,7 @@
     <ClCompile Include="Utility\Vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Game\GameObjects\Actors\BulletBase.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Bullet\BulletBase.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\ChargeReadyState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\ChargeShootState.h" />
     <ClInclude Include="Game\GameObjects\GameObject.h" />
@@ -194,6 +195,7 @@
     <ClInclude Include="Manager\ResourceLoader.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\MovingState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\NormalShootState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Bullet\PlayerBullet.h" />
     <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="Scene\SceneController.h" />
     <ClInclude Include="Utility\Fade.h" />

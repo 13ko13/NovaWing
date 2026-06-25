@@ -44,8 +44,7 @@ private:
 	void SetCbuffMatrixData();
 	//移動範囲を制限する
 	void ClampPosition();
-	//行列を適用する
-	void ApplyMatrix();
+	
 	//ステートの更新
 	//テンプレート関数なのでヘッダに実装をかく
 	template <typename T>

@@ -6,6 +6,8 @@ namespace
 	constexpr int life_time = 60;//1秒
 	//球のサイズ
 	constexpr float sphere_size = 16.0f;
+	//モデルのサイズ
+	const Vector3 model_size = Vector3(1.0f, 1.0f, 1.0f);
 }
 
 BulletBase::BulletBase(const Vector3& pos, const Vector3& vel, int attackPower,
@@ -46,6 +48,14 @@ void BulletBase::Update()
 
 void BulletBase::Draw()
 {
+	//行列を適用する
+	ApplyMatrix(model_size, m_pos, m_rotation, m_modelHandle);
+
 	//モデルの描画
 	MV1DrawModel(m_modelHandle);
+
+#ifdef _DEBUG
+	//球を描画
+	m_sphere.Draw(0xffffff);
+#endif
 }

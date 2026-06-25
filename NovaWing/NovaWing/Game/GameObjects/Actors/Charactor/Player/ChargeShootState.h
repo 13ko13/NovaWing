@@ -1,9 +1,13 @@
 #pragma once
 #include "IShootState.h"
+
+class Player;
+class BulletManager;
 class ChargeShootState : public IShootState
 {
 public:
-	ChargeShootState(const std::weak_ptr<Player> pPlayer);
+	ChargeShootState(const std::weak_ptr<Player> pPlayer,
+		std::weak_ptr<BulletManager> pBulletManager);
 	~ChargeShootState();
 
 	void Exit() override;

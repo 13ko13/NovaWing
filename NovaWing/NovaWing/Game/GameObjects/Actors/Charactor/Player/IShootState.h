@@ -3,6 +3,7 @@
 
 #include "IPlayerState.h"
 
+class BulletManager;
 class Player;
 /// <summary>
 /// プレイヤーの弾撃ちステートの窓口
@@ -10,7 +11,8 @@ class Player;
 class IShootState : public IPlayerState<IShootState>
 {
 public:
-	IShootState(const std::weak_ptr<Player> pPlayer);
+	IShootState(const std::weak_ptr<Player> pPlayer,
+		std::weak_ptr<BulletManager> pBulletManager);
 	virtual ~IShootState() = default;
 
 	virtual void Enter() = 0;//ステートに入った時
@@ -18,6 +20,7 @@ public:
 	virtual void Exit() = 0;//ステートから出たとき
 
 protected:
-
+	//弾のマネージャー
+	std::weak_ptr<BulletManager> m_pBulletManager;
 };
 

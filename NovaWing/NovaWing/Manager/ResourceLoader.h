@@ -8,6 +8,7 @@ public:
 	enum class ModelID : int
 	{
 		Player, //プレイヤー
+		PlayerBullet,//プレイヤーの弾
 	};
 
 	//グラフィックの種類
