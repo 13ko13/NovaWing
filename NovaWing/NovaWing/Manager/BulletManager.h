@@ -11,9 +11,6 @@ public:
 	BulletManager();
 	~BulletManager();
 
-	void Update();//更新処理
-	void Draw();//描画処理
-
 	//弾の種類
 	enum class BulletType
 	{
@@ -27,5 +24,5 @@ public:
 
 private:
 	 //弾の配列
-	std::vector < std::shared_ptr<BulletBase>> m_pBullets;
+	std::vector < std::weak_ptr<BulletBase>> m_pBullets;
 };

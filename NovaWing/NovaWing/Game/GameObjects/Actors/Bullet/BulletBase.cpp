@@ -1,4 +1,5 @@
 #include "BulletBase.h"
+#include "Manager/LightingManager.h"
 
 namespace
 {
@@ -7,7 +8,7 @@ namespace
 	//球のサイズ
 	constexpr float sphere_size = 16.0f;
 	//モデルのサイズ
-	const Vector3 model_size = Vector3(1.0f, 1.0f, 1.0f);
+	const Vector3 model_size = Vector3(0.4f, 0.4f, 0.4f);
 }
 
 BulletBase::BulletBase(const Vector3& pos, const Vector3& vel, int attackPower,
@@ -51,6 +52,7 @@ void BulletBase::Draw()
 	//行列を適用する
 	ApplyMatrix(model_size, m_pos, m_rotation, m_modelHandle);
 
+	LightingManager::GetInstance().ApplyShader();
 	//モデルの描画
 	MV1DrawModel(m_modelHandle);
 
@@ -58,4 +60,6 @@ void BulletBase::Draw()
 	//球を描画
 	m_sphere.Draw(0xffffff);
 #endif
+
+	LightingManager::GetInstance().ResetShader();
 }

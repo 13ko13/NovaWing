@@ -124,7 +124,7 @@ void Player::DrawPlayer()
 
 #if TRUE
 	//法線マップをシェーダに渡す
-	SetUseTextureToShader(1, normGraphH);
+	//SetUseTextureToShader(1, normGraphH);
 
 	LightingManager::GetInstance().ApplyShader();
 	SetShaderConstantBuffer(m_cbufferMatrix, DX_SHADERTYPE_VERTEX, 2);
@@ -134,8 +134,8 @@ void Player::DrawPlayer()
 	//プレイヤーのモデルを描画する
 	MV1DrawModel(m_modelHandle);
 
-	//法線マップをシェーダに渡す
-	SetUseTextureToShader(1, -1);//法線マップを解除
+	////法線マップをシェーダに渡す
+	//SetUseTextureToShader(1, -1);//法線マップを解除
 	//シェーダを解除
 	LightingManager::GetInstance().ResetShader();
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 2);

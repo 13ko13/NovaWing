@@ -15,7 +15,10 @@ GameObjectManager& GameObjectManager::GetInstance()
 void GameObjectManager::Register(std::shared_ptr<GameObject> pGameObject)
 {
     //配列に登録する
-    m_pGameObjects.push_back(pGameObject);
+    //UpdateAll中にpush_backされて配列の要素数が変わってしまうため
+    //保留中に入れておいて、UpdateAllの後に実際の
+    //配列に追加する
+    m_pHoldGameObject.push_back(pGameObject);
 }
 
 void GameObjectManager::UpdateAll()
@@ -25,6 +28,16 @@ void GameObjectManager::UpdateAll()
     {
         gameObject->Update();
     }
+    //保留しておいたGameObjectの配列を
+    //実際の配列に格納する
+    //insertはvectorのendの位置に別のvectorのbeginからendまでの要素をまとめて入れる
+    m_pGameObjects.insert(
+        m_pGameObjects.end(),
+        m_pHoldGameObject.begin(),
+        m_pHoldGameObject.end()
+    );
+    //格納終了したので保留していたものをクリアする
+    m_pHoldGameObject.clear();
 
     //削除の対象を探して削除する
     RemoveGameObject();

@@ -43,6 +43,9 @@ private:
 	void RemoveGameObject();
 
 private:
+	//ゲームオブジェクトの配列
 	std::vector<std::shared_ptr<GameObject>> m_pGameObjects;
+	//保留中のゲームオブジェクトの配列
+	std::vector<std::shared_ptr<GameObject>> m_pHoldGameObject;
 };
 
