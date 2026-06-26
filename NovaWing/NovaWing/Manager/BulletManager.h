@@ -20,7 +20,7 @@ public:
 
 	//別クラスから種類を指定してもらってその弾を作成する
 	void CreateBullet(const BulletType bulletType,const Vector3& pos,
-		const Vector3& vel,const int attackPower,ResourceLoader::ModelID modelId);
+		const Vector3& vel,const int attackPower);
 
 private:
 	 //弾の配列

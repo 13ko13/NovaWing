@@ -2,14 +2,14 @@
 #include "Manager/InputManager.h"
 #include "NormalShootState.h"
 #include "Manager/BulletManager.h"
-#include "Player.h"
+#include "Charactor/Player/Player.h"
 
 namespace
 {
 	//チャージ弾を打てる許容時間
 	constexpr int can_shoot_frame = 60;//1秒
 	//弾の速度
-	constexpr float move_speed = 4.0f;
+	constexpr float move_speed = 12.0f;
 	//攻撃力
 	constexpr int attack_power = 10;
 }
@@ -45,11 +45,10 @@ void ChargeReadyState::Update()
 		std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock();//一時的にshared_ptrに変換
 		std::shared_ptr<Player> pPlayer = m_pPlayer.lock();//一時的にshared_ptrに変換
 		const Vector3 pos = pPlayer->GetPos();//プレイヤーの位置
-		const Vector3 vel = pPlayer->GetForward() * move_speed;//速度
-		const ResourceLoader::ModelID id = ResourceLoader::ModelID::PlayerBullet;
+		const Vector3 vel = -pPlayer->GetForward() * move_speed;//速度
 
 		pBulletManager->CreateBullet(BulletManager::BulletType::PlayerBullet,
-			pos, vel, attack_power, id);
+			pos, vel, attack_power);
 
 		//ノーマルステートに戻す
 		ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager));

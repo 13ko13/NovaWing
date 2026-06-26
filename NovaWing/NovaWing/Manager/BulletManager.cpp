@@ -10,7 +10,7 @@ BulletManager::~BulletManager()
 }
 
 void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos,
-	const Vector3& vel, const int attackPower, ResourceLoader::ModelID modelId)
+	const Vector3& vel, const int attackPower)
 {
 	switch (bulletType)
 	{
@@ -18,7 +18,7 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 	{
 		//インスタンスを作成
 		std::shared_ptr<PlayerBullet> pBullet =
-			std::make_shared<PlayerBullet>(pos, vel, attackPower, modelId);
+			std::make_shared<PlayerBullet>(pos, vel, attackPower);
 
 		//初期化
 		pBullet->Init();

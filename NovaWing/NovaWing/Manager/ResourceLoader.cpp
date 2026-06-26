@@ -22,14 +22,21 @@ void ResourceLoader::LoadAll()
 	assert(handle >= 0); 
 	m_modelHandles[ModelID::Player] = handle;
 
-	handle = MV1LoadModel(L"Data/Model/Bullet.mv1");
-	assert(handle >= 0); 
-	m_modelHandles[ModelID::PlayerBullet] = handle;
-
 	//画像を読み込んでハンドルを保存する
+	//法線マップ
 	handle = LoadGraph(L"Data/Model/Player.fbm/StarSparrow_Normal.png");
 	assert(handle >= 0); 
 	m_graphicHandles[GraphicID::PlayerNormalMap] = handle;
+
+	//メタリックマップ
+	handle = LoadGraph(L"Data/Model/Player.fbm/StarSparrow_MetallicSmoothness.png");
+	assert(handle >= 0); 
+	m_graphicHandles[GraphicID::PlayerMetalicMap] = handle;
+
+	//エミッションマップ
+	handle = LoadGraph(L"Data/Model/Player.fbm/StarSparrow_Emission.png");
+	assert(handle >= 0);
+	m_graphicHandles[GraphicID::PlayerEmissionMap] = handle;
 }
 
 void ResourceLoader::ReleaseAll()

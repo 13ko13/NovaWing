@@ -8,13 +8,14 @@ public:
 	enum class ModelID : int
 	{
 		Player, //プレイヤー
-		PlayerBullet,//プレイヤーの弾
 	};
 
 	//グラフィックの種類
 	enum class GraphicID : int
 	{
 		PlayerNormalMap,//プレイヤーの法線マップ
+		PlayerMetalicMap,//プレイヤーのメタリックマップ
+		PlayerEmissionMap,//プレイヤーのエミッションマップ
 	};
 
 	//エフェクトの種類

@@ -23,11 +23,13 @@ public:
 	//セッター
 	void SetPos(const Position3& pos) { m_pos = pos; }//位置を指定
 	void SetRotation(const Quaternion& rot) { m_rotation = rot; };//回転を指定
+	void SetVel(const Vector3& vel) { m_velocity = vel; };//速度を指定
 
 	//ゲッター
 	Position3 GetPos() const { return m_pos; }//位置を取得
 	Quaternion GetRotation() const { return m_rotation; }//回転を取得
 	bool IsDead() const { return m_isDead; }//死んでいるかを返す
+	Vector3 GetVel() const { return m_velocity; }//速度を取得
 
 	//操作
 	void Rotate(const Vector3& axis, float angle);//回転を加える

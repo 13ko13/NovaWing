@@ -2,7 +2,7 @@
 
 #include "MovingState.h"
 #include "Manager/InputManager.h"
-#include "Player.h"
+#include "Charactor/Player/Player.h"
 #include "IdleMovementState.h"
 
 namespace

@@ -20,12 +20,6 @@ public:
 	virtual void Update() = 0;//更新
 	virtual void Draw() = 0;//描画
 
-	//セッター
-	void SetVel(const Vector3& vel) { m_velocity = vel; };//速度を指定
-
-	//ゲッター
-	Vector3 GetVel() const { return m_velocity; }//速度を取得
-
 	//行列を適用する
 	void ApplyMatrix(const Vector3& scale, const Vector3& pos,
 		Quaternion& rotation, int modelHandle);

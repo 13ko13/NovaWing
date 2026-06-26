@@ -9,9 +9,9 @@
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/InputManager.h"
 #include "Manager/ResourceLoader.h"
-#include "IdleMovementState.h"
-#include "DefaultRotationState.h"
-#include "NormalShootState.h"
+#include "Charactor/Player/Movement/IdleMovementState.h"
+#include "Charactor/Player/Rotation/DefaultRotationState.h"
+#include "Charactor/Player/Shoot/NormalShootState.h"
 
 namespace
 {
@@ -121,10 +121,20 @@ void Player::DrawPlayer()
 	//法線マップ取得
 	const int normGraphH = resourceLoader.GetGraphic(
 		ResourceLoader::GraphicID::PlayerNormalMap);
+	//メタリックマップを取得
+	const int metalicGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::PlayerMetalicMap);
+	//エミッションマップを取得
+	const int emissionGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::PlayerEmissionMap);
 
 #if TRUE
 	//法線マップをシェーダに渡す
 	//SetUseTextureToShader(1, normGraphH);
+	//メタリックマップを渡す
+	SetUseTextureToShader(2, metalicGraphH);
+	//エミッションマップを渡す
+	SetUseTextureToShader(3, emissionGraphH);
 
 	LightingManager::GetInstance().ApplyShader();
 	SetShaderConstantBuffer(m_cbufferMatrix, DX_SHADERTYPE_VERTEX, 2);
@@ -136,6 +146,8 @@ void Player::DrawPlayer()
 
 	////法線マップをシェーダに渡す
 	//SetUseTextureToShader(1, -1);//法線マップを解除
+	SetUseTextureToShader(2, -1);//メタリックマップを解除
+	SetUseTextureToShader(3, -1);//エミッションマップを解除
 	//シェーダを解除
 	LightingManager::GetInstance().ResetShader();
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 2);

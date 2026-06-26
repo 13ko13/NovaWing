@@ -1,14 +1,13 @@
 #pragma once
 
 #include "Manager/ResourceLoader.h"
-#include "Game/GameObjects/Actors/Actor.h"
+#include "Game/GameObjects/GameObject.h"
 #include "Utility/Sphere.h"
 
-class BulletBase : public Actor
+class BulletBase : public GameObject
 {
 public:
-	BulletBase(const Vector3& pos,const Vector3& vel,int attackPower,
-		ResourceLoader::ModelID modelId);
+	BulletBase(const Vector3& pos,const Vector3& vel,int attackPower);
 	virtual ~BulletBase();
 
 	virtual void Update();//更新処理

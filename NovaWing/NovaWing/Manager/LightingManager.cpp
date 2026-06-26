@@ -15,6 +15,14 @@ LightingManager::LightingManager()
 	LoadShader();
 }
 
+void LightingManager::SetLightDirection(const Vector3& lightDir)
+{
+	//独自シェーダのライティングを設定
+	m_lightDir = lightDir;
+	ChangeLightTypeDir(lightDir.ToDxLib());
+	SetLightDifColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
+}
+
 void LightingManager::ApplyShader()
 {
 	MV1SetUseOrigShader(true);
@@ -27,7 +35,7 @@ void LightingManager::ApplyShader()
 	//ピクセルシェーダをセットする
 	SetUsePixelShader(m_lightingPSH);
 	//定数バッファをシェーダにセットする
-	SetShaderConstantBuffer(m_cbufferLightInfo, DX_SHADERTYPE_PIXEL, 0);
+	SetShaderConstantBuffer(m_cbufferLightInfo, DX_SHADERTYPE_PIXEL, 4);
 }
 
 void LightingManager::ResetShader()
@@ -35,7 +43,7 @@ void LightingManager::ResetShader()
 	//シェーダを解除してデフォルトに戻す
 	SetUseVertexShader(-1);
 	SetUsePixelShader(-1);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 0);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 4);
 	MV1SetUseOrigShader(false);
 }
 

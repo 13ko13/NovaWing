@@ -5,7 +5,7 @@ class PlayerBullet : public BulletBase
 {
 public:
 	PlayerBullet(const Vector3& pos,const Vector3& vel,
-		const int attackPower,const ResourceLoader::ModelID modelId);
+		const int attackPower);
 	~PlayerBullet();
 
 	void Update() override;//更新処理

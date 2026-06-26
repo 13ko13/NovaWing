@@ -1,9 +1,8 @@
 #include "PlayerBullet.h"
 
 PlayerBullet::PlayerBullet(
-	const Vector3& pos, const Vector3& vel,const int attackPower,
-	const ResourceLoader::ModelID modelId) :
-	BulletBase(pos,vel,attackPower,modelId)
+	const Vector3& pos, const Vector3& vel,const int attackPower) :
+	BulletBase(pos,vel,attackPower)
 {
 }
 

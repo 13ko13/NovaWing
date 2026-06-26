@@ -20,7 +20,7 @@ InputManager::InputManager() :
 							{PeripheralType::pad1,PAD_INPUT_A } };	//パッド:A
 
 	m_inputTable["shoot"] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
-							{PeripheralType::pad1,PAD_INPUT_X} };		//パッド:?ボタン
+							{PeripheralType::pad1,PAD_INPUT_B} };		//パッド:Bボタン
 	
 #ifdef _DEBUG
 	//デバッグ用キー

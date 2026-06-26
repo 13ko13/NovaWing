@@ -1,17 +1,17 @@
 #pragma once
 #include <memory>
 
-#include "IPlayerState.h"
+#include "Charactor/Player/IPlayerState.h"
 
 class Player;
 /// <summary>
-/// プレイヤーの回転系ステートの窓口
+/// プレイヤーの移動ステートの窓口
 /// </summary>
-class IRotationState : public IPlayerState<IRotationState>
+class IMovementState : public IPlayerState<IMovementState>
 {
 public:
-	IRotationState(const std::weak_ptr<Player> pPlayer);
-	virtual ~IRotationState() = default;
+	IMovementState(const std::weak_ptr<Player> pPlayer);
+	virtual ~IMovementState() = default;
 
 	virtual void Enter() = 0;//ステートに入った時
 	virtual void Update() = 0;//更新処理

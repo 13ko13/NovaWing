@@ -11,7 +11,7 @@ public:
 	LightingManager& operator=(const LightingManager&) = delete;
 
 	//ライトの方向ベクトルをセットする
-	void SetLightDirection(const Vector3& lightDir) { m_lightDir = lightDir; }
+	void SetLightDirection(const Vector3& lightDir);
 	//シェーダーを適用&定数バッファに値を渡す
 	void ApplyShader();
 	//シェーダーを解除する

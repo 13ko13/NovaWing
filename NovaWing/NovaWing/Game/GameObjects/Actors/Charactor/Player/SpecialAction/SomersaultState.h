@@ -1,10 +1,11 @@
 #pragma once
-#include "IRotationState.h"
-class DefaultRotationState : public IRotationState
+#include "ISpecialActionState.h"
+
+class SomersaultState : public ISpecialActionState
 {
 public:
-	DefaultRotationState(const std::weak_ptr<Player> pPlayer);
-	~DefaultRotationState();
+	SomersaultState(const std::weak_ptr<Player> pPlayer);
+	~SomersaultState();
 
 	void Enter()override;//ステートに入った時
 	void Update() override;//更新処理
@@ -13,4 +14,3 @@ public:
 private:
 
 };
-

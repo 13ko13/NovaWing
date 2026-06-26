@@ -78,31 +78,31 @@
     <ClCompile Include="Manager\LightingManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IMovementState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\IMovementState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IdleMovementState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\IdleMovementState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\MovingState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\MovingState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IRotationState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Rotation\IRotationState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\DefaultRotationState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DefaultRotationState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\IShootState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\IShootState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\NormalShootState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\NormalShootState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\ChargeShootState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\ChargeShootState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\ChargeReadyState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\ChargeReadyState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Actors\Bullet\BulletBase.cpp">
@@ -112,6 +112,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Actors\Bullet\PlayerBullet.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\SomersaultState.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\ISpecialActionState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -185,31 +191,31 @@
     <ClInclude Include="Manager\LightingManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IMovementState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\IMovementState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IdleMovementState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\IdleMovementState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\MovingState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\MovingState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IRotationState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Rotation\IRotationState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\DefaultRotationState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DefaultRotationState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IShootState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\IShootState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\NormalShootState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\NormalShootState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\ChargeShootState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\ChargeShootState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\ChargeReadyState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\ChargeReadyState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Actors\Bullet\BulletBase.h">
@@ -219,6 +225,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Actors\Bullet\PlayerBullet.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\SomersaultState.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\ISpecialActionState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

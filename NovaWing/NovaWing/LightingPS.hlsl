@@ -1,5 +1,8 @@
 Texture2D tex : register(t0);
 Texture2D normTex : register(t1);
+Texture2D metalicTex : register(t2);
+Texture2D emissionTex : register(t3);
+
 SamplerState smp : register(s0);
 
 struct PS_INPUT
@@ -12,7 +15,7 @@ struct PS_INPUT
     float3 tangentWS : TANGENT;//ワールド空間の接線
 };
 
-cbuffer LightingBuffer : register(b0)
+cbuffer LightingBuffer : register(b4)
 {
     float3 lightVec;//光の方向ベクトル
 };
@@ -27,10 +30,15 @@ float4 main(PS_INPUT input) : SV_TARGET
 {
     //return float4(normTex.Sample(smp, input.uv).rgb, 1.0f);
     
+    //メタリックマップのカラーを取得
+    float4 metCol = metalicTex.Sample(smp, input.uv);
+    
     //ピクセル情報を取得
     float4 texColor = tex.Sample(smp, input.uv);
     //法線マップのカラーを取得(0～1)
     float4 normMapColor = normTex.Sample(smp, input.uv);
+    //エミッション(影の場所でも光る)
+    float4 emission = emissionTex.Sample(smp, input.uv);
 
     //法線方向は-1～1の範囲なので変換する(タンジェント空間)
     float3 normalTS = normMapColor * 2.0 - 1.0;
@@ -73,10 +81,13 @@ float4 main(PS_INPUT input) : SV_TARGET
     //normLightVecは物体→光源なので
     //-で反転させる
     float3 reflectVec = reflect(normLightDir, normalWSFinal);
+    //滑らかさを計算
+    float smoothness = metCol.r * 29.0 + 1.0;//1～30
+    
     //スペキュラの計算
-    float specular = pow(saturate(dot(viewDir, reflectVec)), 30.0f);
+    float specular = pow(saturate(dot(viewDir, reflectVec)), smoothness);
     specular *= diffuse;
 
     //テクスチャの色に明るさを適用してそのピクセルの色を返す
-    return float4(texColor.rgb * light + specular, 1.0f);
+    return float4(texColor.rgb * light + specular + emission.rgb, 1.0f);
 }

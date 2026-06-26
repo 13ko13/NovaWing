@@ -11,9 +11,7 @@ namespace
 	const Vector3 model_size = Vector3(0.4f, 0.4f, 0.4f);
 }
 
-BulletBase::BulletBase(const Vector3& pos, const Vector3& vel, int attackPower,
-	ResourceLoader::ModelID modelId):
-	Actor(modelId),
+BulletBase::BulletBase(const Vector3& pos, const Vector3& vel, int attackPower):
 	m_sphere(pos),
 	m_attackPower(attackPower),
 	m_lifeTime(0)
@@ -49,17 +47,8 @@ void BulletBase::Update()
 
 void BulletBase::Draw()
 {
-	//行列を適用する
-	ApplyMatrix(model_size, m_pos, m_rotation, m_modelHandle);
-
-	LightingManager::GetInstance().ApplyShader();
-	//モデルの描画
-	MV1DrawModel(m_modelHandle);
-
 #ifdef _DEBUG
 	//球を描画
 	m_sphere.Draw(0xffffff);
 #endif
-
-	LightingManager::GetInstance().ResetShader();
 }
