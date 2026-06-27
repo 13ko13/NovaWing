@@ -36,6 +36,12 @@ public:
 	//GameSceneからカメラをセットさせる
 	void SetCamera(std::shared_ptr<CameraBase> pCamera) { m_pCamera = pCamera; }
 
+	//ゲージ取得
+	float GetBoostGauge() const { return m_gauge; }
+
+	//ゲージ変化
+	void ChangeGauge(float delta);
+
 private:
 	//回転の更新
 	void UpdateRotation();
@@ -66,7 +72,7 @@ private:
 
 private:
 	//ブースト関連
-	int m_boostGauge = 100;//ブーストゲージ
+	float m_gauge = 100.0f;//ブーストゲージ
 	float m_boostSpeed = 0;//ブースト時のスピード
 	float m_brakeSpeed = 0;//ブレーキ時のスピード
 

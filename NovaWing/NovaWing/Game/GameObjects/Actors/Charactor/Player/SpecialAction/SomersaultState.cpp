@@ -11,7 +11,7 @@ namespace
 	//宙返りをどれぐらいの時間をかけて行うか
 	constexpr float max_frame = 180.0f;
 	//移動する際の速度
-	constexpr float move_speed = 12.0f;
+	constexpr float move_speed = 10.0f;
 }
 
 SomersaultState::SomersaultState(const std::weak_ptr<Player> pPlayer) :

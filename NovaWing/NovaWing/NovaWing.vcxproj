@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\BoostState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DisabledRotState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\DisabledMovementState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Bullet\BulletBase.cpp" />
@@ -149,6 +150,7 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Rotation\IRotationState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\IShootState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\ISpecialActionState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\GaugeActionStateBase.cpp" />
     <ClCompile Include="Manager\LightingManager.cpp" />
     <ClCompile Include="Manager\GameObjectManager.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Actor.cpp" />
@@ -177,6 +179,7 @@
     <ClCompile Include="Utility\Vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\BoostState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DisabledRotState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\DisabledMovementState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Bullet\BulletBase.h" />
@@ -189,6 +192,7 @@
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Rotation\IRotationState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\IShootState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\ISpecialActionState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\GaugeActionStateBase.h" />
     <ClInclude Include="Manager\LightingManager.h" />
     <ClInclude Include="Manager\GameObjectManager.h" />
     <ClInclude Include="Game\GameObjects\Actors\Actor.h" />

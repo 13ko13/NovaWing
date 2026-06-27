@@ -264,6 +264,14 @@ void Player::LerpToAngleY(float targetAngle, float t)
 	UpdateRotation();
 }
 
+void Player::ChangeGauge(float delta)
+{
+	//増減量を足す
+	m_gauge += delta;
+	//0～100にクランプ
+	m_gauge = std::clamp(m_gauge, 0.0f, 100.0f);
+}
+
 void Player::UpdateRotation()
 {
 	//XとYの回転角からQuaternionを生成
