@@ -4,10 +4,17 @@
 #include "Manager/InputManager.h"
 #include "Utility/Vector2.h"
 #include "MovingState.h"
+#include "Charactor/Player/Player.h"
+
+namespace
+{
+	constexpr float move_speed = 6.0f;
+}
 
 IdleMovementState::IdleMovementState(const std::weak_ptr<Player> pPlayer):
 	IMovementState(pPlayer)
 {
+	Enter();
 }
 
 IdleMovementState::~IdleMovementState()
@@ -16,6 +23,9 @@ IdleMovementState::~IdleMovementState()
 
 void IdleMovementState::Enter()
 {
+	//プレイヤーの速度をz以外0にする
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+	pPlayer->SetVel(Vector3(0.0f, 0.0f, move_speed));
 }
 
 void IdleMovementState::Update()

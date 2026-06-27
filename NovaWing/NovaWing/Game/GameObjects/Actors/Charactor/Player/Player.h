@@ -9,6 +9,7 @@ class CameraBase;
 class IMovementState;
 class IRotationState;
 class IShootState;
+class ISpecialActionState;
 class Player : public Charactor
 {
 public:
@@ -78,6 +79,9 @@ private:
 	//プレイヤーの初期回転を保存する
 	Quaternion m_initRotation;
 
+	//現在宙返りを行っているか
+	bool m_isSomersoult = false;
+
 	//上下回転角
 	float m_rotationX = 0.0f;
 	//左右回転角
@@ -107,4 +111,6 @@ private:
 	std::shared_ptr<IRotationState> m_pRotationState;
 	//弾撃ち系ステート
 	std::shared_ptr<IShootState> m_pShootState;
+	//特殊行動計ステート
+	std::shared_ptr<ISpecialActionState> m_pSpecialState;
 };

@@ -1,4 +1,4 @@
-﻿	#include "InputManager.h"
+﻿#include "InputManager.h"
 #include "DxLib.h"
 
 namespace
@@ -21,6 +21,9 @@ InputManager::InputManager() :
 
 	m_inputTable["shoot"] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
 							{PeripheralType::pad1,PAD_INPUT_B} };		//パッド:Bボタン
+
+	m_inputTable["somersault"] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
+							{PeripheralType::pad1,PAD_INPUT_Y} };//パッド:Yボタン+スティック上
 	
 #ifdef _DEBUG
 	//デバッグ用キー

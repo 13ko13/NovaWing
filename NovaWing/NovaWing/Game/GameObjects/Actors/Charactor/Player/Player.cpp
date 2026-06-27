@@ -2,9 +2,7 @@
 #include <cassert>
 
 #include "Player.h"
-#include "IPlayerState.h"
 #include "Utility/Quaternion.h"
-#include "Utility/Matrix4x4.h"
 #include "Manager/LightingManager.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/InputManager.h"
@@ -12,6 +10,10 @@
 #include "Charactor/Player/Movement/IdleMovementState.h"
 #include "Charactor/Player/Rotation/DefaultRotationState.h"
 #include "Charactor/Player/Shoot/NormalShootState.h"
+#include "SpecialAction/NoneState.h"
+#include "Movement/DisabledMovementState.h"
+#include "Rotation/DisabledRotState.h"
+#include "SpecialAction/SomersaultState.h"
 
 namespace
 {
@@ -73,16 +75,83 @@ void Player::OnInit()
 		std::make_shared<NormalShootState>(
 			std::static_pointer_cast<Player>(shared_from_this()),
 			m_pBulletManager);
+
+	//SpecialActionの初期化
+	m_pSpecialState =
+		std::make_shared<NoneState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
 }
 
 void Player::Update()
 {
+	InputManager& input = InputManager::GetInstance();
+
+	//左スティックの値を取得して-1～1にする
+	Vector2 stick = {
+		static_cast<float>(input.GetBufX()) / 1000.0f,
+		static_cast<float>(input.GetBufY()) / 1000.0f
+	};
+
+	//宙返りボタンが押されていたらステートをそれぞれ切り替える
+	if (input.IsTriggered("somersault") &&
+		stick.m_y < -0.2f &&
+		!m_isSomersoult)
+	{
+		//射撃のみできるようにする
+		//全ての入った時の処理も呼ぶ
+		//何もしないステート
+		m_pMovementState = std::make_shared<DisabledMovementState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+		m_pMovementState->Enter();
+
+		//何もしないステート
+		m_pRotationState = std::make_shared<DisabledRotState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+		m_pRotationState->Enter();
+
+		//宙返りステートに変更
+		m_pSpecialState = std::make_shared<SomersaultState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+		m_pSpecialState->Enter();
+
+		//宙返りフラグをtrue
+		m_isSomersoult = true;
+	}
+
+	//更新前のSpecialActionStateを保存
+	std::shared_ptr<ISpecialActionState> beforeSpecialState = m_pSpecialState;
+
 	//移動系処理の更新処理
 	UpdateState(m_pMovementState);
 	//回転系処理の更新処理
 	UpdateState(m_pRotationState);
 	//弾撃ち系処理の更新処理
 	UpdateState(m_pShootState);
+	//特殊行動系処理の更新処理
+	UpdateState(m_pSpecialState);
+
+	//m_pSpecialStateが切り替わったかどうかを確認
+	if (m_pSpecialState != beforeSpecialState)
+	{
+		//切り替わっていたら通常のステートに戻す
+		//通常のステート
+		m_pMovementState = std::make_shared<IdleMovementState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+		m_pMovementState->Enter();
+
+		//通常のステート
+		m_pRotationState = std::make_shared<DefaultRotationState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+		m_pRotationState->Enter();
+
+		//通常のステート
+		m_pSpecialState = std::make_shared<NoneState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+		m_pSpecialState->Enter();
+
+		//宙返りフラグをfalse
+		m_isSomersoult = false;
+	}
 
 	//キャラクターの更新処理
 	Charactor::Update();
@@ -93,8 +162,8 @@ void Player::Update()
 void Player::ClampPosition()
 {
 	//移動範囲を制限する
-	m_pos.m_x = std::clamp(m_pos.m_x, -move_limit_x, move_limit_x);
-	m_pos.m_y = std::clamp(m_pos.m_y, -move_limit_y, move_limit_y);
+	/*m_pos.m_x = std::clamp(m_pos.m_x, -move_limit_x, move_limit_x);
+	m_pos.m_y = std::clamp(m_pos.m_y, -move_limit_y, move_limit_y);*/
 }
 
 void Player::Draw()
@@ -107,6 +176,10 @@ void Player::Draw()
 
 	//シェーダを適用したプレイヤーを描画
 	DrawPlayer();
+
+#ifdef _DEBUG
+	DrawFormatString(0, 300, 0xffffff, L"playerPosY : %f", m_pos.m_y);
+#endif
 }
 
 void Player::DrawPlayer()

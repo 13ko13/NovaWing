@@ -101,7 +101,7 @@ void CameraBase::Draw()
 {
 #ifdef _DEBUG
 	//DrawFormatString((int)0.0f, (int)30.0f, 0xffffff, "angleX : %f,Y : %f", m_angleX,m_angleY);
-	DrawFormatString((int)0.0f, (int)30.0f, 0xffffff, L"posX : %f,posY:%f,posZ:%f", m_pos.m_x, m_pos.m_y,m_pos.m_z);
+	DrawFormatString((int)0.0f, (int)30.0f, 0xffffff, L"CameraPosX : %f,posY:%f,posZ:%f", m_pos.m_x, m_pos.m_y,m_pos.m_z);
 #endif // _DEBUG
 }
 
