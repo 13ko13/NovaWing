@@ -12,6 +12,8 @@ namespace
 	constexpr float max_frame = 180.0f;
 	//移動する際の速度
 	constexpr float move_speed = 10.0f;
+	//ゲージ消費量
+	constexpr float gauge_consumption = -0.3f;
 }
 
 SomersaultState::SomersaultState(const std::weak_ptr<Player> pPlayer) :
@@ -21,13 +23,18 @@ SomersaultState::SomersaultState(const std::weak_ptr<Player> pPlayer) :
 }
 
 SomersaultState::~SomersaultState()
-{}
+{
+
+}
 
 void SomersaultState::Enter()
 {
+	//ゲージ使用を開始したことをプレイヤーに伝える
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+	pPlayer->StartUseGauge();
+
 	m_frame = 0;
 	//プレイヤーの左右回転をリセット
-	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	pPlayer->LerpToAngleY(DX_PI_F, 0.6f);
 }
 
@@ -44,6 +51,9 @@ void SomersaultState::Update()
 	//プレイヤーに回転を適用
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	pPlayer->LerpToAngleX(-targetAngleX, 1.0f);//補完は行わない
+
+	//ゲージを消費
+	pPlayer->ChangeGauge(gauge_consumption);
 
 	//速度
 	Vector3 vel;
@@ -64,4 +74,7 @@ void SomersaultState::Exit()
 	//プレイヤーの回転を0にする
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	pPlayer->LerpToAngleX(0.0f, 1.0f);
+
+	//ゲージ使用を中止したことをプレイヤーに伝える
+	pPlayer->EndUseGauge();
 }

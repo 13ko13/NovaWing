@@ -1,5 +1,5 @@
 ﻿#include "InputManager.h"
-#include "DxLib.h"
+#include <DxLib.h>
 
 namespace
 {
@@ -23,7 +23,13 @@ InputManager::InputManager() :
 							{PeripheralType::pad1,PAD_INPUT_B} };		//パッド:Bボタン
 
 	m_inputTable["somersault"] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
-							{PeripheralType::pad1,PAD_INPUT_Y} };//パッド:Yボタン+スティック上
+							{PeripheralType::pad1,PAD_INPUT_X} };//パッド:Yボタン
+
+	m_inputTable["boost"] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
+							{PeripheralType::pad1,PAD_INPUT_C} };//パッド:?ボタン
+
+	m_inputTable["brake"] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
+							{PeripheralType::pad1,PAD_INPUT_A} };//パッド:Aボタン
 	
 #ifdef _DEBUG
 	//デバッグ用キー

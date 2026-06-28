@@ -14,6 +14,8 @@
 #include "Movement/DisabledMovementState.h"
 #include "Rotation/DisabledRotState.h"
 #include "SpecialAction/SomersaultState.h"
+#include "Movement/BoostState.h"
+#include "Movement/BrakeState.h"
 
 namespace
 {
@@ -23,6 +25,9 @@ namespace
 	//移動制限範囲
 	constexpr float move_limit_x = 500.0f;
 	constexpr float move_limit_y = 300.0f;
+
+	//ゲージの毎フレームの回復量
+	constexpr float gauge_recovery_amount = 0.5f;
 }
 
 Player::Player(
@@ -85,38 +90,11 @@ void Player::OnInit()
 void Player::Update()
 {
 	InputManager& input = InputManager::GetInstance();
-
-	//左スティックの値を取得して-1～1にする
-	Vector2 stick = {
-		static_cast<float>(input.GetBufX()) / 1000.0f,
-		static_cast<float>(input.GetBufY()) / 1000.0f
-	};
-
-	//宙返りボタンが押されていたらステートをそれぞれ切り替える
-	if (input.IsTriggered("somersault") &&
-		stick.m_y < -0.2f &&
-		!m_isSomersoult)
-	{
-		//射撃のみできるようにする
-		//全ての入った時の処理も呼ぶ
-		//何もしないステート
-		m_pMovementState = std::make_shared<DisabledMovementState>(
-			std::static_pointer_cast<Player>(shared_from_this()));
-		m_pMovementState->Enter();
-
-		//何もしないステート
-		m_pRotationState = std::make_shared<DisabledRotState>(
-			std::static_pointer_cast<Player>(shared_from_this()));
-		m_pRotationState->Enter();
-
-		//宙返りステートに変更
-		m_pSpecialState = std::make_shared<SomersaultState>(
-			std::static_pointer_cast<Player>(shared_from_this()));
-		m_pSpecialState->Enter();
-
-		//宙返りフラグをtrue
-		m_isSomersoult = true;
-	}
+	//宙返り入力
+	Somersault(input);
+	//ブーストとブレーキの入力
+	Boost(input);
+	Brake(input);
 
 	//更新前のSpecialActionStateを保存
 	std::shared_ptr<ISpecialActionState> beforeSpecialState = m_pSpecialState;
@@ -130,32 +108,38 @@ void Player::Update()
 	//特殊行動系処理の更新処理
 	UpdateState(m_pSpecialState);
 
+	//ゲージ使用していないときはゲージを回復する
+	if (!IsUseGauge())
+	{
+		ChangeGauge(gauge_recovery_amount);
+	}
+
 	//m_pSpecialStateが切り替わったかどうかを確認
 	if (m_pSpecialState != beforeSpecialState)
 	{
 		//切り替わっていたら通常のステートに戻す
 		//通常のステート
-		m_pMovementState = std::make_shared<IdleMovementState>(
+		std::shared_ptr<IMovementState> newMoveState =
+			std::make_shared<IdleMovementState>(
 			std::static_pointer_cast<Player>(shared_from_this()));
-		m_pMovementState->Enter();
+		ChangeMovementState(newMoveState);
 
 		//通常のステート
-		m_pRotationState = std::make_shared<DefaultRotationState>(
+		std::shared_ptr<IRotationState> newRotState =
+			std::make_shared<DefaultRotationState>(
 			std::static_pointer_cast<Player>(shared_from_this()));
-		m_pRotationState->Enter();
+		ChangeRotationState(newRotState);
 
 		//通常のステート
-		m_pSpecialState = std::make_shared<NoneState>(
+		std::shared_ptr<ISpecialActionState> newSpecialState =
+			std::make_shared<NoneState>(
 			std::static_pointer_cast<Player>(shared_from_this()));
-		m_pSpecialState->Enter();
-
-		//宙返りフラグをfalse
-		m_isSomersoult = false;
+		ChangeSpecialState(newSpecialState);
 	}
 
 	//キャラクターの更新処理
 	Charactor::Update();
-
+	//位置をクランプする
 	ClampPosition();
 }
 
@@ -164,6 +148,98 @@ void Player::ClampPosition()
 	//移動範囲を制限する
 	/*m_pos.m_x = std::clamp(m_pos.m_x, -move_limit_x, move_limit_x);
 	m_pos.m_y = std::clamp(m_pos.m_y, -move_limit_y, move_limit_y);*/
+}
+
+void Player::Somersault(InputManager& input)
+{
+	//宙返りの処理
+	//左スティックの値を取得して-1～1にする
+	Vector2 stick = {
+		static_cast<float>(input.GetBufX()) / 1000.0f,
+		static_cast<float>(input.GetBufY()) / 1000.0f
+	};
+
+	//宙返りボタンが押されていたらステートをそれぞれ切り替える
+	if (input.IsTriggered("somersault") &&
+		stick.m_y < -0.2f)
+	{
+		//射撃のみできるようにする
+		//全ての入った時の処理も呼ぶ
+		//何もしないステート
+		std::shared_ptr<IMovementState> newMoveState =
+			std::make_shared<DisabledMovementState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+		ChangeMovementState(newMoveState);
+
+		//何もしないステート
+		std::shared_ptr<IRotationState> newRotState =
+			std::make_shared<DisabledRotState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+		ChangeRotationState(newRotState);
+
+		//宙返りステートに変更
+		std::shared_ptr<ISpecialActionState> newSpecialState = 
+			std::make_shared<SomersaultState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+		ChangeSpecialState(newSpecialState);
+	}
+}
+
+void Player::Boost(const InputManager& input)
+{
+	//ゲージマックス中にブースト入力されたら
+	if (input.IsTriggered("boost") &&
+		m_gauge >= 100.0f)
+	{
+		//移動ステートをブースト状態に変更
+		std::shared_ptr<IMovementState> newState =
+			std::make_shared<BoostState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+		//初期化
+		ChangeMovementState(newState);
+	}
+}
+
+void Player::Brake(const InputManager & input)
+{
+	//ゲージマックス中にブレーキ入力されたら
+	if (input.IsTriggered("brake") &&
+		m_gauge >= 100.0f)
+	{
+		//移動ステートをブレーキ状態に変更
+		std::shared_ptr<IMovementState> newState =
+			std::make_shared<BrakeState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+		//初期化
+		ChangeMovementState(newState);
+	}
+}
+
+void Player::ChangeMovementState(std::shared_ptr<IMovementState>(newState))
+{
+	//前のステートの出るときの処理
+	//新しいステートの代入と入るときの処理
+	m_pMovementState->Exit();
+	m_pMovementState = newState;
+	newState->Enter();
+}
+
+void Player::ChangeRotationState(std::shared_ptr<IRotationState>(newState))
+{
+	//前のステートの出るときの処理
+	//新しいステートの代入と入るときの処理
+	m_pRotationState->Exit();
+	m_pRotationState = newState;
+	newState->Enter();
+}
+
+void Player::ChangeSpecialState(std::shared_ptr<ISpecialActionState>(newState))
+{
+	//前のステートの出るときの処理
+	//新しいステートの代入と入るときの処理
+	m_pSpecialState->Exit();
+	m_pSpecialState = newState;
+	newState->Enter();
 }
 
 void Player::Draw()
@@ -179,6 +255,7 @@ void Player::Draw()
 
 #ifdef _DEBUG
 	DrawFormatString(0, 300, 0xffffff, L"playerPosY : %f", m_pos.m_y);
+	DrawFormatString(0, 250, 0xffffff, L"Gauge : %f", m_gauge);
 #endif
 }
 
@@ -270,6 +347,23 @@ void Player::ChangeGauge(float delta)
 	m_gauge += delta;
 	//0～100にクランプ
 	m_gauge = std::clamp(m_gauge, 0.0f, 100.0f);
+}
+
+void Player::StartUseGauge()
+{
+	//ゲージ使用を開始
+	m_isUseGauge = true;
+}
+
+void Player::EndUseGauge()
+{
+	//ゲージ使用を中止
+	m_isUseGauge = false;
+}
+
+bool Player::IsUseGauge() const
+{
+	return m_isUseGauge;
 }
 
 void Player::UpdateRotation()

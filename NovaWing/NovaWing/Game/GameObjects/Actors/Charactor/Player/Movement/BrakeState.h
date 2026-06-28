@@ -1,10 +1,10 @@
 #pragma once
 #include "GaugeActionStateBase.h"
-class BoostState :public GaugeActionStateBase
+class BrakeState :public GaugeActionStateBase
 {
 public:
-	BoostState(const std::weak_ptr<Player> pPlayer);
-	~BoostState();
+	BrakeState(const std::weak_ptr<Player> pPlayer);
+	~BrakeState();
 
 	void Enter()override;//ステートに入った時
 	void Exit() override;//ステートから出たとき

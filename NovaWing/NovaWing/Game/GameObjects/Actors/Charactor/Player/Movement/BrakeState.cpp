@@ -1,42 +1,42 @@
-#include "BoostState.h"
+#include "BrakeState.h"
 #include "Charactor/Player/Player.h"
 
 namespace
 {
-	constexpr float boost_speed = 13.0f;
+	constexpr float brake_speed = 2.0f;
 }
 
-BoostState::BoostState(const std::weak_ptr<Player> pPlayer):
+BrakeState::BrakeState(const std::weak_ptr<Player> pPlayer) :
 	GaugeActionStateBase(pPlayer)
 {
 
 }
 
-BoostState::~BoostState()
+BrakeState::~BrakeState()
 {
 
 }
 
-void BoostState::Enter()
+void BrakeState::Enter()
 {
 	//ゲージ使用を開始したことをプレイヤーに伝える
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	pPlayer->StartUseGauge();
 }
 
-void BoostState::Exit()
+void BrakeState::Exit()
 {
 	//ゲージ使用を中止したことをプレイヤーに伝える
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	pPlayer->EndUseGauge();
 }
 
-float BoostState::GetSpeed() const
+float BrakeState::GetSpeed() const
 {
-	return boost_speed;
+	return brake_speed;
 }
 
-const char* BoostState::GetButtonName() const
+const char* BrakeState::GetButtonName() const
 {
-	return "boost";
+	return "brake";
 }

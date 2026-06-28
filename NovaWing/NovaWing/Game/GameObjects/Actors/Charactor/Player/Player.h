@@ -37,10 +37,17 @@ public:
 	void SetCamera(std::shared_ptr<CameraBase> pCamera) { m_pCamera = pCamera; }
 
 	//ゲージ取得
-	float GetBoostGauge() const { return m_gauge; }
+	float GetGauge() const { return m_gauge; }
 
 	//ゲージ変化
 	void ChangeGauge(float delta);
+
+	//ゲージを使用するとき
+	void StartUseGauge();
+	//ゲージの使用をやめたとき
+	void EndUseGauge();
+	//ゲージを使用してるかを取得
+	bool IsUseGauge() const; 
 
 private:
 	//回転の更新
@@ -51,6 +58,18 @@ private:
 	void SetCbuffMatrixData();
 	//移動範囲を制限する
 	void ClampPosition();
+	//宙返り処理
+	void Somersault(InputManager& input);
+	//ブースト入力処理
+	void Boost(const InputManager& input);
+	//ブレーキ入力処理
+	void Brake(const InputManager& input);
+	//移動系ステートを変更する
+	void ChangeMovementState(std::shared_ptr<IMovementState>(newState));
+	//回転系ステートを変更する
+	void ChangeRotationState(std::shared_ptr<IRotationState>(newState));
+	//特殊行動系ステートを変更する
+	void ChangeSpecialState(std::shared_ptr<ISpecialActionState>(newState));
 	
 	//ステートの更新
 	//テンプレート関数なのでヘッダに実装をかく
@@ -85,8 +104,8 @@ private:
 	//プレイヤーの初期回転を保存する
 	Quaternion m_initRotation;
 
-	//現在宙返りを行っているか
-	bool m_isSomersoult = false;
+	//現在ゲージ消費中かどうか
+	bool m_isUseGauge = false;
 
 	//上下回転角
 	float m_rotationX = 0.0f;

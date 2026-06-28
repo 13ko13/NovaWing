@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 
-#include "../Utility/Vector3.h"
 #include "../Utility/Vector2.h"
 
 /// <summary>

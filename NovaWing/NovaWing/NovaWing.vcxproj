@@ -138,6 +138,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\BoostState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\BrakeState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DisabledRotState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\DisabledMovementState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Bullet\BulletBase.cpp" />
@@ -180,6 +181,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\BoostState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\BrakeState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DisabledRotState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\DisabledMovementState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Bullet\BulletBase.h" />
