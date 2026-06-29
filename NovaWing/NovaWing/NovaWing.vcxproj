@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\BoostState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\BrakeState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DisabledRotState.cpp" />
@@ -181,6 +182,7 @@
     <ClCompile Include="Utility\Vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\BoostState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\BrakeState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DisabledRotState.h" />
