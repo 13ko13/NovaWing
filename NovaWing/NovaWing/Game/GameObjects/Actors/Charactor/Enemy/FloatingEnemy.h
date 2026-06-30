@@ -19,6 +19,8 @@ public:
 
 	//プレイヤーの位置を返す
 	Vector3 GetPlayerPos() const;
+	//プレイヤーの前方向
+	Vector3 GetPlayerFoward() const;
 
 private:
 	std::weak_ptr<Player> m_pPlayer;//プレイヤーを借りる

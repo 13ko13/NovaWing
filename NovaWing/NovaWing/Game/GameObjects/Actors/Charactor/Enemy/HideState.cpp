@@ -6,7 +6,7 @@
 namespace
 {
 	//出現条件の距離
-	constexpr float appear_distance = 100.0f;
+	constexpr float appear_distance =400.0f;
 }
 
 HideState::HideState(std::weak_ptr<FloatingEnemy> pEnemy):

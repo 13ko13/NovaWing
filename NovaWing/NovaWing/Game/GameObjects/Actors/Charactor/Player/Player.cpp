@@ -84,7 +84,8 @@ void Player::OnInit()
 	//SpecialActionの初期化
 	m_pSpecialState =
 		std::make_shared<NoneState>(
-			std::static_pointer_cast<Player>(shared_from_this()));
+			std::static_pointer_cast<Player>(shared_from_this())
+		);
 }
 
 void Player::Update()

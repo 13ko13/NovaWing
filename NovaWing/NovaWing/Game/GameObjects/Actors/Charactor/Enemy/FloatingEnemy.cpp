@@ -35,6 +35,8 @@ void FloatingEnemy::OnInit()
 
 	//ステートに入った時の処理
 	m_pState->Enter();
+	m_pos.m_z += 900;
+	//m_pos.m_x += 200;
 }
 
 void FloatingEnemy::Update()
@@ -64,7 +66,7 @@ void FloatingEnemy::Update()
 void FloatingEnemy::Draw()
 {
 	//モデルに行列を適用
-	ApplyMatrix(model_scale, m_pos, m_rotation, m_modelHandle);
+	ApplyMatrix(model_scale,m_pos, m_rotation, m_modelHandle);
 
 	//モデルを描画
 	MV1DrawModel(m_modelHandle);
@@ -72,6 +74,8 @@ void FloatingEnemy::Draw()
 #ifdef _DEBUG
 	//当たり判定の描画
 	m_colSphere.Draw(0xaaffff);
+	//位置
+	DrawFormatString(0, 320, 0xffffff, L"EPosX:%f,Y:%f,Z:%f", m_pos.m_x, m_pos.m_y, m_pos.m_z);
 #endif
 }
 
@@ -87,4 +91,13 @@ Vector3 FloatingEnemy::GetPlayerPos() const
 
 	//位置を取得して返す
 	return pPlayer->GetPos();
+}
+
+Vector3 FloatingEnemy::GetPlayerFoward() const
+{
+	//shared_ptrに変換
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+
+	//前方向を取得して返す
+	return pPlayer->GetForward();
 }

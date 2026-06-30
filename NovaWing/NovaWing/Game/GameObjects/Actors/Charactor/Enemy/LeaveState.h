@@ -2,17 +2,18 @@
 #include "IEnemyState.h"
 
 class FloatingEnemy;
-class ActiveState : public IEnemyState
+class LeaveState : public IEnemyState
 {
 public:
-	ActiveState(std::weak_ptr<FloatingEnemy> pEnemy);
-	~ActiveState();
+	LeaveState(std::weak_ptr<FloatingEnemy> pEnemy);
+	~LeaveState();
 
 	void Enter() override;
 	void Update() override;
 	void Exit() override;
 
 private:
-	//sin波用のフレーム
+	//死亡するまでの時間計測
 	int m_frame = 0;
 };
+

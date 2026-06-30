@@ -156,6 +156,7 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\GaugeActionStateBase.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\IEnemyState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\HideState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\LeaveState.cpp" />
     <ClCompile Include="Manager\LightingManager.cpp" />
     <ClCompile Include="Manager\GameObjectManager.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Actor.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\GaugeActionStateBase.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\IEnemyState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\HideState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\LeaveState.h" />
     <ClInclude Include="Manager\LightingManager.h" />
     <ClInclude Include="Manager\GameObjectManager.h" />
     <ClInclude Include="Game\GameObjects\Actors\Actor.h" />
