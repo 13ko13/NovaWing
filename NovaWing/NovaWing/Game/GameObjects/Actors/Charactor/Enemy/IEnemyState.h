@@ -3,11 +3,11 @@
 
 #include "Manager/ResourceLoader.h"
 
-class Enemy;
+class FloatingEnemy;
 class IEnemyState
 {
 public:
-	IEnemyState(std::weak_ptr<Enemy> pEnemy);
+	IEnemyState(std::weak_ptr<FloatingEnemy> pEnemy);
 	virtual ~IEnemyState() = default;
 
 	virtual void Enter() = 0;//ステートに入った時
@@ -20,6 +20,6 @@ public:
 	void ChangeState(std::shared_ptr<IEnemyState> pNextState) { m_nextState = pNextState; }
 
 protected:
-	std::weak_ptr<Enemy> m_pEnemy;//敵自身のポインタ
-	std::shared_ptr<IEnemyState> m_nextState;
+	std::weak_ptr<FloatingEnemy> m_pEnemy;//敵自身のポインタ
+	std::shared_ptr<IEnemyState> m_nextState;//次のステート
 };

@@ -17,6 +17,7 @@
 #include "../Game/GameObjects/Camera/CameraBase.h"
 #include "../Manager/GameObjectManager.h"
 #include "../Manager/ResourceLoader.h"
+#include "Charactor/Enemy/FloatingEnemy.h"
 
 namespace
 {
@@ -70,6 +71,10 @@ void GameScene::Init()
 	m_pCamera->Init();
 	//プレイヤーにカメラを渡す
 	m_pPlayer->SetCamera(m_pCamera);
+	//エネミーの初期化
+	m_pFloatingEnemy = std::make_shared<FloatingEnemy>(m_pPlayer,
+		ResourceLoader::ModelID::Player);
+	m_pFloatingEnemy->Init();
 }
 
 void GameScene::Update()

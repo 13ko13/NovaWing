@@ -7,6 +7,7 @@
 class Player;
 class CameraBase;
 class BulletManager;
+class FloatingEnemy;
 class GameScene :public Scene
 {
 public:
@@ -32,6 +33,9 @@ private:
 
 	//カメラの実体
 	std::shared_ptr<CameraBase> m_pCamera;
+
+	//浮遊エネミーの実体
+	std::shared_ptr<FloatingEnemy> m_pFloatingEnemy;
 
 	//バレットマネージャーの実体
 	std::shared_ptr<BulletManager> m_pBulletManager;

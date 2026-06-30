@@ -25,7 +25,8 @@ void IdleMovementState::Enter()
 {
 	//プレイヤーの速度をz以外0にする
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
-	pPlayer->SetVel(Vector3(0.0f, 0.0f, move_speed));
+	//pPlayer->SetVel(Vector3(0.0f, 0.0f, move_speed));
+	pPlayer->SetVel(Vector3(0.0f, 0.0f, 0.0f));
 }
 
 void IdleMovementState::Update()

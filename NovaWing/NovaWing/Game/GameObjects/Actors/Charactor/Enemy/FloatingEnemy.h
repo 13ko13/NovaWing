@@ -1,6 +1,7 @@
 #pragma once
 #include "Charactor/Charactor.h"
 #include "Manager/ResourceLoader.h"
+#include "Utility/Sphere.h"
 
 class Player;
 class IEnemyState;
@@ -16,7 +17,12 @@ public:
 	void Draw() override;//描画
 	void TakeDamage(int damage) override;//ダメージを受ける
 
+	//プレイヤーの位置を返す
+	Vector3 GetPlayerPos() const;
+
 private:
 	std::weak_ptr<Player> m_pPlayer;//プレイヤーを借りる
 	std::shared_ptr<IEnemyState> m_pState;//ステート
+
+	Sphere m_colSphere;//当たり判定(球)
 };
