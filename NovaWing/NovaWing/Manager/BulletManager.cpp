@@ -46,12 +46,12 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 	}
 }
 
-std::vector<std::shared_ptr<PlayerBullet>> BulletManager::GetPlayerBullets() const
+const std::vector<std::weak_ptr<PlayerBullet>>& BulletManager::GetPlayerBullets() const
 {
-	return 
+	return m_pPlayerBullets;
 }
 
-std::vector<std::shared_ptr<EnemyBullet>> BulletManager::GetEnemyBullets() const
+const std::vector<std::weak_ptr<EnemyBullet>>& BulletManager::GetEnemyBullets() const
 {
-	return std::vector<std::shared_ptr<EnemyBullet>>();
+	return m_pEnemyBullets;
 }

@@ -27,6 +27,9 @@ public:
 	//弾の管理者を取得する
 	std::shared_ptr<BulletManager> GetBulletManager() const;
 
+	//当たり判定(球)を取得
+	const Sphere& GetSphere() const { return m_colSphere; }
+
 private:
 	std::weak_ptr<Player> m_pPlayer;//プレイヤーを借りる
 	std::shared_ptr<IEnemyState> m_pState;//ステート

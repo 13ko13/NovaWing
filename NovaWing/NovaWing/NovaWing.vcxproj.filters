@@ -156,7 +156,7 @@
     <ClCompile Include="Game\GameObjects\Actors\Bullet\EnemyBullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="CollisionManager.cpp">
+    <ClCompile Include="Manager\CollisionManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

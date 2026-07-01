@@ -24,9 +24,9 @@ public:
 		const Vector3& vel, const int attackPower);
 
 	//プレイヤー弾の配列のゲッター
-	std::vector<std::weak_ptr<PlayerBullet>>& GetPlayerBullets() const;
+	const std::vector<std::weak_ptr<PlayerBullet>>& GetPlayerBullets() const;
 	//敵弾の配列のゲッター
-	std::vector<std::weak_ptr<EnemyBullet>>& GetEnemyBullets() const;
+	const std::vector<std::weak_ptr<EnemyBullet>>& GetEnemyBullets() const;
 
 private:
 	//敵弾の配列

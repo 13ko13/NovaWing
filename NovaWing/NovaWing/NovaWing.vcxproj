@@ -137,7 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CollisionManager.cpp" />
+    <ClCompile Include="Manager\CollisionManager.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Bullet\EnemyBullet.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\ActiveState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy.cpp" />

@@ -6,7 +6,7 @@
 namespace
 {
 	//モデルのサイズ
-	const Vector3 model_scale = { 0.3f,0.3f,0.3f };
+	const Vector3 model_scale = { 0.1f,0.1f,0.1f };
 	//敵自身の球の当たり判定の半径
 	constexpr float col_radius = 132.0f;
 }
