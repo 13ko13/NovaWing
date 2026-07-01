@@ -73,7 +73,8 @@ void GameScene::Init()
 	m_pPlayer->SetCamera(m_pCamera);
 	//エネミーの初期化
 	m_pFloatingEnemy = std::make_shared<FloatingEnemy>(m_pPlayer,
-		ResourceLoader::ModelID::Player);
+		ResourceLoader::ModelID::Player,
+		m_pBulletManager);
 	m_pFloatingEnemy->Init();
 }
 

@@ -153,6 +153,12 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\LeaveState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Game\GameObjects\Actors\Bullet\EnemyBullet.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants\Game.h">
@@ -297,6 +303,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\LeaveState.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameObjects\Actors\Bullet\EnemyBullet.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

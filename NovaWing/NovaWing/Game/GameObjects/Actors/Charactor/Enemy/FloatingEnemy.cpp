@@ -12,10 +12,12 @@ namespace
 }
 
 FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
-	const ResourceLoader::ModelID Id) :
+	const ResourceLoader::ModelID Id,
+	const std::shared_ptr<BulletManager> pBulletManager) :
 	Charactor(Id),
 	m_pPlayer(pPlayer),
-	m_colSphere(m_pos)
+	m_colSphere(m_pos),
+	m_pBulletManager(pBulletManager)
 {
 
 }
@@ -100,4 +102,10 @@ Vector3 FloatingEnemy::GetPlayerFoward() const
 
 	//前方向を取得して返す
 	return pPlayer->GetForward();
+}
+
+std::shared_ptr<BulletManager> FloatingEnemy::GetBulletManager() const
+{
+	std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock();
+	return pBulletManager;
 }

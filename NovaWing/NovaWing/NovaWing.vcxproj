@@ -137,6 +137,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CollisionManager.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Bullet\EnemyBullet.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\ActiveState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\BoostState.cpp" />
@@ -185,6 +187,8 @@
     <ClCompile Include="Utility\Vector3.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CollisionManager.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Bullet\EnemyBullet.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\ActiveState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\BoostState.h" />
