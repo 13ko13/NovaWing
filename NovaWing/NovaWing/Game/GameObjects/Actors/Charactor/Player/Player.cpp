@@ -255,7 +255,7 @@ void Player::Draw()
 	DrawPlayer();
 
 #ifdef _DEBUG
-	DrawFormatString(0, 300, 0xffffff, L"playerPosY : %f", m_pos.m_y);
+	DrawFormatString(0, 300, 0xffffff, L"playerPosX:%f,Y : %f,Z:%f", m_pos.m_x, m_pos.m_y, m_pos.m_z);
 	DrawFormatString(0, 250, 0xffffff, L"Gauge : %f", m_gauge);
 #endif
 }

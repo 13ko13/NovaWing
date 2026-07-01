@@ -2,11 +2,12 @@
 #include "IEnemyState.h"
 #include "Charactor/Player/Player.h"
 #include "HideState.h"
+#include "Manager/LightingManager.h"
 
 namespace
 {
 	//モデルのサイズ
-	const Vector3 model_scale = { 0.1f,0.1f,0.1f };
+	const Vector3 model_scale = { 5.0f,5.0f,5.0f };
 	//敵自身の球の当たり判定の半径
 	constexpr float col_radius = 132.0f;
 }
@@ -37,7 +38,7 @@ void FloatingEnemy::OnInit()
 
 	//ステートに入った時の処理
 	m_pState->Enter();
-	m_pos.m_z += 900;
+	//m_pos.m_z += 900;
 	//m_pos.m_x += 200;
 }
 
@@ -69,13 +70,17 @@ void FloatingEnemy::Draw()
 {
 	//モデルに行列を適用
 	ApplyMatrix(model_scale,m_pos, m_rotation, m_modelHandle);
+	 
+	LightingManager::GetInstance().ApplyShader();
 
-	//モデルを描画
+	//モデル描画
 	MV1DrawModel(m_modelHandle);
+
+	LightingManager::GetInstance().ResetShader();
 
 #ifdef _DEBUG
 	//当たり判定の描画
-	m_colSphere.Draw(0xaaffff);
+	m_colSphere.Draw(0xffffff);
 	//位置
 	DrawFormatString(0, 320, 0xffffff, L"EPosX:%f,Y:%f,Z:%f", m_pos.m_x, m_pos.m_y, m_pos.m_z);
 #endif
