@@ -26,7 +26,7 @@ void CollisionManager::Update()
 {
 	//shared_ptrに変換
 	std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock();
-	std::shared_ptr<Player> pBulletManager = m_pPlayer.lock();
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 
 	//プレイヤー弾の配列を取得
 	std::vector<std::weak_ptr<PlayerBullet>> weakBullets = pBulletManager->GetPlayerBullets();

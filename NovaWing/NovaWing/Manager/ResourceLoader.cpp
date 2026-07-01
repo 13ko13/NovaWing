@@ -22,6 +22,10 @@ void ResourceLoader::LoadAll()
 	assert(handle >= 0); 
 	m_modelHandles[ModelID::Player] = handle;
 
+	handle = MV1LoadModel(L"Data/Model/FloatingEnemy.mv1");//浮遊する敵
+	assert(handle >= 0); 
+	m_modelHandles[ModelID::FloatingEnemy] = handle;
+
 	//画像を読み込んでハンドルを保存する
 	//法線マップ
 	handle = LoadGraph(L"Data/Model/Player.fbm/StarSparrow_Normal.png");

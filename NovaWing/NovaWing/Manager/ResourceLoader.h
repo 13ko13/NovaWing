@@ -8,6 +8,7 @@ public:
 	enum class ModelID : int
 	{
 		Player, //プレイヤー
+		FloatingEnemy,//浮遊する敵
 	};
 
 	//グラフィックの種類
