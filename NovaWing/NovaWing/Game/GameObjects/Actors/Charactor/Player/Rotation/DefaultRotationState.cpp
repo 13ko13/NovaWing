@@ -1,4 +1,4 @@
-#include <cmath>
+﻿#include <cmath>
 
 #include "DefaultRotationState.h"
 #include "Manager/InputManager.h"

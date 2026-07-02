@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GaugeActionStateBase.h"
 class BrakeState :public GaugeActionStateBase
 {

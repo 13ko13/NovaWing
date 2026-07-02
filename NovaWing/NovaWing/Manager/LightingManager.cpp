@@ -1,4 +1,4 @@
-#include <DxLib.h>
+﻿#include <DxLib.h>
 #include <cassert>
 
 #include "LightingManager.h"

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "IMovementState.h"
 class MovingState : public IMovementState
 {

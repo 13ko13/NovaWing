@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "ISpecialActionState.h"
 
 class SomersaultState : public ISpecialActionState

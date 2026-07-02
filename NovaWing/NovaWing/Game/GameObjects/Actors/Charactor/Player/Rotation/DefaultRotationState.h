@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "IRotationState.h"
 class DefaultRotationState : public IRotationState
 {

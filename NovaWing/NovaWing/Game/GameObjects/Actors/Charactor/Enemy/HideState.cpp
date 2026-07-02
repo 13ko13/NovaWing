@@ -1,4 +1,4 @@
-#include "HideState.h"
+﻿#include "HideState.h"
 #include "Utility/Vector3.h"
 #include "FloatingEnemy.h"
 #include "ActiveState.h"

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "IMovementState.h"
 #include <memory>
 class GaugeActionStateBase : public IMovementState

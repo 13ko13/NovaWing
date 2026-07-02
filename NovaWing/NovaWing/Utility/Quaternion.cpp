@@ -1,4 +1,4 @@
-#include <cmath>
+﻿#include <cmath>
 
 #include "Quaternion.h"
 #include "../Utility/Matrix4x4.h"

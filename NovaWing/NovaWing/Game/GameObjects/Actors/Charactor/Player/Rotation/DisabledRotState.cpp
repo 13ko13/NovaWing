@@ -1,4 +1,4 @@
-#include "DisabledRotState.h"
+﻿#include "DisabledRotState.h"
 
 DisabledRotState::DisabledRotState(const std::weak_ptr<Player> pPlayer) :
 	IRotationState(pPlayer)

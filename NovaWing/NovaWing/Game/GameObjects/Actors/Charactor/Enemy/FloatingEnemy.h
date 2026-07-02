@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 #include "Charactor/Charactor.h"
 #include "Manager/ResourceLoader.h"
 #include "Utility/Sphere.h"
+#include "Utility/ModelAnimator.h"
 
 class Player;
 class IEnemyState;
@@ -23,6 +24,8 @@ public:
 	Vector3 GetPlayerPos() const;
 	//プレイヤーの前方向
 	Vector3 GetPlayerFoward() const;
+	//プレイヤーからカメラの位置を取得
+	Vector3 GetPlayerCameraPos() const;
 
 	//弾の管理者を取得する
 	std::shared_ptr<BulletManager> GetBulletManager() const;
@@ -36,4 +39,7 @@ private:
 	std::weak_ptr<BulletManager> m_pBulletManager;//弾の管理者
 
 	Sphere m_colSphere;//当たり判定(球)
+
+	//アニメーター
+	std::shared_ptr<ModelAnimator> m_pAnimator;
 };

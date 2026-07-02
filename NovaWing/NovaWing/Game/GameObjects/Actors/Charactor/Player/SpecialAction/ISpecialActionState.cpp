@@ -1,4 +1,4 @@
-#include "ISpecialActionState.h"
+﻿#include "ISpecialActionState.h"
 
 ISpecialActionState::ISpecialActionState(
 	const std::weak_ptr<Player> pPlayer) :

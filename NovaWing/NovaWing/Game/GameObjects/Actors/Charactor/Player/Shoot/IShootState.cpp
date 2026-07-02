@@ -1,4 +1,4 @@
-#include "IShootState.h"
+﻿#include "IShootState.h"
 
 IShootState::IShootState(const std::weak_ptr<Player> pPlayer,
 	std::weak_ptr<BulletManager> pBulletManager):

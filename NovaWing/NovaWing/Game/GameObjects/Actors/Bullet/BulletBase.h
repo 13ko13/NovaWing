@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Manager/ResourceLoader.h"
 #include "Game/GameObjects/GameObject.h"

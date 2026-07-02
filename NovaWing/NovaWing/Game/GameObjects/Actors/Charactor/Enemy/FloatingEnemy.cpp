@@ -1,4 +1,4 @@
-#include "FloatingEnemy.h"
+﻿#include "FloatingEnemy.h"
 #include "IEnemyState.h"
 #include "Charactor/Player/Player.h"
 #include "HideState.h"
@@ -7,7 +7,7 @@
 namespace
 {
 	//モデルのサイズ
-	const Vector3 model_scale = { 5.0f,5.0f,5.0f };
+	const Vector3 model_scale = { 1.0f,1.0f,1.0f };
 	//敵自身の球の当たり判定の半径
 	constexpr float col_radius = 132.0f;
 }
@@ -38,8 +38,14 @@ void FloatingEnemy::OnInit()
 
 	//ステートに入った時の処理
 	m_pState->Enter();
-	//m_pos.m_z += 900;
+	m_pos.m_z += 900;
 	//m_pos.m_x += 200;
+
+	//定数バッファを作成
+	CreateShaderBuffers();
+
+	//アニメーターを作成
+	m_pAnimator = std::make_shared<ModelAnimator>(m_modelHandle);
 }
 
 void FloatingEnemy::Update()
@@ -58,6 +64,8 @@ void FloatingEnemy::Update()
 		//切り替え後の入った時の処理
 		m_pState->Enter();
 	}
+	//アニメーターの更新
+	m_pAnimator->Update(1.0f);
 
 	//キャラクタークラス共通の処理
 	Charactor::Update();
@@ -69,14 +77,28 @@ void FloatingEnemy::Update()
 void FloatingEnemy::Draw()
 {
 	//モデルに行列を適用
-	ApplyMatrix(model_scale,m_pos, m_rotation, m_modelHandle);
-	 
+	ApplyMatrix(model_scale, m_pos, m_rotation, m_modelHandle);
+
+	//シェーダに渡すカメラ情報を更新してから
+	UpdateShaderMatrixData(GetPlayerCameraPos());
+
+	//定数バッファをシェーダレジスタに渡す
+	BindShaderBuffers();
+
+
+	//明示的にテクスチャがないことをシェーダに伝える
+	SetUseTextureToShader(1, -1);//t1
+	SetUseTextureToShader(2, -1);//t2
+	SetUseTextureToShader(3, -1);//t3
+
 	LightingManager::GetInstance().ApplyShader();
 
 	//モデル描画
 	MV1DrawModel(m_modelHandle);
 
 	LightingManager::GetInstance().ResetShader();
+	//シェーダレジスタにセットした定数バッファを解放
+	ReleaseShaderBuffers();
 
 #ifdef _DEBUG
 	//当たり判定の描画
@@ -107,6 +129,15 @@ Vector3 FloatingEnemy::GetPlayerFoward() const
 
 	//前方向を取得して返す
 	return pPlayer->GetForward();
+}
+
+Vector3 FloatingEnemy::GetPlayerCameraPos() const
+{
+	//shared_ptrに変換
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+
+	//カメラの位置を取得して返す
+	return pPlayer->GetCameraPos();
 }
 
 std::shared_ptr<BulletManager> FloatingEnemy::GetBulletManager() const

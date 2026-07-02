@@ -1,4 +1,4 @@
-#include <cmath>
+﻿#include <cmath>
 
 #include "IdleMovementState.h"
 #include "Manager/InputManager.h"

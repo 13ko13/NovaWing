@@ -1,4 +1,4 @@
-#include <algorithm>
+﻿#include <algorithm>
 #include <cassert>
 
 #include "Player.h"
@@ -51,11 +51,8 @@ void Player::OnInit()
 	m_rotationY = DX_PI_F;
 	UpdateRotation();
 
-	m_cbufferMatrix = CreateShaderConstantBuffer(sizeof(MatrixBuffer));
-	m_pCbufferMatrixData = static_cast<MatrixBuffer*>(GetBufferShaderConstantBuffer(m_cbufferMatrix));
-
-	m_cbufferCamera = CreateShaderConstantBuffer(sizeof(CameraBuffer));
-	m_pCbufferCameraData = static_cast<CameraBuffer*>(GetBufferShaderConstantBuffer(m_cbufferCamera));
+	//シェーダに渡す定数バッファを作成
+	CreateShaderBuffers();
 
 	//ライトの方向ベクトルをセットする
 	LightingManager::GetInstance().SetLightDirection(Vector3(1.0f, -1.0f, -1.0f));
@@ -249,7 +246,7 @@ void Player::Draw()
 	ApplyMatrix(model_scale,m_pos,m_rotation,m_modelHandle);
 
 	//シェーダに渡すバッファに行列情報を渡す
-	SetCbuffMatrixData();
+	UpdateShaderMatrixData(m_pCamera.lock()->GetPos());
 
 	//シェーダを適用したプレイヤーを描画
 	DrawPlayer();
@@ -262,10 +259,6 @@ void Player::Draw()
 
 void Player::DrawPlayer()
 {
-	//シェーダを適用する
-	UpdateShaderConstantBuffer(m_cbufferMatrix);
-	UpdateShaderConstantBuffer(m_cbufferCamera);
-
 	//ResourceLoaderからPlayerの法線マップを取得
 	//ResourceLoaderのインスタンスを取得
 	const ResourceLoader& resourceLoader = ResourceLoader::GetInstance();
@@ -279,46 +272,26 @@ void Player::DrawPlayer()
 	const int emissionGraphH = resourceLoader.GetGraphic(
 		ResourceLoader::GraphicID::PlayerEmissionMap);
 
-#if TRUE
 	//法線マップをシェーダに渡す
-	//SetUseTextureToShader(1, normGraphH);
+	SetUseTextureToShader(1, normGraphH);
 	//メタリックマップを渡す
 	SetUseTextureToShader(2, metalicGraphH);
 	//エミッションマップを渡す
 	SetUseTextureToShader(3, emissionGraphH);
 
 	LightingManager::GetInstance().ApplyShader();
-	SetShaderConstantBuffer(m_cbufferMatrix, DX_SHADERTYPE_VERTEX, 2);
-	SetShaderConstantBuffer(m_cbufferCamera, DX_SHADERTYPE_VERTEX, 3);
-	SetShaderConstantBuffer(m_cbufferCamera, DX_SHADERTYPE_PIXEL, 3);
-#endif
+	BindShaderBuffers();
+	
 	//プレイヤーのモデルを描画する
 	MV1DrawModel(m_modelHandle);
 
 	////法線マップをシェーダに渡す
-	//SetUseTextureToShader(1, -1);//法線マップを解除
+	SetUseTextureToShader(1, -1);//法線マップを解除
 	SetUseTextureToShader(2, -1);//メタリックマップを解除
 	SetUseTextureToShader(3, -1);//エミッションマップを解除
 	//シェーダを解除
 	LightingManager::GetInstance().ResetShader();
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 2);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 3);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 3);
-}
-
-void Player::SetCbuffMatrixData()
-{
-	//行列情報を入れる
-	m_pCbufferMatrixData->world = MV1GetLocalWorldMatrix(m_modelHandle);
-	m_pCbufferMatrixData->view = GetCameraViewMatrix();
-	m_pCbufferMatrixData->proj = GetCameraProjectionMatrix();
-
-	//カメラの位置をMatrix情報に渡す]
-	//shared_ptrに変換
-	std::shared_ptr<CameraBase> camera = m_pCamera.lock();
-	assert(camera != nullptr);//Nullチェック
-	//カメラの位置も入れる
-	m_pCbufferCameraData->cameraPos = camera->GetPos();
+	ReleaseShaderBuffers();
 }
 
 void Player::TakeDamage(int damage)
@@ -365,6 +338,12 @@ void Player::EndUseGauge()
 bool Player::IsUseGauge() const
 {
 	return m_isUseGauge;
+}
+
+Vector3 Player::GetCameraPos() const
+{
+	std::shared_ptr<CameraBase> pCamera = m_pCamera.lock();
+	return pCamera->GetPos();
 }
 
 void Player::UpdateRotation()

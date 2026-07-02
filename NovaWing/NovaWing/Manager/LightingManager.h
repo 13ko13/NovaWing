@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Utility/Vector3.h"
 
 class LightingManager

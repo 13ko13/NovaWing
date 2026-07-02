@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <map>
 #include <vector>
 #include <string>
@@ -6,7 +6,7 @@
 #include "../Utility/Vector2.h"
 
 /// <summary>
-/// ���Ӌ@����
+/// 周辺機器種別
 /// </summary>
 enum class PeripheralType
 {
@@ -15,91 +15,91 @@ enum class PeripheralType
 };
 
 /// <summary>
-/// ���͑Ή����
+/// 入力対応情報
 /// </summary>
 struct InputState
 {
-	PeripheralType type;//���͂��ꂽ�@��̎��
-	int id;//���͏�񂪓���(�L�[�{�[�h�̏ꍇ�̓C���f�b�N�X�A�p�b�h�̏ꍇ�̓r�b�g)
+	PeripheralType type;//入力された機器の種別
+	int id;//入力情報が入る(キーボードの場合はインデックス、パッドの場合はビット)
 };
 
 /// <summary>
-/// ���͂𒊏ۉ����邽�߂̃V���O���g���N���X
+/// 入力を抽象化するためのシングルトンクラス
 /// </summary>
 class InputManager
 {
-	//map�͑Ή��\�̂悤�Ȃ���
+	//mapは対応表のようなもの
 private:
-	std::map<std::string, std::vector<InputState>> m_inputTable;///�C�x���g���Ǝ��ۂ̓��͂̑Ή��\
-	std::map<std::string, bool>m_inputData;///���ۂɓ��͂��ꂽ���ǂ����̃f�[�^
-	std::map<std::string, bool>m_lastInputData;///�O�̃t���[���ɓ��͂��ꂽ���ǂ����̃f�[�^
+	std::map<std::string, std::vector<InputState>> m_inputTable;///イベント名と実際の入力の対応表
+	std::map<std::string, bool>m_inputData;///実際に入力されたかどうかのデータ
+	std::map<std::string, bool>m_lastInputData;///前のフレームに入力されたかどうかのデータ
 
-	//�R���g���[���[�̍��X�e�B�b�N��|�����Ƃ��̒l��ێ��������
+	//コントローラーの左スティックを倒したときの値を保持するもの
 	int m_bufX;
 	int m_bufY;
 
-	//�E�X�e�B�b�N�̓��͕���(���K����)�Ɠ��͋��x��ێ�����
+	//右スティックの入力方向(正規化済)と入力強度を保持する
 	Vector2 m_rightStickDir;
 private:
 	/// <summary>
-	/// �R���X�g���N�^
+	/// コンストラクタ
 	/// </summary>
 	InputManager();
 
 public:
 	/// <summary>
-	/// InputManager�̃C���X�^���X���擾����
+	/// InputManagerのインスタンスを取得する
 	/// </summary>
 	/// <returns></returns>
 	static InputManager& GetInstance();
 
-	//�R�s�[�Ƒ�����֎~����(����)
+	//コピーと代入を禁止する(消す)
 	InputManager(const InputManager&) = delete;
 	InputManager& operator=(const InputManager&) = delete;
 
 	/// <summary>
-	/// ���t���[���Ăяo���āA
-	/// ���͏����X�V������
+	/// 毎フレーム呼び出して、
+	/// 入力情報を更新させる
 	/// </summary>
 	void Update();
 
 	/// <summary>
-	/// ����̃{�^����������Ă��邩
+	/// 特定のボタンがおされているか
 	/// </summary>
-	/// <param name="name">�C�x���g��(��:OK,BACK�Ȃ�)</param>
-	/// <returns>������Ă���:true,������Ă��Ȃ�:false</returns>
+	/// <param name="name">イベント名(例:OK,BACKなど)</param>
+	/// <returns>押されている:true,押されていない:false</returns>
 	bool IsPressed(const char* name) const;
 
 	/// <summary>
-	/// ����̃{�^�������݉����ꂽ��(�����ꂽ�u�Ԃ̂ݔ�������)
+	/// 特定のボタンが現在押されたか(押された瞬間のみ反応する)
 	/// </summary>
-	/// <param name="name">�C�x���g��</param>
-	/// <returns>�������ꂽ�u��:true,������ĂȂ�or�������ςȂ�:false</returns>
+	/// <param name="name">イベント名</param>
+	/// <returns>今押された瞬間:true,押されてないor押しっぱなし:false</returns>
 	bool IsTriggered(const char* name) const;
 
 	/// <summary>
-	/// ����̃{�^���������ꂽ�u�Ԃ̂ݔ�������
+	/// 特定のボタンが離された瞬間のみ反応する
 	/// </summary>
-	/// <param name="name">�C�x���g��</param>
-	/// <returns>�����ꂽ�u��:true,�܂�������Ă�����false</returns>
+	/// <param name="name">イベント名</param>
+	/// <returns>離された瞬間:true,まだ押されていたらfalse</returns>
 	bool IsReleased(const char* name) const;
 
 	/// <summary>
-	/// �R���g���[���[�̍��X�e�B�b�N��|�����Ƃ��ǂ̂��炢�|��������X�̒l���擾����
+	/// コントローラーの左スティックを倒したときどのくらい倒したかのXの値を取得する
 	/// </summary>
-	/// <returns>���X�e�B�b�N��|�����Ƃ��ǂ̂��炢�|�������̒l</returns>
+	/// <returns>左スティックを倒したときどのくらい倒したかの値</returns>
 	int GetBufX();
 
 	/// <summary>
-	/// �R���g���[���[�̍��X�e�B�b�N��|�����Ƃ��ǂ̂��炢�|��������Y�̒l���擾����
+	/// コントローラーの左スティックを倒したときどのくらい倒したかのYの値を取得する
 	/// </summary>
-	/// <returns>���X�e�B�b�N��|�����Ƃ��ǂ̂��炢�|�������̒l</returns>
+	/// <returns>左スティックを倒したときどのくらい倒したかの値</returns>
 	int GetBufY();
 
 	/// <summary>
-	/// �E�X�e�B�b�N�̓|���Ă�����͕���(���K���ς�)��
-	/// ���͋��x���擾����
+	/// 右スティックの倒している入力方向(正規化済み)と
+	/// 入力強度を取得する
 	/// </summary>
-	/// <returns>�E�X�e�B�b�N�̓|���Ă�����͕���(���K���ς�)�Ɠ��͋��x</returns>
+	/// <returns>右スティックの倒している入力方向(正規化済み)と入力強度</returns>
 	Vector2 const GetRightStickDir() const {return m_rightStickDir;}
 };

@@ -1,4 +1,4 @@
-#include "EnemyBullet.h"
+﻿#include "EnemyBullet.h"
 
 EnemyBullet::EnemyBullet(const Vector3& pos, const Vector3& vel, const int attackPower):
 	BulletBase(pos,vel,attackPower)

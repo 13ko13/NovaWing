@@ -1,9 +1,9 @@
-#pragma once
+ï»¿#pragma once
 #include <vector>
 #include <memory>
 #include "Scene.h"
 
-//‘O•ûéŒ¾
+//å‰æ–¹å®£è¨€
 class Player;
 class CameraBase;
 class BulletManager;
@@ -20,23 +20,23 @@ public:
 
 private:
 	/// <summary>
-	/// ƒfƒoƒbƒO—p‚ÌƒOƒŠƒbƒh‚ğ•`‰æ‚·‚é
+	/// ãƒ‡ãƒãƒƒã‚°ç”¨ã®ã‚°ãƒªãƒƒãƒ‰ã‚’æç”»ã™ã‚‹
 	/// </summary>
 	void DrawGrid();
 
 private:
-	//ƒtƒŒ[ƒ€ƒJƒEƒ“ƒ^[
+	//ãƒ•ãƒ¬ãƒ¼ãƒ ã‚«ã‚¦ãƒ³ã‚¿ãƒ¼
 	int m_frameCount;
 
-	//ƒvƒŒƒCƒ„[‚ÌÀ‘Ì
+	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å®Ÿä½“
 	std::shared_ptr<Player> m_pPlayer;
 
-	//ƒJƒƒ‰‚ÌÀ‘Ì
+	//ã‚«ãƒ¡ãƒ©ã®å®Ÿä½“
 	std::shared_ptr<CameraBase> m_pCamera;
 
-	//•‚—VƒGƒlƒ~[‚ÌÀ‘Ì
+	//æµ®éŠã‚¨ãƒãƒŸãƒ¼ã®å®Ÿä½“
 	std::shared_ptr<FloatingEnemy> m_pFloatingEnemy;
 
-	//ƒoƒŒƒbƒgƒ}ƒl[ƒWƒƒ[‚ÌÀ‘Ì
+	//ãƒãƒ¬ãƒƒãƒˆãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã®å®Ÿä½“
 	std::shared_ptr<BulletManager> m_pBulletManager;
 };

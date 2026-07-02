@@ -1,4 +1,4 @@
-#include "NoneState.h"
+﻿#include "NoneState.h"
 
 NoneState::NoneState(const std::weak_ptr<Player> pPlayer):
 	ISpecialActionState(pPlayer)

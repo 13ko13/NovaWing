@@ -1,4 +1,4 @@
-#include <cmath>
+﻿#include <cmath>
 
 #include "ActiveState.h"
 #include "Utility/Vector3.h"

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <memory>
 
 #include "../Charactor.h"
@@ -48,14 +48,14 @@ public:
 	void EndUseGauge();
 	//ゲージを使用してるかを取得
 	bool IsUseGauge() const; 
+	//カメラの位置を取得
+	Vector3 GetCameraPos() const;
 
 private:
 	//回転の更新
 	void UpdateRotation();
 	//シェーダを適用したプレイヤーの描画
 	void DrawPlayer();
-	//行列情報を定数バッファに設定する
-	void SetCbuffMatrixData();
 	//移動範囲を制限する
 	void ClampPosition();
 	//宙返り処理
@@ -111,24 +111,6 @@ private:
 	float m_rotationX = 0.0f;
 	//左右回転角
 	float m_rotationY = 0.0f;
-
-	//シェーダに渡す情報
-	struct MatrixBuffer
-	{
-		MATRIX world;//ワールド行列
-		MATRIX view;//ビュー行列
-		MATRIX proj;//プロジェクション行列
-	};
-	int m_cbufferMatrix = -1;
-	MatrixBuffer* m_pCbufferMatrixData = nullptr;
-
-	struct CameraBuffer
-	{
-		Vector3 cameraPos;//カメラの位置
-		float padding;
-	};
-	int m_cbufferCamera = -1;
-	CameraBuffer* m_pCbufferCameraData = nullptr;
 
 	//移動系ステート
 	std::shared_ptr<IMovementState> m_pMovementState;

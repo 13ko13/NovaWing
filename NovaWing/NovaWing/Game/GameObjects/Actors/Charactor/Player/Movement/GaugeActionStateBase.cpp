@@ -1,4 +1,4 @@
-#include <cmath>
+﻿#include <cmath>
 
 #include "GaugeActionStateBase.h"
 #include "Manager/InputManager.h"

@@ -1,12 +1,12 @@
-#pragma once
+ï»¿#pragma once
 #include <vector>
 
 class InputManager;
-class SceneController;	//ƒV[ƒ“ƒRƒ“ƒgƒ[ƒ‰[‚Ìƒvƒƒgƒ^ƒCƒvéŒ¾
+class SceneController;	//ã‚·ãƒ¼ãƒ³ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ã®ãƒ—ãƒ­ãƒˆã‚¿ã‚¤ãƒ—å®£è¨€
 class PlayerBullet;
 
 /// <summary>
-/// ƒV[ƒ“Šî’êƒNƒ‰ƒX
+/// ã‚·ãƒ¼ãƒ³åŸºåº•ã‚¯ãƒ©ã‚¹
 /// </summary>
 class Scene
 {
@@ -19,12 +19,12 @@ public:
 	virtual void Init() abstract;
 
 	/// <summary>
-	/// ƒV[ƒ“‚ÌXVˆ—
+	/// ã‚·ãƒ¼ãƒ³ã®æ›´æ–°å‡¦ç†
 	/// </summary>
 	virtual void Update() abstract;
 
 	/// <summary>
-	/// ƒV[ƒ“‚Ì•`‰æ
+	/// ã‚·ãƒ¼ãƒ³ã®æç”»
 	/// </summary>
 	virtual void Draw() abstract;
 };

@@ -1,4 +1,4 @@
-#define NOMINMAX
+ï»¿#define NOMINMAX
 
 #include <DxLib.h>
 #include <cassert>
@@ -21,20 +21,20 @@
 
 namespace
 {
-	//ƒJƒƒ‰‚Ìnear‚Æfar
+	//ã‚«ãƒ¡ãƒ©ã®nearã¨far
 	constexpr float camera_near = 200.0f;
 	constexpr float camera_far = 1800.0f;
 
-	//ƒXƒe[ƒW‚ÌƒTƒCƒY
+	//ã‚¹ãƒ†ãƒ¼ã‚¸ã®ã‚µã‚¤ã‚º
 	const Vector3 stage_size = { 1400.0f, 0.0f, 1400.0f };
 
-	//’n–Ê‚ÌêŠ
+	//åœ°é¢ã®å ´æ‰€
 	const Vector3 ground_pos = { 0.0f, -50.0f, 0.0f };
 
-	//ƒtƒF[ƒh‚É‚©‚¯‚éƒtƒŒ[ƒ€”
+	//ãƒ•ã‚§ãƒ¼ãƒ‰ã«ã‹ã‘ã‚‹ãƒ•ãƒ¬ãƒ¼ãƒ æ•°
 	constexpr float fade_frame = 30.0f;
 
-	//1•b‚ ‚½‚è‚ÌƒtƒŒ[ƒ€”
+	//1ç§’ã‚ãŸã‚Šã®ãƒ•ãƒ¬ãƒ¼ãƒ æ•°
 	constexpr int frame_per_second = 60;
 }
 
@@ -42,7 +42,7 @@ GameScene::GameScene(SceneController& controller) :
 	Scene(controller),
 	m_frameCount(0)
 {
-	//BulletManager‚ğ¶¬
+	//BulletManagerã‚’ç”Ÿæˆ
 	m_pBulletManager = std::make_shared<BulletManager>();
 }
 
@@ -53,25 +53,25 @@ GameScene::~GameScene()
 
 void GameScene::Init()
 {
-	//ƒJƒŠƒ“ƒO‚Ìİ’è
+	//ã‚«ãƒªãƒ³ã‚°ã®è¨­å®š
 	SetUseBackCulling(true);
 
-	//ResourceLoader‚©‚ç•K—v‚ÈƒŠƒ\[ƒX‚ğæ“¾‚µ‚Ä‰Šú‰»‚·‚é
+	//ResourceLoaderã‹ã‚‰å¿…è¦ãªãƒªã‚½ãƒ¼ã‚¹ã‚’å–å¾—ã—ã¦åˆæœŸåŒ–ã™ã‚‹
 	ResourceLoader& resourceLoader = ResourceLoader::GetInstance();
 	resourceLoader.LoadAll();
 	
-	//ƒvƒŒƒCƒ„[‚ğ¶¬
+	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’ç”Ÿæˆ
 	m_pPlayer = std::make_shared<Player>(
 		m_pBulletManager,ResourceLoader::ModelID::Player);
-	//ƒvƒŒƒCƒ„[‚Ì‰Šú‰»ˆ—
+	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®åˆæœŸåŒ–å‡¦ç†
 	m_pPlayer->Init();
-	//ƒJƒƒ‰‚ÌÀ‘Ì‚ğŠm•Û
+	//ã‚«ãƒ¡ãƒ©ã®å®Ÿä½“ã‚’ç¢ºä¿
 	m_pCamera = std::make_shared<CameraBase>(m_pPlayer);
-	//ƒJƒƒ‰‚Ì‰Šú‰»ˆ—
+	//ã‚«ãƒ¡ãƒ©ã®åˆæœŸåŒ–å‡¦ç†
 	m_pCamera->Init();
-	//ƒvƒŒƒCƒ„[‚ÉƒJƒƒ‰‚ğ“n‚·
+	//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã«ã‚«ãƒ¡ãƒ©ã‚’æ¸¡ã™
 	m_pPlayer->SetCamera(m_pCamera);
-	//ƒGƒlƒ~[‚Ì‰Šú‰»
+	//ã‚¨ãƒãƒŸãƒ¼ã®åˆæœŸåŒ–
 	m_pFloatingEnemy = std::make_shared<FloatingEnemy>(m_pPlayer,
 		ResourceLoader::ModelID::FloatingEnemy,
 		m_pBulletManager);
@@ -80,16 +80,16 @@ void GameScene::Init()
 
 void GameScene::Update()
 {
-	//ƒtƒŒ[ƒ€ƒJƒEƒ“ƒ^[‚ÌXV
+	//ãƒ•ãƒ¬ãƒ¼ãƒ ã‚«ã‚¦ãƒ³ã‚¿ãƒ¼ã®æ›´æ–°
 	m_frameCount++;
 
-	//‘SGameObject‚ÌUpdate‚ğŒÄ‚Ô
+	//å…¨GameObjectã®Updateã‚’å‘¼ã¶
 	GameObjectManager::GetInstance().UpdateAll();
 }
 
 void GameScene::Draw()
 {
-	//ƒOƒŠƒbƒh‚Ì•`‰æ
+	//ã‚°ãƒªãƒƒãƒ‰ã®æç”»
 	DrawGrid();
 
 #ifdef _DEBUG
@@ -97,21 +97,21 @@ void GameScene::Draw()
 	DrawFormatString(0, 16, 0xffffff, L"FRAME:%d", m_frameCount);
 #endif //DEBUG
 
-	//‘SGameObject‚ÌDraw‚ğŒÄ‚Ô
+	//å…¨GameObjectã®Drawã‚’å‘¼ã¶
 	GameObjectManager::GetInstance().DrawAll();
 }
 
 void GameScene::DrawGrid()
 {
-	//ƒJƒƒ‰‚Ìdraw(Šî–{ƒfƒoƒbƒO—p)
+	//ã‚«ãƒ¡ãƒ©ã®draw(åŸºæœ¬ãƒ‡ãƒãƒƒã‚°ç”¨)
 	//m_pCamera->Draw();
 
 #ifdef _DEBUG
-	//’¼ü‚Ìn“_‚ÆI“_
+	//ç›´ç·šã®å§‹ç‚¹ã¨çµ‚ç‚¹
 	VECTOR startPos;
 	VECTOR endPos;
 
-	//ƒXƒe[ƒW‚ÌƒTƒCƒY‚É‡‚í‚¹‚ÄƒOƒŠƒbƒh‚ğ•`‰æ‚·‚é
+	//ã‚¹ãƒ†ãƒ¼ã‚¸ã®ã‚µã‚¤ã‚ºã«åˆã‚ã›ã¦ã‚°ãƒªãƒƒãƒ‰ã‚’æç”»ã™ã‚‹
 	for (int z = static_cast<int>(-stage_size.m_z);
 		z <= static_cast<int>(stage_size.m_z); z += 100)
 	{
