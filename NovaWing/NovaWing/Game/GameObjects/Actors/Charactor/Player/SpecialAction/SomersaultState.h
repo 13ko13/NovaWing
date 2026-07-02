@@ -13,5 +13,5 @@ public:
 
 private:
 	//宙返りを行うための現在のフレーム数
-	int m_frame = 0.0f;
+	int m_frame = 0;
 };

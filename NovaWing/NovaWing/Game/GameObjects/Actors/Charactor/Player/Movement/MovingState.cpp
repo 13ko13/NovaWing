@@ -1,4 +1,4 @@
-#include <cmath>
+﻿#include <cmath>
 
 #include "MovingState.h"
 #include "Manager/InputManager.h"

@@ -63,6 +63,11 @@ void ModelAnimator::Play(int animIndex, bool isLoop,float animSpeed, float start
 	}
 }
 
+void ModelAnimator::Play(const wchar_t* animName, bool isLoop, float animSpeed, float startFrame)
+{
+	Play(MV1GetAnimIndex(m_modelHandle, animName), isLoop, animSpeed, startFrame);
+}
+
 void ModelAnimator::Update(float blendTime)
 {
 	//アニメーションなし状態なら処理をスキップ

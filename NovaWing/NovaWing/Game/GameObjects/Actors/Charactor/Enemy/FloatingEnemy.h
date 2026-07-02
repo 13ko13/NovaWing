@@ -33,6 +33,13 @@ public:
 	//当たり判定(球)を取得
 	const Sphere& GetSphere() const { return m_colSphere; }
 
+	//アニメーターを取得
+	//返り値の型をshared_ptrにすると
+	//他のクラス(State)が呼び出すたびに
+	//参照カウントが増えてModelAnimatorの
+	//所有者の1人になってしまうため参照でポインタを返す
+	ModelAnimator& GetAnimator() { return *m_pAnimator; }
+
 private:
 	std::weak_ptr<Player> m_pPlayer;//プレイヤーを借りる
 	std::shared_ptr<IEnemyState> m_pState;//ステート

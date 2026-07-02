@@ -13,6 +13,15 @@ public:
 	void Play(int animIndex, bool isLoop, float animSpeed = 1.0f, float startFrame = 0.0f);
 
 	/// <summary>
+	/// アニメーションを再生(変更)
+	/// </summary>
+	/// <param name="animName">アニメーションの名前</param>
+	/// <param name="isLoop"></param>
+	/// <param name="animSpeed"></param>
+	/// <param name="startFrame"></param>
+	void Play(const wchar_t* animName, bool isLoop, float animSpeed = 1.0f, float startFrame = 0.0f);
+
+	/// <summary>
 	/// アニメーションを更新
 	/// </summary>
 	/// <param name="blendTime">何フレームでブレンドするか</param>

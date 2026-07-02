@@ -36,6 +36,9 @@ void FloatingEnemy::OnInit()
 		std::static_pointer_cast<FloatingEnemy>(shared_from_this())
 	);
 
+	//アニメーターを作成
+	m_pAnimator = std::make_shared<ModelAnimator>(m_modelHandle);
+
 	//ステートに入った時の処理
 	m_pState->Enter();
 	m_pos.m_z += 900;
@@ -44,8 +47,6 @@ void FloatingEnemy::OnInit()
 	//定数バッファを作成
 	CreateShaderBuffers();
 
-	//アニメーターを作成
-	m_pAnimator = std::make_shared<ModelAnimator>(m_modelHandle);
 }
 
 void FloatingEnemy::Update()

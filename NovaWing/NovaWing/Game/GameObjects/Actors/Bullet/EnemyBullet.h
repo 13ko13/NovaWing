@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "BulletBase.h"
 class EnemyBullet : public BulletBase
 {
