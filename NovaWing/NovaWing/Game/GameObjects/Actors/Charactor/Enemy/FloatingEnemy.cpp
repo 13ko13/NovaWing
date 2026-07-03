@@ -83,23 +83,9 @@ void FloatingEnemy::Draw()
 	//シェーダに渡すカメラ情報を更新してから
 	UpdateShaderMatrixData(GetPlayerCameraPos());
 
-	//定数バッファをシェーダレジスタに渡す
-	BindShaderBuffers();
+	//敵の描画
+	DrawEnemy();
 
-
-	//明示的にテクスチャがないことをシェーダに伝える
-	SetUseTextureToShader(1, -1);//t1
-	SetUseTextureToShader(2, -1);//t2
-	SetUseTextureToShader(3, -1);//t3
-
-	LightingManager::GetInstance().ApplyShader();
-
-	//モデル描画
-	MV1DrawModel(m_modelHandle);
-
-	LightingManager::GetInstance().ResetShader();
-	//シェーダレジスタにセットした定数バッファを解放
-	ReleaseShaderBuffers();
 
 #ifdef _DEBUG
 	//当たり判定の描画
@@ -107,6 +93,39 @@ void FloatingEnemy::Draw()
 	//位置
 	DrawFormatString(0, 320, 0xffffff, L"EPosX:%f,Y:%f,Z:%f", m_pos.m_x, m_pos.m_y, m_pos.m_z);
 #endif
+}
+
+void FloatingEnemy::DrawEnemy()
+{
+	//ResourceLoaderからPlayerの法線マップを取得
+	//ResourceLoaderのインスタンスを取得
+	const ResourceLoader& resourceLoader = ResourceLoader::GetInstance();
+	//法線マップ取得
+	const int normGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::EnemyNormalMap);
+	//エミッションマップを取得
+	const int emissionGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::EnemyEmissionMap);
+
+	//明示的にテクスチャがないことをシェーダに伝える
+	SetUseTextureToShader(1, normGraphH);//t1
+	SetUseTextureToShader(2, -1);//t2
+	SetUseTextureToShader(3, emissionGraphH);//t3
+
+	LightingManager::GetInstance().ApplyShader();
+	//定数バッファをシェーダレジスタにセットする
+	BindShaderBuffers();
+
+	//モデル描画
+	MV1DrawModel(m_modelHandle);
+
+	//テクスチャを解除する
+	SetUseTextureToShader(1, -1);//法線マップを解除
+	SetUseTextureToShader(2, -1);//メタリックマップを解除
+	SetUseTextureToShader(3, -1);//エミッションマップを解除
+	//シェーダを解除
+	LightingManager::GetInstance().ResetShader();
+	ReleaseShaderBuffers();
 }
 
 void FloatingEnemy::TakeDamage(int damage)

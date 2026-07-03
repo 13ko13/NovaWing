@@ -17,6 +17,8 @@ public:
 		PlayerNormalMap,//プレイヤーの法線マップ
 		PlayerMetalicMap,//プレイヤーのメタリックマップ
 		PlayerEmissionMap,//プレイヤーのエミッションマップ
+		EnemyNormalMap,//敵の法線マップ
+		EnemyEmissionMap,//敵のエミッションマップ
 	};
 
 	//エフェクトの種類

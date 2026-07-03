@@ -285,7 +285,6 @@ void Player::DrawPlayer()
 	//プレイヤーのモデルを描画する
 	MV1DrawModel(m_modelHandle);
 
-	////法線マップをシェーダに渡す
 	SetUseTextureToShader(1, -1);//法線マップを解除
 	SetUseTextureToShader(2, -1);//メタリックマップを解除
 	SetUseTextureToShader(3, -1);//エミッションマップを解除

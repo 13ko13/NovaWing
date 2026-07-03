@@ -22,7 +22,7 @@ void ResourceLoader::LoadAll()
 	assert(handle >= 0); 
 	m_modelHandles[ModelID::Player] = handle;
 
-	handle = MV1LoadModel(L"Data/Model/FloatingEnemy.mv1");//浮遊する敵
+	handle = MV1LoadModel(L"Data/Model/Drone_fix.mv1");//浮遊する敵
 	assert(handle >= 0); 
 	m_modelHandles[ModelID::FloatingEnemy] = handle;
 
@@ -41,6 +41,16 @@ void ResourceLoader::LoadAll()
 	handle = LoadGraph(L"Data/Model/Player.fbm/StarSparrow_Emission.png");
 	assert(handle >= 0);
 	m_graphicHandles[GraphicID::PlayerEmissionMap] = handle;
+
+	//法線マップ
+	handle = LoadGraph(L"Data/Model/Drone.fbm/Drone_NormalMap.png");
+	assert(handle >= 0); 
+	m_graphicHandles[GraphicID::EnemyNormalMap] = handle;
+
+	//エミッションマップ
+	handle = LoadGraph(L"Data/Model/Drone.fbm/Drone_Emission.png");
+	assert(handle >= 0);
+	m_graphicHandles[GraphicID::EnemyEmissionMap] = handle;
 }
 
 void ResourceLoader::ReleaseAll()
