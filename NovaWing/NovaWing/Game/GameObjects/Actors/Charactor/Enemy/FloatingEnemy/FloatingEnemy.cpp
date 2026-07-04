@@ -97,7 +97,7 @@ void FloatingEnemy::Draw()
 
 void FloatingEnemy::DrawEnemy()
 {
-	//ResourceLoaderからPlayerの法線マップを取得
+	//ResourceLoaderから浮遊敵の法線マップを取得
 	//ResourceLoaderのインスタンスを取得
 	const ResourceLoader& resourceLoader = ResourceLoader::GetInstance();
 	//法線マップ取得

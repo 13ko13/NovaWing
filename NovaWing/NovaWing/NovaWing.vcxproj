@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -78,6 +78,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)/DxLib_h;$(ProjectDir);$(ProjectDir)/Game/GameObjects/Actors/</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -95,6 +96,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)/DxLib_h;$(ProjectDir);$(ProjectDir)/Game/GameObjects/Actors/</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -139,8 +141,8 @@
   <ItemGroup>
     <ClCompile Include="Manager\CollisionManager.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Bullet\EnemyBullet.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\ActiveState.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\ActiveState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemy.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\BoostState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\BrakeState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DisabledRotState.cpp" />
@@ -156,9 +158,9 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\IShootState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\ISpecialActionState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\GaugeActionStateBase.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\IEnemyState.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\HideState.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\LeaveState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\IEnemyState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\HideState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\LeaveState.cpp" />
     <ClCompile Include="Manager\LightingManager.cpp" />
     <ClCompile Include="Manager\GameObjectManager.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Actor.cpp" />
@@ -185,12 +187,13 @@
     <ClCompile Include="Utility\Sphere.cpp" />
     <ClCompile Include="Utility\Vector2.cpp" />
     <ClCompile Include="Utility\Vector3.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Manager\CollisionManager.h" />
     <ClInclude Include="Game\GameObjects\Actors\Bullet\EnemyBullet.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\ActiveState.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\ActiveState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemy.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\BoostState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\BrakeState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DisabledRotState.h" />
@@ -206,9 +209,9 @@
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\IShootState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\ISpecialActionState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\GaugeActionStateBase.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\IEnemyState.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\HideState.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\LeaveState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\IEnemyState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\HideState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\LeaveState.h" />
     <ClInclude Include="Manager\LightingManager.h" />
     <ClInclude Include="Manager\GameObjectManager.h" />
     <ClInclude Include="Game\GameObjects\Actors\Actor.h" />
@@ -237,6 +240,7 @@
     <ClInclude Include="Utility\Sphere.h" />
     <ClInclude Include="Utility\Vector2.h" />
     <ClInclude Include="Utility\Vector3.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="LightingPS.hlsl">

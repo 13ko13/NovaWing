@@ -5,6 +5,7 @@
 class Player;
 class BulletManager;
 class FloatingEnemy;
+class WormEnemy;
 class CollisionManager
 {
 public:
@@ -13,7 +14,8 @@ public:
 	~CollisionManager();
 
 	//敵を配列に格納する
-	void RegisterEnemy(std::shared_ptr<FloatingEnemy> pEnemy);
+	void RegisterFloatingEnemy(std::shared_ptr<FloatingEnemy> pEnemy);
+	void RegisterWormEnemy(std::shared_ptr<WormEnemy> pEnemy);
 	void Update();//更新処理
 
 private:
@@ -21,7 +23,9 @@ private:
 	std::weak_ptr<Player> m_pPlayer;
 	//弾のマネージャー
 	std::weak_ptr<BulletManager> m_pBulletManager;
-	//敵の配列
+	//浮遊敵の配列
 	std::vector<std::weak_ptr<FloatingEnemy>> m_pEnemies;
+	//ワームエネミーの配列
+	std::vector<std::weak_ptr<WormEnemy>> m_pWormEnemies;
 };
 

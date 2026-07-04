@@ -138,25 +138,28 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\BrakeState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\IEnemyState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\IEnemyState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemy.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\HideState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\HideState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\ActiveState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\ActiveState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\LeaveState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\LeaveState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Actors\Bullet\EnemyBullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Manager\CollisionManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -290,25 +293,28 @@
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\BrakeState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\IEnemyState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\IEnemyState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\HideState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\HideState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\ActiveState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\ActiveState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\LeaveState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\LeaveState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Actors\Bullet\EnemyBullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Manager\CollisionManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

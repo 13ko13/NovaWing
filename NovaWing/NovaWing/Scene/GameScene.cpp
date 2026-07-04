@@ -17,7 +17,8 @@
 #include "../Game/GameObjects/Camera/CameraBase.h"
 #include "../Manager/GameObjectManager.h"
 #include "../Manager/ResourceLoader.h"
-#include "Charactor/Enemy/FloatingEnemy.h"
+#include "Charactor/Enemy/FloatingEnemy/FloatingEnemy.h"
+#include "Charactor/Enemy/WormEnemy/WormEnemy.h"
 #include "Manager/CollisionManager.h"
 
 namespace
@@ -84,8 +85,16 @@ void GameScene::Init()
 		m_pBulletManager);
 	m_pFloatingEnemy->Init();
 	//衝突判定マネージャーに敵を登録する
-	m_pCollisionManager->RegisterEnemy(m_pFloatingEnemy);
+	m_pCollisionManager->RegisterFloatingEnemy(m_pFloatingEnemy);
 	
+	//ワームエネミーの初期化
+	//ワームのモデルがないので、とりあえずFloatingEnemyのモデルを使う
+	m_pWormEnemy = std::make_shared<WormEnemy>(m_pPlayer,
+		ResourceLoader::ModelID::FloatingEnemy,
+		m_pBulletManager, 5);
+	m_pWormEnemy->Init();
+	//衝突判定マネージャーにワームエネミーを登録する
+	m_pCollisionManager->RegisterWormEnemy(m_pWormEnemy);
 }
 
 void GameScene::Update()

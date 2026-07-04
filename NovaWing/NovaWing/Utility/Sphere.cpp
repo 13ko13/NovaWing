@@ -1,5 +1,11 @@
 ﻿#include "Sphere.h"
 
+Sphere::Sphere():
+	m_pos(Vector3(0.0f, 0.0f, 0.0f)),
+	m_radius(0.0f)
+{
+}
+
 Sphere::Sphere(const Vector3& pos):
 	m_pos(pos)
 {

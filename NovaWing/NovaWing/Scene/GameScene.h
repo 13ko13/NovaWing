@@ -9,6 +9,7 @@ class CameraBase;
 class BulletManager;
 class FloatingEnemy;
 class CollisionManager;
+class WormEnemy;
 class GameScene :public Scene
 {
 public:
@@ -39,4 +40,6 @@ private:
 	std::shared_ptr<BulletManager> m_pBulletManager;
 	//衝突判定マネージャーの実体
 	std::shared_ptr<CollisionManager> m_pCollisionManager;
+	//ワームエネミーの実体
+	std::shared_ptr<WormEnemy> m_pWormEnemy;
 };

@@ -4,6 +4,7 @@
 class Sphere
 {
 public:
+	Sphere();
 	Sphere(const Vector3& pos);
 	~Sphere();
 

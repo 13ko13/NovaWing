@@ -15,11 +15,12 @@ public:
 		const std::shared_ptr<BulletManager> pBulletManager);
 	~FloatingEnemy();
 
-	void OnInit();//初期化処理
+	void OnInit() override;//初期化処理
 	void Update() override;//更新処理
+	//描画
 	void Draw() override;
 	void DrawEnemy();
-	//描画
+	
 	void TakeDamage(int damage) override;//ダメージを受ける
 
 	//プレイヤーの位置を返す
