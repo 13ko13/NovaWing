@@ -8,6 +8,7 @@ class Player;
 class CameraBase;
 class BulletManager;
 class FloatingEnemy;
+class CollisionManager;
 class GameScene :public Scene
 {
 public:
@@ -30,13 +31,12 @@ private:
 
 	//プレイヤーの実体
 	std::shared_ptr<Player> m_pPlayer;
-
 	//カメラの実体
 	std::shared_ptr<CameraBase> m_pCamera;
-
 	//浮遊エネミーの実体
 	std::shared_ptr<FloatingEnemy> m_pFloatingEnemy;
-
 	//バレットマネージャーの実体
 	std::shared_ptr<BulletManager> m_pBulletManager;
+	//衝突判定マネージャーの実体
+	std::shared_ptr<CollisionManager> m_pCollisionManager;
 };

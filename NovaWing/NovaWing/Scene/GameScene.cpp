@@ -18,6 +18,7 @@
 #include "../Manager/GameObjectManager.h"
 #include "../Manager/ResourceLoader.h"
 #include "Charactor/Enemy/FloatingEnemy.h"
+#include "Manager/CollisionManager.h"
 
 namespace
 {
@@ -65,17 +66,26 @@ void GameScene::Init()
 		m_pBulletManager,ResourceLoader::ModelID::Player);
 	//プレイヤーの初期化処理
 	m_pPlayer->Init();
+
 	//カメラの実体を確保
 	m_pCamera = std::make_shared<CameraBase>(m_pPlayer);
 	//カメラの初期化処理
 	m_pCamera->Init();
+
 	//プレイヤーにカメラを渡す
 	m_pPlayer->SetCamera(m_pCamera);
+
+	//衝突判定マネージャーの初期化
+	m_pCollisionManager = std::make_shared<CollisionManager>(m_pPlayer, m_pBulletManager);
+
 	//エネミーの初期化
 	m_pFloatingEnemy = std::make_shared<FloatingEnemy>(m_pPlayer,
 		ResourceLoader::ModelID::FloatingEnemy,
 		m_pBulletManager);
 	m_pFloatingEnemy->Init();
+	//衝突判定マネージャーに敵を登録する
+	m_pCollisionManager->RegisterEnemy(m_pFloatingEnemy);
+	
 }
 
 void GameScene::Update()
@@ -85,6 +95,9 @@ void GameScene::Update()
 
 	//全GameObjectのUpdateを呼ぶ
 	GameObjectManager::GetInstance().UpdateAll();
+
+	//衝突判定マネージャーの更新
+	m_pCollisionManager->Update();
 }
 
 void GameScene::Draw()

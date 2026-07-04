@@ -28,13 +28,19 @@ namespace
 
 	//ゲージの毎フレームの回復量
 	constexpr float gauge_recovery_amount = 0.5f;
+	
+	//当たり判定の球の半径
+	constexpr float coll_sphere_radius = 80.0f;
+	//当たり判定位置のオフセット
+	const Vector3 coll_sphere_offset = { 0.0f, 0.0f, -90.0f };
 }
 
 Player::Player(
 	std::shared_ptr<BulletManager> bulletManager,
 	ResourceLoader::ModelID modelID) :
 	Charactor(modelID),
-	m_pBulletManager(bulletManager)
+	m_pBulletManager(bulletManager),
+	m_collSphere(m_pos)
 {
 
 }
@@ -139,6 +145,10 @@ void Player::Update()
 	Charactor::Update();
 	//位置をクランプする
 	ClampPosition();
+	//当たり判定の球の位置更新
+	//ちょっとずれているのでオフセットで修正
+	Vector3 collPos = m_pos + coll_sphere_offset;
+	m_collSphere.Update(collPos, coll_sphere_radius);
 }
 
 void Player::ClampPosition()
@@ -254,6 +264,10 @@ void Player::Draw()
 #ifdef _DEBUG
 	DrawFormatString(0, 300, 0xffffff, L"playerPosX:%f,Y : %f,Z:%f", m_pos.m_x, m_pos.m_y, m_pos.m_z);
 	DrawFormatString(0, 250, 0xffffff, L"Gauge : %f", m_gauge);
+	DrawFormatString(1080, 20, 0xffffff, L"Health : %d", m_health);
+
+	//当たり判定の球を描画
+	m_collSphere.Draw(0xff0000);
 #endif
 }
 
@@ -295,7 +309,13 @@ void Player::DrawPlayer()
 
 void Player::TakeDamage(int damage)
 {
-
+	//HPを減らす
+	m_health -= damage;
+	//HP0以下になったら脂肪処理を行う
+	if (m_health <= 0)
+	{
+		OnDead();
+	}
 }
 
 void Player::LerpToAngleX(float targetAngle, float t)

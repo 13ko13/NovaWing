@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "../Charactor.h"
+#include "Utility/Sphere.h"
 
 class InputManager;
 class BulletManager;
@@ -50,6 +51,8 @@ public:
 	bool IsUseGauge() const; 
 	//カメラの位置を取得
 	Vector3 GetCameraPos() const;
+	//当たり判定用の球を取得
+	Sphere GetSphere() const { return m_collSphere; }
 
 private:
 	//回転の更新
@@ -120,4 +123,7 @@ private:
 	std::shared_ptr<IShootState> m_pShootState;
 	//特殊行動計ステート
 	std::shared_ptr<ISpecialActionState> m_pSpecialState;
+
+	//当たり判定用の球
+	Sphere m_collSphere;
 };

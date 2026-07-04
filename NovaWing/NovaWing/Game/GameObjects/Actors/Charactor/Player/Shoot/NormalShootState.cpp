@@ -9,7 +9,7 @@ namespace
 	//弾の速度
 	constexpr float move_speed = 15.0f;
 	//攻撃力
-	constexpr int attack_power = 10;
+	constexpr int attack_power = 100;
 }
 
 NormalShootState::NormalShootState(const std::weak_ptr<Player> pPlayer,

@@ -130,7 +130,13 @@ void FloatingEnemy::DrawEnemy()
 
 void FloatingEnemy::TakeDamage(int damage)
 {
-
+	//体力を減らす
+	m_health -= damage;
+	//体力が0以下になったら死亡処理
+	if (m_health <= 0)
+	{
+		OnDead();
+	}
 }
 
 Vector3 FloatingEnemy::GetPlayerPos() const
