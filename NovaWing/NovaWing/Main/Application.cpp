@@ -7,7 +7,7 @@
 #include "../Scene/SceneController.h"
 #include "../Constants/Game.h"
 #include "../Manager/ResourceLoader.h"
-#include "../Scene/GameScene.h"
+#include "../Scene/TitleScene.h"
 
 namespace
 {
@@ -66,8 +66,10 @@ void Application::Run()
 {
 	SetDrawScreen(DX_SCREEN_BACK);
 	SceneController controller;//シーンを管理するオブジェクト
-	//GameSceneを作成してChangeSceneで読み込む
-	controller.ChangeScene(std::make_shared<GameScene>(controller), 0.0f);
+	//TitleSceneを作成してChangeSceneで読み込む
+	controller.ChangeScene(
+		std::make_shared<TitleScene>(
+			controller), 60.0f);
 
 	while (ProcessMessage() != -1)
 	{
