@@ -28,7 +28,7 @@ private:
 
 private:
 	//フレームカウンター
-	int m_frameCount;
+	int m_frame;
 
 	//プレイヤーの実体
 	std::shared_ptr<Player> m_pPlayer;

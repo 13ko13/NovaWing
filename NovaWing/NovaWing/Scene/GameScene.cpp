@@ -20,21 +20,12 @@
 #include "Charactor/Enemy/FloatingEnemy/FloatingEnemy.h"
 #include "Charactor/Enemy/WormEnemy/WormEnemy.h"
 #include "Manager/CollisionManager.h"
+#include "Scene/GameoverScene.h"
 
 namespace
 {
-	//カメラのnearとfar
-	constexpr float camera_near = 200.0f;
-	constexpr float camera_far = 1800.0f;
-
-	//ステージのサイズ
-	const Vector3 stage_size = { 1400.0f, 0.0f, 1400.0f };
-
-	//地面の場所
-	const Vector3 ground_pos = { 0.0f, -50.0f, 0.0f };
-
-	//フェードにかけるフレーム数
-	constexpr float fade_frame = 30.0f;
+	//グリッドのサイズ
+	const Vector3 grid_size = { 1400.0f, 0.0f, 1400.0f };
 
 	//1秒あたりのフレーム数
 	constexpr int frame_per_second = 60;
@@ -42,7 +33,7 @@ namespace
 
 GameScene::GameScene(SceneController& controller) :
 	Scene(controller),
-	m_frameCount(0)
+	m_frame(0)
 {
 	//BulletManagerを生成
 	m_pBulletManager = std::make_shared<BulletManager>();
@@ -55,12 +46,11 @@ GameScene::~GameScene()
 
 void GameScene::Init()
 {
+	//ゲームオブジェクトマネージャーの初期化
+	GameObjectManager::GetInstance().ClearAll();
+
 	//カリングの設定
 	SetUseBackCulling(true);
-
-	//ResourceLoaderから必要なリソースを取得して初期化する
-	ResourceLoader& resourceLoader = ResourceLoader::GetInstance();
-	resourceLoader.LoadAll();
 	
 	//プレイヤーを生成
 	m_pPlayer = std::make_shared<Player>(
@@ -88,9 +78,8 @@ void GameScene::Init()
 	m_pCollisionManager->RegisterFloatingEnemy(m_pFloatingEnemy);
 	
 	//ワームエネミーの初期化
-	//ワームのモデルがないので、とりあえずFloatingEnemyのモデルを使う
 	m_pWormEnemy = std::make_shared<WormEnemy>(m_pPlayer,
-		ResourceLoader::ModelID::FloatingEnemy,
+		ResourceLoader::ModelID::WormHead,
 		m_pBulletManager, 5);
 	m_pWormEnemy->Init();
 	//衝突判定マネージャーにワームエネミーを登録する
@@ -100,13 +89,21 @@ void GameScene::Init()
 void GameScene::Update()
 {
 	//フレームカウンターの更新
-	m_frameCount++;
+	m_frame++;
 
 	//全GameObjectのUpdateを呼ぶ
 	GameObjectManager::GetInstance().UpdateAll();
 
 	//衝突判定マネージャーの更新
 	m_pCollisionManager->Update();
+
+	//プレイヤーが死んだらゲームオーバーシーンに遷移する
+	if (m_pPlayer->IsDead())
+	{
+		m_controller.ChangeScene(
+			std::make_shared<GameoverScene>(
+				m_controller), frame_per_second);
+	}
 }
 
 void GameScene::Draw()
@@ -116,7 +113,7 @@ void GameScene::Draw()
 
 #ifdef _DEBUG
 	DrawString(0, 0, L"GameScene", 0xffffff);
-	DrawFormatString(0, 16, 0xffffff, L"FRAME:%d", m_frameCount);
+	DrawFormatString(0, 16, 0xffffff, L"FRAME:%d", m_frame);
 #endif //DEBUG
 
 	//全GameObjectのDrawを呼ぶ
@@ -134,17 +131,17 @@ void GameScene::DrawGrid()
 	VECTOR endPos;
 
 	//ステージのサイズに合わせてグリッドを描画する
-	for (int z = static_cast<int>(-stage_size.m_z);
-		z <= static_cast<int>(stage_size.m_z); z += 100)
+	for (int z = static_cast<int>(-grid_size.m_z);
+		z <= static_cast<int>(grid_size.m_z); z += 100)
 	{
-		startPos = VGet(-stage_size.m_x, 0.0f, static_cast<float>(z));
-		endPos = VGet(stage_size.m_x, 0.0f, static_cast<float>(z));
+		startPos = VGet(-grid_size.m_x, 0.0f, static_cast<float>(z));
+		endPos = VGet(grid_size.m_x, 0.0f, static_cast<float>(z));
 		DrawLine3D(startPos, endPos, 0xff0000);
 	}
-	for (int x = static_cast<int>(-stage_size.m_x); x <= static_cast<int>(stage_size.m_x); x += 100)
+	for (int x = static_cast<int>(-grid_size.m_x); x <= static_cast<int>(grid_size.m_x); x += 100)
 	{
-		startPos = VGet(static_cast<float>(x), 0.0f, -stage_size.m_z);
-		endPos = VGet(static_cast<float>(x), 0.0f, stage_size.m_z);
+		startPos = VGet(static_cast<float>(x), 0.0f, -grid_size.m_z);
+		endPos = VGet(static_cast<float>(x), 0.0f, grid_size.m_z);
 		DrawLine3D(startPos, endPos, 0x0000ff);
 	}
 #endif
