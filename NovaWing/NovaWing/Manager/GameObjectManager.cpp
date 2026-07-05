@@ -52,6 +52,13 @@ void GameObjectManager::DrawAll()
     }
 }
 
+void GameObjectManager::ClearAll()
+{
+    //全てのGameObjectをクリアする
+    m_pGameObjects.clear();
+	m_pHoldGameObject.clear();
+}
+
 void GameObjectManager::RemoveGameObject()
 {
     //ActorのIsDeadがtrueになっているオブジェクトのみ解除する

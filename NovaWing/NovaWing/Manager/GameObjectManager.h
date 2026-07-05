@@ -31,6 +31,9 @@ public:
 	/// </summary>
 	void DrawAll();
 
+	//ゲームオブジェクトの配列をクリアする
+	void ClearAll();
+
 private:
 	/// <summary>
 	/// コンストラクタ
