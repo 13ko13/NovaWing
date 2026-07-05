@@ -30,23 +30,21 @@ InputManager::InputManager() :
 
 	m_inputTable["brake"] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
 							{PeripheralType::pad1,PAD_INPUT_A} };//パッド:Aボタン
-	
-#ifdef _DEBUG
-	//デバッグ用キー
+
 	m_inputTable["up"] = { {PeripheralType::keyboard,KEY_INPUT_UP},		//キーボード:上矢印
-							{PeripheralType::pad1,PAD_INPUT_UP } };		//パッド:スティック上又は十字上
+						{PeripheralType::pad1,PAD_INPUT_UP } };		//パッド:スティック上又は十字上
 
 	m_inputTable["down"] = { {PeripheralType::keyboard,KEY_INPUT_DOWN},	//キーボード:下矢印
 							{PeripheralType::pad1,PAD_INPUT_DOWN } };	//パッド:スティック下又は十字下
-
+	
+#ifdef _DEBUG
+	//デバッグ用キー
 	m_inputTable["left"] = { {PeripheralType::keyboard,KEY_INPUT_LEFT},	//キーボード:左矢印
 								{PeripheralType::pad1,PAD_INPUT_LEFT } };//パッド:スティック左又は十字左
 
 	m_inputTable["right"] = { {PeripheralType::keyboard,KEY_INPUT_RIGHT},//キーボード:右矢印
 							{PeripheralType::pad1,PAD_INPUT_RIGHT } };	 //パッド:スティック右又は十字右
-	m_inputTable["shader"] = { {PeripheralType::keyboard,KEY_INPUT_Q},//キーボード:Q
-							{PeripheralType::pad1,PAD_INPUT_RIGHT } };	 //パッド:スティック右又は十字右
-#endif // _DEBUG
+#endif
 
 	//あらかじめ入力データのための枠を開けておく
 	//ここで枠を開けておかないと、チェックの際にAt関数でクラッシュする可能性がある(Null)
