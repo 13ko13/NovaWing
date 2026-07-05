@@ -107,7 +107,7 @@ void FloatingEnemy::DrawEnemy()
 	const int emissionGraphH = resourceLoader.GetGraphic(
 		ResourceLoader::GraphicID::EnemyEmissionMap);
 
-	//明示的にテクスチャがないことをシェーダに伝える
+	//テクスチャをシェーダにセットする
 	SetUseTextureToShader(1, normGraphH);//t1
 	SetUseTextureToShader(2, -1);//t2
 	SetUseTextureToShader(3, emissionGraphH);//t3
