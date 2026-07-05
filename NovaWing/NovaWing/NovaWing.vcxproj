@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Scene\GameoverScene.cpp" />
     <ClCompile Include="Manager\CollisionManager.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Bullet\EnemyBullet.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\ActiveState.cpp" />
@@ -179,6 +180,7 @@
     <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="Scene\SceneController.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\SomersaultState.cpp" />
+    <ClCompile Include="Scene\TitleScene.cpp" />
     <ClCompile Include="Utility\Fade.cpp" />
     <ClCompile Include="Utility\Matrix4x4.cpp" />
     <ClCompile Include="Utility\ModelAnimator.cpp" />
@@ -190,6 +192,7 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scene\GameoverScene.h" />
     <ClInclude Include="Manager\CollisionManager.h" />
     <ClInclude Include="Game\GameObjects\Actors\Bullet\EnemyBullet.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\ActiveState.h" />
@@ -231,6 +234,7 @@
     <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="Scene\SceneController.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\SomersaultState.h" />
+    <ClInclude Include="Scene\TitleScene.h" />
     <ClInclude Include="Utility\Fade.h" />
     <ClInclude Include="Utility\Matrix4x4.h" />
     <ClInclude Include="Utility\ModelAnimator.h" />
