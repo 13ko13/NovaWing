@@ -1,11 +1,12 @@
 ﻿#include "WormEnemy.h"
 #include "Charactor/Player/Player.h"
 #include "Manager/BulletManager.h"
+#include "Manager/LightingManager.h"
 
 namespace
 {
 	//頭の移動速度
-	constexpr float move_speed =8.0f;
+	constexpr float move_speed =10.0f;
 	//螺旋状に回転するときの回転速度
 	constexpr float rot_speed = 2.0f;
 	//螺旋移動の時の半径
@@ -22,6 +23,9 @@ namespace
 	constexpr int bullet_power = 1;
 	//胴体間の間隔フレーム数
 	constexpr int spacing = 6;
+
+	//モデルのサイズ
+	const Vector3 model_scale = { 1.0f,1.0f,1.0f };
 }
 
 WormEnemy::WormEnemy(
@@ -60,6 +64,14 @@ void WormEnemy::OnInit()
 	{
 		sphere = Sphere(m_pos);
 	}
+	//Y軸に180度回転する(モデルが反対を向いているので)
+	Vector3 axis = Vector3(0.0f, 1.0f, 0.0f);
+	//初期回転
+	Quaternion initRot = Quaternion(axis, DX_PI_F);
+	m_rotation = initRot;
+
+	//定数バッファを作成
+	CreateShaderBuffers();
 
 	//仮で位置決定
 	m_pos.m_z -= 500.0f;//プレイヤーより後ろに配置
@@ -72,12 +84,19 @@ void WormEnemy::Update()
 
 	//螺旋状に回転させる
 	m_rotationAngle += rot_speed;
+	//初期回転を適用したうえで
+	Quaternion initRot = Quaternion(
+		Vector3(0.0f, 1.0f, 0.0f),
+		DX_PI_F
+	);
+
 	//Z軸を中心に螺旋回転させる
 	Quaternion rotZ = Quaternion(
 			Vector3(0.0f, 0.0f, 1.0f),
 			m_rotationAngle * DX_PI_F / 180.0f
 	);
-	m_rotation = rotZ;
+	//初期回転を適用したうえで螺旋回転を適用する
+	m_rotation = rotZ * initRot;
 
 	//頭の移動を螺旋状にする
 	m_pos.m_z += move_speed;
@@ -137,6 +156,28 @@ void WormEnemy::Update()
 
 void WormEnemy::Draw()
 {
+	//モデルのスケール、位置、回転を適用する
+	ApplyMatrix(model_scale, m_pos, m_rotation, m_modelHandle);
+	//シェーダに渡すカメラ情報を更新してから
+	UpdateShaderMatrixData(GetPlayerCameraPos());
+	//頭のモデルを描画
+	DrawWormHead();
+	//胴体のモデルを描画
+	//胴体の数だけループを回す
+	for (int i = 0; i < m_segmentCount; i++)
+	{
+		//それぞれの胴体の位置にモデルを適用する
+		ApplyMatrix(
+			model_scale, 
+			m_segmentPositions[i],
+			m_rotation, m_modelHandle);
+		//シェーダに渡すカメラ情報を更新してから
+		UpdateShaderMatrixData(GetPlayerCameraPos());
+
+		//それぞれの胴体のモデルを描画する
+		DrawWormBody();
+	}
+
 #ifdef _DEBUG
 	//頭の当たり判定を描画
 	m_headSphere.Draw(0xff0000);
@@ -145,9 +186,85 @@ void WormEnemy::Draw()
 	{
 		sphere.Draw(0x00ff00);
 	}
-
 #endif
+}
 
+void WormEnemy::DrawWormHead()
+{
+	//ResourceLoaderから浮遊敵の法線マップを取得
+	//ResourceLoaderのインスタンスを取得
+	const ResourceLoader& resourceLoader = ResourceLoader::GetInstance();
+	//法線マップ取得
+	const int normGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::WormHeadNormalMap);
+	//メタリックマップを取得
+	const int metalicGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::WormHeadMetalicMap);
+	//エミッションマップを取得
+	const int emissionGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::WormHeadEmissionMap);
+	
+
+	//シェーダにテクスチャをセットする
+	SetUseTextureToShader(1, normGraphH);//t1
+	SetUseTextureToShader(2, metalicGraphH);//t2
+	SetUseTextureToShader(3, emissionGraphH);//t3
+
+	LightingManager::GetInstance().ApplyShader();
+	//定数バッファをシェーダレジスタにセットする
+	BindShaderBuffers();
+
+	//モデル描画
+	MV1DrawModel(m_modelHandle);
+
+	//テクスチャを解除する
+	SetUseTextureToShader(1, -1);//法線マップを解除
+	SetUseTextureToShader(2, -1);//メタリックマップを解除
+	SetUseTextureToShader(3, -1);//エミッションマップを解除
+	//シェーダを解除
+	LightingManager::GetInstance().ResetShader();
+	ReleaseShaderBuffers();
+}
+
+void WormEnemy::DrawWormBody()
+{
+	//ResourceLoaderから浮遊敵の法線マップを取得
+	//ResourceLoaderのインスタンスを取得
+	const ResourceLoader& resourceLoader = ResourceLoader::GetInstance();
+	//法線マップ取得
+	const int normGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::WormHeadNormalMap);
+	//メタリックマップを取得
+	const int metalicGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::WormHeadMetalicMap);
+	//エミッションマップを取得
+	const int emissionGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::WormHeadEmissionMap);
+	//ワームの胴体のディフューズマップを取得
+	const int diffuseGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::WormBodyDiffuseMap);
+
+	//シェーダにテクスチャをセットする
+	SetUseTextureToShader(0, diffuseGraphH);//t0
+	SetUseTextureToShader(1, normGraphH);//t1
+	SetUseTextureToShader(2, metalicGraphH);//t2
+	SetUseTextureToShader(3, emissionGraphH);//t3
+
+	LightingManager::GetInstance().ApplyShader();
+	//定数バッファをシェーダレジスタにセットする
+	BindShaderBuffers();
+
+	//モデル描画
+	MV1DrawModel(m_modelHandle);
+
+	//テクスチャを解除する
+	SetUseTextureToShader(0, -1);//ディフューズマップを解除
+	SetUseTextureToShader(1, -1);//法線マップを解除
+	SetUseTextureToShader(2, -1);//メタリックマップを解除
+	SetUseTextureToShader(3, -1);//エミッションマップを解除
+	//シェーダを解除
+	LightingManager::GetInstance().ResetShader();
+	ReleaseShaderBuffers();
 }
 
 void WormEnemy::TakeDamage(int damage)
@@ -159,4 +276,13 @@ void WormEnemy::TakeDamage(int damage)
 	{
 		OnDead();
 	}
+}
+
+Vector3 WormEnemy::GetPlayerCameraPos() const
+{
+	//shared_ptrに変換
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+
+	//カメラの位置を取得して返す
+	return pPlayer->GetCameraPos();
 }

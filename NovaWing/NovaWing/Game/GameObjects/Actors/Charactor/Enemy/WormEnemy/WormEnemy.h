@@ -25,12 +25,15 @@ public:
 
 	void OnInit() override;//初期化処理
 	void Update() override;//更新処理
-	void Draw() override;//描画処理
+	//描画処理
+	void Draw() override;
+	void DrawWormHead();
+	void DrawWormBody();
 	
 	void TakeDamage(int damage) override;//ダメージを受ける
 	//頭の当たり判定(球)を取得
 	const Sphere& GetHeadSphere() const { return m_headSphere; }
-
+	//胴体の当たり判定(球)を取得
 	const std::vector<Sphere>& GetSegmentSpheres() const { return m_segmentSpheres; }
 
 private:
@@ -51,5 +54,8 @@ private:
 
 	//頭の位置を履歴として持つ
 	std::vector<Vector3> m_headHistory;
+
+private:
+	Vector3 GetPlayerCameraPos() const;
 };
 
