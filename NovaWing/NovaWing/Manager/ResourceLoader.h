@@ -9,6 +9,7 @@ public:
 	{
 		Player, //プレイヤー
 		FloatingEnemy,//浮遊する敵
+		WormHead,//ワームの頭
 	};
 
 	//グラフィックの種類
@@ -19,6 +20,10 @@ public:
 		PlayerEmissionMap,//プレイヤーのエミッションマップ
 		EnemyNormalMap,//敵の法線マップ
 		EnemyEmissionMap,//敵のエミッションマップ
+		WormHeadNormalMap,//ワームの頭の法線マップ
+		WormHeadMetalicMap,//ワームの頭のメタリックマップ
+		WormHeadEmissionMap,//ワームの頭のエミッションマップ
+		WormBodyDiffuseMap,//ワームの胴体のディフューズマップ
 	};
 
 	//エフェクトの種類

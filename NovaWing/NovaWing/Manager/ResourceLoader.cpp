@@ -26,6 +26,10 @@ void ResourceLoader::LoadAll()
 	assert(handle >= 0); 
 	m_modelHandles[ModelID::FloatingEnemy] = handle;
 
+	handle = MV1LoadModel(L"Data/Model/Worm_fix.mv1");//ワーム
+	assert(handle >= 0); 
+	m_modelHandles[ModelID::WormHead] = handle;
+
 	//画像を読み込んでハンドルを保存する
 	//法線マップ
 	handle = LoadGraph(L"Data/Model/Player.fbm/StarSparrow_Normal.png");
@@ -51,6 +55,26 @@ void ResourceLoader::LoadAll()
 	handle = LoadGraph(L"Data/Model/Drone.fbm/Drone_Emission.png");
 	assert(handle >= 0);
 	m_graphicHandles[GraphicID::EnemyEmissionMap] = handle;
+
+	//ワームの頭の法線マップ
+	handle = LoadGraph(L"Data/Model/Worm_fix.fbm/Worm_Normal.png");
+	assert(handle >= 0);
+	m_graphicHandles[GraphicID::WormHeadNormalMap] = handle;
+
+	//ワームの頭のメタリックマップ
+	handle = LoadGraph(L"Data/Model/Worm_fix.fbm/Worm_Metallic.png");
+	assert(handle >= 0);
+	m_graphicHandles[GraphicID::WormHeadMetalicMap] = handle;
+
+	//ワームの頭のエミッションマップ
+	handle = LoadGraph(L"Data/Model/Worm_fix.fbm/Worm_Emission_Orange.png");
+	assert(handle >= 0);
+	m_graphicHandles[GraphicID::WormHeadEmissionMap] = handle;
+
+	//ワームの胴体のディフューズマップ
+	handle = LoadGraph(L"Data/Model/Worm_fix.fbm/T_Space_Drone_D_Blue.png");
+	assert(handle >= 0);
+	m_graphicHandles[GraphicID::WormBodyDiffuseMap] = handle;
 }
 
 void ResourceLoader::ReleaseAll()
