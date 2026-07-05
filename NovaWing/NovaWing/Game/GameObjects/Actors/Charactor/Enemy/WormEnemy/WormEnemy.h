@@ -48,5 +48,8 @@ private:
 	Sphere m_headSphere;//当たり判定(球)
 	std::vector<Vector3> m_segmentPositions;//胴体一つ一つの位置
 	std::vector<Sphere> m_segmentSpheres;//胴体一つ一つの当たり判定球
+
+	//頭の位置を履歴として持つ
+	std::vector<Vector3> m_headHistory;
 };
 

@@ -5,9 +5,12 @@
 namespace
 {
 	//頭の移動速度
-	constexpr float move_speed =10.0f;
+	constexpr float move_speed =8.0f;
 	//螺旋状に回転するときの回転速度
-	constexpr float rot_speed = 17.0f;
+	constexpr float rot_speed = 2.0f;
+	//螺旋移動の時の半径
+	constexpr float spiral_radius = 160.0f;
+
 	//当たり判定球の半径
 	constexpr float sphere_radius = 40.0f;
 
@@ -16,9 +19,9 @@ namespace
 	//弾の速度
 	constexpr float bullet_speed = 8.0f;
 	//弾の攻撃力
-	constexpr int bullet_power = 34;
-	//胴体の更新を何フレームに一回行うか
-	constexpr int segment_update_interval = 15;
+	constexpr int bullet_power = 1;
+	//胴体間の間隔フレーム数
+	constexpr int spacing = 6;
 }
 
 WormEnemy::WormEnemy(
@@ -67,22 +70,6 @@ void WormEnemy::Update()
 	//フレーム更新
 	m_frame++;
 
-	//更新を数フレームに一回にする
-	if (m_frame % segment_update_interval == 0)
-	{
-		//胴体から1つ前の位置をコピー
-		//末尾からループを回す
-		for (int i = m_segmentCount - 1; i > 0; i--)
-		{
-			m_segmentPositions[i] = m_segmentPositions[i - 1];
-		}
-		//一番前の胴体には、頭の更新前の位置を入れる
-		m_segmentPositions[0] = m_pos;
-	}
-
-	//頭の前進
-	m_pos += GetForward() * move_speed;
-
 	//螺旋状に回転させる
 	m_rotationAngle += rot_speed;
 	//Z軸を中心に螺旋回転させる
@@ -91,6 +78,25 @@ void WormEnemy::Update()
 			m_rotationAngle * DX_PI_F / 180.0f
 	);
 	m_rotation = rotZ;
+
+	//頭の移動を螺旋状にする
+	m_pos.m_z += move_speed;
+	m_pos.m_x = cosf(m_rotationAngle * DX_PI_F / 180.0f) * spiral_radius;
+	m_pos.m_y = sinf(m_rotationAngle * DX_PI_F / 180.0f) * spiral_radius;
+
+	//頭の位置を履歴に追加
+	m_headHistory.insert(m_headHistory.begin(), m_pos);
+
+	//それぞれの胴体の位置を履歴から取得する
+	for (int i = 0; i < m_segmentCount; i++)
+	{
+		//履歴が足りないときにクラッシュするので
+		//if文でガードする
+		if (static_cast<int>(m_headHistory.size()) > (i+1) * spacing)
+		{
+			m_segmentPositions[i] = m_headHistory[(i+1) * spacing];
+		}
+	}
 
 	//各Sphereの位置を更新
 	//頭の当たり判定更新
