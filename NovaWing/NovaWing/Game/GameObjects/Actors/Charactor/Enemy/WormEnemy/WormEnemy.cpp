@@ -6,7 +6,7 @@
 namespace
 {
 	//頭の移動速度
-	constexpr float move_speed =10.0f;
+	constexpr float move_speed =9.0f;
 	//螺旋状に回転するときの回転速度
 	constexpr float rot_speed = 2.0f;
 	//螺旋移動の時の半径

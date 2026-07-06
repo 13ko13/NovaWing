@@ -1,6 +1,9 @@
 ﻿#include "BulletManager.h"
-#include"Game/GameObjects/Actors/Bullet/PlayerBullet.h"
-#include "Game/GameObjects/Actors/Bullet/EnemyBullet.h"
+#include"Game/GameObjects/Bullet/PlayerBullet.h"
+#include "Game/GameObjects/Bullet/EnemyBullet.h"
+#include "Game/GameObjects/Bullet/ChargeBullet.h"
+#include "Game/GameObjects/GameObject.h"
+
 
 BulletManager::BulletManager()
 {
@@ -11,7 +14,8 @@ BulletManager::~BulletManager()
 }
 
 void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos,
-	const Vector3& vel, const int attackPower)
+	const Vector3& vel, const int attackPower,
+		std::weak_ptr<GameObject> pTarget)
 {
 	switch (bulletType)
 	{
@@ -43,15 +47,18 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 		m_pEnemyBullets.push_back(pBullet);
 		break;
 	}
+	case BulletType::ChargeBullet://プレイヤーのチャージ弾
+	{
+		//チャージ弾はターゲットを受け取る必要がある
+		std::shared_ptr<ChargeBullet> pBullet =
+			std::make_shared<ChargeBullet>(pos, vel, attackPower, pTarget);
+
+		///初期化
+		pBullet->Init();
+
+		//それを配列に格納する
+		m_pChargeBullets.push_back(pBullet);
+		break;
 	}
-}
-
-const std::vector<std::weak_ptr<PlayerBullet>>& BulletManager::GetPlayerBullets() const
-{
-	return m_pPlayerBullets;
-}
-
-const std::vector<std::weak_ptr<EnemyBullet>>& BulletManager::GetEnemyBullets() const
-{
-	return m_pEnemyBullets;
+	}
 }

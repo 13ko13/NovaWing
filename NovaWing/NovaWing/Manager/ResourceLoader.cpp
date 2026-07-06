@@ -75,6 +75,16 @@ void ResourceLoader::LoadAll()
 	handle = LoadGraph(L"Data/Model/Worm_fix.fbm/T_Space_Drone_D_Blue.png");
 	assert(handle >= 0);
 	m_graphicHandles[GraphicID::WormBodyDiffuseMap] = handle;
+
+	//ノーマルレティクル
+	handle = LoadGraph(L"Data/Image/NormalReticle.png");
+	assert(handle >= 0);
+	m_graphicHandles[GraphicID::NormalReticle] = handle;
+
+	//チャージレティクル
+	handle = LoadGraph(L"Data/Image/ChargeReticle.png");
+	assert(handle >= 0);
+	m_graphicHandles[GraphicID::ChargeReticle] = handle;
 }
 
 void ResourceLoader::ReleaseAll()

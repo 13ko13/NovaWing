@@ -3,6 +3,7 @@
 
 class Player;
 class BulletManager;
+class TargetManager;
 class ChargeShootState : public IShootState
 {
 public:

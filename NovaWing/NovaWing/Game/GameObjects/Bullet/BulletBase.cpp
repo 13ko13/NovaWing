@@ -4,7 +4,7 @@
 namespace
 {
 	//寿命
-	constexpr int life_time = 60;//1秒
+	constexpr int life_time = 180;//3秒
 	//球のサイズ
 	constexpr float sphere_size = 16.0f;
 	//モデルのサイズ

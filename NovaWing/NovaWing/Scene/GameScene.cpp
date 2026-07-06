@@ -21,6 +21,9 @@
 #include "Charactor/Enemy/WormEnemy/WormEnemy.h"
 #include "Manager/CollisionManager.h"
 #include "Scene/GameoverScene.h"
+#include "Manager/TargetManager.h"
+#include "Manager/UIManager.h"
+#include "Game/UI/ReticleUI.h"
 
 namespace
 {
@@ -84,6 +87,18 @@ void GameScene::Init()
 	m_pWormEnemy->Init();
 	//衝突判定マネージャーにワームエネミーを登録する
 	m_pCollisionManager->RegisterWormEnemy(m_pWormEnemy);
+
+	//ターゲットマネージャーの初期化
+	m_pTargetManager = std::make_shared<TargetManager>(m_pPlayer);
+	//プレイヤーにターゲットマネージャーをセットする
+	m_pPlayer->SetTargetManager(m_pTargetManager);
+	//ターゲットマネージャーにエネミーを登録する
+	m_pTargetManager->RegisterFloatingEnemy(m_pFloatingEnemy);
+	m_pTargetManager->RegisterWormEnemy(m_pWormEnemy);
+
+	//UIManagerの初期化
+	m_pUIManager = std::make_shared<UIManager>();
+	m_pUIManager->Register(std::make_shared<ReticleUI>(m_pTargetManager,m_pPlayer));
 }
 
 void GameScene::Update()
@@ -96,6 +111,9 @@ void GameScene::Update()
 
 	//衝突判定マネージャーの更新
 	m_pCollisionManager->Update();
+
+	//タッゲットマネージャーの更新
+	m_pTargetManager->Update();
 
 	//プレイヤーが死んだらゲームオーバーシーンに遷移する
 	if (m_pPlayer->IsDead())
@@ -118,6 +136,9 @@ void GameScene::Draw()
 
 	//全GameObjectのDrawを呼ぶ
 	GameObjectManager::GetInstance().DrawAll();
+
+	//全てのUIを描画する
+	m_pUIManager->Draw();
 }
 
 void GameScene::DrawGrid()

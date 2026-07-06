@@ -10,6 +10,8 @@ class BulletManager;
 class FloatingEnemy;
 class CollisionManager;
 class WormEnemy;
+class TargetManager;
+class UIManager;
 class GameScene :public Scene
 {
 public:
@@ -42,4 +44,8 @@ private:
 	std::shared_ptr<CollisionManager> m_pCollisionManager;
 	//ワームエネミーの実体
 	std::shared_ptr<WormEnemy> m_pWormEnemy;
+	//ターゲットマネージャーの実体
+	std::shared_ptr<TargetManager> m_pTargetManager;
+	//UIマネージャー
+	std::shared_ptr<UIManager> m_pUIManager;
 };

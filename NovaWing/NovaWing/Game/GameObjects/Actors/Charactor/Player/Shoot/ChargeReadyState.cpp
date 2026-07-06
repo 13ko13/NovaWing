@@ -9,7 +9,7 @@ namespace
 	//チャージ弾を打てる許容時間
 	constexpr int can_shoot_frame = 60;//1秒
 	//弾の速度
-	constexpr float move_speed = 12.0f;
+	constexpr float move_speed = 65.0f;
 	//攻撃力
 	constexpr int attack_power = 10;
 }
@@ -18,6 +18,7 @@ ChargeReadyState::ChargeReadyState(const std::weak_ptr<Player> pPlayer,
 	std::weak_ptr<BulletManager> pBulletManager) :
 	IShootState(pPlayer,pBulletManager)
 {
+
 }
 
 ChargeReadyState::~ChargeReadyState()
@@ -47,8 +48,11 @@ void ChargeReadyState::Update()
 		const Vector3 pos = pPlayer->GetPos();//プレイヤーの位置
 		const Vector3 vel = -pPlayer->GetForward() * move_speed;//速度
 
-		pBulletManager->CreateBullet(BulletManager::BulletType::PlayerBullet,
-			pos, vel, attack_power);
+		//プレイヤーからターゲットを受け取る
+		std::weak_ptr<GameObject> pTarget = m_pPlayer.lock()->GetFocusTarget();
+
+		pBulletManager->CreateBullet(BulletManager::BulletType::ChargeBullet,
+			pos, vel, attack_power,pTarget);
 
 		//ノーマルステートに戻す
 		ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager));
@@ -59,6 +63,11 @@ void ChargeReadyState::Update()
 		//何もせずにノーマルステートに戻す
 		ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager));
 	}
+
+#ifdef _DEBUG
+	//チャージ完了デバッグ
+	DrawFormatString(0, 350, 0xff0000, L"チャージ完了");
+#endif // _DEBUG
 }
 
 void ChargeReadyState::Enter()

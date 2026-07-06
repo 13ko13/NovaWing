@@ -18,12 +18,17 @@ public:
 		PlayerNormalMap,//プレイヤーの法線マップ
 		PlayerMetalicMap,//プレイヤーのメタリックマップ
 		PlayerEmissionMap,//プレイヤーのエミッションマップ
+
 		EnemyNormalMap,//敵の法線マップ
 		EnemyEmissionMap,//敵のエミッションマップ
+
 		WormHeadNormalMap,//ワームの頭の法線マップ
 		WormHeadMetalicMap,//ワームの頭のメタリックマップ
 		WormHeadEmissionMap,//ワームの頭のエミッションマップ
 		WormBodyDiffuseMap,//ワームの胴体のディフューズマップ
+
+		NormalReticle,//ノーマル状態のレティクル
+		ChargeReticle,//チャージ状態のレティクル
 	};
 
 	//エフェクトの種類

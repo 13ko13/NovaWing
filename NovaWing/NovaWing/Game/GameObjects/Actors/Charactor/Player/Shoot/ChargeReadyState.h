@@ -19,4 +19,3 @@ private:
 	//次またボタンを押されるまでの時間
 	int m_waitFrame = 0;
 };
-

@@ -7,7 +7,7 @@
 namespace
 {
 	//弾の速度
-	constexpr float move_speed = 15.0f;
+	constexpr float move_speed = 60.0f;
 	//攻撃力
 	constexpr int attack_power = 100;
 }

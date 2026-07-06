@@ -16,6 +16,8 @@
 #include "SpecialAction/SomersaultState.h"
 #include "Movement/BoostState.h"
 #include "Movement/BrakeState.h"
+#include "Manager/TargetManager.h"
+#include "Charactor/Player/Shoot/ChargeReadyState.h"
 
 namespace
 {
@@ -265,6 +267,7 @@ void Player::Draw()
 	DrawFormatString(0, 300, 0xffffff, L"playerPosX:%f,Y : %f,Z:%f", m_pos.m_x, m_pos.m_y, m_pos.m_z);
 	DrawFormatString(0, 250, 0xffffff, L"Gauge : %f", m_gauge);
 	DrawFormatString(1080, 20, 0xffffff, L"Health : %d", m_health);
+	DrawFormatString(0, 365, 0xffffff, L"IsFocus : %d", IsFocus());
 
 	//当たり判定の球を描画
 	m_collSphere.Draw(0xff0000);
@@ -363,6 +366,25 @@ Vector3 Player::GetCameraPos() const
 {
 	std::shared_ptr<CameraBase> pCamera = m_pCamera.lock();
 	return pCamera->GetPos();
+}
+
+std::weak_ptr<GameObject> Player::GetFocusTarget() const
+{
+	//ターゲットマネージャーのターゲットを取得してそれを返す
+	return m_pTargetManager.lock()->GetFocusTarget();
+}
+
+bool Player::IsFocus() const
+{
+	//フォーカス中か
+	return m_pTargetManager.lock()->IsFocus();
+}
+
+bool Player::IsChargeReady() const
+{
+	//m_pShootStateをChargeReadyStateに
+	//ダイナミックキャストしてnullじゃなければtrueを返す
+	return std::dynamic_pointer_cast<ChargeReadyState>(m_pShootState) != nullptr;
 }
 
 void Player::UpdateRotation()

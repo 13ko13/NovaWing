@@ -139,16 +139,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\GameObjects\Bullet\ChargeBullet.cpp" />
+    <ClCompile Include="Game\UI\ReticleUI.cpp" />
     <ClCompile Include="Scene\GameoverScene.cpp" />
     <ClCompile Include="Manager\CollisionManager.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Bullet\EnemyBullet.cpp" />
+    <ClCompile Include="Game\GameObjects\Bullet\EnemyBullet.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\ActiveState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemy.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\BoostState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\BrakeState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DisabledRotState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\DisabledMovementState.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Bullet\BulletBase.cpp" />
+    <ClCompile Include="Game\GameObjects\Bullet\BulletBase.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\ChargeReadyState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\ChargeShootState.cpp" />
     <ClCompile Include="Game\GameObjects\GameObject.cpp" />
@@ -175,12 +177,15 @@
     <ClCompile Include="Manager\ResourceLoader.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\MovingState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\NormalShootState.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Bullet\PlayerBullet.cpp" />
+    <ClCompile Include="Game\GameObjects\Bullet\PlayerBullet.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\NoneState.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="Scene\SceneController.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\SomersaultState.cpp" />
     <ClCompile Include="Scene\TitleScene.cpp" />
+    <ClCompile Include="Manager\TargetManager.cpp" />
+    <ClCompile Include="Game\UI\UIBase.cpp" />
+    <ClCompile Include="Manager\UIManager.cpp" />
     <ClCompile Include="Utility\Fade.cpp" />
     <ClCompile Include="Utility\Matrix4x4.cpp" />
     <ClCompile Include="Utility\ModelAnimator.cpp" />
@@ -190,18 +195,21 @@
     <ClCompile Include="Utility\Vector2.cpp" />
     <ClCompile Include="Utility\Vector3.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.cpp" />
+    <ClCompile Include="WaterManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\GameObjects\Bullet\ChargeBullet.h" />
+    <ClInclude Include="Game\UI\ReticleUI.h" />
     <ClInclude Include="Scene\GameoverScene.h" />
     <ClInclude Include="Manager\CollisionManager.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Bullet\EnemyBullet.h" />
+    <ClInclude Include="Game\GameObjects\Bullet\EnemyBullet.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\ActiveState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemy.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\BoostState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\BrakeState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DisabledRotState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\DisabledMovementState.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Bullet\BulletBase.h" />
+    <ClInclude Include="Game\GameObjects\Bullet\BulletBase.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\ChargeReadyState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\ChargeShootState.h" />
     <ClInclude Include="Game\GameObjects\GameObject.h" />
@@ -229,12 +237,15 @@
     <ClInclude Include="Manager\ResourceLoader.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\MovingState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\NormalShootState.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Bullet\PlayerBullet.h" />
+    <ClInclude Include="Game\GameObjects\Bullet\PlayerBullet.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\NoneState.h" />
     <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="Scene\SceneController.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\SomersaultState.h" />
     <ClInclude Include="Scene\TitleScene.h" />
+    <ClInclude Include="Manager\TargetManager.h" />
+    <ClInclude Include="Game\UI\UIBase.h" />
+    <ClInclude Include="Manager\UIManager.h" />
     <ClInclude Include="Utility\Fade.h" />
     <ClInclude Include="Utility\Matrix4x4.h" />
     <ClInclude Include="Utility\ModelAnimator.h" />
@@ -245,6 +256,7 @@
     <ClInclude Include="Utility\Vector2.h" />
     <ClInclude Include="Utility\Vector3.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.h" />
+    <ClInclude Include="WaterManager.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="LightingPS.hlsl">

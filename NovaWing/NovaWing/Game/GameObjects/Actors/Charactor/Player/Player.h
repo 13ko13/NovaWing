@@ -11,6 +11,7 @@ class IMovementState;
 class IRotationState;
 class IShootState;
 class ISpecialActionState;
+class TargetManager;
 class Player : public Charactor
 {
 public:
@@ -36,6 +37,8 @@ public:
 
 	//GameSceneからカメラをセットさせる
 	void SetCamera(std::shared_ptr<CameraBase> pCamera) { m_pCamera = pCamera; }
+	//ターゲットマネージャーをセットさせる
+	void SetTargetManager(std::shared_ptr<TargetManager> pTargetManager) { m_pTargetManager = pTargetManager; }
 
 	//ゲージ取得
 	float GetGauge() const { return m_gauge; }
@@ -53,6 +56,13 @@ public:
 	Vector3 GetCameraPos() const;
 	//当たり判定用の球を取得
 	Sphere GetSphere() const { return m_collSphere; }
+
+	//フォーカスターゲットを取得
+	std::weak_ptr<GameObject> GetFocusTarget() const;
+	//フォーカス中か
+	bool IsFocus() const;
+	//チャージ完了しているか
+	bool IsChargeReady() const;
 
 private:
 	//回転の更新
@@ -126,4 +136,7 @@ private:
 
 	//当たり判定用の球
 	Sphere m_collSphere;
+
+	//ターゲットマネージャー
+	std::weak_ptr<TargetManager> m_pTargetManager;
 };

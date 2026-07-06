@@ -10,7 +10,7 @@ namespace
 	//チャージ完了と判定する秒数
 	constexpr int charge_comp_frame = 60 * 2;//2秒
 	//弾の速度
-	constexpr float move_speed = 12.0f;
+	constexpr float move_speed = 60.0f;
 	//攻撃力
 	constexpr int attack_power = 10;
 }

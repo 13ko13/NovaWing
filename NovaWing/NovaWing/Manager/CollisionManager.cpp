@@ -1,10 +1,11 @@
 ﻿#include "CollisionManager.h"
 #include "Manager/BulletManager.h"
-#include "Game/GameObjects/Actors/Bullet/PlayerBullet.h"
-#include "Game/GameObjects/Actors/Bullet/EnemyBullet.h"
+#include "Game/GameObjects/Bullet/PlayerBullet.h"
+#include "Game/GameObjects/Bullet/EnemyBullet.h"
 #include "Charactor/Enemy/FloatingEnemy/FloatingEnemy.h"
 #include "Charactor/Player/Player.h"
 #include "Charactor/Enemy/WormEnemy/WormEnemy.h"
+#include "TargetManager.h"
 
 CollisionManager::CollisionManager(const std::weak_ptr<Player> pPlayer, 
 	const std::weak_ptr<BulletManager> pBulletManager):
