@@ -8,7 +8,7 @@
 
 namespace
 {
-	constexpr float move_speed = 6.0f;
+	constexpr float move_speed = 0.0f;
 }
 
 IdleMovementState::IdleMovementState(const std::weak_ptr<Player> pPlayer):

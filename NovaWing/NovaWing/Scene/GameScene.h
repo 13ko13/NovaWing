@@ -12,6 +12,7 @@ class CollisionManager;
 class WormEnemy;
 class TargetManager;
 class UIManager;
+class WaterManager;
 class GameScene :public Scene
 {
 public:
@@ -48,4 +49,6 @@ private:
 	std::shared_ptr<TargetManager> m_pTargetManager;
 	//UIマネージャー
 	std::shared_ptr<UIManager> m_pUIManager;
+	//海用の水マネージャー
+	std::shared_ptr<WaterManager> m_pWaterManager;
 };

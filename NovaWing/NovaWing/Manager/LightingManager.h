@@ -16,6 +16,8 @@ public:
 	void ApplyShader();
 	//シェーダーを解除する
 	void ResetShader();
+	//光の情報を持ってる定数バッファのハンドルを返す
+	int GetLightCBuffer() const { return m_cbufferLightInfo; }
 
 private:
 	//コンストラクタ

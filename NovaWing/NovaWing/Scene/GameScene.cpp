@@ -24,6 +24,7 @@
 #include "Manager/TargetManager.h"
 #include "Manager/UIManager.h"
 #include "Game/UI/ReticleUI.h"
+#include "Manager/WaterManager.h"
 
 namespace
 {
@@ -99,6 +100,10 @@ void GameScene::Init()
 	//UIManagerの初期化
 	m_pUIManager = std::make_shared<UIManager>();
 	m_pUIManager->Register(std::make_shared<ReticleUI>(m_pTargetManager,m_pPlayer));
+
+	//水マネージャーの初期化
+	m_pWaterManager = std::make_shared<WaterManager>(m_pCamera);
+	m_pWaterManager->Init();
 }
 
 void GameScene::Update()
@@ -114,6 +119,9 @@ void GameScene::Update()
 
 	//タッゲットマネージャーの更新
 	m_pTargetManager->Update();
+
+	//水マネージャーの更新
+	m_pWaterManager->Update();
 
 	//プレイヤーが死んだらゲームオーバーシーンに遷移する
 	if (m_pPlayer->IsDead())
@@ -139,13 +147,13 @@ void GameScene::Draw()
 
 	//全てのUIを描画する
 	m_pUIManager->Draw();
+
+	//水マネージャーの描画
+	m_pWaterManager->Draw();
 }
 
 void GameScene::DrawGrid()
 {
-	//カメラのdraw(基本デバッグ用)
-	//m_pCamera->Draw();
-
 #ifdef _DEBUG
 	//直線の始点と終点
 	VECTOR startPos;
