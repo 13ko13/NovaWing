@@ -53,6 +53,8 @@ void WormEnemy::OnInit()
 	m_segmentPositions.resize(m_segmentCount);
 	m_segmentSpheres.resize(m_segmentCount);
 
+	m_pos.m_y += 500.0f;
+
 	//胴体の数だけ位置と当たり判定を初期化する
 	//位置の初期化
 	for (Vector3& segmentPos : m_segmentPositions)
@@ -100,8 +102,10 @@ void WormEnemy::Update()
 
 	//頭の移動を螺旋状にする
 	m_pos.m_z += move_speed;
-	m_pos.m_x = cosf(m_rotationAngle * DX_PI_F / 180.0f) * spiral_radius;
-	m_pos.m_y = sinf(m_rotationAngle * DX_PI_F / 180.0f) * spiral_radius;
+	m_pos.m_x = cosf(m_rotationAngle * DX_PI_F / 180.0f) *
+		spiral_radius;
+	m_pos.m_y = sinf(m_rotationAngle * DX_PI_F / 180.0f) *
+		spiral_radius + 500.0f;
 
 	//頭の位置を履歴に追加
 	m_headHistory.insert(m_headHistory.begin(), m_pos);

@@ -1,5 +1,3 @@
-SamplerState smp : register(s0);
-
 struct PS_INPUT
 {
     float4 pos : SV_POSITION;
@@ -21,19 +19,15 @@ cbuffer CameraBuffer : register(b5)
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    //return float4(0.0f, 0.3f, 0.8f, 1.0f);
-    
-    //ピクセル情報を取得
-    float4 texCol = float4(0.0f, 0.0f, 0.8f, 1.0f);
     //視線方向を計算
     float3 viewDir = normalize(cameraPos - input.worldPos);
 
     //光のベクトルを計算
     float3 normLightDir = normalize(lightVec);
     
-    return float4(normalize(lightVec) * 0.5 + 0.5, 1.0f);
+    //return float4(normalize(lightVec) * 0.5 + 0.5, 1.0f);
     
-    //環境光を追加(完全な暗闇を防ぐ)
+    //環境光を追加
     float ambient = 0.2f;
     //法線と光のベクトルの内積から暗い部分と明るい部分を出す
     float diffuse = saturate(dot(input.normalWS, -normLightDir));
@@ -44,8 +38,38 @@ float4 main(PS_INPUT input) : SV_TARGET
     float3 reflectVec = reflect(normLightDir, input.normalWS);
 
     //反射光の計算
-    float specular = pow(saturate(dot(viewDir, reflectVec)), 10.0f);
+    //少しまぶしいので値を小さくする
+    float specular = pow(saturate(dot(viewDir, reflectVec)), 60.0f) * 0.6f;
+    
+    //フレネル効果
+    //水面を真上から見ると透明
+    //水面を斜めから見ると反射が強くなる
+    //これを活かして透明感と深みを表現する
+    //視線方向と法線の角度を使用する
+    float fresnel = pow(
+    1.0f - saturate(dot(viewDir, input.normalWS)), 5.0f);
+    
+    //浅い色
+    float3 shallowColor = float3(0.0f, 0.5f, 0.9f);
+    //深い色
+    float3 deepColor = float3(0.0f, 0.05f, 0.2f);
+    //最終的な水の色
+    float3 waterColor = lerp(
+    shallowColor, deepColor, fresnel);
+    
+    //return float4(input.worldPos.y / 50.0f, 0.0f, 0.0f, 1.0f);
+    
+    //白波を表現する
+    //波の頂点付近(Y座標が高い場所)を白くする
+    float waveHeight = input.worldPos.y;
+    //泡の部分
+    //smoothstep(min,max,x)は、
+    //minとmax以内であれば1それ以外は0を返す
+    float foam = smoothstep(95.0f, 107.505f, waveHeight);
+    //海の色と白を混ぜる
+    //lerpで泡の部分は白に補間する
+    float3 finalColor = lerp(waterColor.rgb, float3(1, 1, 1), foam * 0.15f);
     
     //テクスチャの色に明るさを適用してそのピクセルの色を返す
-    return float4(texCol.rgb * light + specular, 1.0f);
+    return float4(finalColor * light + specular, 1.0f);
 }

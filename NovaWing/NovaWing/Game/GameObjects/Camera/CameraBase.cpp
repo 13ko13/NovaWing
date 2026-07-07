@@ -8,8 +8,8 @@
 namespace
 {
 	constexpr float camera_near = 200.0f;//カメラのNear
-	constexpr float camera_far = 3500.0f;//カメラのFar
-	const Vector3 first_pos = { 0.0f,300.0f,700.0f };
+	constexpr float camera_far = 5500.0f;//カメラのFar
+	const Vector3 first_pos = { 0.0f,600.0f,00.0f };
 	//注視点からカメラ位置に向かうベクトル
 	const Vector3 target_to_camera = { 0.0f,200.0f,-1200.0f };
 	//右スティックを動かしたときのカメラの回転角の増減量
@@ -17,7 +17,7 @@ namespace
 	//カメラが回転するまでのデッドゾーン
 	constexpr float camera_rot_dead_zone = 0.5f;
 	//カメラの固定Y位置
-	constexpr float camera_fixed_y = 100.0f;
+	constexpr float camera_fixed_y = 600.0f;
 
 	//カメラの視野角
 	constexpr float fov = DX_PI_F / 3.0f;
@@ -37,6 +37,9 @@ CameraBase::CameraBase(const std::shared_ptr<Player> pPlayer)
 
 	//ターゲットの位置を更新
 	UpdateTargetPos();
+
+	//初期座標
+	m_pos = first_pos;
 
 	//カメラの設定
 	//プレイヤーの位置を取得して、そこをカメラのターゲットにする
@@ -141,7 +144,7 @@ void CameraBase::UpdateTargetPos()
 {
 	//注視点X、Yは固定
 	m_targetPos.m_x = 0.0f;
-	m_targetPos.m_y = 0.0f;
+	m_targetPos.m_y = 500.0f;
 
 	//プレイヤーのZ位置を取得して、追従する
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();

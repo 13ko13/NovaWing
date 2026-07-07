@@ -35,6 +35,9 @@ namespace
 	constexpr float coll_sphere_radius = 80.0f;
 	//当たり判定位置のオフセット
 	const Vector3 coll_sphere_offset = { 0.0f, 0.0f, -90.0f };
+
+	//初期座標
+	const Vector3 first_pos = { 0.0f,500.0f,0.0f };
 }
 
 Player::Player(
@@ -59,11 +62,14 @@ void Player::OnInit()
 	m_rotationY = DX_PI_F;
 	UpdateRotation();
 
+	//初期座標
+	m_pos = first_pos;
+
 	//シェーダに渡す定数バッファを作成
 	CreateShaderBuffers();
 
 	//ライトの方向ベクトルをセットする
-	LightingManager::GetInstance().SetLightDirection(Vector3(1.0f, -1.0f, -1.0f));
+	LightingManager::GetInstance().SetLightDirection(Vector3(0.0f, -1.0f, -1.0f));
 
 	//MovementStateの初期化
 	//待機状態

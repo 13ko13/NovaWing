@@ -85,6 +85,31 @@ void ResourceLoader::LoadAll()
 	handle = LoadGraph(L"Data/Image/ChargeReticle.png");
 	assert(handle >= 0);
 	m_graphicHandles[GraphicID::ChargeReticle] = handle;
+
+	//スカイボックス前
+	handle = LoadGraph(L"Data/Image/SkyBox/skybox_front.png");
+	assert(handle >= 0);
+	m_graphicHandles[GraphicID::SkyBoxFront] = handle;
+	//スカイボックス後
+	handle = LoadGraph(L"Data/Image/SkyBox/skybox_back.png");
+	assert(handle >= 0);
+	m_graphicHandles[GraphicID::SkyBoxBack] = handle;
+	//スカイボックス右
+	handle = LoadGraph(L"Data/Image/SkyBox/skybox_right.png");
+	assert(handle >= 0);
+	m_graphicHandles[GraphicID::SkyBoxRight] = handle;
+	//スカイボックス左
+	handle = LoadGraph(L"Data/Image/SkyBox/skybox_left.png");
+	assert(handle >= 0);
+	m_graphicHandles[GraphicID::SkyBoxLeft] = handle;
+	//スカイボックス上
+	handle = LoadGraph(L"Data/Image/SkyBox/skybox_up.png");
+	assert(handle >= 0);
+	m_graphicHandles[GraphicID::SkyBoxUp] = handle;
+	//スカイボックス下
+	handle = LoadGraph(L"Data/Image/SkyBox/skybox_bottom.png");
+	assert(handle >= 0);
+	m_graphicHandles[GraphicID::SkyBoxBottom] = handle;
 }
 
 void ResourceLoader::ReleaseAll()

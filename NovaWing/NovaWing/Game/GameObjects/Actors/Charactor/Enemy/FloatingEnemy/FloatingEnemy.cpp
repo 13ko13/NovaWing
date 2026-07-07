@@ -41,8 +41,8 @@ void FloatingEnemy::OnInit()
 
 	//ステートに入った時の処理
 	m_pState->Enter();
-	m_pos.m_z += 900;
-	//m_pos.m_x += 200;
+	m_pos.m_z += 900.0f;
+	m_pos.m_y += 500.0f;
 
 	//定数バッファを作成
 	CreateShaderBuffers();

@@ -25,6 +25,7 @@
 #include "Manager/UIManager.h"
 #include "Game/UI/ReticleUI.h"
 #include "Manager/WaterManager.h"
+#include "Game/BackGround/SkyBox.h"
 
 namespace
 {
@@ -56,6 +57,9 @@ void GameScene::Init()
 	//カリングの設定
 	SetUseBackCulling(true);
 	
+	//リソースローダーのインスタンス
+	ResourceLoader& resourceL = ResourceLoader::GetInstance();
+
 	//プレイヤーを生成
 	m_pPlayer = std::make_shared<Player>(
 		m_pBulletManager,ResourceLoader::ModelID::Player);
@@ -104,6 +108,16 @@ void GameScene::Init()
 	//水マネージャーの初期化
 	m_pWaterManager = std::make_shared<WaterManager>(m_pCamera);
 	m_pWaterManager->Init();
+
+	//スカイボックスの初期化
+	m_pSkyBox = std::make_shared<SkyBox>(
+		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxFront),
+		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxBack),
+		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxLeft),
+		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxRight),
+		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxUp),
+		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxBottom)
+	);
 }
 
 void GameScene::Update()
@@ -134,6 +148,9 @@ void GameScene::Update()
 
 void GameScene::Draw()
 {
+	//スカイボックスの描画
+	m_pSkyBox->Draw(m_pCamera->GetPos());
+
 	//グリッドの描画
 	DrawGrid();
 
@@ -145,11 +162,11 @@ void GameScene::Draw()
 	//全GameObjectのDrawを呼ぶ
 	GameObjectManager::GetInstance().DrawAll();
 
-	//全てのUIを描画する
-	m_pUIManager->Draw();
-
 	//水マネージャーの描画
 	m_pWaterManager->Draw();
+
+	//全てのUIを描画する
+	m_pUIManager->Draw();
 }
 
 void GameScene::DrawGrid()

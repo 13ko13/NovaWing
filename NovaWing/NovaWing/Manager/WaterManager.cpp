@@ -4,16 +4,17 @@
 #include "Utility/Size.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/LightingManager.h"
+#include "Utility/Matrix4x4.h"
 
 namespace
 {
 	//グリッドの縦の分割数
-	constexpr int vertical_grid_num = 20;
+	constexpr int vertical_grid_num = 50;
 	//グリッドの横の分割数
-	constexpr int horizontal_grid_num = 20;
+	constexpr int horizontal_grid_num = 50;
 
 	//グリッド全体の広さ
-	constexpr Size grid_size = { 3000.0f,5000.0f };
+	constexpr Size grid_size = { 3000.0f,3000.0f };
 }
 
 WaterManager::WaterManager(const std::shared_ptr<CameraBase> pCamera) :
@@ -137,7 +138,7 @@ void WaterManager::CreateVertexData()
 			//頂点の座標
 			vertexData.pos.x =
 				j * (grid_size.m_width / horizontal_grid_num) - (grid_size.m_width / 2);//-1500～1500
-			vertexData.pos.y = -1000.0f;//高さは波の高さなのでシェーダ側で動かす
+			vertexData.pos.y = 0.0f;//高さは波の高さなのでシェーダ側で動かす
 			vertexData.pos.z = i * (grid_size.m_height / vertical_grid_num);
 
 			//頂点の法線
@@ -195,7 +196,13 @@ void WaterManager::CreateConstantBuffer()
 void WaterManager::UpdateShaderMatrixData()
 {
 	//行列情報を入れる
-	m_pCbufferMatrixData->world = MGetIdent();
+	//プレイヤーが動くのに合わせて水面も一緒に動くようにするために
+	//カメラのZ座標を使用して頂点のワールド座標が平行移動するようにする
+	//カメラのZ座標
+	float cameraZ = m_pCamera.lock()->GetPos().m_z;
+	Matrix4x4 trans = Matrix4x4::Translate(Vector3(0.0f, 0.0f, cameraZ));
+
+	m_pCbufferMatrixData->world = trans.ToDxLib();
 	m_pCbufferMatrixData->view = GetCameraViewMatrix();
 	m_pCbufferMatrixData->proj = GetCameraProjectionMatrix();
 

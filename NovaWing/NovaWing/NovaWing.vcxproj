@@ -85,6 +85,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)/DxLib_h</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterPS.hlsl
+C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterVS.hlsl</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -103,6 +107,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)/DxLib_h</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterPS.hlsl
+C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterVS.hlsl</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -119,6 +127,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)/DxLib_h</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterPS.hlsl
+C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterVS.hlsl</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -138,11 +150,12 @@
       <AdditionalLibraryDirectories>$(SolutionDir)/DxLib_h</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>C:\Users\SakamotoKou\Desktop\DxLib_VC3_24f\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 C:\Users\SakamotoKou\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterPS.hlsl
-C:\Users\SakamotoKou\Desktop\DxLib_VC3_24f\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\SakamotoKou\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterVS.hlsl</Command>
+      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterPS.hlsl
+C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterVS.hlsl</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\BackGround\SkyBox.cpp" />
     <ClCompile Include="Game\GameObjects\Bullet\ChargeBullet.cpp" />
     <ClCompile Include="Game\UI\ReticleUI.cpp" />
     <ClCompile Include="Scene\GameoverScene.cpp" />
@@ -202,6 +215,7 @@ C:\Users\SakamotoKou\Desktop\DxLib_VC3_24f\DxLib_VC\Tool\ShaderCompiler\ShaderCo
     <ClCompile Include="Manager\WaterManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\BackGround\SkyBox.h" />
     <ClInclude Include="Game\GameObjects\Bullet\ChargeBullet.h" />
     <ClInclude Include="Game\UI\ReticleUI.h" />
     <ClInclude Include="Scene\GameoverScene.h" />

@@ -29,6 +29,13 @@ public:
 
 		NormalReticle,//ノーマル状態のレティクル
 		ChargeReticle,//チャージ状態のレティクル
+
+		SkyBoxFront,//スカイボックス(前)
+		SkyBoxBack,//スカイボックス(後)
+		SkyBoxLeft,//スカイボックス(左)
+		SkyBoxRight,//スカイボックス(右)
+		SkyBoxUp,//スカイボックス(上)
+		SkyBoxBottom,//スカイボックス(下)
 	};
 
 	//エフェクトの種類
