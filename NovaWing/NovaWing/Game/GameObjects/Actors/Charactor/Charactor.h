@@ -7,7 +7,7 @@
 class Charactor : public Actor
 {
 public:
-	Charactor(ResourceLoader::ModelID modelId);
+	Charactor(ResourceLoader::ModelID modelID);
 	virtual ~Charactor();
 	virtual void Update() override;
 	virtual void Draw() = 0;

@@ -3,11 +3,11 @@
 #include "Actor.h"
 #include "Utility/Matrix4x4.h"
 
-Actor::Actor(ResourceLoader::ModelID modelId) 
+Actor::Actor(ResourceLoader::ModelID modelID) 
 {
 	//受け取ったモデルIDをもとにモデルを複製してハンドルを取得する
 	m_modelHandle = MV1DuplicateModel(
-		ResourceLoader::GetInstance().GetModel(modelId));
+		ResourceLoader::GetInstance().GetModel(modelID));
 }
 
 Actor::~Actor()

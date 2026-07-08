@@ -5,6 +5,7 @@
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/LightingManager.h"
 #include "Utility/Matrix4x4.h"
+#include "Manager/ResourceLoader.h"
 
 namespace
 {
@@ -49,6 +50,15 @@ void WaterManager::Init()
 
 	//定数バッファの作成
 	CreateConstantBuffer();
+
+	//画像ハンドル取得
+	ResourceLoader& loader = ResourceLoader::GetInstance();
+	m_skyFrontH = loader.GetGraphic(ResourceLoader::GraphicID::SkyBoxFront);
+	m_skyBackH = loader.GetGraphic(ResourceLoader::GraphicID::SkyBoxBack);
+	m_skyRightH = loader.GetGraphic(ResourceLoader::GraphicID::SkyBoxRight);
+	m_skyLeftH = loader.GetGraphic(ResourceLoader::GraphicID::SkyBoxLeft);
+	m_skyUpH = loader.GetGraphic(ResourceLoader::GraphicID::SkyBoxUp);
+	m_skyBottomH = loader.GetGraphic(ResourceLoader::GraphicID::SkyBoxBottom);
 }
 void WaterManager::Update()
 {
@@ -75,6 +85,7 @@ void WaterManager::Draw()
 	SetUseVertexShader(m_waterVSH);
 	//ピクセルシェーダをセットする
 	SetUsePixelShader(m_waterPSH);
+
 	//定数バッファを頂点シェーダにセットする
 	SetShaderConstantBuffer(m_cbufferWater, DX_SHADERTYPE_VERTEX, 4);
 	SetShaderConstantBuffer(m_cbufferMatrix, DX_SHADERTYPE_VERTEX, 2);
@@ -83,6 +94,14 @@ void WaterManager::Draw()
 		LightingManager::GetInstance().GetLightCBuffer(),
 		DX_SHADERTYPE_PIXEL, 3
 	);
+
+	//スカイボックスのテクスチャをシェーダにセットする
+	SetUseTextureToShader(0, m_skyFrontH);
+	SetUseTextureToShader(1, m_skyBackH);
+	SetUseTextureToShader(2, m_skyRightH);
+	SetUseTextureToShader(3, m_skyLeftH);
+	SetUseTextureToShader(4, m_skyUpH);
+	SetUseTextureToShader(5, m_skyBottomH);
 
 	//頂点バッファとインデックスバッファを使用して3Dポリゴンを描画する
 	DrawPolygonIndexed3DToShader_UseVertexBuffer(
@@ -95,6 +114,11 @@ void WaterManager::Draw()
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 2);
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 5);
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 3);
+	//テクスチャを解除
+	for (int i = 0; i < 6; i++)
+	{
+		SetUseTextureToShader(i, -1);
+	}
 
 #ifdef _DEBUG
 	DrawFormatString(0, 500, 0xff0000, L"frame : %f", m_pCBufferWaterData->time);
@@ -199,7 +223,7 @@ void WaterManager::UpdateShaderMatrixData()
 	//プレイヤーが動くのに合わせて水面も一緒に動くようにするために
 	//カメラのZ座標を使用して頂点のワールド座標が平行移動するようにする
 	//カメラのZ座標
-	float cameraZ = m_pCamera.lock()->GetPos().m_z;
+	float cameraZ = m_pCamera.lock()->GetPos().m_z + 300.0f;
 	Matrix4x4 trans = Matrix4x4::Translate(Vector3(0.0f, 0.0f, cameraZ));
 
 	m_pCbufferMatrixData->world = trans.ToDxLib();

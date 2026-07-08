@@ -13,7 +13,7 @@ class ModelAnimator;
 class Actor :public GameObject
 {
 public:
-	Actor(ResourceLoader::ModelID modelId);
+	Actor(ResourceLoader::ModelID modelID);
 	virtual ~Actor();
 
 	//純粋仮想関数

@@ -34,6 +34,14 @@ private:
 	//フレームカウンター
 	int m_frame = 0;
 
+	//スカイボックスのテクスチャ
+	int m_skyFrontH = -1;
+	int m_skyBackH = -1;
+	int m_skyRightH = -1;
+	int m_skyLeftH = -1;
+	int m_skyUpH = -1;
+	int m_skyBottomH = -1;
+
 	//↓なぜunsigned shortなのか
 	//intは32ビット、unsigned shordは16ビット
 	//海のグリッド程度ならばそこまで頂点数は多くならないので、

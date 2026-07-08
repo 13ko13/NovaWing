@@ -59,7 +59,7 @@ public:
 	void ReleaseAll();
 
 	//取得
-	int GetModel(ModelID id) const;
+	int GetModel(ResourceLoader::ModelID id) const;
 	int GetGraphic(GraphicID id) const;
 	int GetEffect(EffectID id) const;
 	int GetSound(SoundID id) const;
@@ -76,7 +76,7 @@ private:
 
 private:
 	//IDをいれて直感的にアクセスできるようにするためのマップ
-	std::unordered_map<ModelID, int> m_modelHandles;//モデルのハンドルを保存するマップ
+	std::unordered_map<ResourceLoader::ModelID, int> m_modelHandles;//モデルのハンドルを保存するマップ
 	std::unordered_map<GraphicID, int> m_graphicHandles;//グラフィックのハンドルを保存するマップ
 	std::unordered_map<EffectID, int> m_effectHandles;//エフェクトのハンドルを保存するマップ
 	std::unordered_map<SoundID, int> m_soundHandles;//サウンドのハンドルを保存するマップ

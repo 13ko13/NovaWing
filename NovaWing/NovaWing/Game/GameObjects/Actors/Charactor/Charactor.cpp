@@ -5,8 +5,8 @@ namespace
 	constexpr int max_health = 100;//最大体力
 }
 
-Charactor::Charactor(ResourceLoader::ModelID modelId):
-	Actor(modelId),
+Charactor::Charactor(ResourceLoader::ModelID modelID):
+	Actor(modelID),
 	m_health(max_health),
 	m_attackPower(1.0f)
 	

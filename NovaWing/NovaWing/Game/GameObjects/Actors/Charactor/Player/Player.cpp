@@ -42,7 +42,7 @@ namespace
 
 Player::Player(
 	std::shared_ptr<BulletManager> bulletManager,
-	ResourceLoader::ModelID modelID) :
+		ResourceLoader::ModelID modelID) :
 	Charactor(modelID),
 	m_pBulletManager(bulletManager),
 	m_collSphere(m_pos)

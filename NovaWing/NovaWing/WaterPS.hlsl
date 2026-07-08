@@ -163,7 +163,7 @@ float4 main(PS_INPUT input) : SV_TARGET
 
     //反射光の計算
     //少しまぶしいので値を小さくする
-    float specular = pow(saturate(dot(viewDir, lightRefVec)), 60.0f) * 0.6f;
+    float specular = pow(saturate(dot(viewDir, lightRefVec)), 30.0f) * 0.5f;
     
     //フレネル効果
     //水面を真上から見ると透明
@@ -171,17 +171,18 @@ float4 main(PS_INPUT input) : SV_TARGET
     //これを活かして透明感と深みを表現する
     //視線方向と法線の角度を使用する
     float fresnel = pow(
-    1.0f - saturate(dot(viewDir, input.normalWS)), 5.0f);
+    1.0f - saturate(dot(viewDir, input.normalWS)), 20.0f);
     
     //浅い色
     float3 shallowColor = float3(0.0f, 0.5f, 0.9f);
     //深い色
     float3 deepColor = float3(0.0f, 0.05f, 0.2f);
-    //最終的な水の色
+    //二つを組み合わせてフレネル効果を付けた水の色
     float3 waterColor = lerp(
     shallowColor, deepColor, fresnel);
     
-    //return float4(input.worldPos.y / 50.0f, 0.0f, 0.0f, 1.0f);
+    //求めた空の色と水の色をフレネルで補間する　
+    float3 finalWaterCol = lerp(waterColor, skyColor, fresnel);
     
     //白波を表現する
     //波の頂点付近(Y座標が高い場所)を白くする
@@ -190,11 +191,24 @@ float4 main(PS_INPUT input) : SV_TARGET
     //smoothstep(min,max,x)は、
     //min以下は0,max以上は1
     //その間は滑らかに0～1に補間
-    float foam = smoothstep(90.0f, 110.505f, waveHeight);
-    //海の色と白を混ぜる
+    float foam = smoothstep(50.0f, 130.0f, waveHeight);
+    //海の色(空の反射も混ざっている色)と白を混ぜる
     //lerpで泡の部分は白に補間する
-    float3 finalColor = lerp(waterColor.rgb, float3(1, 1, 1), foam );
+    float3 finalColor = lerp(finalWaterCol.rgb, float3(1, 1, 1), foam);
+    
+    //最終的な見た目に霧をかけたいので先に
+    //ライティングと反射光を適用した後の色を出しておく
+    float3 litColor = finalColor * light + specular;
+    
+     //霧(水平線を表現する)
+    //カメラから水面までの距離を求める
+    float dist = length(cameraPos - input.worldPos);
+    //距離に応じた霧の強さ(0～1)
+    float fogFactor = smoothstep(800.0f, 2000.0f, dist);
+    
+    //最終的な色に霧を適用する
+    float3 foggedColor = lerp(litColor, skyColor, fogFactor);
     
     //テクスチャの色に明るさを適用してそのピクセルの色を返す
-    return float4(finalColor * light + specular, 1.0f);
+    return float4(foggedColor, 1.0f);
 }
