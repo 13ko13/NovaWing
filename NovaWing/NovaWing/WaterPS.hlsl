@@ -5,6 +5,8 @@ Texture2D skyLeft : register(t3);
 Texture2D skyUp : register(t4);
 Texture2D skyBottom : register(t5);
 
+SamplerState smp : register(s0);
+
 struct PS_INPUT
 {
     float4 pos : SV_POSITION;
@@ -24,60 +26,110 @@ cbuffer CameraBuffer : register(b5)
     float padding;
 }
 
-//float3 SampleSkyReflection(float3 reflectVec)
-//{
-//    //反射ベクトルは立方体の中心から外側に向かって伸びているベクトル
-//    //このベクトルがどの面を貫くか判定する
-//    //全ての成分の絶対値を比較する
-//    float absX = abs(reflectVec.x);
-//    float absY = abs(reflectVec.y);
-//    float absZ = abs(reflectVec.z);
+float3 SampleSkyReflection(float3 reflectVec)
+{
+    //反射ベクトルは立方体の中心から外側に向かって伸びているベクトル
+    //このベクトルがどの面を貫くか判定する
+    //全ての成分の絶対値を比較する
+    float absX = abs(reflectVec.x);
+    float absY = abs(reflectVec.y);
+    float absZ = abs(reflectVec.z);
     
-//    //xとyどちらが大きいか
-//    float maxXY = max(absX, absY);
-//    //それとzを比べてどちらが大きいか
-//    float maxAll = max(maxXY, absZ);
-//    //その値がどの成分なのか調べるためにそれぞれと照合する
-//    if (maxAll == absX)//X
-//    {
-//        //他の成分が
-//        //反射ベクトルを1にするためのscaleを計算      
-//        float scale = 1.0f / reflectVec.x;
-//        //左右どちらなのかを調べる
-//        if (reflectVec.x > 0.0f)//右
-//        {
+    //xとyどちらが大きいか
+    float maxXY = max(absX, absY);
+    //それとzを比べてどちらが大きいか
+    float maxAll = max(maxXY, absZ);
+    //その値がどの成分なのか調べるためにそれぞれと照合する
+    if (maxAll == absX)//X
+    {
+        //他の成分がその面のどのあたりにあるのかを
+        //調べるためにscaleを逆算で求める
+        float scale = 1.0f / reflectVec.x;
+        //面上のx以外の座標を求める
+        float faceY = reflectVec.y * scale;
+        float faceZ = reflectVec.z * scale;
+        
+        //左右どちらなのかを調べる
+        if (reflectVec.x > 0.0f)//右
+        {
+            //右面の左上のuv = (0,0)
+            //右上のuv = (1,0)
+            float faceU = 1.0f - (faceZ + 1.0f) / 2; //0～1
+            float faceV = 1.0f - (faceY + 1.0f) / 2; //0～1
             
-//        }
-//        else //左
-//        {
+            //右面のテクスチャをサンプリングしてその色を返す
+            float3 skyColor = skyRight.Sample(smp, float2(faceU, faceV)).rgb;
+            return float3(skyColor);
+        }
+        else //左
+        {
+            float faceU = (faceZ + 1.0f) / 2; //0～1
+            float faceV = 1.0f - (faceY + 1.0f) / 2; //0～1
             
-//        }
-//    }
-//    else if (maxAll == absY)//Y
-//    {
-//        //上下どちらなのかを調べる
-//        if (reflectVec.y > 0.0f)//上
-//        {
+            //左面のテクスチャをサンプリングしてその色を返す
+            float3 skyColor = skyLeft.Sample(smp, float2(faceU, faceV)).rgb;
+            return float3(skyColor);
+        }
+    }
+    else if (maxAll == absY)//Y
+    {
+        //他の成分がその面のどのあたりにあるのかを
+        //調べるためにscaleを逆算で求める
+        float scale = 1.0f / reflectVec.y;
+        //面上のx以外の座標を求める
+        float faceX = reflectVec.x * scale;
+        float faceZ = reflectVec.z * scale;
+        
+        //上下どちらなのかを調べる
+        if (reflectVec.y > 0.0f)//上
+        {
+            float faceU = (faceX + 1.0f) / 2; //0～1
+            float faceV = (faceZ + 1.0f) / 2; //0～1
             
-//        }
-//        else //下
-//        {
+            //上面のテクスチャをサンプリングしてその色を返す
+            float3 skyColor = skyUp.Sample(smp, float2(faceU, faceV)).rgb;
+            return float3(skyColor);
+        }
+        else //下
+        {
+            float faceU = (faceX + 1.0f) / 2; //0～1
+            float faceV = 1.0f - (faceZ + 1.0f) / 2; //0～1
             
-//        }
-//    }
-//    else //Z
-//    {
-//        //前後どちらなのかを調べる
-//        if (reflectVec.z > 0.0f)//前
-//        {
+            //下面のテクスチャをサンプリングしてその色を返す
+            float3 skyColor = skyBottom.Sample(smp, float2(faceU, faceV)).rgb;
+            return float3(skyColor);
+        }
+    }
+    else //Z
+    {
+         //他の成分がその面のどのあたりにあるのかを
+        //調べるためにscaleを逆算で求める
+        float scale = 1.0f / reflectVec.z;
+        //面上のz以外の座標を求める
+        float faceX = reflectVec.x * scale;
+        float faceY = reflectVec.y * scale;
+        
+        //前後どちらなのかを調べる
+        if (reflectVec.z > 0.0f)//前
+        {
+            float faceU = (faceX + 1.0f) / 2; //0～1
+            float faceV = 1.0f - (faceY + 1.0f) / 2; //0～1
             
-//        }
-//        else //後ろ
-//        {
+            //前面のテクスチャをサンプリングしてその色を返す
+            float3 skyColor = skyFront.Sample(smp, float2(faceU, faceV)).rgb;
+            return float3(skyColor);
+        }
+        else //後ろ
+        {
+            float faceU = 1.0f - (faceX + 1.0f) / 2; //0～1
+            float faceV = 1.0f - (faceY + 1.0f) / 2; //0～1
             
-//        }
-//    }
-//}
+            //背面のテクスチャをサンプリングしてその色を返す
+            float3 skyColor = skyBack.Sample(smp, float2(faceU, faceV)).rgb;
+            return float3(skyColor);
+        }
+    }
+}
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
@@ -96,12 +148,22 @@ float4 main(PS_INPUT input) : SV_TARGET
     //最終的な光の強さ
     float light = saturate(diffuse + ambient);
     
-    //視線方向と光の方向から反射ベクトルを計算
-    float3 reflectVec = reflect(normLightDir, input.normalWS);
+    //光の反射用のベクトル(specular用)
+    float3 lightRefVec = reflect(normLightDir, input.normalWS);
+    
+    //空を海に反射させるために
+    //入射ベクトルとワールド座標から反射ベクトルを計算
+    //今回はカメラ→水面ではなく
+    //水面→カメラのベクトルが欲しいので既にある
+    //視線ベクトルを反転させる
+    float3 viewRefVec = reflect(-viewDir, input.normalWS);
+    
+    //空の色を求める
+    float3 skyColor = SampleSkyReflection(viewRefVec);
 
     //反射光の計算
     //少しまぶしいので値を小さくする
-    float specular = pow(saturate(dot(viewDir, reflectVec)), 60.0f) * 0.6f;
+    float specular = pow(saturate(dot(viewDir, lightRefVec)), 60.0f) * 0.6f;
     
     //フレネル効果
     //水面を真上から見ると透明
