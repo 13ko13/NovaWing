@@ -38,7 +38,7 @@ static const float wave_height = 33.0f; //”g‚Ì‚‚³
 //c‚Ì”g
 static const float wave_frequency2 = 0.005f; //”g‚Ìü”g”(¬‚³‚¢‚Ù‚Ç”g‚ª’·‚¢)
 static const float wave_speed2 = 0.1f; //”g‚Ì‘¬“x
-static const float wave_height2 = 35.0f; //”g‚Ì‚‚³
+static const float wave_height2 = 30.0f; //”g‚Ì‚‚³
 
 //Î‚ß‚Ì¬‚³‚¢”g
 static const float wave_frequency3 = 0.02f; //”g‚Ìü”g”(¬‚³‚¢‚Ù‚Ç”g‚ª’·‚¢)
@@ -48,7 +48,7 @@ static const float wave_height3 = 1.0f; //”g‚Ì‚‚³
 //×‚©‚¢”g–ä
 static const float wave_frequency4 = 0.05f; //”g‚Ìü”g”(¬‚³‚¢‚Ù‚Ç”g‚ª’·‚¢)
 static const float wave_speed4 = 2.5f; //”g‚Ì‘¬“x
-static const float wave_height4= 0.1f; //”g‚Ì‚‚³
+static const float wave_height4 = 0.1f; //”g‚Ì‚‚³
 
 //”’”g‚ğo‚·‚½‚ß‚Ì”g
 static const float wave_frequency5 = 0.001f; //”g‚Ìü”g”(¬‚³‚¢‚Ù‚Ç”g‚ª’·‚¢)
@@ -69,12 +69,12 @@ VS_OUTPUT main(VS_INPUT input)
     //’¸“_‚Ìƒ[ƒ‹ƒhÀ•W‚ğŒvZ‚µ‚½ŒãA”g‚Ì•ÏˆÊ‚ğ‰Á‚¦‚é
     //sin(’¸“_‚Ìƒ[ƒ‹ƒhÀ•WX * ”g‚Ìü”g” + Œo‰ßŠÔ * ”g‚Ì‘¬“x ) * ”g‚Ì‚‚³
     float wave = sin(worldPos.x * wave_frequency +
-    time * wave_speed) * wave_height +   //‰¡‚Ì”g
+    time * wave_speed) * wave_height + //‰¡‚Ì”g
     sin(worldPos.z * wave_frequency2 +
     time * wave_speed2) * wave_height2 + //c‚Ì”g
     sin((worldPos.z + worldPos.x) * wave_frequency3 +
     time * wave_speed3) * wave_height3 + //Î‚ß‚Ì”g
-    sin((worldPos.z - worldPos.x) * wave_frequency4 + 
+    sin((worldPos.z - worldPos.x) * wave_frequency4 +
     time * wave_speed4) * wave_height4 + //×‚©‚¢”g–ä
     sin((worldPos.z + worldPos.x) * wave_frequency5 +
     time * wave_speed5) * wave_height5;
@@ -144,11 +144,9 @@ VS_OUTPUT main(VS_INPUT input)
     //‚»‚Ì–@ü‚Í¶ã‚ğŒü‚­‚Ì‚Å-‚ğ•t‚¯‚é•K—v‚ª‚ ‚é
     //‘S‚Ä‚ÌŒX‚«‚ğ‘«‚µ‡‚í‚¹‚é
     float3 newNormal = normalize(float3(
-    -(derivateveWaveX + dDiagonalWaveX +
-    dRippleWaveX + dWhiteWaveX), //X¬•ª‚ğ‚Â”g
-    1.0f, 
-    -(derivateveWaveZ + dDiagonalWaveZ + 
-    dRippleWaveZ + dWhiteWaveZ) //Z¬•ª‚ğ‚Â”g
+    -(derivateveWaveX + dDiagonalWaveX + dRippleWaveX + dWhiteWaveX), //X¬•ª‚ğ‚Â”g
+    1.0f,
+    -(derivateveWaveZ + dDiagonalWaveZ + dRippleWaveZ + dWhiteWaveZ) //Z¬•ª‚ğ‚Â”g
     ));
     
     output.pos = screenPos;

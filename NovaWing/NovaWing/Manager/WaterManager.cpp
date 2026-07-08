@@ -9,9 +9,9 @@
 namespace
 {
 	//グリッドの縦の分割数
-	constexpr int vertical_grid_num = 50;
+	constexpr int vertical_grid_num = 70;
 	//グリッドの横の分割数
-	constexpr int horizontal_grid_num = 50;
+	constexpr int horizontal_grid_num = 70;
 
 	//グリッド全体の広さ
 	constexpr Size grid_size = { 3000.0f,3000.0f };

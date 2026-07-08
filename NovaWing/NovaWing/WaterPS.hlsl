@@ -1,3 +1,10 @@
+Texture2D skyFront : register(t0);
+Texture2D skyBack : register(t1);
+Texture2D skyRight : register(t2);
+Texture2D skyLeft : register(t3);
+Texture2D skyUp : register(t4);
+Texture2D skyBottom : register(t5);
+
 struct PS_INPUT
 {
     float4 pos : SV_POSITION;
@@ -16,6 +23,61 @@ cbuffer CameraBuffer : register(b5)
     float3 cameraPos;//カメラの位置
     float padding;
 }
+
+//float3 SampleSkyReflection(float3 reflectVec)
+//{
+//    //反射ベクトルは立方体の中心から外側に向かって伸びているベクトル
+//    //このベクトルがどの面を貫くか判定する
+//    //全ての成分の絶対値を比較する
+//    float absX = abs(reflectVec.x);
+//    float absY = abs(reflectVec.y);
+//    float absZ = abs(reflectVec.z);
+    
+//    //xとyどちらが大きいか
+//    float maxXY = max(absX, absY);
+//    //それとzを比べてどちらが大きいか
+//    float maxAll = max(maxXY, absZ);
+//    //その値がどの成分なのか調べるためにそれぞれと照合する
+//    if (maxAll == absX)//X
+//    {
+//        //他の成分が
+//        //反射ベクトルを1にするためのscaleを計算      
+//        float scale = 1.0f / reflectVec.x;
+//        //左右どちらなのかを調べる
+//        if (reflectVec.x > 0.0f)//右
+//        {
+            
+//        }
+//        else //左
+//        {
+            
+//        }
+//    }
+//    else if (maxAll == absY)//Y
+//    {
+//        //上下どちらなのかを調べる
+//        if (reflectVec.y > 0.0f)//上
+//        {
+            
+//        }
+//        else //下
+//        {
+            
+//        }
+//    }
+//    else //Z
+//    {
+//        //前後どちらなのかを調べる
+//        if (reflectVec.z > 0.0f)//前
+//        {
+            
+//        }
+//        else //後ろ
+//        {
+            
+//        }
+//    }
+//}
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
@@ -64,11 +126,12 @@ float4 main(PS_INPUT input) : SV_TARGET
     float waveHeight = input.worldPos.y;
     //泡の部分
     //smoothstep(min,max,x)は、
-    //minとmax以内であれば1それ以外は0を返す
-    float foam = smoothstep(95.0f, 107.505f, waveHeight);
+    //min以下は0,max以上は1
+    //その間は滑らかに0～1に補間
+    float foam = smoothstep(90.0f, 110.505f, waveHeight);
     //海の色と白を混ぜる
     //lerpで泡の部分は白に補間する
-    float3 finalColor = lerp(waterColor.rgb, float3(1, 1, 1), foam * 0.15f);
+    float3 finalColor = lerp(waterColor.rgb, float3(1, 1, 1), foam );
     
     //テクスチャの色に明るさを適用してそのピクセルの色を返す
     return float4(finalColor * light + specular, 1.0f);

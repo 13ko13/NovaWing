@@ -69,7 +69,7 @@ void Player::OnInit()
 	CreateShaderBuffers();
 
 	//ライトの方向ベクトルをセットする
-	LightingManager::GetInstance().SetLightDirection(Vector3(0.0f, -1.0f, -1.0f));
+	LightingManager::GetInstance().SetLightDirection(Vector3(0.0f, -0.5f, -1.0f));
 
 	//MovementStateの初期化
 	//待機状態

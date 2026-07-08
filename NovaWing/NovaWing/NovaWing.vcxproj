@@ -121,6 +121,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Docum
       <AdditionalIncludeDirectories>$(SolutionDir)/DxLib_h;$(ProjectDir);$(ProjectDir)/Game/GameObjects/Actors/</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -143,6 +144,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Docum
       <AdditionalIncludeDirectories>$(SolutionDir)/DxLib_h;$(ProjectDir);$(ProjectDir)/Game/GameObjects/Actors/</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
