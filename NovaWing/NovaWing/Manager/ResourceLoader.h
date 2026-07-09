@@ -10,6 +10,9 @@ public:
 		Player, //プレイヤー
 		FloatingEnemy,//浮遊する敵
 		WormHead,//ワームの頭
+		Rock1,//岩1
+		Rock2,//岩2
+		Rock3,//岩3
 	};
 
 	//グラフィックの種類
@@ -36,6 +39,9 @@ public:
 		SkyBoxRight,//スカイボックス(右)
 		SkyBoxUp,//スカイボックス(上)
 		SkyBoxBottom,//スカイボックス(下)
+
+		RockDiffAndSpc,//岩のディフューズマップとスペキュラマップ同梱(aをスペキュラとする)
+		RockNorm,//岩の法線マップ
 	};
 
 	//エフェクトの種類
@@ -73,6 +79,11 @@ private:
 	//コピーコンストラクタとコピー代入演算子は削除する
 	ResourceLoader(const ResourceLoader&) = delete;
 	ResourceLoader& operator=(const ResourceLoader&) = delete;
+
+	//モデルのハンドルをすべて保存する
+	void KeepModel();
+	//画像のハンドルをすべて保存する
+	void KeepGraph();
 
 private:
 	//IDをいれて直感的にアクセスできるようにするためのマップ

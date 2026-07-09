@@ -27,7 +27,36 @@ public:
 private:
 
 protected:
+	//シェーダに渡す情報
+	struct MatrixBuffer
+	{
+		MATRIX world;//ワールド行列
+		MATRIX view;//ビュー行列
+		MATRIX proj;//プロジェクション行列
+	};
+
+	int m_cbufferMatrix = -1;
+	MatrixBuffer* m_pCbufferMatrixData = nullptr;
+
+	struct CameraBuffer
+	{
+		Vector3 cameraPos;//カメラの位置
+		float padding;
+	};
+	int m_cbufferCamera = -1;
+	CameraBuffer* m_pCbufferCameraData = nullptr;
+
 	//機体情報
 	int m_modelHandle = -1;//モデルハンドル
+
+protected:
+	//シェーダに渡す定数バッファを作成
+	void CreateShaderBuffers();
+	//シェーダに渡す行列情報を更新
+	void UpdateShaderMatrixData(const Vector3& cameraPos);
+	//定数バッファをシェーダレジスタにセットする
+	void BindShaderBuffers();
+	//シェーダレジスタにセットしている定数バッファを解放する
+	void ReleaseShaderBuffers();
 };
 

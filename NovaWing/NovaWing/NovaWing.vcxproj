@@ -79,6 +79,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)/DxLib_h;$(ProjectDir);$(ProjectDir)/Game/GameObjects/Actors/</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -101,6 +102,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Docum
       <AdditionalIncludeDirectories>$(SolutionDir)/DxLib_h;$(ProjectDir);$(ProjectDir)/Game/GameObjects/Actors/</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -158,8 +160,10 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Docum
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Game\BackGround\SkyBox.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Rock\Rock.cpp" />
     <ClCompile Include="Game\GameObjects\Bullet\ChargeBullet.cpp" />
     <ClCompile Include="Game\UI\ReticleUI.cpp" />
+    <ClCompile Include="Rock.cpp" />
     <ClCompile Include="Scene\GameoverScene.cpp" />
     <ClCompile Include="Manager\CollisionManager.cpp" />
     <ClCompile Include="Game\GameObjects\Bullet\EnemyBullet.cpp" />
@@ -218,8 +222,10 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Docum
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\BackGround\SkyBox.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Rock\Rock.h" />
     <ClInclude Include="Game\GameObjects\Bullet\ChargeBullet.h" />
     <ClInclude Include="Game\UI\ReticleUI.h" />
+    <ClInclude Include="Rock.h" />
     <ClInclude Include="Scene\GameoverScene.h" />
     <ClInclude Include="Manager\CollisionManager.h" />
     <ClInclude Include="Game\GameObjects\Bullet\EnemyBullet.h" />

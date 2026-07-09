@@ -87,6 +87,10 @@ float4 main(PS_INPUT input) : SV_TARGET
     //スペキュラの計算
     float specular = pow(saturate(dot(viewDir, reflectVec)), smoothness);
     specular *= diffuse;
+    //拡散色テクスチャのアルファをスペキュラ強度マップとして使用
+    //(このシェーダーは元々テクスチャのアルファを使っておらず、出力アルファも1.0f固定なので競合しない。
+    //アルファチャンネルを持たないテクスチャはサンプル結果が1.0になるため既存モデルへの影響もない)
+    specular *= texColor.a;
 
     //テクスチャの色に明るさを適用してそのピクセルの色を返す
     return float4(texColor.rgb * light + specular + emission.rgb, 1.0f);
