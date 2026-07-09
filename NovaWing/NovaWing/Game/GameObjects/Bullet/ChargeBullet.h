@@ -10,7 +10,7 @@ public:
 	void Draw() override;//描画処理
 
 	//敵にヒットした時の処理
-	void OnHitEnemy();
+	void OnHitEnemy() override;
 
 private:
 	//ターゲットのオブジェクト

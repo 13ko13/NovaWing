@@ -11,7 +11,7 @@ namespace
 	//弾の速度
 	constexpr float move_speed = 40.0f;
 	//攻撃力
-	constexpr int attack_power = 10;
+	constexpr int attack_power = 100;
 }
 
 ChargeReadyState::ChargeReadyState(const std::weak_ptr<Player> pPlayer,

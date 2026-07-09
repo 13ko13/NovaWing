@@ -1,205 +1,205 @@
 struct VS_INPUT
 {
-    float4 pos : POSITION; //ƒ‚ƒfƒ‹‚Ì’¸“_À•W
-    float3 normal : NORMAL0; //ƒ‚ƒfƒ‹‚Ì–@ü•ûŒü
-    float4 diffuse : COLOR0; //‚±‚Ì“ñ‚Â‚Í‚È‚¢‚Æ‚¤‚Ü‚­’l‚ª“ü‚ç‚È‚¢
+    float4 pos : POSITION; //ãƒ¢ãƒ‡ãƒ«ã®é ‚ç‚¹åº§æ¨™
+    float3 normal : NORMAL0; //ãƒ¢ãƒ‡ãƒ«ã®æ³•ç·šæ–¹å‘
+    float4 diffuse : COLOR0; //ã“ã®äºŒã¤ã¯ãªã„ã¨ã†ã¾ãå€¤ãŒå…¥ã‚‰ãªã„
     float4 specular : COLOR1;
-    float2 uv : TEXCOORD0; //ƒsƒNƒZƒ‹uv
+    float2 uv : TEXCOORD0; //ãƒ”ã‚¯ã‚»ãƒ«uv
 };
 
 struct VS_OUTPUT
 {
-    float4 pos : SV_POSITION; //ƒXƒNƒŠ[ƒ“‹óŠÔ‚ÌˆÊ’u
-    float2 uv : TEXCOORD0; //UVÀ•W
-    float3 normal : NORMAL; //ƒ[ƒ‹ƒh‹óŠÔ‚Ì–@ü
-    float3 worldPos : TEXCOORD1; //ƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚É“n‚·ƒ[ƒ‹ƒhÀ•W
+    float4 pos : SV_POSITION; //ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ç©ºé–“ã®ä½ç½®
+    float2 uv : TEXCOORD0; //UVåº§æ¨™
+    float3 normal : NORMAL; //ãƒ¯ãƒ¼ãƒ«ãƒ‰ç©ºé–“ã®æ³•ç·š
+    float3 worldPos : TEXCOORD1; //ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«æ¸¡ã™ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™
 };
 
 cbuffer MatrixBuffer : register(b2)
 {
-    float4x4 world; //ƒ[ƒ‹ƒhs—ñ
-    float4x4 view; //ƒJƒƒ‰s—ñ
-    //Ë‰es—ñ(‹óŠÔÀ•W‚ğ‹‘ä‚Éû‚ßA‰æ–Êã‚Ì2ŸŒ³À•W‚Ö•ÏŠ·‚·‚é‚½‚ß‚Ìs—ñ)
-    //‰“‹ß–@‚È‚Ç‚ğ•\‚·‚½‚ß‚É‚Í•K{
-    float4x4 proj; //ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñ
+    float4x4 world; //ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—
+    float4x4 view; //ã‚«ãƒ¡ãƒ©è¡Œåˆ—
+    //å°„å½±è¡Œåˆ—(ç©ºé–“åº§æ¨™ã‚’è¦–éŒå°ã«åã‚ã€ç”»é¢ä¸Šã®2æ¬¡å…ƒåº§æ¨™ã¸å¤‰æ›ã™ã‚‹ãŸã‚ã®è¡Œåˆ—)
+    //é è¿‘æ³•ãªã©ã‚’è¡¨ã™ãŸã‚ã«ã¯å¿…é ˆ
+    float4x4 proj; //ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—
 }
 
 cbuffer WaterBuffer : register(b4)
 {
-    float time; //Œo‰ßŠÔ
-    float3 padding; //‹l‚ß•¨(16ƒoƒCƒgƒAƒ‰ƒCƒƒ“ƒg)
+    float time; //çµŒéæ™‚é–“
+    float3 padding; //è©°ã‚ç‰©(16ãƒã‚¤ãƒˆã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆ)
 }
 
-//ƒxƒNƒgƒ‹‚ÌX‚ÆZ‚©‚çƒ‰ƒ“ƒ_ƒ€”{‚ÉŒ©‚¦‚é’l‚ğì‚éŠÖ”
+//ãƒ™ã‚¯ãƒˆãƒ«ã®Xã¨Zã‹ã‚‰ãƒ©ãƒ³ãƒ€ãƒ å€ã«è¦‹ãˆã‚‹å€¤ã‚’ä½œã‚‹é–¢æ•°
 float Hash(float2 vecXZ)
 {
-    //frac‚Í¬”“_ˆÈ‰º‚ğØ‚èo‚µ‚Ä‚­‚ê‚é
+    //fracã¯å°æ•°ç‚¹ä»¥ä¸‹ã‚’åˆ‡ã‚Šå‡ºã—ã¦ãã‚Œã‚‹
     float value = dot(vecXZ, float2(12.9898, 78.233));
     return frac(sin(value) * 43758.5453);
 }
 
 float ValueNoise(float2 vecXZ)
 {
-    //’¸“_‚ÌˆÊ’u‚©‚çA©•ª‚ª‚¢‚éƒOƒŠƒbƒh“à‚ÌêŠ‚ğ‹‚ß‚é
-    float2 gridCell = floor(vecXZ); //ƒ}ƒX–Ú‚Ì¶‰º‚ÌÀ•W
-    //frac‚Í¬”“_ˆÈ‰º‚Ì‚İØ‚èo‚·
-    float2 localPos = frac(vecXZ); //ƒ}ƒX–Ú“à‚Å‚ÌˆÊ’u(0`1)
-    //‚»‚Ìƒ}ƒX–Ú‚Ìl‹÷‚ğƒ‰ƒ“ƒ_ƒ€‚È’l‚É‚µ‚Ä‚­‚ê‚éƒnƒbƒVƒ…’l‚ğ‹‚ß‚é
-    float hash00 = Hash(gridCell + float2(0.0f, 0.0f)); //¶‰º
-    float hash10 = Hash(gridCell + float2(1.0f, 0.0f)); //‰E‰º
-    float hash01 = Hash(gridCell + float2(0.0f, 1.0f)); //¶ã
-    float hash11 = Hash(gridCell + float2(1.0f, 1.0f)); //‰Eã
-    //‰º•Ó‚ğlocalPos‚Ìx‚Å•âŠÔ‚·‚é
+    //é ‚ç‚¹ã®ä½ç½®ã‹ã‚‰ã€è‡ªåˆ†ãŒã„ã‚‹ã‚°ãƒªãƒƒãƒ‰å†…ã®å ´æ‰€ã‚’æ±‚ã‚ã‚‹
+    float2 gridCell = floor(vecXZ); //ãƒã‚¹ç›®ã®å·¦ä¸‹ã®åº§æ¨™
+    //fracã¯å°æ•°ç‚¹ä»¥ä¸‹ã®ã¿åˆ‡ã‚Šå‡ºã™
+    float2 localPos = frac(vecXZ); //ãƒã‚¹ç›®å†…ã§ã®ä½ç½®(0ï½1)
+    //ãã®ãƒã‚¹ç›®ã®å››éš…ã‚’ãƒ©ãƒ³ãƒ€ãƒ ãªå€¤ã«ã—ã¦ãã‚Œã‚‹ãƒãƒƒã‚·ãƒ¥å€¤ã‚’æ±‚ã‚ã‚‹
+    float hash00 = Hash(gridCell + float2(0.0f, 0.0f)); //å·¦ä¸‹
+    float hash10 = Hash(gridCell + float2(1.0f, 0.0f)); //å³ä¸‹
+    float hash01 = Hash(gridCell + float2(0.0f, 1.0f)); //å·¦ä¸Š
+    float hash11 = Hash(gridCell + float2(1.0f, 1.0f)); //å³ä¸Š
+    //ä¸‹è¾ºã‚’localPosã®xã§è£œé–“ã™ã‚‹
     float bottomValue = lerp(hash00, hash10, localPos.x);
-    //ã•Ó‚ğlocalPos‚Ìx‚Å•âŠÔ‚·‚é
+    //ä¸Šè¾ºã‚’localPosã®xã§è£œé–“ã™ã‚‹
     float topValue = lerp(hash01, hash11, localPos.x);
-    //ÅŒã‚É‚±‚Ì“ñ‚Â‚ğlocalPos‚Ìy‚Å•âŠÔ‚·‚é
+    //æœ€å¾Œã«ã“ã®äºŒã¤ã‚’localPosã®yã§è£œé–“ã™ã‚‹
     float finalValue = lerp(bottomValue, topValue, localPos.y);
     
     return finalValue;
 }
 
-//‰¡‚Ì”g
-static const float wave_frequency = 0.0025f; //”g‚Ìü”g”(¬‚³‚¢‚Ù‚Ç”g‚ª’·‚¢)
-static const float wave_speed = 1.0f; //”g‚Ì‘¬“x
-static const float wave_height = 33.0f; //”g‚Ì‚‚³
+//æ¨ªã®æ³¢
+static const float wave_frequency = 0.0025f; //æ³¢ã®å‘¨æ³¢æ•°(å°ã•ã„ã»ã©æ³¢ãŒé•·ã„)
+static const float wave_speed = 1.0f; //æ³¢ã®é€Ÿåº¦
+static const float wave_height =5.0f; //æ³¢ã®é«˜ã•
 
-//c‚Ì”g
-static const float wave_frequency2 = 0.005f; //”g‚Ìü”g”(¬‚³‚¢‚Ù‚Ç”g‚ª’·‚¢)
-static const float wave_speed2 = 0.1f; //”g‚Ì‘¬“x
-static const float wave_height2 = 10.0f; //”g‚Ì‚‚³
+//ç¸¦ã®æ³¢
+static const float wave_frequency2 = 0.005f; //æ³¢ã®å‘¨æ³¢æ•°(å°ã•ã„ã»ã©æ³¢ãŒé•·ã„)
+static const float wave_speed2 = 0.1f; //æ³¢ã®é€Ÿåº¦
+static const float wave_height2 = 6.0f; //æ³¢ã®é«˜ã•
 
-//Î‚ß‚Ì¬‚³‚¢”g
-static const float wave_frequency3 = 0.02f; //”g‚Ìü”g”(¬‚³‚¢‚Ù‚Ç”g‚ª’·‚¢)
-static const float wave_speed3 = 2.0f; //”g‚Ì‘¬“x
-static const float wave_height3 = 4.0f; //”g‚Ì‚‚³
+//ç¸¦ã®å°ã•ã„æ³¢
+static const float wave_frequency3 = 0.002f; //æ³¢ã®å‘¨æ³¢æ•°(å°ã•ã„ã»ã©æ³¢ãŒé•·ã„)
+static const float wave_speed3 = 2.0f; //æ³¢ã®é€Ÿåº¦
+static const float wave_height3 = 4.0f; //æ³¢ã®é«˜ã•
 
-//×‚©‚¢”g–ä
-static const float wave_frequency4 = 0.05f; //”g‚Ìü”g”(¬‚³‚¢‚Ù‚Ç”g‚ª’·‚¢)
-static const float wave_speed4 = 2.5f; //”g‚Ì‘¬“x
-static const float wave_height4 = 0.5f; //”g‚Ì‚‚³
+//ç´°ã‹ã„æ³¢ç´‹
+static const float wave_frequency4 = 0.005f; //æ³¢ã®å‘¨æ³¢æ•°(å°ã•ã„ã»ã©æ³¢ãŒé•·ã„)
+static const float wave_speed4 = 2.5f; //æ³¢ã®é€Ÿåº¦
+static const float wave_height4 = 0.5f; //æ³¢ã®é«˜ã•
 
-//”’”g‚ğo‚·‚½‚ß‚Ì”g
-static const float wave_frequency5 = 0.001f; //”g‚Ìü”g”(¬‚³‚¢‚Ù‚Ç”g‚ª’·‚¢)
-static const float wave_speed5 = 3.0f; //”g‚Ì‘¬“x
-static const float wave_height5 = 40.0f; //”g‚Ì‚‚³
+//ç™½æ³¢ã‚’å‡ºã™ãŸã‚ã®æ³¢
+static const float wave_frequency5 = 0.001f; //æ³¢ã®å‘¨æ³¢æ•°(å°ã•ã„ã»ã©æ³¢ãŒé•·ã„)
+static const float wave_speed5 = 3.0f; //æ³¢ã®é€Ÿåº¦
+static const float wave_height5 = 16.0f; //æ³¢ã®é«˜ã•
 
-//ƒmƒCƒY‚Ì×‚©‚³‚ğ’²®‚·‚é‚½‚ß‚Ì’l
-static const float noiseScale = 0.06f;
-//ŒX‚«‚ğ‹‚ß‚é‚½‚ß‚É‚¸‚ç‚·—Ê(”÷•ª‚Åg—p‚·‚é)
+//ãƒã‚¤ã‚ºã®ç´°ã‹ã•ã‚’èª¿æ•´ã™ã‚‹ãŸã‚ã®å€¤
+static const float noiseScale = 0.006f;
+//å‚¾ãã‚’æ±‚ã‚ã‚‹ãŸã‚ã«ãšã‚‰ã™é‡(å¾®åˆ†ã§ä½¿ç”¨ã™ã‚‹)
 static const float noiseEpsilon = 0.0001f;
-//ƒmƒCƒY‚Ì‹­‚³
-static const float noiseStrength = 0.05f;
+//ãƒã‚¤ã‚ºã®å¼·ã•
+static const float noiseStrength = 0.01f;
 
 VS_OUTPUT main(VS_INPUT input)
 {
     VS_OUTPUT output;
     
-    //ƒ[ƒJƒ‹À•W‚Íƒ‚ƒfƒ‹©g‚ğ’†S‚Æ‚µ‚½‚Æ‚«‚ÌÀ•W
-    //ƒ[ƒ‹ƒhÀ•W‚Íƒ‚ƒfƒ‹©g‚ª¢ŠE‚Ì’†S‚©‚çŒ©‚Ä‚Ç‚±‚É‚ ‚é‚©‚ÌÀ•W
-    //ƒrƒ…[À•W‚ÍƒJƒƒ‰‚ÌˆÊ’u‚ğŠî€‚Æ‚µ‚½‚Æ‚«‚ÌÀ•W
+    //ãƒ­ãƒ¼ã‚«ãƒ«åº§æ¨™ã¯ãƒ¢ãƒ‡ãƒ«è‡ªèº«ã‚’ä¸­å¿ƒã¨ã—ãŸã¨ãã®åº§æ¨™
+    //ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã¯ãƒ¢ãƒ‡ãƒ«è‡ªèº«ãŒä¸–ç•Œã®ä¸­å¿ƒã‹ã‚‰è¦‹ã¦ã©ã“ã«ã‚ã‚‹ã‹ã®åº§æ¨™
+    //ãƒ“ãƒ¥ãƒ¼åº§æ¨™ã¯ã‚«ãƒ¡ãƒ©ã®ä½ç½®ã‚’åŸºæº–ã¨ã—ãŸã¨ãã®åº§æ¨™
     
-	//ƒ[ƒJƒ‹À•W¨ƒ[ƒ‹ƒhÀ•W‚É•ÏŠ·‚·‚é
+	//ãƒ­ãƒ¼ã‚«ãƒ«åº§æ¨™â†’ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã«å¤‰æ›ã™ã‚‹
     float4 worldPos = mul(input.pos, transpose(world));
     
-    //’¸“_‚Ìƒ[ƒ‹ƒhÀ•W‚ğŒvZ‚µ‚½ŒãA”g‚Ì•ÏˆÊ‚ğ‰Á‚¦‚é
-    //sin(’¸“_‚Ìƒ[ƒ‹ƒhÀ•WX * ”g‚Ìü”g” + Œo‰ßŠÔ * ”g‚Ì‘¬“x ) * ”g‚Ì‚‚³
+    //é ‚ç‚¹ã®ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã‚’è¨ˆç®—ã—ãŸå¾Œã€æ³¢ã®å¤‰ä½ã‚’åŠ ãˆã‚‹
+    //sin(é ‚ç‚¹ã®ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™X * æ³¢ã®å‘¨æ³¢æ•° + çµŒéæ™‚é–“ * æ³¢ã®é€Ÿåº¦ ) * æ³¢ã®é«˜ã•
     float wave = sin(worldPos.x * wave_frequency +
-    time * wave_speed) * wave_height + //‰¡‚Ì”g
+    time * wave_speed) * wave_height + //æ¨ªã®æ³¢
     sin(worldPos.z * wave_frequency2 +
-    time * wave_speed2) * wave_height2 + //c‚Ì”g
-    sin((worldPos.z + worldPos.x) * wave_frequency3 +
-    time * wave_speed3) * wave_height3 + //Î‚ß‚Ì”g
+    time * wave_speed2) * wave_height2 + //ç¸¦ã®æ³¢
+    sin(worldPos.z  * wave_frequency3 +
+    time * wave_speed3) * wave_height3 + //æ–œã‚ã®æ³¢
     sin((worldPos.z - worldPos.x) * wave_frequency4 +
-    time * wave_speed4) * wave_height4 + //×‚©‚¢”g–ä
+    time * wave_speed4) * wave_height4 + //ç´°ã‹ã„æ³¢ç´‹
     sin((worldPos.z + worldPos.x) * wave_frequency5 +
     time * wave_speed5) * wave_height5;
     
-    //ƒ[ƒ‹ƒhÀ•W‚ÌY‚É”g‚Ì•ÏˆÊ‚ğ‰Á‚¦‚é•K—v‚ª‚ ‚é
+    //ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã®Yã«æ³¢ã®å¤‰ä½ã‚’åŠ ãˆã‚‹å¿…è¦ãŒã‚ã‚‹
     worldPos.y += wave;
     
-    //ƒ[ƒ‹ƒhÀ•W¨ƒrƒ…[À•W
+    //ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™â†’ãƒ“ãƒ¥ãƒ¼åº§æ¨™
     float4 viewPos = mul(worldPos, transpose(view));
-    //ƒrƒ…[À•W‚ğƒXƒNƒŠ[ƒ“À•W‚É•ÏŠ·
+    //ãƒ“ãƒ¥ãƒ¼åº§æ¨™ã‚’ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ã«å¤‰æ›
     float4 screenPos = mul(viewPos, transpose(proj));
-    //–@ü‚Ìƒ[ƒ‹ƒh•ÏŠ·
-    //w‚Ì’l‚ğ0‚É‚·‚é‚±‚Æ‚ÅA•ûŒü‚Æ‚µ‚Ä•ÏŠ·Axyz‚Ì‚İ‚ğ‚Æ‚é‚±‚Æ‚Åfloat3‚É–ß‚·
+    //æ³•ç·šã®ãƒ¯ãƒ¼ãƒ«ãƒ‰å¤‰æ›
+    //wã®å€¤ã‚’0ã«ã™ã‚‹ã“ã¨ã§ã€æ–¹å‘ã¨ã—ã¦å¤‰æ›ã€xyzã®ã¿ã‚’ã¨ã‚‹ã“ã¨ã§float3ã«æˆ»ã™
     float3 worldNormal = normalize(mul(float4(input.normal.xyz, 0.0f), transpose(world)).xyz);
     
-    //”g‚Ì”÷•ª‚©‚ç–@ü‚ğŒvZ
-    //”g‚ÌŒX‚«‚ğŒvZ‚·‚é
-    //X•ûŒü‚ÌŒX‚«
+    //æ³¢ã®å¾®åˆ†ã‹ã‚‰æ³•ç·šã‚’è¨ˆç®—
+    //æ³¢ã®å‚¾ãã‚’è¨ˆç®—ã™ã‚‹
+    //Xæ–¹å‘ã®å‚¾ã
     float derivateveWaveX =
     cos(
              worldPos.x * wave_frequency +
               time * wave_speed
           ) * wave_height * wave_frequency;
     
-    //Z•ûŒü‚ÌŒX‚«
+    //Zæ–¹å‘ã®å‚¾ã
     float derivateveWaveZ =
     cos(
              worldPos.z * wave_frequency2 +
               time * wave_speed2
           ) * wave_height2 * wave_frequency2;
     
-    //Î‚ß‚Ì”gX‚ÌŒX‚«(Diagonal=Î‚ß)
+    //æ–œã‚ã®æ³¢Xã®å‚¾ã(Diagonal=æ–œã‚)
     float dDiagonalWaveX =
     cos(
-             (worldPos.z + worldPos.x) * wave_frequency3 +
+             worldPos.z  * wave_frequency3 +
               time * wave_speed3
           ) * wave_height3 * wave_frequency3;
     
-    //Î‚ß‚Ì”gZ‚ÌŒX‚«(Diagonal=Î‚ß)
-    //Î‚ß45“x‚È‚Ì‚ÅX‚ÆZ‚ÌŒX‚«‚Í“¯‚¶
+    //æ–œã‚ã®æ³¢Zã®å‚¾ã(Diagonal=æ–œã‚)
+    //æ–œã‚45åº¦ãªã®ã§Xã¨Zã®å‚¾ãã¯åŒã˜
     float dDiagonalWaveZ = dDiagonalWaveX;
     
-    //×‚©‚¢”g–äX‚ÌŒX‚«(Ripple=”g–ä)
+    //ç´°ã‹ã„æ³¢ç´‹Xã®å‚¾ã(Ripple=æ³¢ç´‹)
     float dRippleWaveX =
     cos(
              (worldPos.z - worldPos.x) * wave_frequency4 +
               time * wave_speed4
           ) * wave_height4 * wave_frequency4;
     
-    //×‚©‚¢”g–äZ‚ÌŒX‚«(Ripple=”g–ä)
-    //X-Z‚È‚Ì‚ÅZ‚ÍX‚Æ‹tŒü‚«
+    //ç´°ã‹ã„æ³¢ç´‹Zã®å‚¾ã(Ripple=æ³¢ç´‹)
+    //X-Zãªã®ã§Zã¯Xã¨é€†å‘ã
     float dRippleWaveZ = -dRippleWaveX;
     
-    //”’”g—p‚Ì”gX
+    //ç™½æ³¢ç”¨ã®æ³¢X
     float dWhiteWaveX =
     cos(
              (worldPos.z + worldPos.x) * wave_frequency5 +
               time * wave_speed5
           ) * wave_height5 * wave_frequency5;
     
-    //”’”g—p‚Ì”gZ
+    //ç™½æ³¢ç”¨ã®æ³¢Z
     float dWhiteWaveZ = dWhiteWaveX;
     
-    //”g‚ªŠŠ‚ç‚©‚·‚¬‚Ä•z‚Ì‚æ‚¤‚ÉŒ©‚¦‚é‚Ì‚ÅƒmƒCƒY‚ğ­‚µ‚©‚¯‚Ä‚İ‚é
-    //Šî€“_‚ÌƒmƒCƒY
+    //æ³¢ãŒæ»‘ã‚‰ã‹ã™ãã¦å¸ƒã®ã‚ˆã†ã«è¦‹ãˆã‚‹ã®ã§ãƒã‚¤ã‚ºã‚’å°‘ã—ã‹ã‘ã¦ã¿ã‚‹
+    //åŸºæº–ç‚¹ã®ãƒã‚¤ã‚º
     float noiseBase = ValueNoise(worldPos.xz * noiseScale);
-    //x•ûŒü‚É­‚µ‚¸‚ç‚µ‚½“_‚ÌƒmƒCƒY
+    //xæ–¹å‘ã«å°‘ã—ãšã‚‰ã—ãŸç‚¹ã®ãƒã‚¤ã‚º
     float noiseX = ValueNoise(worldPos.xz *
     noiseScale + float2(noiseEpsilon, 0.0f));
-    //z•ûŒü‚É­‚µ‚¸‚ç‚µ‚½“_‚ÌƒmƒCƒY
+    //zæ–¹å‘ã«å°‘ã—ãšã‚‰ã—ãŸç‚¹ã®ãƒã‚¤ã‚º
     float noiseZ = ValueNoise(worldPos.xz *
     noiseScale + float2(0.0f, noiseEpsilon));
     
-    //ŒX‚«‚©‚ç–@ü‚ğŒvZ‚·‚é
-    //«”g‚ª‰Eã‚ª‚è‚Ìê‡
-    //”g‚ª‰Eã‚ª‚è‚Ìâó‘Ô‚Æ‚¢‚¤‚±‚Æ‚Í
-    //‚»‚Ì–@ü‚Í¶ã‚ğŒü‚­‚Ì‚Å-‚ğ•t‚¯‚é•K—v‚ª‚ ‚é
-    //‘S‚Ä‚ÌŒX‚«‚ğ‘«‚µ‡‚í‚¹‚é
-    //‚±‚Ì“ñ‚Â‚©‚çŒX‚«‚ğ‹‚ß‚é
+    //å‚¾ãã‹ã‚‰æ³•ç·šã‚’è¨ˆç®—ã™ã‚‹
+    //â†“æ³¢ãŒå³ä¸ŠãŒã‚Šã®å ´åˆ
+    //æ³¢ãŒå³ä¸ŠãŒã‚Šã®å‚çŠ¶æ…‹ã¨ã„ã†ã“ã¨ã¯
+    //ãã®æ³•ç·šã¯å·¦ä¸Šã‚’å‘ãã®ã§-ã‚’ä»˜ã‘ã‚‹å¿…è¦ãŒã‚ã‚‹
+    //å…¨ã¦ã®å‚¾ãã‚’è¶³ã—åˆã‚ã›ã‚‹
+    //ã“ã®äºŒã¤ã‹ã‚‰å‚¾ãã‚’æ±‚ã‚ã‚‹
     float noiseDX = (noiseX - noiseBase) / noiseEpsilon;
     float noiseDZ = (noiseZ - noiseBase) / noiseEpsilon;
     
-    //ÅI“I‚È–@ü‚ğŒvZ
+    //æœ€çµ‚çš„ãªæ³•ç·šã‚’è¨ˆç®—
     float3 finalNormal = normalize(float3(
     -(derivateveWaveX + dDiagonalWaveX +
-    dRippleWaveX + dWhiteWaveX + noiseDX * noiseStrength), //X¬•ª‚ğ‚Â”g
+    dRippleWaveX + dWhiteWaveX + noiseDX * noiseStrength), //Xæˆåˆ†ã‚’æŒã¤æ³¢
     1.0f,
     -(derivateveWaveZ + dDiagonalWaveZ +
-    dRippleWaveZ + dWhiteWaveZ + noiseDZ * noiseStrength))); //Z¬•ª‚ğ‚Â”g
+    dRippleWaveZ + dWhiteWaveZ + noiseDZ * noiseStrength))); //Zæˆåˆ†ã‚’æŒã¤æ³¢
     
     output.pos = screenPos;
     output.uv = input.uv;

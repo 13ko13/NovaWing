@@ -1,6 +1,7 @@
 ﻿#include "CollisionManager.h"
 #include "Manager/BulletManager.h"
 #include "Game/GameObjects/Bullet/PlayerBullet.h"
+#include "Game/GameObjects/Bullet/ChargeBullet.h"
 #include "Game/GameObjects/Bullet/EnemyBullet.h"
 #include "Charactor/Enemy/FloatingEnemy/FloatingEnemy.h"
 #include "Charactor/Player/Player.h"
@@ -46,6 +47,10 @@ void CollisionManager::Update()
 	std::vector<std::weak_ptr<EnemyBullet>> weakEnemyBullets = pBulletManager->GetEnemyBullets();
 	std::vector<std::shared_ptr<EnemyBullet>> sharedEnemyBullets;
 
+	//チャージ弾の配列を取得
+	std::vector<std::weak_ptr<ChargeBullet>> weakChargeBullets = pBulletManager->GetChargeBullets();
+	std::vector<std::shared_ptr<ChargeBullet>> sharedChargeBullets;
+
 	//弾のすべてのweak_ptrをshared_ptrに変換
 	for (std::weak_ptr<PlayerBullet>& weakBullet : weakPlayerBullets)//プレイヤー弾
 	{
@@ -67,6 +72,21 @@ void CollisionManager::Update()
 		//変換したものを格納
 		sharedEnemyBullets.push_back(pBullet);
 	}
+	for (std::weak_ptr<ChargeBullet>& weakBullet : weakChargeBullets)//チャージ弾
+	{
+		std::shared_ptr<ChargeBullet> pBullet = weakBullet.lock();
+
+		//nullチェック
+		if (!pBullet) continue;
+
+		//変換したものを格納
+		sharedChargeBullets.push_back(pBullet);
+	}
+
+	//チャージ弾とノーマル弾を一つにまとめる
+	std::vector<std::shared_ptr<BulletBase>> sharedBullets;
+	sharedBullets.insert(sharedBullets.end(),sharedPlayerBullet.begin(),sharedPlayerBullet.end());
+	sharedBullets.insert(sharedBullets.end(),sharedChargeBullets.begin(),sharedChargeBullets.end());
 
 	//敵も同様にshared_ptrに変換
 	std::vector<std::shared_ptr<FloatingEnemy>> pSharedEnemies;//浮遊敵
@@ -90,14 +110,14 @@ void CollisionManager::Update()
 		pSharedWormEnemies.push_back(pSharedWormEnemy);
 	}
 
-	//全ての敵と弾が当たっているか
+	//全ての浮遊敵と弾が当たっているか
 	for (std::shared_ptr<FloatingEnemy> pEnemy : pSharedEnemies)
 	{
 		//もしその敵が死んでいるなら処理をせずに次の敵の処理に移る
 		if (pEnemy->IsDead()) continue;
 
 		//全ての弾をループで見る
-		for (std::shared_ptr<PlayerBullet> pPlayerBullet : sharedPlayerBullet)
+		for (std::shared_ptr<BulletBase> pPlayerBullet : sharedBullets)
 		{
 			Sphere enemyCol = pEnemy->GetSphere();//敵の球
 			Sphere bulletCol = pPlayerBullet->GetSphere();
@@ -112,7 +132,7 @@ void CollisionManager::Update()
 			}
 		}
 	}
-
+	
 	//プレイヤーとすべての敵の弾が当たっているかを一つずつ調べる
 	for (std::shared_ptr<EnemyBullet> pEnemyBullet : sharedEnemyBullets)
 	{
@@ -129,7 +149,7 @@ void CollisionManager::Update()
 			//プレイヤーのHPを減らす
 			pPlayer->TakeDamage(pEnemyBullet->GetAttackPower());
 			//敵弾の当たったときの処理
-			pEnemyBullet->OnHitPlayer();
+			pEnemyBullet->OnHitEnemy();
 		}
 	}
 
@@ -140,7 +160,7 @@ void CollisionManager::Update()
 		//もしその敵が死んでいるなら処理をせずに次の敵の処理に移る
 		if (pWormEnemy->IsDead()) continue;
 		//全ての弾をループで見る
-		for (std::shared_ptr<PlayerBullet> pPlayerBullet : sharedPlayerBullet)
+		for (std::shared_ptr<BulletBase> pPlayerBullet : sharedBullets)
 		{
 			Sphere wormHeadCol = pWormEnemy->GetHeadSphere();//ワームエネミーの頭の球
 			Sphere bulletCol = pPlayerBullet->GetSphere();
@@ -151,31 +171,6 @@ void CollisionManager::Update()
 				pWormEnemy->TakeDamage(pPlayerBullet->GetAttackPower());
 				//敵に当たったときのプレイヤー弾の処理
 				pPlayerBullet->OnHitEnemy();
-			}
-		}
-	}
-
-	//プレイヤーの弾とワームエネミーの胴体の
-	//当たり判定が当たっているかを一つずつ調べる
-	for(std::shared_ptr<WormEnemy> pWormEnemy : pSharedWormEnemies)
-	{
-		//もしその敵が死んでいるなら処理をせずに次の敵の処理に移る
-		if(pWormEnemy->IsDead()) continue;
-		//全ての弾をループで見る
-		for(std::shared_ptr<PlayerBullet> pPlayerBullet : sharedPlayerBullet)
-		{
-			Sphere bulletCol = pPlayerBullet->GetSphere();
-			//胴体の当たり判定を取得
-			const std::vector<Sphere>& segmentSpheres = pWormEnemy->GetSegmentSpheres();
-			for(const Sphere& segmentSphere : segmentSpheres)
-			{
-				//当たっていたら
-				if(segmentSphere.HitCollision(bulletCol))
-				{
-					//胴体は無敵なのでHPは減らさない
-					//敵に当たったときのプレイヤー弾の処理
-					pPlayerBullet->OnHitEnemy();
-				}
 			}
 		}
 	}

@@ -11,6 +11,6 @@ public:
 	void Draw() override;//描画処理
 
 	//弾がプレイヤーに当たった時の処理
-	void OnHitPlayer();
+	void OnHitEnemy() override;
 };
 

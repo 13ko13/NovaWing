@@ -15,7 +15,7 @@ namespace
 	constexpr int horizontal_grid_num = 140;
 
 	//グリッド全体の広さ
-	constexpr Size grid_size = { 3000.0f,3000.0f };
+	constexpr Size grid_size = {10000.0f,10000.0f };
 }
 
 WaterManager::WaterManager(const std::shared_ptr<CameraBase> pCamera) :
@@ -226,7 +226,8 @@ void WaterManager::UpdateShaderMatrixData()
 	float cameraZ = m_pCamera.lock()->GetPos().m_z + 300.0f;
 	Matrix4x4 trans = Matrix4x4::Translate(Vector3(0.0f, 0.0f, cameraZ));
 
-	m_pCbufferMatrixData->world = trans.ToDxLib();
+	//m_pCbufferMatrixData->world = trans.ToDxLib();
+	m_pCbufferMatrixData->world = MGetIdent();
 	m_pCbufferMatrixData->view = GetCameraViewMatrix();
 	m_pCbufferMatrixData->proj = GetCameraProjectionMatrix();
 

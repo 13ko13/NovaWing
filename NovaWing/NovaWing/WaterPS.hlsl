@@ -11,120 +11,120 @@ struct PS_INPUT
 {
     float4 pos : SV_POSITION;
     float2 uv : TEXCOORD0;
-    float3 normalWS : NORMAL; //���[���h��Ԃ̖@��
+    float3 normalWS : NORMAL; //ワールド空間の法線
     float3 worldPos : TEXCOORD1;
 };
 
 cbuffer LightingBuffer : register(b3)
 {
-    float3 lightVec;//���̕����x�N�g��
+    float3 lightVec;//光の方向ベクトル
 }
 
 cbuffer CameraBuffer : register(b5)
 {
-    float3 cameraPos;//�J�����̈ʒu
+    float3 cameraPos;//カメラの位置
     float padding;
 }
 
 float3 SampleSkyReflection(float3 reflectVec)
 {
-    //���˃x�N�g���͗����̂̒��S����O���Ɍ������ĐL�тĂ���x�N�g��
-    //���̃x�N�g�����ǂ̖ʂ��т������肷��
-    //�S�Ă̐����̐�Βl���r����
+    //反射ベクトルは立方体の中心から外側に向かって伸びているベクトル
+    //このベクトルがどの面を貫くか判定する
+    //全ての成分の絶対値を比較する
     float absX = abs(reflectVec.x);
     float absY = abs(reflectVec.y);
     float absZ = abs(reflectVec.z);
     
-    //x��y�ǂ��炪�傫����
+    //xとyどちらが大きいか
     float maxXY = max(absX, absY);
-    //�����z���ׂĂǂ��炪�傫����
+    //それとzを比べてどちらが大きいか
     float maxAll = max(maxXY, absZ);
-    //���̒l���ǂ̐����Ȃ̂����ׂ邽�߂ɂ��ꂼ��Əƍ�����
+    //その値がどの成分なのか調べるためにそれぞれと照合する
     if (maxAll == absX)//X
     {
-        //���̐��������̖ʂ̂ǂ̂�����ɂ���̂���
-        //���ׂ邽�߂�scale���t�Z�ŋ��߂�
-        float scale = 1.0f / reflectVec.x;
-        //�ʏ��x�ȊO�̍��W�����߂�
+        //他の成分がその面のどのあたりにあるのかを
+        //調べるためにscaleを逆算で求める
+        float scale = 1.0f / absX;
+        //面上のx以外の座標を求める
         float faceY = reflectVec.y * scale;
         float faceZ = reflectVec.z * scale;
         
-        //���E�ǂ���Ȃ̂��𒲂ׂ�
-        if (reflectVec.x > 0.0f)//�E
+        //左右どちらなのかを調べる
+        if (reflectVec.x > 0.0f)//右
         {
-            //�E�ʂ̍����uv = (0,0)
-            //�E���uv = (1,0)
-            float faceU = 1.0f - (faceZ + 1.0f) / 2; //0�`1
-            float faceV = 1.0f - (faceY + 1.0f) / 2; //0�`1
+            //右面の左上のuv = (0,0)
+            //右上のuv = (1,0)
+            float faceU = 1.0f - (faceZ + 1.0f) / 2; //0～1
+            float faceV = 1.0f - (faceY + 1.0f) / 2; //0～1
             
-            //�E�ʂ̃e�N�X�`�����T���v�����O���Ă��̐F��Ԃ�
+            //右面のテクスチャをサンプリングしてその色を返す
             float3 skyColor = skyRight.Sample(smp, float2(faceU, faceV)).rgb;
             return float3(skyColor);
         }
-        else //��
+        else //左
         {
-            float faceU = (faceZ + 1.0f) / 2; //0�`1
-            float faceV = 1.0f - (faceY + 1.0f) / 2; //0�`1
+            float faceU = (faceZ + 1.0f) / 2; //0～1
+            float faceV = 1.0f - (faceY + 1.0f) / 2; //0～1
             
-            //���ʂ̃e�N�X�`�����T���v�����O���Ă��̐F��Ԃ�
+            //左面のテクスチャをサンプリングしてその色を返す
             float3 skyColor = skyLeft.Sample(smp, float2(faceU, faceV)).rgb;
             return float3(skyColor);
         }
     }
     else if (maxAll == absY)//Y
     {
-        //���̐��������̖ʂ̂ǂ̂�����ɂ���̂���
-        //���ׂ邽�߂�scale���t�Z�ŋ��߂�
-        float scale = 1.0f / reflectVec.y;
-        //�ʏ��x�ȊO�̍��W�����߂�
+        //他の成分がその面のどのあたりにあるのかを
+        //調べるためにscaleを逆算で求める
+        float scale = 1.0f / absY;
+        //面上のx以外の座標を求める
         float faceX = reflectVec.x * scale;
         float faceZ = reflectVec.z * scale;
         
-        //�㉺�ǂ���Ȃ̂��𒲂ׂ�
-        if (reflectVec.y > 0.0f)//��
+        //上下どちらなのかを調べる
+        if (reflectVec.y > 0.0f)//上
         {
-            float faceU = (faceX + 1.0f) / 2; //0�`1
-            float faceV = (faceZ + 1.0f) / 2; //0�`1
+            float faceU = (faceX + 1.0f) / 2; //0～1
+            float faceV = (faceZ + 1.0f) / 2; //0～1
             
-            //��ʂ̃e�N�X�`�����T���v�����O���Ă��̐F��Ԃ�
+            //上面のテクスチャをサンプリングしてその色を返す
             float3 skyColor = skyUp.Sample(smp, float2(faceU, faceV)).rgb;
             return float3(skyColor);
         }
-        else //��
+        else //下
         {
-            float faceU = (faceX + 1.0f) / 2; //0�`1
-            float faceV = 1.0f - (faceZ + 1.0f) / 2; //0�`1
+            float faceU = (faceX + 1.0f) / 2; //0～1
+            float faceV = 1.0f - (faceZ + 1.0f) / 2; //0～1
             
-            //���ʂ̃e�N�X�`�����T���v�����O���Ă��̐F��Ԃ�
+            //下面のテクスチャをサンプリングしてその色を返す
             float3 skyColor = skyBottom.Sample(smp, float2(faceU, faceV)).rgb;
             return float3(skyColor);
         }
     }
     else //Z
     {
-         //���̐��������̖ʂ̂ǂ̂�����ɂ���̂���
-        //���ׂ邽�߂�scale���t�Z�ŋ��߂�
-        float scale = 1.0f / reflectVec.z;
-        //�ʏ��z�ȊO�̍��W�����߂�
+         //他の成分がその面のどのあたりにあるのかを
+        //調べるためにscaleを逆算で求める
+        float scale = 1.0f / absZ;
+        //面上のz以外の座標を求める
         float faceX = reflectVec.x * scale;
         float faceY = reflectVec.y * scale;
         
-        //�O��ǂ���Ȃ̂��𒲂ׂ�
-        if (reflectVec.z > 0.0f)//�O
+        //前後どちらなのかを調べる
+        if (reflectVec.z > 0.0f)//前
         {
-            float faceU = (faceX + 1.0f) / 2; //0�`1
-            float faceV = 1.0f - (faceY + 1.0f) / 2; //0�`1
+            float faceU = (faceX + 1.0f) / 2; //0～1
+            float faceV = 1.0f - (faceY + 1.0f) / 2; //0～1
             
-            //�O�ʂ̃e�N�X�`�����T���v�����O���Ă��̐F��Ԃ�
+            //前面のテクスチャをサンプリングしてその色を返す
             float3 skyColor = skyFront.Sample(smp, float2(faceU, faceV)).rgb;
             return float3(skyColor);
         }
-        else //���
+        else //後ろ
         {
-            float faceU = 1.0f - (faceX + 1.0f) / 2; //0�`1
-            float faceV = 1.0f - (faceY + 1.0f) / 2; //0�`1
+            float faceU = 1.0f - (faceX + 1.0f) / 2; //0～1
+            float faceV = 1.0f - (faceY + 1.0f) / 2; //0～1
             
-            //�w�ʂ̃e�N�X�`�����T���v�����O���Ă��̐F��Ԃ�
+            //背面のテクスチャをサンプリングしてその色を返す
             float3 skyColor = skyBack.Sample(smp, float2(faceU, faceV)).rgb;
             return float3(skyColor);
         }
@@ -133,82 +133,82 @@ float3 SampleSkyReflection(float3 reflectVec)
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    //�����������v�Z
+    //視線方向を計算
     float3 viewDir = normalize(cameraPos - input.worldPos);
 
-    //���̃x�N�g�����v�Z
+    //光のベクトルを計算
     float3 normLightDir = normalize(lightVec);
     
     //return float4(normalize(lightVec) * 0.5 + 0.5, 1.0f);
     
-    //������ǉ�
+    //環境光を追加
     float ambient = 0.2f;
-    //�@���ƌ��̃x�N�g���̓��ς���Â������Ɩ��邢�������o��
+    //法線と光のベクトルの内積から暗い部分と明るい部分を出す
     float diffuse = saturate(dot(input.normalWS, -normLightDir));
-    //�ŏI�I�Ȍ��̋���
+    //最終的な光の強さ
     float light = saturate(diffuse + ambient);
     
-    //���̔��˗p�̃x�N�g��(specular�p)
+    //光の反射用のベクトル(specular用)
     float3 lightRefVec = reflect(normLightDir, input.normalWS);
     
-    //����C�ɔ��˂����邽�߂�
-    //���˃x�N�g���ƃ��[���h���W���甽�˃x�N�g�����v�Z
-    //����̓J���������ʂł͂Ȃ�
-    //���ʁ��J�����̃x�N�g�����~�����̂Ŋ��ɂ���
-    //�����x�N�g���𔽓]������
+    //空を海に反射させるために
+    //入射ベクトルとワールド座標から反射ベクトルを計算
+    //今回はカメラ→水面ではなく
+    //水面→カメラのベクトルが欲しいので既にある
+    //視線ベクトルを反転させる
     float3 viewRefVec = reflect(-viewDir, input.normalWS);
     
-    //��̐F�����߂�
+    //空の色を求める
     float3 skyColor = SampleSkyReflection(viewRefVec);
 
-    //���ˌ��̌v�Z
-    //�����܂Ԃ����̂Œl������������
+    //反射光の計算
+    //少しまぶしいので値を小さくする
     float specular = pow(saturate(dot(viewDir, lightRefVec)), 30.0f) * 0.5f;
     
-    //�t���l������
-    //���ʂ�^�ォ�猩��Ɠ���
-    //���ʂ��΂߂��猩��Ɣ��˂������Ȃ�
-    //������������ē������Ɛ[�݂�\������
-    //���������Ɩ@���̊p�x���g�p����
+    //フレネル効果
+    //水面を真上から見ると透明
+    //水面を斜めから見ると反射が強くなる
+    //これを活かして透明感と深みを表現する
+    //視線方向と法線の角度を使用する
     float fresnel = pow(
     1.0f - saturate(dot(viewDir, input.normalWS)), 20.0f);
     
-    //�󂢐F
+    //浅い色
     float3 shallowColor = float3(0.0f, 0.5f, 0.9f);
-    //�[���F
+    //深い色
     float3 deepColor = float3(0.0f, 0.05f, 0.2f);
-    //���g�ݍ��킹�ăt���l�����ʂ�t�������̐F
+    //二つを組み合わせてフレネル効果を付けた水の色
     float3 waterColor = lerp(
     shallowColor, deepColor, fresnel);
     
-    //���߂���̐F�Ɛ��̐F���t���l���ŕ�Ԃ���@
+    //求めた空の色と水の色をフレネルで補間する　
     float3 finalWaterCol = lerp(waterColor, skyColor, fresnel);
     
-    //���g��\������
-    //�g�̒��_�t��(Y���W�������ꏊ)�𔒂�����
+    //白波を表現する
+    //波の頂点付近(Y座標が高い場所)を白くする
     float waveHeight = input.worldPos.y;
-    //�A�̕���
-    //smoothstep(min,max,x)�́A
-    //min�ȉ���0,max�ȏ��1
-    //���̊Ԃ͊��炩��0�`1�ɕ��
+    //泡の部分
+    //smoothstep(min,max,x)は、
+    //min以下は0,max以上は1
+    //その間は滑らかに0～1に補間
     float foam = smoothstep(50.0f, 130.0f, waveHeight);
-    //�C�̐F(��̔��˂��������Ă���F)�Ɣ���������
-    //lerp�ŖA�̕����͔��ɕ�Ԃ���
+    //海の色(空の反射も混ざっている色)と白を混ぜる
+    //lerpで泡の部分は白に補間する
     float3 finalColor = lerp(finalWaterCol.rgb, float3(1, 1, 1), foam);
     
-    //�ŏI�I�Ȍ����ڂɖ������������̂Ő��
-    //���C�e�B���O�Ɣ��ˌ���K�p������̐F���o���Ă���
+    //最終的な見た目に霧をかけたいので先に
+    //ライティングと反射光を適用した後の色を出しておく
     float3 litColor = finalColor * light + specular;
     
-     //��(��������\������)
-    //�J�������琅�ʂ܂ł̋��������߂�
+     //霧(水平線を表現する)
+    //カメラから水面までの距離を求める
     float dist = length(cameraPos - input.worldPos);
-    //�����ɉ��������̋���(0�`1)
+    //距離に応じた霧の強さ(0～1)
     float fogFactor = smoothstep(800.0f, 2000.0f, dist);
     
-    //�ŏI�I�ȐF�ɖ���K�p����
+    //最終的な色に霧を適用する
     float3 foggedColor = lerp(litColor, skyColor, fogFactor);
     
-    //�e�N�X�`���̐F�ɖ��邳��K�p���Ă��̃s�N�Z���̐F��Ԃ�
+    //テクスチャの色に明るさを適用してそのピクセルの色を返す
     return float4(foggedColor, 1.0f);
 }

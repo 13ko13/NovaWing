@@ -21,7 +21,7 @@ void EnemyBullet::Draw()
 	BulletBase::Draw();
 }
 
-void EnemyBullet::OnHitPlayer()
+void EnemyBullet::OnHitEnemy()
 {
 	//消す処理
 	OnDead();
