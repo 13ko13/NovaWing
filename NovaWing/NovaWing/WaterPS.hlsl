@@ -236,15 +236,11 @@ float4 main(PS_INPUT input) : SV_TARGET
         float delta =  abs(captureCol.a - normDistNtoF);
         //smoothstep(0.0f,0.05f,delta)で出るのは、deltaが小さいほど0になってしまうので
         //それを1.0 - にすることでdeltaが小さいほど透明度が1、deltaが大きいほど透明度が0になる
-        reveal = 1.0f - smoothstep(0.0f,0.5f,delta);
+        reveal = (1.0f - smoothstep(0.0f, 0.15f, delta)) * 0.6f;
     }
 
     //霧を適用させたカラーと、キャプチャーしたカラーをrevealで補間する
     float3 finalCol = lerp(foggedColor,captureCol.rgb, reveal);
-
-    
-    float normDistNtoF_debug = saturate((dist - near_clip) / (far_clip - near_clip));
-    return float4(normDistNtoF_debug, normDistNtoF_debug, normDistNtoF_debug, 1.0f);
     
     //不透明で返す
     return float4(finalCol,1.0f);

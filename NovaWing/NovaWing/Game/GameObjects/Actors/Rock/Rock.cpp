@@ -12,14 +12,20 @@ Rock::Rock(ResourceLoader::ModelID modelId,
     std::weak_ptr<CameraBase> pCamera) :
     Actor(modelId,pCamera)
 {
-
+    //マテリアル単位でブレンド無しを明示する
+    //(全体のSetDrawBlendModeはMV1描画時にマテリアル設定で上書きされるため)
+    int matNum = MV1GetMaterialNum(m_modelHandle);
+    for (int i = 0; i < matNum; i++)
+    {
+        MV1SetMaterialDrawBlendMode(m_modelHandle, i, DX_BLENDMODE_NOBLEND);
+    }
 }
 
 void Rock::OnInit()
 {
     //位置の調整
     //仮で0,0,0
-    SetPos(Vector3(0.0f, 0.0f, 900.0f));
+    SetPos(Vector3(0.0f, 0.0f, 1500.0f));
 
     //定数バッファを作成
     CreateShaderBuffers();

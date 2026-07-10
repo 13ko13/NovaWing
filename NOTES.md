@@ -93,3 +93,29 @@
 - ブレンドモード(`SetDrawBlendMode`)はUI/フェード演出でしか使われておらず、キャプチャパス関連には無関係と確認済み。
 - **次にやるべきこと**: `CapturePS.hlsl`の`return`を一時的に`return float4(depthNearToFar, depthNearToFar, depthNearToFar, depthNearToFar);`に変更し(RGBにも同じ値を入れる)、`WaterPS.hlsl`側で`captureCol.rgb`をそのまま可視化して、キャプチャ側の`dist`計算結果を直接確認する。cameraPosの値がCapturePS.hlsl(b6)とWaterPS.hlsl(b5)で本当に同じフレームの同じ値を参照しているか、Rockのモデルスケール(3.0,5.0,3.0)がworldPos計算に悪影響していないか、あたりを疑って調査を続ける。
 - デバッグ用に書き換えた`WaterPS.hlsl`/`CapturePS.hlsl`の`return`文は実験用なので、次回作業再開時は最新の状態を確認してから続きを進めること（正式なreveal計算のコードに戻っているかもしれないし、デバッグ版のままかもしれない）。
+
+### 進捗（2026-07-11・透過水の完成！！）
+
+**海と岩の境界透過（reveal）が完成した。** 岩の水中部分が境界からふわっと透けて見え、深くなるほど水の色に戻る狙い通りの表現になった。
+
+**真の原因（2つの独立した問題が重なっていた）:**
+1. **`.vcxproj`のFxCompile設定不足**: `CapturePS.hlsl`/`LightingPS.hlsl`/`WaterPS.hlsl`/`WaterVS.hlsl`はDebug|x64にしか`ObjectFileOutput`（`$(ProjectDir)`への.pso出力）が設定されておらず、Releaseビルドでは古い.psoが読み込まれ続けていた。デバッグ中の観測結果が実験ごとに食い違って見えた元凶の一つ。→ **Release|x64にもShaderModel 5.0とObjectFileOutputを設定して解決**（LightingVSだけは元々両方設定済みだった）。
+2. **DxLibの乗算済みアルファ（premultiplied alpha）問題（本命）**: アルファ付きオフスクリーン（`MakeScreen(w,h,true)`）へのMV1描画で、マテリアルのブレンド設定が全体の`SetDrawBlendMode(NOBLEND)`を上書きし、**保存される値が「RGB=色×α、A=α×α」に化けていた**。さらに岩テクスチャのα（スペキュラマップ）のせいでモデルが半透明メッシュ判定され、Z書き込みなしで裏面ポリゴンまで重ね描き→αが蓄積して1近くまで膨らんでいた。「captureCol.aがほぼ1」の正体はこれ。
+
+**修正内容:**
+- `Rock.cpp`コンストラクタに追加（この2つで解決）:
+  - `MV1GetTextureNum`でループし`MV1SetTextureGraphHandle(handle, i, 同じgrHandle, FALSE)`で全テクスチャを「半透明要素なし」に再登録（半透明メッシュ判定を解除）
+  - `MV1GetMaterialNum`でループし`MV1SetMaterialDrawBlendMode(handle, i, DX_BLENDMODE_NOBLEND)`で全マテリアルをブレンド無しに（**これが決定打**。グローバルな`SetDrawBlendMode`はMV1描画では効かない）
+- `WaterRevealManager::BeginCapture()`/`EndCapture()`に`SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255)`も追加済み（保険。害はない）
+- `WaterPS.hlsl`のreveal式: `reveal = (1.0f - smoothstep(0.0f, 0.15f, delta)) * 0.6f;`
+  - `0.15f` = 透ける範囲の広さ（深度差の閾値）、`0.6f` = 透け具合の上限（水の色を4割残す）。見た目の好みはこの2つで調整する。
+
+**デバッグ手法のメモ（今後同種の問題が出たとき用）:**
+- シェーダー内の値は「段階別カラー判定」（if文で値の範囲ごとに純色を返す）で可視化するのが確実。グラデーション表示は増幅率で振り切れて情報が消えることがある。
+- 「テクスチャに書いた値」と「読んだ値」が食い違うときは、①psoの鮮度（ビルド設定）②ブレンドモード（特に乗算済みα）③半透明メッシュ判定、の順に疑う。
+- 検証時はαを定数（例:0.1）にして書き込み→読み出し経路だけを単独テストすると切り分けが速い。
+
+**残タスク:**
+1. 岩の座標を実際の配置位置に調整（今は仮位置）。複数配置するなら岩の生成をループ化。
+2. 岩の配置をCSVから読み込む仕組み（以前からの要望・未実装）。
+3. 敵など他のモデルも水に潜る演出をするなら、Rockと同じテクスチャ/マテリアル設定が必要になる点に注意（今回の修正はRockのみに適用）。将来的には`Actor`側に共通化してもよいかも。

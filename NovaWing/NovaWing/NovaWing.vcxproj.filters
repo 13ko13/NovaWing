@@ -189,10 +189,10 @@
     <ClCompile Include="Game\BackGround\SkyBox.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Rock.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Rock\Rock.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Rock\Rock.cpp">
+    <ClCompile Include="Manager\WaterRevealManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -377,10 +377,10 @@
     <ClInclude Include="Game\BackGround\SkyBox.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Rock.h">
+    <ClInclude Include="Game\GameObjects\Actors\Rock\Rock.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Rock\Rock.h">
+    <ClInclude Include="Manager\WaterRevealManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -389,5 +389,6 @@
     <FxCompile Include="LightingVS.hlsl" />
     <FxCompile Include="WaterVS.hlsl" />
     <FxCompile Include="WaterPS.hlsl" />
+    <FxCompile Include="CapturePS.hlsl" />
   </ItemGroup>
 </Project>

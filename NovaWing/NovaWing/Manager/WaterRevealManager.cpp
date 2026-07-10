@@ -24,6 +24,8 @@ void WaterRevealManager::BeginCapture()
     SetDrawScreen(m_captureH);
     //前フレームの描画内容をクリア
     ClearDrawScreen();
+    //ブレンドを無効化してシェーダー出力のアルファをそのまま書き込む
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
     //キャプチャ開始フラグを立てる
     m_isCapture = true;
 }
@@ -32,6 +34,7 @@ void WaterRevealManager::EndCapture()
 {
     //描画先をバックバッファに戻す
     SetDrawScreen(DX_SCREEN_BACK);
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
     //キャプチャフラグを降ろす
     m_isCapture = false;
     MV1SetUseOrigShader(false);
