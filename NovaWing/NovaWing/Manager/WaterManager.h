@@ -85,8 +85,10 @@ private:
 	struct CameraBuffer
 	{
 		Vector3 cameraPos;//カメラ位置(12バイト)
-		float padding;//詰め物(4バイト)
-	};
+		float screenWidth;//4バイト
+		float screenHeight;//4バイト
+		float padding[3];//詰め物(12バイト(16バイトアライメント))
+	};//合計32バイト
 	int m_cbufferCamera = -1;
 	CameraBuffer* m_pCbufferCameraData = nullptr;
 

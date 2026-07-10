@@ -6,6 +6,8 @@
 #include "Manager/LightingManager.h"
 #include "Utility/Matrix4x4.h"
 #include "Manager/ResourceLoader.h"
+#include "Constants/Game.h"
+#include "Manager/WaterRevealManager.h"
 
 namespace
 {
@@ -50,6 +52,9 @@ void WaterManager::Init()
 
 	//定数バッファの作成
 	CreateConstantBuffer();
+	//画面解像度をシェーダに渡す情報にセットする
+	m_pCbufferCameraData->screenWidth = static_cast<float>(Game::screen_width);
+	m_pCbufferCameraData->screenHeight = static_cast<float>(Game::screen_height);
 
 	//画像ハンドル取得
 	ResourceLoader& loader = ResourceLoader::GetInstance();
@@ -103,6 +108,9 @@ void WaterManager::Draw()
 	SetUseTextureToShader(4, m_skyUpH);
 	SetUseTextureToShader(5, m_skyBottomH);
 
+	//透過水表現用のキャプチャテクスチャをシェーダにセットする
+	SetUseTextureToShader(6, WaterRevealManager::GetInstance().GetCaptureTextureHandle());
+
 	//頂点バッファとインデックスバッファを使用して3Dポリゴンを描画する
 	DrawPolygonIndexed3DToShader_UseVertexBuffer(
 		m_vertexBufferH,
@@ -115,7 +123,7 @@ void WaterManager::Draw()
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 5);
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 3);
 	//テクスチャを解除
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 7; i++)
 	{
 		SetUseTextureToShader(i, -1);
 	}

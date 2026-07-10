@@ -1,13 +1,15 @@
 ﻿#pragma once
 #include "../Actor.h"
 
+class CameraBase;
 /// <summary>
 /// HPを持つキャラクター
 /// </summary>
 class Charactor : public Actor
 {
 public:
-	Charactor(ResourceLoader::ModelID modelID);
+	Charactor(ResourceLoader::ModelID modelID,
+		std::weak_ptr<CameraBase> camera);
 	virtual ~Charactor();
 	virtual void Update() override;
 	virtual void Draw() = 0;

@@ -26,6 +26,8 @@
 #include "Game/UI/ReticleUI.h"
 #include "Manager/WaterManager.h"
 #include "Game/BackGround/SkyBox.h"
+#include "Game/GameObjects/Actors/Rock/Rock.h"
+#include "Manager/WaterRevealManager.h"
 
 namespace
 {
@@ -62,7 +64,8 @@ void GameScene::Init()
 
 	//プレイヤーを生成
 	m_pPlayer = std::make_shared<Player>(
-		m_pBulletManager,ResourceLoader::ModelID::Player);
+		m_pBulletManager,ResourceLoader::ModelID::Player,
+	std::weak_ptr<CameraBase>());//カメラがまだ制せされていないので空のweak_ptrを渡す
 	//プレイヤーの初期化処理
 	m_pPlayer->Init();
 
@@ -70,8 +73,7 @@ void GameScene::Init()
 	m_pCamera = std::make_shared<CameraBase>(m_pPlayer);
 	//カメラの初期化処理
 	m_pCamera->Init();
-
-	//プレイヤーにカメラを渡す
+	//カメラを生成したのでプレイヤーにカメラをセットする
 	m_pPlayer->SetCamera(m_pCamera);
 
 	//衝突判定マネージャーの初期化
@@ -80,7 +82,8 @@ void GameScene::Init()
 	//エネミーの初期化
 	m_pFloatingEnemy = std::make_shared<FloatingEnemy>(m_pPlayer,
 		ResourceLoader::ModelID::FloatingEnemy,
-		m_pBulletManager);
+		m_pBulletManager,
+		m_pCamera);
 	m_pFloatingEnemy->Init();
 	//衝突判定マネージャーに敵を登録する
 	m_pCollisionManager->RegisterFloatingEnemy(m_pFloatingEnemy);
@@ -88,7 +91,8 @@ void GameScene::Init()
 	//ワームエネミーの初期化
 	m_pWormEnemy = std::make_shared<WormEnemy>(m_pPlayer,
 		ResourceLoader::ModelID::WormHead,
-		m_pBulletManager, 5);
+		m_pBulletManager, 5,
+		m_pCamera);
 	m_pWormEnemy->Init();
 	//衝突判定マネージャーにワームエネミーを登録する
 	m_pCollisionManager->RegisterWormEnemy(m_pWormEnemy);
@@ -118,6 +122,10 @@ void GameScene::Init()
 		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxUp),
 		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxBottom)
 	);
+
+	//岩の初期化
+	m_pRock = std::make_shared<Rock>(ResourceLoader::ModelID::Rock1, m_pCamera);
+	m_pRock->Init();
 }
 
 void GameScene::Update()
@@ -148,6 +156,15 @@ void GameScene::Update()
 
 void GameScene::Draw()
 {
+	//WaterRevealManagerのインスタンスを取得
+	WaterRevealManager& revealManager = WaterRevealManager::GetInstance();
+	//キャプチャ開始
+	revealManager.BeginCapture();
+	//キャプチャのほうに全オブジェクトの描画を行う
+	GameObjectManager::GetInstance().DrawAll();
+	//キャプチャを終了
+	revealManager.EndCapture();
+
 	//スカイボックスの描画
 	m_pSkyBox->Draw(m_pCamera->GetPos());
 

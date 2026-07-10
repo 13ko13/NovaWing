@@ -7,6 +7,7 @@
 
 class Player;
 class BulletManager;
+class CameraBase;
 class WormEnemy : public Charactor
 {
 public:
@@ -17,10 +18,12 @@ public:
 	/// <param name="Id">モデルのID</param>
 	/// <param name="pBulletManager">弾の管理者</param>
 	/// <param name="segmentCount">胴体の数</param>
+	/// <param name="camera">カメラ</param>
 	WormEnemy(const std::weak_ptr<Player> pPlayer,
 		const ResourceLoader::ModelID Id,
 		const std::shared_ptr<BulletManager> pBulletManager,
-		int segmentCount);
+		int segmentCount,
+		std::weak_ptr<CameraBase> camera);
 	~WormEnemy();
 
 	void OnInit() override;//初期化処理
@@ -54,8 +57,5 @@ private:
 
 	//頭の位置を履歴として持つ
 	std::vector<Vector3> m_headHistory;
-
-private:
-	Vector3 GetPlayerCameraPos() const;
 };
 

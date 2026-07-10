@@ -1,9 +1,9 @@
-Texture2D skyFront : register(t0);
-Texture2D skyBack : register(t1);
-Texture2D skyRight : register(t2);
-Texture2D skyLeft : register(t3);
-Texture2D skyUp : register(t4);
-Texture2D skyBottom : register(t5);
+Texture2D<float4> skyFront : register(t0);
+Texture2D<float4> skyBack : register(t1);
+Texture2D<float4> skyRight : register(t2);
+Texture2D<float4> skyLeft : register(t3);
+Texture2D<float4> skyUp : register(t4);
+Texture2D<float4> skyBottom : register(t5);
 
 SamplerState smp : register(s0);
 
@@ -190,7 +190,7 @@ float4 main(PS_INPUT input) : SV_TARGET
     //泡の部分
     //smoothstep(min,max,x)は、
     //min以下は0,max以上は1
-    //その間は滑らかに0～1に補間
+    //その間は滑らかに0～1へ変化する
     float foam = smoothstep(50.0f, 130.0f, waveHeight);
     //海の色(空の反射も混ざっている色)と白を混ぜる
     //lerpで泡の部分は白に補間する

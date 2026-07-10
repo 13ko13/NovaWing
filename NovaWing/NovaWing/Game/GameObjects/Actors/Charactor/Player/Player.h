@@ -16,7 +16,8 @@ class Player : public Charactor
 {
 public:
 	Player(std::shared_ptr<BulletManager> bulletManager,
-		ResourceLoader::ModelID modelID);
+		ResourceLoader::ModelID modelID,
+		std::weak_ptr<CameraBase> camera);
 	~Player();
 
 	void OnInit() override;
@@ -52,8 +53,6 @@ public:
 	void EndUseGauge();
 	//ゲージを使用してるかを取得
 	bool IsUseGauge() const; 
-	//カメラの位置を取得
-	Vector3 GetCameraPos() const;
 	//当たり判定用の球を取得
 	Sphere GetSphere() const { return m_collSphere; }
 
@@ -111,7 +110,6 @@ private:
 	//外部クラス参照
 	//借りてくるだけなのでweak_ptrにする
 	std::weak_ptr<BulletManager> m_pBulletManager;//弾の管理
-	std::weak_ptr<CameraBase> m_pCamera;//カメラ
 
 	//プレイヤーの向きが逆向きなので
 	//プレイヤーの初期回転を保存する

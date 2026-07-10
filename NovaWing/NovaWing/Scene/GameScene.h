@@ -14,6 +14,7 @@ class TargetManager;
 class UIManager;
 class WaterManager;
 class SkyBox;
+class Rock;
 class GameScene :public Scene
 {
 public:
@@ -54,4 +55,6 @@ private:
 	std::shared_ptr<WaterManager> m_pWaterManager;
 	//スカイボックス
 	std::shared_ptr<SkyBox> m_pSkyBox;
+	//岩
+	std::shared_ptr<Rock> m_pRock;
 };

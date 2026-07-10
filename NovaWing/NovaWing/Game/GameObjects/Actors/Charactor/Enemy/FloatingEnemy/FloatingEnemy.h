@@ -7,12 +7,14 @@
 class Player;
 class IEnemyState;
 class BulletManager;
+class CameraBase;
 class FloatingEnemy : public Charactor
 {
 public:
 	FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 		const ResourceLoader::ModelID Id,
-		const std::shared_ptr<BulletManager> pBulletManager);
+		const std::shared_ptr<BulletManager> pBulletManager,
+		std::weak_ptr<CameraBase> camera);
 	~FloatingEnemy();
 
 	void OnInit() override;//初期化処理
@@ -27,8 +29,6 @@ public:
 	Vector3 GetPlayerPos() const;
 	//プレイヤーの前方向
 	Vector3 GetPlayerFoward() const;
-	//プレイヤーからカメラの位置を取得
-	Vector3 GetPlayerCameraPos() const;
 
 	//弾の管理者を取得する
 	std::shared_ptr<BulletManager> GetBulletManager() const;

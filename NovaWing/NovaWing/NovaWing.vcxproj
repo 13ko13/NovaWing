@@ -87,8 +87,8 @@
       <AdditionalLibraryDirectories>$(SolutionDir)/DxLib_h</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterPS.hlsl
-C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterVS.hlsl</Command>
+      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 $(ProjectDir)WaterPS.hlsl
+C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS.hlsl</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -110,8 +110,8 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Docum
       <AdditionalLibraryDirectories>$(SolutionDir)/DxLib_h</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterPS.hlsl
-C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterVS.hlsl</Command>
+      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 $(ProjectDir)WaterPS.hlsl
+C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS.hlsl</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -131,8 +131,8 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Docum
       <AdditionalLibraryDirectories>$(SolutionDir)/DxLib_h</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterPS.hlsl
-C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterVS.hlsl</Command>
+      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 $(ProjectDir)WaterPS.hlsl
+C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS.hlsl</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -154,8 +154,8 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Docum
       <AdditionalLibraryDirectories>$(SolutionDir)/DxLib_h</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterPS.hlsl
-C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Documents\GitHub\NovaWing\NovaWing\NovaWing\WaterVS.hlsl</Command>
+      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 $(ProjectDir)WaterPS.hlsl
+C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS.hlsl</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -163,7 +163,6 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Docum
     <ClCompile Include="Game\GameObjects\Actors\Rock\Rock.cpp" />
     <ClCompile Include="Game\GameObjects\Bullet\ChargeBullet.cpp" />
     <ClCompile Include="Game\UI\ReticleUI.cpp" />
-    <ClCompile Include="Rock.cpp" />
     <ClCompile Include="Scene\GameoverScene.cpp" />
     <ClCompile Include="Manager\CollisionManager.cpp" />
     <ClCompile Include="Game\GameObjects\Bullet\EnemyBullet.cpp" />
@@ -225,7 +224,6 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Docum
     <ClInclude Include="Game\GameObjects\Actors\Rock\Rock.h" />
     <ClInclude Include="Game\GameObjects\Bullet\ChargeBullet.h" />
     <ClInclude Include="Game\UI\ReticleUI.h" />
-    <ClInclude Include="Rock.h" />
     <ClInclude Include="Scene\GameoverScene.h" />
     <ClInclude Include="Manager\CollisionManager.h" />
     <ClInclude Include="Game\GameObjects\Bullet\EnemyBullet.h" />
@@ -285,6 +283,14 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 C:\Users\Admin\Docum
     <ClInclude Include="Manager\WaterManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="CapturePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)%(Filename).pso</ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="LightingPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

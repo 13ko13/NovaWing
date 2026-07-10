@@ -14,8 +14,9 @@ namespace
 
 FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 	const ResourceLoader::ModelID Id,
-	const std::shared_ptr<BulletManager> pBulletManager) :
-	Charactor(Id),
+	const std::shared_ptr<BulletManager> pBulletManager,
+	std::weak_ptr<CameraBase> camera) :
+	Charactor(Id,camera),
 	m_pPlayer(pPlayer),
 	m_colSphere(m_pos),
 	m_pBulletManager(pBulletManager)
@@ -81,7 +82,7 @@ void FloatingEnemy::Draw()
 	ApplyMatrix(model_scale, m_pos, m_rotation, m_modelHandle);
 
 	//シェーダに渡すカメラ情報を更新してから
-	UpdateShaderMatrixData(GetPlayerCameraPos());
+	UpdateShaderMatrixData();
 
 	//敵の描画
 	DrawEnemy();
@@ -155,15 +156,6 @@ Vector3 FloatingEnemy::GetPlayerFoward() const
 
 	//前方向を取得して返す
 	return pPlayer->GetForward();
-}
-
-Vector3 FloatingEnemy::GetPlayerCameraPos() const
-{
-	//shared_ptrに変換
-	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
-
-	//カメラの位置を取得して返す
-	return pPlayer->GetCameraPos();
 }
 
 std::shared_ptr<BulletManager> FloatingEnemy::GetBulletManager() const

@@ -1,12 +1,14 @@
 ﻿#include "Charactor.h"
+#include "Game/GameObjects/Camera/CameraBase.h"
 
 namespace
 {
 	constexpr int max_health = 100;//最大体力
 }
 
-Charactor::Charactor(ResourceLoader::ModelID modelID):
-	Actor(modelID),
+Charactor::Charactor(ResourceLoader::ModelID modelID,
+		std::weak_ptr<CameraBase> camera):
+	Actor(modelID,camera),
 	m_health(max_health),
 	m_attackPower(1.0f)
 	

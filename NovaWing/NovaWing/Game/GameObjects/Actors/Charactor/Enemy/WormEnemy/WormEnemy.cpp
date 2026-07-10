@@ -32,8 +32,9 @@ WormEnemy::WormEnemy(
 	const std::weak_ptr<Player> pPlayer,
 	const ResourceLoader::ModelID Id,
 	const std::shared_ptr<BulletManager> pBulletManager,
-	int segmentCount) :
-	Charactor(Id),
+	int segmentCount,
+	std::weak_ptr<CameraBase> camera) :
+	Charactor(Id,camera),
 	m_pPlayer(pPlayer),
 	m_pBulletManager(pBulletManager),
 	m_segmentCount(segmentCount),
@@ -163,7 +164,7 @@ void WormEnemy::Draw()
 	//モデルのスケール、位置、回転を適用する
 	ApplyMatrix(model_scale, m_pos, m_rotation, m_modelHandle);
 	//シェーダに渡すカメラ情報を更新してから
-	UpdateShaderMatrixData(GetPlayerCameraPos());
+	UpdateShaderMatrixData();
 	//頭のモデルを描画
 	DrawWormHead();
 	//胴体のモデルを描画
@@ -176,7 +177,7 @@ void WormEnemy::Draw()
 			m_segmentPositions[i],
 			m_rotation, m_modelHandle);
 		//シェーダに渡すカメラ情報を更新してから
-		UpdateShaderMatrixData(GetPlayerCameraPos());
+		UpdateShaderMatrixData();
 
 		//それぞれの胴体のモデルを描画する
 		DrawWormBody();
@@ -280,13 +281,4 @@ void WormEnemy::TakeDamage(int damage)
 	{
 		OnDead();
 	}
-}
-
-Vector3 WormEnemy::GetPlayerCameraPos() const
-{
-	//shared_ptrに変換
-	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
-
-	//カメラの位置を取得して返す
-	return pPlayer->GetCameraPos();
 }

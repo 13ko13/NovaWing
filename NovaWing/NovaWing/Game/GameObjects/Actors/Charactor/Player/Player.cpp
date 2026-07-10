@@ -42,8 +42,9 @@ namespace
 
 Player::Player(
 	std::shared_ptr<BulletManager> bulletManager,
-		ResourceLoader::ModelID modelID) :
-	Charactor(modelID),
+		ResourceLoader::ModelID modelID,
+		std::weak_ptr<CameraBase> camera) :
+	Charactor(modelID,camera),
 	m_pBulletManager(bulletManager),
 	m_collSphere(m_pos)
 {
@@ -264,7 +265,7 @@ void Player::Draw()
 	ApplyMatrix(model_scale,m_pos,m_rotation,m_modelHandle);
 
 	//シェーダに渡すバッファに行列情報を渡す
-	UpdateShaderMatrixData(m_pCamera.lock()->GetPos());
+	UpdateShaderMatrixData();
 
 	//シェーダを適用したプレイヤーを描画
 	DrawPlayer();
@@ -366,12 +367,6 @@ void Player::EndUseGauge()
 bool Player::IsUseGauge() const
 {
 	return m_isUseGauge;
-}
-
-Vector3 Player::GetCameraPos() const
-{
-	std::shared_ptr<CameraBase> pCamera = m_pCamera.lock();
-	return pCamera->GetPos();
 }
 
 std::weak_ptr<GameObject> Player::GetFocusTarget() const

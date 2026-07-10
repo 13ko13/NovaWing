@@ -40,7 +40,6 @@ public:
 		SkyBoxUp,//スカイボックス(上)
 		SkyBoxBottom,//スカイボックス(下)
 
-		RockDiffAndSpc,//岩のディフューズマップとスペキュラマップ同梱(aをスペキュラとする)
 		RockNorm,//岩の法線マップ
 	};
 

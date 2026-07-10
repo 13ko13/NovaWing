@@ -10,10 +10,12 @@
 /// モデルを持ち、ゲーム世界に見えるオブジェクト
 /// </summary>
 class ModelAnimator;
+class CameraBase;
 class Actor :public GameObject
 {
 public:
-	Actor(ResourceLoader::ModelID modelID);
+	Actor(ResourceLoader::ModelID modelID,
+	std::weak_ptr<CameraBase> pCamera);
 	virtual ~Actor();
 
 	//純粋仮想関数
@@ -24,6 +26,9 @@ public:
 	void ApplyMatrix(const Vector3& scale, const Vector3& pos,
 		Quaternion& rotation, int modelHandle);
 
+	//カメラをセットする
+	void SetCamera(std::weak_ptr<CameraBase> pCamera){m_pCamera = pCamera;}
+	
 private:
 
 protected:
@@ -46,6 +51,9 @@ protected:
 	int m_cbufferCamera = -1;
 	CameraBuffer* m_pCbufferCameraData = nullptr;
 
+	//カメラの弱参照
+	std::weak_ptr<CameraBase> m_pCamera;
+
 	//機体情報
 	int m_modelHandle = -1;//モデルハンドル
 
@@ -53,10 +61,12 @@ protected:
 	//シェーダに渡す定数バッファを作成
 	void CreateShaderBuffers();
 	//シェーダに渡す行列情報を更新
-	void UpdateShaderMatrixData(const Vector3& cameraPos);
+	void UpdateShaderMatrixData();
 	//定数バッファをシェーダレジスタにセットする
 	void BindShaderBuffers();
 	//シェーダレジスタにセットしている定数バッファを解放する
 	void ReleaseShaderBuffers();
+	//カメラの位置を取得する
+	Vector3 GetCameraPos() const;
 };
 

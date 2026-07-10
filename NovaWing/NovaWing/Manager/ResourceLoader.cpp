@@ -213,10 +213,6 @@ void ResourceLoader::KeepGraph()
 	assert(handle >= 0);
 	m_graphicHandles[ResourceLoader::GraphicID::SkyBoxBottom] = handle;
 
-	//岩のディフューズとスペキュラが同梱されているテクスチャ
-	handle = LoadGraph(L"Data/Model/Rock.fbm/rocks_diff_spec_new.png");
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::RockDiffAndSpc] = handle;
 	//岩の法線マップテクスチャ
 	handle = LoadGraph(L"Data/Model/Rock.fbm/rocks_nm_new.png");
 	assert(handle >= 0);

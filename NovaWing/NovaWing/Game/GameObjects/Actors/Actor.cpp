@@ -2,8 +2,11 @@
 
 #include "Actor.h"
 #include "Utility/Matrix4x4.h"
+#include "Game/GameObjects/Camera/CameraBase.h"
 
-Actor::Actor(ResourceLoader::ModelID modelID) 
+Actor::Actor(ResourceLoader::ModelID modelID,
+	std::weak_ptr<CameraBase> pCamera) :
+	m_pCamera(pCamera)
 {
 	//受け取ったモデルIDをもとにモデルを複製してハンドルを取得する
 	m_modelHandle = MV1DuplicateModel(
@@ -42,7 +45,7 @@ void Actor::CreateShaderBuffers()
 	m_pCbufferCameraData = static_cast<CameraBuffer*>(GetBufferShaderConstantBuffer(m_cbufferCamera));
 }
 
-void Actor::UpdateShaderMatrixData(const Vector3& cameraPos)
+void Actor::UpdateShaderMatrixData()
 {
 	//行列情報を入れる
 	m_pCbufferMatrixData->world = MV1GetLocalWorldMatrix(m_modelHandle);
@@ -50,7 +53,7 @@ void Actor::UpdateShaderMatrixData(const Vector3& cameraPos)
 	m_pCbufferMatrixData->proj = GetCameraProjectionMatrix();
 
 	//カメラの位置をMatrix情報に渡す
-	m_pCbufferCameraData->cameraPos = cameraPos;
+	m_pCbufferCameraData->cameraPos = m_pCamera.lock()->GetPos();
 
 
 	UpdateShaderConstantBuffer(m_cbufferMatrix);
@@ -69,4 +72,10 @@ void Actor::ReleaseShaderBuffers()
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 2);
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 3);
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 3);
+}
+
+Vector3 Actor::GetCameraPos() const
+{
+    //shared_ptrに変換して位置を返す
+	return m_pCamera.lock()->GetPos();
 }

@@ -2,6 +2,7 @@
 #include <cassert>
 
 #include "LightingManager.h"
+#include "WaterRevealManager.h"
 
 LightingManager& LightingManager::GetInstance()
 {
@@ -32,8 +33,24 @@ void LightingManager::ApplyShader()
 	UpdateShaderConstantBuffer(m_cbufferLightInfo);
 	//頂点シェーダをセット
 	SetUseVertexShader(m_lightingVSH);
-	//ピクセルシェーダをセットする
-	SetUsePixelShader(m_lightingPSH);
+
+	//WaterRevealManagerのインスタンスを受け取る
+	WaterRevealManager& revealManager = WaterRevealManager::GetInstance();
+	//キャプチャ用のピクセルシェーダハンドルを受け取る
+	int capturePSH = revealManager.GetCapturePSHandle();
+
+	//キャプチャ中の場合はCapturePS,そうじゃない場合はLightingPSを呼ぶ
+	if (revealManager.IsCaptureMode())
+	{
+		//キャプチャ用のシェーダをセット
+		SetUsePixelShader(capturePSH);
+	}
+	else
+	{
+		//普通のライティング用のシェーダをセット
+		SetUsePixelShader(m_lightingPSH);
+	}
+
 	//定数バッファをシェーダにセットする
 	SetShaderConstantBuffer(m_cbufferLightInfo, DX_SHADERTYPE_PIXEL, 4);
 }
