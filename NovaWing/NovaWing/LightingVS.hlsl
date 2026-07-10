@@ -20,7 +20,7 @@ struct VS_OUTPUT
     float3 tangent : TANGENT; //tangent空間のtangent(接線)
 };
 
-cbuffer MatrixBuffer : register(b2)
+cbuffer MatrixBuffer : register(b5)
 {
     float4x4 world;//ワールド行列
     float4x4 view;//カメラ行列
@@ -29,7 +29,7 @@ cbuffer MatrixBuffer : register(b2)
     float4x4 proj;//プロジェクション行列
 }
 
-cbuffer CameraBuffer : register(b3)
+cbuffer CameraBuffer : register(b6)
 {
     float3 cameraPos; //カメラの位置
     float padding; //16バイトアライメント

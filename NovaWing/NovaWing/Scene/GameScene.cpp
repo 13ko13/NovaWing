@@ -160,10 +160,14 @@ void GameScene::Draw()
 	WaterRevealManager& revealManager = WaterRevealManager::GetInstance();
 	//キャプチャ開始
 	revealManager.BeginCapture();
+	//視野角とNearFarを再設定
+	m_pCamera->SetUpCamera();
 	//キャプチャのほうに全オブジェクトの描画を行う
 	GameObjectManager::GetInstance().DrawAll();
 	//キャプチャを終了
 	revealManager.EndCapture();
+	//視野角とNearFarを再設定
+	m_pCamera->SetUpCamera();
 
 	//スカイボックスの描画
 	m_pSkyBox->Draw(m_pCamera->GetPos());

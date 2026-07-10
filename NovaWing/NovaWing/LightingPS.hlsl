@@ -20,7 +20,7 @@ cbuffer LightingBuffer : register(b4)
     float3 lightVec;//光の方向ベクトル
 };
 
-cbuffer CameraBuffer : register(b3)
+cbuffer CameraBuffer : register(b6)
 {
     float3 cameraPos;
     float padding;

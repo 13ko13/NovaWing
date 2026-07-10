@@ -62,16 +62,16 @@ void Actor::UpdateShaderMatrixData()
 
 void Actor::BindShaderBuffers()
 {
-	SetShaderConstantBuffer(m_cbufferMatrix, DX_SHADERTYPE_VERTEX, 2);
-	SetShaderConstantBuffer(m_cbufferCamera, DX_SHADERTYPE_VERTEX, 3);
-	SetShaderConstantBuffer(m_cbufferCamera, DX_SHADERTYPE_PIXEL, 3);
+	SetShaderConstantBuffer(m_cbufferMatrix, DX_SHADERTYPE_VERTEX, 5);
+	SetShaderConstantBuffer(m_cbufferCamera, DX_SHADERTYPE_VERTEX, 6);
+	SetShaderConstantBuffer(m_cbufferCamera, DX_SHADERTYPE_PIXEL, 6);
 }
 
 void Actor::ReleaseShaderBuffers()
 {
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 2);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 3);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 3);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 5);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 6);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 6);
 }
 
 Vector3 Actor::GetCameraPos() const

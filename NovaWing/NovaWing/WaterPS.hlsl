@@ -4,6 +4,7 @@ Texture2D<float4> skyRight : register(t2);
 Texture2D<float4> skyLeft : register(t3);
 Texture2D<float4> skyUp : register(t4);
 Texture2D<float4> skyBottom : register(t5);
+Texture2D<float4> sceneCapture : register(t6);
 
 SamplerState smp : register(s0);
 
@@ -23,7 +24,9 @@ cbuffer LightingBuffer : register(b3)
 cbuffer CameraBuffer : register(b5)
 {
     float3 cameraPos;//カメラの位置
-    float padding;
+    float screenWidth;//画面の幅
+    float screenHeight;//画面の高さ
+    float3 padding;
 }
 
 float3 SampleSkyReflection(float3 reflectVec)
@@ -131,6 +134,9 @@ float3 SampleSkyReflection(float3 reflectVec)
     }
 }
 
+static const float near_clip = 200.0f;
+static const float far_clip = 5500.0f;
+
 float4 main(PS_INPUT input) : SV_TARGET
 {
     //視線方向を計算
@@ -209,6 +215,37 @@ float4 main(PS_INPUT input) : SV_TARGET
     //最終的な色に霧を適用する
     float3 foggedColor = lerp(litColor, skyColor, fogFactor);
     
-    //テクスチャの色に明るさを適用してそのピクセルの色を返す
-    return float4(foggedColor, 1.0f);
+    //スクリーンUV座標を求める
+    //input.posはSV_POSITIONセマンティクスで、ピクセルシェーダに渡された時点ではすでに
+    //ピクセル単位のスクリーン座標になっている(0～画面幅、高さ)これをwidth / screenHeightで割ることで
+    //0～1のUV座標に変換できる
+    float2 screenUV = input.pos.xy / float2(screenWidth,screenHeight);
+    //シーンをキャプチャしてきたテクスチャをそのUV座標でサンプリング
+    float4 captureCol =  sceneCapture.Sample(smp,screenUV);
+
+    //アルファがほぼ0の場所はrevealを0にする
+    //何もない場所でたまたまdeltaが小さくなり、不自然に薄くなってしまう可能性があるため
+    float reveal = 0.0f;
+    if(captureCol.a > 0.001f)
+    {
+        //水面自体の正規化距離を求める
+        float normDistNtoF = saturate((dist - near_clip) / (far_clip - near_clip));
+        //物体までの距離と水面までの距離を引き算して、
+        //その差が小さいほど水面のすぐ下に物体があると判定できる
+        //絶対値にしなければ広い範囲で効果が出てしまう
+        float delta =  abs(captureCol.a - normDistNtoF);
+        //smoothstep(0.0f,0.05f,delta)で出るのは、deltaが小さいほど0になってしまうので
+        //それを1.0 - にすることでdeltaが小さいほど透明度が1、deltaが大きいほど透明度が0になる
+        reveal = 1.0f - smoothstep(0.0f,0.5f,delta);
+    }
+
+    //霧を適用させたカラーと、キャプチャーしたカラーをrevealで補間する
+    float3 finalCol = lerp(foggedColor,captureCol.rgb, reveal);
+
+    
+    float normDistNtoF_debug = saturate((dist - near_clip) / (far_clip - near_clip));
+    return float4(normDistNtoF_debug, normDistNtoF_debug, normDistNtoF_debug, 1.0f);
+    
+    //不透明で返す
+    return float4(finalCol,1.0f);
 }

@@ -12,7 +12,7 @@ struct PS_INPUT
 	float3 tangentWS : TANGENT;
 };
 
-cbuffer CameraBuffer : register(b3)
+cbuffer CameraBuffer : register(b6)
 {
 	//カメラの位置
 	float3 cameraPos;

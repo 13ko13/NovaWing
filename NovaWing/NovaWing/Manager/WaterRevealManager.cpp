@@ -34,4 +34,7 @@ void WaterRevealManager::EndCapture()
     SetDrawScreen(DX_SCREEN_BACK);
     //キャプチャフラグを降ろす
     m_isCapture = false;
+    MV1SetUseOrigShader(false);
+    SetUseVertexShader(-1);
+    SetUsePixelShader(-1);
 }

@@ -42,7 +42,10 @@ public:
 	/// <param name="power">揺れるときの力</param>
 	/// <param name="frame">揺れの持続フレーム数</param>
 	void OnShake(float power, int frame);
-	
+
+	//カメラの視野角とNear、Farを再設定する(シェーダー用)
+	void SetUpCamera();
+
 private:
 	float m_angleX = 0.0f;//カメラの回転角横
 	float m_angleY = 0.0f;//カメラの回転角縦

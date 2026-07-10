@@ -218,6 +218,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClCompile Include="Utility\Vector3.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.cpp" />
     <ClCompile Include="Manager\WaterManager.cpp" />
+    <ClCompile Include="Manager\WaterRevealManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\BackGround\SkyBox.h" />
@@ -281,6 +282,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClInclude Include="Utility\Vector3.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.h" />
     <ClInclude Include="Manager\WaterManager.h" />
+    <ClInclude Include="Manager\WaterRevealManager.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">

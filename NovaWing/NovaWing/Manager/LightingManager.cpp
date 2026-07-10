@@ -49,10 +49,9 @@ void LightingManager::ApplyShader()
 	{
 		//普通のライティング用のシェーダをセット
 		SetUsePixelShader(m_lightingPSH);
+		//定数バッファをシェーダにセットする
+		SetShaderConstantBuffer(m_cbufferLightInfo, DX_SHADERTYPE_PIXEL, 4);
 	}
-
-	//定数バッファをシェーダにセットする
-	SetShaderConstantBuffer(m_cbufferLightInfo, DX_SHADERTYPE_PIXEL, 4);
 }
 
 void LightingManager::ResetShader()

@@ -45,10 +45,8 @@ CameraBase::CameraBase(const std::shared_ptr<Player> pPlayer)
 	//プレイヤーの位置を取得して、そこをカメラのターゲットにする
 	SetCameraPositionAndTarget_UpVecY(m_pos.ToDxLib(), m_targetPos.ToDxLib());
 
-	//カメラの視野角を設定する(180/3)
-	SetupCamera_Perspective(fov);
-	//カメラの遠近感の範囲を設定する
-	SetCameraNearFar(camera_near, camera_far);
+	//カメラの視野角とNear,Farを設定
+	SetUpCamera();
 }
 
 CameraBase::~CameraBase()
@@ -118,6 +116,16 @@ void CameraBase::OnShake(float power, int frame)
 {
 	m_shakePower = power;
 	m_shakeFrame = frame;
+}
+
+void CameraBase::SetUpCamera()
+{
+	//カメラの視野角を設定する(180/3)
+	SetupCamera_Perspective(fov);
+	//カメラの遠近感の範囲を設定する
+	SetCameraNearFar(camera_near, camera_far);
+	//位置も設定
+	SetCameraPositionAndTarget_UpVecY(m_pos.ToDxLib(), m_targetPos.ToDxLib());
 }
 
 Vector3 CameraBase::UpdateShake()
