@@ -56,5 +56,5 @@ private:
 	//スカイボックス
 	std::shared_ptr<SkyBox> m_pSkyBox;
 	//岩
-	std::shared_ptr<Rock> m_pRock;
+	std::vector<std::shared_ptr<Rock>> m_pRocks;
 };

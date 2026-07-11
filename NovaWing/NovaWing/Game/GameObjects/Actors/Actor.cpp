@@ -11,6 +11,15 @@ Actor::Actor(ResourceLoader::ModelID modelID,
 	//受け取ったモデルIDをもとにモデルを複製してハンドルを取得する
 	m_modelHandle = MV1DuplicateModel(
 		ResourceLoader::GetInstance().GetModel(modelID));
+	
+	//マテリアル単位でブレンド無しを明示する
+    //(全体のSetDrawBlendModeはMV1描画時にマテリアル設定で上書きされるため)
+	//これをしておかないと、水に埋まっている部分が見えなくなってしまう
+    int matNum = MV1GetMaterialNum(m_modelHandle);
+    for (int i = 0; i < matNum; i++)
+    {
+        MV1SetMaterialDrawBlendMode(m_modelHandle, i, DX_BLENDMODE_NOBLEND);
+    }
 }
 
 Actor::~Actor()

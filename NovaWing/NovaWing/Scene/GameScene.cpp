@@ -28,6 +28,7 @@
 #include "Game/BackGround/SkyBox.h"
 #include "Game/GameObjects/Actors/Rock/Rock.h"
 #include "Manager/WaterRevealManager.h"
+#include "Rock/RockDataSetter.h"
 
 namespace
 {
@@ -123,9 +124,13 @@ void GameScene::Init()
 		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxBottom)
 	);
 
-	//岩の初期化
-	m_pRock = std::make_shared<Rock>(ResourceLoader::ModelID::Rock1, m_pCamera);
-	m_pRock->Init();
+	//岩の生成&初期化
+	m_pRocks = RockDataSetter::CreateRock(m_pCamera);
+	//それぞれの岩の初期化
+	for(std::shared_ptr<Rock> pRock : m_pRocks)
+	{
+		pRock->Init();
+	}
 }
 
 void GameScene::Update()

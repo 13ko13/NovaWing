@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <DxLib.h>
+#include <string>
 
 /// <summary>
 /// 3Dベクトル構造体
@@ -28,8 +29,16 @@ public:
 
 	//Easing関数
 	//勉強用
-	//なぜstaticを付ける必要があるのか？→staticを付けなかったら、わざわざVector3クラスのインスタンスを作成しないといけないから
+	//なぜstaticを付ける必要があるのか？
+	//→staticを付けなかったら、わざわざVector3クラスのインスタンスを作成しないといけないから
 	static Vector3 Lerp(const Vector3& start, const Vector3& end, float t);//線形補間
+
+	//文字列(x,y,z)からVector3を生成する(CSV読み込みなどで使用する)
+	static Vector3 FromWString(
+		const std::wstring& x,
+		const std::wstring& y,
+		const std::wstring& z
+	);
 };
 
 //別名(座標を表すこともあるため)

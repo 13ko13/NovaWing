@@ -195,6 +195,21 @@
     <ClCompile Include="Manager\WaterRevealManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Utility\StringUtil.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="CSVData\CSVData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SchoolGit\CSVLoader\CSVLoader\CSVDataLoader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\CSVDataLoader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameObjects\Actors\Rock\RockDataSetter.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants\Game.h">
@@ -383,6 +398,21 @@
     <ClInclude Include="Manager\WaterRevealManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Utility\StringUtil.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="CSVData\CSVData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SchoolGit\CSVLoader\CSVLoader\CSVDataLoader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\CSVDataLoader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameObjects\Actors\Rock\RockDataSetter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="LightingPS.hlsl" />
@@ -390,5 +420,8 @@
     <FxCompile Include="WaterVS.hlsl" />
     <FxCompile Include="WaterPS.hlsl" />
     <FxCompile Include="CapturePS.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\CSV\RockData.csv" />
   </ItemGroup>
 </Project>

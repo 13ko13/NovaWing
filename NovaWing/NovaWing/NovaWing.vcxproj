@@ -159,10 +159,14 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\SchoolGit\CSVLoader\CSVLoader\CSVDataLoader.cpp" />
+    <ClCompile Include="CSVData\CSVData.cpp" />
     <ClCompile Include="Game\BackGround\SkyBox.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Rock\Rock.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Rock\RockDataSetter.cpp" />
     <ClCompile Include="Game\GameObjects\Bullet\ChargeBullet.cpp" />
     <ClCompile Include="Game\UI\ReticleUI.cpp" />
+    <ClCompile Include="Manager\CSVDataLoader.cpp" />
     <ClCompile Include="Scene\GameoverScene.cpp" />
     <ClCompile Include="Manager\CollisionManager.cpp" />
     <ClCompile Include="Game\GameObjects\Bullet\EnemyBullet.cpp" />
@@ -214,6 +218,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClCompile Include="Utility\Quaternion.cpp" />
     <ClCompile Include="Scene\GameScene.cpp" />
     <ClCompile Include="Utility\Sphere.cpp" />
+    <ClCompile Include="Utility\StringUtil.cpp" />
     <ClCompile Include="Utility\Vector2.cpp" />
     <ClCompile Include="Utility\Vector3.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.cpp" />
@@ -221,10 +226,14 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClCompile Include="Manager\WaterRevealManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\SchoolGit\CSVLoader\CSVLoader\CSVDataLoader.h" />
+    <ClInclude Include="CSVData\CSVData.h" />
     <ClInclude Include="Game\BackGround\SkyBox.h" />
     <ClInclude Include="Game\GameObjects\Actors\Rock\Rock.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Rock\RockDataSetter.h" />
     <ClInclude Include="Game\GameObjects\Bullet\ChargeBullet.h" />
     <ClInclude Include="Game\UI\ReticleUI.h" />
+    <ClInclude Include="Manager\CSVDataLoader.h" />
     <ClInclude Include="Scene\GameoverScene.h" />
     <ClInclude Include="Manager\CollisionManager.h" />
     <ClInclude Include="Game\GameObjects\Bullet\EnemyBullet.h" />
@@ -278,6 +287,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClInclude Include="Scene\GameScene.h" />
     <ClInclude Include="Utility\Size.h" />
     <ClInclude Include="Utility\Sphere.h" />
+    <ClInclude Include="Utility\StringUtil.h" />
     <ClInclude Include="Utility\Vector2.h" />
     <ClInclude Include="Utility\Vector3.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.h" />
@@ -345,6 +355,9 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)%(Filename).vso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).vso</ObjectFileOutput>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\CSV\RockData.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
