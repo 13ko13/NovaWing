@@ -29,6 +29,7 @@
 #include "Game/GameObjects/Actors/Rock/Rock.h"
 #include "Manager/WaterRevealManager.h"
 #include "Rock/RockDataSetter.h"
+#include "Stage/Stage.h"
 
 namespace
 {
@@ -131,6 +132,11 @@ void GameScene::Init()
 	{
 		pRock->Init();
 	}
+
+	//ステージの初期化
+	m_pStage = std::make_shared<Stage>(ResourceLoader::ModelID::Stage,
+	m_pCamera);
+	m_pStage->Init();
 }
 
 void GameScene::Update()

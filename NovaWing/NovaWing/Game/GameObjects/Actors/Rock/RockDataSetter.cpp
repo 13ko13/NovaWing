@@ -5,7 +5,6 @@
 #include "CSVData/CSVData.h"
 #include "Utility/Vector3.h"
 #include "Game/GameObjects/Actors/Rock/Rock.h"
-#include "Manager/ResourceLoader.h"
 
 namespace
 {

@@ -127,7 +127,11 @@ void ResourceLoader::KeepModel()
 
 	handle = MV1LoadModel(L"Data/Model/Rock3.mv1");//岩3
 	assert(handle >= 0); 
-	m_modelHandles[ResourceLoader::ModelID::Rock3] = handle; 
+	m_modelHandles[ResourceLoader::ModelID::Rock3] = handle;
+	
+	handle = MV1LoadModel(L"Data/Model/Stage.mv1");//ステージ
+	assert(handle >= 0); 
+	m_modelHandles[ResourceLoader::ModelID::Stage] = handle; 
 }
 
 void ResourceLoader::KeepGraph()

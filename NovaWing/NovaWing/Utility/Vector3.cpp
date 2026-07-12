@@ -125,5 +125,5 @@ Vector3 Vector3::Lerp(const Vector3& start, const Vector3& end, float t)
 Vector3 Vector3::FromWString(const std::wstring& x, const std::wstring& y, const std::wstring& z)
 {
 	//文字列をそのままfloatにして返す
-    return Vector3(std::stof(x),std::stof(y),std::stof(z));
+	return Vector3(std::stof(x),std::stof(y),std::stof(z));
 }

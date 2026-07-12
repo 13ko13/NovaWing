@@ -159,7 +159,6 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\SchoolGit\CSVLoader\CSVLoader\CSVDataLoader.cpp" />
     <ClCompile Include="CSVData\CSVData.cpp" />
     <ClCompile Include="Game\BackGround\SkyBox.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Rock\Rock.cpp" />
@@ -212,6 +211,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClCompile Include="Manager\TargetManager.cpp" />
     <ClCompile Include="Game\UI\UIBase.cpp" />
     <ClCompile Include="Manager\UIManager.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Stage\Stage.cpp" />
     <ClCompile Include="Utility\Fade.cpp" />
     <ClCompile Include="Utility\Matrix4x4.cpp" />
     <ClCompile Include="Utility\ModelAnimator.cpp" />
@@ -226,7 +226,6 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClCompile Include="Manager\WaterRevealManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\SchoolGit\CSVLoader\CSVLoader\CSVDataLoader.h" />
     <ClInclude Include="CSVData\CSVData.h" />
     <ClInclude Include="Game\BackGround\SkyBox.h" />
     <ClInclude Include="Game\GameObjects\Actors\Rock\Rock.h" />
@@ -280,6 +279,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClInclude Include="Manager\TargetManager.h" />
     <ClInclude Include="Game\UI\UIBase.h" />
     <ClInclude Include="Manager\UIManager.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Stage\Stage.h" />
     <ClInclude Include="Utility\Fade.h" />
     <ClInclude Include="Utility\Matrix4x4.h" />
     <ClInclude Include="Utility\ModelAnimator.h" />
@@ -328,6 +328,20 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)%(Filename).vso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).vso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="StagePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)%(Filename).pso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).pso</ObjectFileOutput>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)%(Filename).pso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)%(Filename).pso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="WaterPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

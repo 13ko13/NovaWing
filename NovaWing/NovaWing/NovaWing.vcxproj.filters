@@ -201,13 +201,13 @@
     <ClCompile Include="CSVData\CSVData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SchoolGit\CSVLoader\CSVLoader\CSVDataLoader.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Manager\CSVDataLoader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Actors\Rock\RockDataSetter.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameObjects\Actors\Stage\Stage.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -404,13 +404,13 @@
     <ClInclude Include="CSVData\CSVData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SchoolGit\CSVLoader\CSVLoader\CSVDataLoader.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Manager\CSVDataLoader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Actors\Rock\RockDataSetter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameObjects\Actors\Stage\Stage.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -420,6 +420,7 @@
     <FxCompile Include="WaterVS.hlsl" />
     <FxCompile Include="WaterPS.hlsl" />
     <FxCompile Include="CapturePS.hlsl" />
+    <FxCompile Include="StagePS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\CSV\RockData.csv" />
