@@ -54,7 +54,7 @@ public:
 	//エフェクトの種類
 	enum class EffectID : int
 	{
-		
+		PlayerBullet,//プレイヤーの弾エフェクト
 	};
 
 	//音の種類
@@ -91,6 +91,8 @@ private:
 	void KeepModel();
 	//画像のハンドルをすべて保存する
 	void KeepGraph();
+	//エフェクトのハンドルをすべて保存する
+	void KeepEffect();
 
 private:
 	//IDをいれて直感的にアクセスできるようにするためのマップ

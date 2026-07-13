@@ -1,6 +1,7 @@
 ﻿#include <memory>
 #include <cassert>
 #include <DxLib.h>
+#include <EffekseerForDXLib.h>
 
 #include "Application.h"
 #include "../Manager/InputManager.h"
@@ -45,6 +46,10 @@ bool Application::Init()
 	SetUseDirect3DVersion(DX_DIRECT3D_11);
 
 	if (DxLib_Init() == -1)
+	{
+		return false;
+	}
+	if(Effekseer_Init(8000) == -1)
 	{
 		return false;
 	}
@@ -101,6 +106,8 @@ void Application::Terminate()
 {
 	//リソースを解放する
 	ResourceLoader::GetInstance().ReleaseAll();
+	//先にEffekseerを終了する
+	Effkseer_End();
 	DxLib_End();
 }
 

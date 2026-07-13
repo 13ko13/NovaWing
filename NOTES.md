@@ -182,3 +182,22 @@
 **ハマった点・試して却下した案:**
 - 当初「通常画像を先に`DrawRotaGraph`で描き、その上にカーソルオン画像の左側だけ`DrawRectRotaGraph`で重ねる」方式にしたところ、両方の画像のグロー・文字縁の半透明部分が重なって色がにじむ(緑背景の画像同士で、黒文字のふちがうっすら緑がかって見える)問題が発生。
 - 正攻法の解決策(常に2枚の画像を`DrawRectRotaGraph`で左右に分割して重ねずに描く)も検討したが、実装がやや複雑になるため見送り、**`wipe_max`を60→10フレームに短縮して、重なりが目立つ時間自体を短くすることで実用上気にならないレベルにする**という判断で妥協・完了とした。今後にじみが気になったら、上記の「重ねずに左右分割描画」方式への変更を検討すること。
+
+### 進捗（プレイヤー弾のEffekseerエフェクト導入・作業中）
+
+**Effekseerで自作したエフェクト(`Data/Effect/PlayerBullet/PlayerBullet.efk`)を、プレイヤーの弾(`PlayerBullet`)の見た目として「発射中もずっと追従表示され続ける」形で組み込む作業を開始した。**
+
+**環境構築:**
+- 素のDxLibにはEffekseer連携APIが無いことが判明。DxLib公式配布の`EffekseerForDXLib`(バージョンはDxLib本体`3.24f`に合わせて`EffekseerForDXLib_1.80.5_324f`)をダウンロードし、既存の`NovaWing/DxLib_h`フォルダを丸ごと差し替える形で導入。`.vcxproj`のインクルードパス/ライブラリパスは元々`$(SolutionDir)/DxLib_h`を指していたため、追加設定は不要だった。
+- 主要API: `Effekseer_Init(パーティクル最大数)`/`Effkseer_End()`(こちらは**ライブラリ側の綴りが`e`抜けの誤字**で、こちらのコードで直してはいけない。実際に`EffekseerForDXLib.h:255`で`void Effkseer_End();`と宣言されている)、`Effekseer_SetGraphicsDeviceLostCallbackFunctions()`、`LoadEffekseerEffect(パス,スケール)`、`PlayEffekseer3DEffect(リソースハンドル)`、`SetPosPlayingEffekseer3DEffect(再生ハンドル,x,y,z)`、`StopEffekseer3DEffect(再生ハンドル)`、`Effekseer_Sync3DSetting()`、`UpdateEffekseer3D()`、`DrawEffekseer3D()`、`DeleteEffekseerEffect(リソースハンドル)`。
+- `Application.cpp`: `SetUseDirect3DVersion(DX_DIRECT3D_11)`(DxLib_Initより前に必要)→`DxLib_Init()`→`Effekseer_Init(8000)`の順で初期化。終了処理は逆順で`Effkseer_End()`→`DxLib_End()`。
+
+**ResourceLoaderへの組み込み(完了):**
+- 既存の`EffectID`enum(元々空で用意されていた)に`PlayerBullet`を追加。
+- `KeepEffect()`を新規実装(`KeepModel()`/`KeepGraph()`と同じパターン)。`LoadAll()`から呼び出し、`ReleaseAll()`にも解放処理(`DeleteEffekseerEffect`)を追加済み。
+
+**次回やること:**
+1. `PlayerBullet.h`に再生ハンドル用のメンバ変数(`int`、初期値-1)を追加するところまで指示済み、**まだ未実装**。
+2. `PlayerBullet.cpp`: コンストラクタで`ResourceLoader::GetEffect(EffectID::PlayerBullet)`→`PlayEffekseer3DEffect`で再生開始、`Update()`で`BulletBase::Update()`の後に`SetPosPlayingEffekseer3DEffect`で位置追従、デストラクタ(またはOnHitEnemy/寿命切れ時)に`StopEffekseer3DEffect`で停止。
+3. まだ`UpdateEffekseer3D()`/`DrawEffekseer3D()`/`Effekseer_Sync3DSetting()`をどこで呼ぶか(GameScene::Update()/Draw()あたりが妥当)も未着手・未検討。
+4. 敵・プレイヤーのCSV化はこの作業のさらに後で再開予定(前回からの継続タスク)。

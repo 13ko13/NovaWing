@@ -26,7 +26,7 @@ float4 main(PS_INPUT input) : SV_TARGET
 	//最終的な明るさ
 	float light = saturate(diffuse + ambient);
 	//ベースの色
-	float4 baseCol = float4(5.0f,1.0f,1.0f,1.0f);
+	float4 baseCol = float4(1.0f,1.0f,1.0f,1.0f);
 	//明るさをかけて出す
 	return baseCol * light;
 }

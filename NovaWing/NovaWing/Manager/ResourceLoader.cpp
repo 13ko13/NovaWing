@@ -1,6 +1,8 @@
-﻿#include "ResourceLoader.h"
-#include <DxLib.h>
+﻿#include <DxLib.h>
 #include <cassert>
+#include <EffekseerForDXLib.h>
+
+#include "ResourceLoader.h"
 
 namespace
 {
@@ -21,6 +23,9 @@ void ResourceLoader::LoadAll()
 
 	//画像を読み込んでハンドルを保存する
 	KeepGraph();
+
+	//エフェクトを読み込んでハンドルを保存する
+	KeepEffect();
 }
 
 void ResourceLoader::ReleaseAll()
@@ -35,6 +40,11 @@ void ResourceLoader::ReleaseAll()
 	for (auto& graphH : m_graphicHandles)
 	{
 		DeleteGraph(graphH.second);
+	}
+	//エフェクト
+	for (auto& effectH : m_effectHandles)
+	{
+		DeleteGraph(effectH.second);
 	}
 }
 
@@ -251,4 +261,13 @@ void ResourceLoader::KeepGraph()
 	handle = LoadGraph(L"Data/Image/SelectFrame/Select_BackGround.png");
 	assert(handle >= 0);
 	m_graphicHandles[ResourceLoader::GraphicID::SelectBackGround] = handle;
+}
+
+void ResourceLoader::KeepEffect()
+{
+	//Effekseerのエフェクトをロードする
+	//プレイヤーの弾
+	int handle = LoadEffekseerEffect(L"Data/Effect/PlayerBullet/PlayerBullet.efk",1.0f);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::PlayerBullet] = handle;
 }
