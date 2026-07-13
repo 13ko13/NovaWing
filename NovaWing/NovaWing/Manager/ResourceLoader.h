@@ -42,6 +42,13 @@ public:
 		SkyBoxBottom,//スカイボックス(下)
 
 		RockNorm,//岩の法線マップ
+
+		TitleLogo,//タイトルロゴ
+		GameStart,//ゲーム開始選択肢画像
+		GameEnd,//ゲーム終了選択肢画像
+		GameStartOnCursor,//カーソルが乗っているときのゲーム開始選択肢画像
+		GameEndOnCursor,////カーソルが乗っているときのゲーム終了選択肢画像
+		SelectBackGround,//選択肢の背景画像
 	};
 
 	//エフェクトの種類

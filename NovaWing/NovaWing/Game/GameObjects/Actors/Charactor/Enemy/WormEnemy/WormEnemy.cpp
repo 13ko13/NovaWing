@@ -6,9 +6,9 @@
 namespace
 {
 	//頭の移動速度
-	constexpr float move_speed =9.0f;
+	constexpr float move_speed =14.0f;
 	//螺旋状に回転するときの回転速度
-	constexpr float rot_speed = 2.0f;
+	constexpr float rot_speed = 4.0f;
 	//螺旋移動の時の半径
 	constexpr float spiral_radius = 160.0f;
 
@@ -22,7 +22,7 @@ namespace
 	//弾の攻撃力
 	constexpr int bullet_power = 1;
 	//胴体間の間隔フレーム数
-	constexpr int spacing = 6;
+	constexpr int spacing = 4;
 
 	//モデルのサイズ
 	const Vector3 model_scale = { 1.0f,1.0f,1.0f };

@@ -20,7 +20,7 @@ namespace
 	constexpr float camera_fixed_y = 600.0f;
 
 	//カメラの視野角
-	constexpr float fov = DX_PI_F / 3.0f;
+	constexpr float fov = DX_PI_F / 2.0f;
 
 	//カメラの回転角の制限
 	constexpr float rot_rimit_up = DX_PI_F / 18.0f;//真上向くときは10度以上回転しないようにする

@@ -66,6 +66,7 @@ void Application::Run()
 {
 	SetDrawScreen(DX_SCREEN_BACK);
 	SceneController controller;//シーンを管理するオブジェクト
+
 	//TitleSceneを作成してChangeSceneで読み込む
 	controller.ChangeScene(
 		std::make_shared<TitleScene>(

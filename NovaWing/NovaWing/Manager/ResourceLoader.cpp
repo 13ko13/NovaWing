@@ -221,4 +221,34 @@ void ResourceLoader::KeepGraph()
 	handle = LoadGraph(L"Data/Model/Rock.fbm/rocks_nm_new.png");
 	assert(handle >= 0);
 	m_graphicHandles[ResourceLoader::GraphicID::RockNorm] = handle;
+
+	//タイトルロゴ
+	handle = LoadGraph(L"Data/Image/title_logo.png");
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::TitleLogo] = handle;
+
+	//ゲーム開始選択肢
+	handle = LoadGraph(L"Data/Image/SelectFrame/Game_Start.png");
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::GameStart] = handle;
+
+	//ゲーム終了選択肢
+	handle = LoadGraph(L"Data/Image/SelectFrame/Game_End.png");
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::GameEnd] = handle;
+
+	//カーソルが乗っているときのゲーム開始選択肢
+	handle = LoadGraph(L"Data/Image/SelectFrame/Game_Start_OnCursor.png");
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::GameStartOnCursor] = handle;
+
+	//カーソルが乗っているときのゲーム終了選択肢
+	handle = LoadGraph(L"Data/Image/SelectFrame/Game_End_OnCursor.png");
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::GameEndOnCursor] = handle;
+
+	//選択肢の背景
+	handle = LoadGraph(L"Data/Image/SelectFrame/Select_BackGround.png");
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::SelectBackGround] = handle;
 }

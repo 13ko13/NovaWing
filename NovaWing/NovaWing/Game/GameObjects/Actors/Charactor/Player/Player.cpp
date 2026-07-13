@@ -32,7 +32,7 @@ namespace
 	constexpr float gauge_recovery_amount = 0.5f;
 	
 	//当たり判定の球の半径
-	constexpr float coll_sphere_radius = 80.0f;
+	constexpr float coll_sphere_radius = 50.0f;
 	//当たり判定位置のオフセット
 	const Vector3 coll_sphere_offset = { 0.0f, 0.0f, -90.0f };
 
