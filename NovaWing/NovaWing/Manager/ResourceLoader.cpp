@@ -267,7 +267,11 @@ void ResourceLoader::KeepEffect()
 {
 	//Effekseerのエフェクトをロードする
 	//プレイヤーの弾
-	int handle = LoadEffekseerEffect(L"Data/Effect/PlayerBullet/PlayerBullet.efk",1.0f);
+	int handle = LoadEffekseerEffect(L"Data/Effect/PlayerBullet/PlayerBullet.efk",1.5f);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::PlayerBullet] = handle;
+	//爆発エフェクト
+	int handle = LoadEffekseerEffect(L"Data/Effect/PlayerBullet/PlayerBullet.efk",1.5f);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::PlayerBullet] = handle;
 }

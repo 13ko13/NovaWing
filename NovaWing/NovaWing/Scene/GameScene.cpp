@@ -5,6 +5,7 @@
 #include <string>
 #include <cmath>
 #include <algorithm>
+#include <EffekseerForDXLib.h>
 
 #include "../Game/GameObjects/Actors/Actor.h"
 #include "../Game/GameObjects/Actors/Charactor/Charactor.h"
@@ -147,6 +148,10 @@ void GameScene::Update()
 	//全GameObjectのUpdateを呼ぶ
 	GameObjectManager::GetInstance().UpdateAll();
 
+	//Effekseerのエフェクト更新
+	Effekseer_Sync3DSetting();
+	UpdateEffekseer3D();
+
 	//衝突判定マネージャーの更新
 	m_pCollisionManager->Update();
 
@@ -175,28 +180,32 @@ void GameScene::Draw()
 	m_pCamera->SetUpCamera();
 	//キャプチャのほうに全オブジェクトの描画を行う
 	GameObjectManager::GetInstance().DrawAll();
+	
 	//キャプチャを終了
 	revealManager.EndCapture();
 	//視野角とNearFarを再設定
 	m_pCamera->SetUpCamera();
-
+	
 	//スカイボックスの描画
 	m_pSkyBox->Draw(m_pCamera->GetPos());
-
+	
 	//グリッドの描画
 	DrawGrid();
 
-#ifdef _DEBUG
+	#ifdef _DEBUG
 	DrawString(0, 0, L"GameScene", 0xffffff);
 	DrawFormatString(0, 16, 0xffffff, L"FRAME:%d", m_frame);
-#endif //DEBUG
+	#endif //DEBUG
 
 	//全GameObjectのDrawを呼ぶ
 	GameObjectManager::GetInstance().DrawAll();
+	
+	//Effekseerのエフェクト描画
+	DrawEffekseer3D();
 
 	//水マネージャーの描画
 	m_pWaterManager->Draw();
-
+	
 	//全てのUIを描画する
 	m_pUIManager->Draw();
 }

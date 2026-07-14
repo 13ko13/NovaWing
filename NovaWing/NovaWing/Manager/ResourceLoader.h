@@ -55,6 +55,7 @@ public:
 	enum class EffectID : int
 	{
 		PlayerBullet,//プレイヤーの弾エフェクト
+		Death,//死亡エフェクト
 	};
 
 	//音の種類
