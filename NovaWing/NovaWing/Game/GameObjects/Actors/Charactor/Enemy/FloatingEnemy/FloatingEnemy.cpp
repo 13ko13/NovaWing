@@ -1,4 +1,6 @@
-﻿#include "FloatingEnemy.h"
+﻿#include <EffekseerForDXLib.h>
+
+#include "FloatingEnemy.h"
 #include "IEnemyState.h"
 #include "Charactor/Player/Player.h"
 #include "HideState.h"
@@ -10,6 +12,8 @@ namespace
 	const Vector3 model_scale = { 1.0f,1.0f,1.0f };
 	//敵自身の球の当たり判定の半径
 	constexpr float col_radius = 132.0f;
+	//死亡待機状態から完全死亡になるまでのフレーム
+	constexpr int true_dead_frame = 30;
 }
 
 FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
@@ -21,12 +25,13 @@ FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 	m_colSphere(m_pos),
 	m_pBulletManager(pBulletManager)
 {
-
+	
 }
 
 FloatingEnemy::~FloatingEnemy()
 {
-
+	//エフェクトを止める
+	StopEffekseer3DEffect(m_effectPlayHandle);
 }
 
 void FloatingEnemy::OnInit()
@@ -52,28 +57,47 @@ void FloatingEnemy::OnInit()
 
 void FloatingEnemy::Update()
 {
-	//ステートの更新
-	m_pState->Update();
-	//次のステートを取得
-	std::shared_ptr<IEnemyState> pState = m_pState->GetNextState();
-	//次のステートがあればステートを変更する
-	if (pState != nullptr)
+	//死亡待機中以外は処理を行う
+	if(!m_isDying)
 	{
-		//前ステートの出るときの処理
-		m_pState->Exit();
-		//ステートを変更
-		m_pState = pState;
-		//切り替え後の入った時の処理
-		m_pState->Enter();
+		//ステートの更新
+		m_pState->Update();
+		//次のステートを取得
+		std::shared_ptr<IEnemyState> pState = m_pState->GetNextState();
+		//次のステートがあればステートを変更する
+		if (pState != nullptr)
+		{
+			//前ステートの出るときの処理
+			m_pState->Exit();
+			//ステートを変更
+			m_pState = pState;
+			//切り替え後の入った時の処理
+			m_pState->Enter();
+		}
+		//アニメーターの更新
+		m_pAnimator->Update(1.0f);
+
+		//キャラクタークラス共通の処理
+		Charactor::Update();
+
+		//当たり判定の更新
+		m_colSphere.Update(m_pos, col_radius);
 	}
-	//アニメーターの更新
-	m_pAnimator->Update(1.0f);
+	//死亡待機中はフレームを数えて一定フレーム経ったら存在を削除
+	else
+	{
+		m_dyingFrame++;
+		if(m_dyingFrame > true_dead_frame)
+		{
+			//完全死亡
+			OnDead();
+		}
+	}
 
-	//キャラクタークラス共通の処理
-	Charactor::Update();
-
-	//当たり判定の更新
-	m_colSphere.Update(m_pos, col_radius);
+	//エフェクトの位置の調整する
+		SetPosPlayingEffekseer3DEffect(
+			m_effectPlayHandle, GetPos().m_x, GetPos().m_y, GetPos().m_z
+		);
 }
 
 void FloatingEnemy::Draw()
@@ -136,7 +160,18 @@ void FloatingEnemy::TakeDamage(int damage)
 	//体力が0以下になったら死亡処理
 	if (m_health <= 0)
 	{
-		OnDead();
+		//死亡待機状態をtrueにする
+		m_isDying = true;
+
+		//Effekseerのエフェクト再生を呼ぶ
+		m_effectPlayHandle = PlayEffekseer3DEffect(
+			ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::Death)
+		);
+
+		//再生直後に正しい位置へ即座にセットする(1フレーム目のワープ軌跡を防ぐ)
+		SetPosPlayingEffekseer3DEffect(
+			m_effectPlayHandle, m_pos.m_x, m_pos.m_y, m_pos.m_z
+		);
 	}
 }
 

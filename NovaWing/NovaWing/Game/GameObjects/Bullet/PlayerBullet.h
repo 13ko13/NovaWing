@@ -15,6 +15,7 @@ public:
 	void OnHitEnemy() override;
 
 private:
-	int m_effectPlayHandle = -1;//Effekseerのエフェクト再生中のハンドル
+//Effekseerのエフェクト再生中のハンドル
+	int m_effectPlayHandle = -1;
 };
 

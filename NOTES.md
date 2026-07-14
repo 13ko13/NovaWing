@@ -197,7 +197,29 @@
 - `KeepEffect()`を新規実装(`KeepModel()`/`KeepGraph()`と同じパターン)。`LoadAll()`から呼び出し、`ReleaseAll()`にも解放処理(`DeleteEffekseerEffect`)を追加済み。
 
 **次回やること:**
-1. `PlayerBullet.h`に再生ハンドル用のメンバ変数(`int`、初期値-1)を追加するところまで指示済み、**まだ未実装**。
-2. `PlayerBullet.cpp`: コンストラクタで`ResourceLoader::GetEffect(EffectID::PlayerBullet)`→`PlayEffekseer3DEffect`で再生開始、`Update()`で`BulletBase::Update()`の後に`SetPosPlayingEffekseer3DEffect`で位置追従、デストラクタ(またはOnHitEnemy/寿命切れ時)に`StopEffekseer3DEffect`で停止。
-3. まだ`UpdateEffekseer3D()`/`DrawEffekseer3D()`/`Effekseer_Sync3DSetting()`をどこで呼ぶか(GameScene::Update()/Draw()あたりが妥当)も未着手・未検討。
-4. 敵・プレイヤーのCSV化はこの作業のさらに後で再開予定(前回からの継続タスク)。
+1. ~~`PlayerBullet.h`に再生ハンドル用のメンバ変数(`int`、初期値-1)を追加。~~ → 完了。プレイヤー弾のエフェクト表示は正常に動作している。
+2. ~~`PlayerBullet.cpp`の再生/追従/停止実装。~~ → 完了。
+3. `UpdateEffekseer3D()`/`DrawEffekseer3D()`/`Effekseer_Sync3DSetting()`をどこで呼ぶかは、プレイヤー弾の実装がうまくいった時点で解決済み(具体的な呼び出し箇所はGameSceneのUpdate/Draw)。
+4. 敵・プレイヤーのCSV化はまだ未着手。次はこちらを再開予定。
+
+### 進捗（2026-07-15・浮遊敵の死亡爆発エフェクト完成）
+
+**浮遊敵(`FloatingEnemy`)を倒したとき、爆発エフェクト(`EffectID::Death`)を再生して「敵が一瞬で消える」不自然さをごまかす演出が完成した。**
+
+**ハマった点1: ResourceLoaderのコピペミス**
+- `KeepEffect()`に爆発エフェクト読み込みを追加した際、`LoadEffekseerEffect`のファイルパスが`PlayerBullet.efk`のままコピペされており、かつ格納先キーも`EffectID::PlayerBullet`のままだった(本来は`EffectID::Death`用の別ファイル・別キーにする必要があった)。結果、`Death`が一度もロードされておらず`GetEffect(EffectID::Death)`で`assert`に引っかかっていた。パスとキー両方を修正して解決。
+
+**ハマった点2: モデルが一瞬で消える不自然さ**
+- 最初は体力0の瞬間に即`OnDead()`+エフェクト再生をしていたため、「モデル消滅」と「爆発開始」が完全同時になり、消える瞬間が丸わかりだった。
+- 対策として、`IEnemyState`を使ったステートマシン拡張(新規State追加)は「めんどくさい」という理由で見送り、**`FloatingEnemy`に`bool m_isDying`と`int m_dyingFrame`を追加するだけの軽量な実装**を採用。`TakeDamage()`で体力0になったら`m_isDying=true`+エフェクト再生のみ行い、`OnDead()`は呼ばない。`Update()`は`m_isDying`で分岐し、死亡待機中は`true_dead_frame`(30F)経過後に初めて`OnDead()`を呼ぶ。この間モデルはそのまま`Draw()`され続ける。
+- **教訓**: ステートマシンへの正式な追加(新クラス作成)よりも、フラグ+カウンタで済む場面では、既存構造を無闇に拡張せずシンプルに済ませる方が実用上speedyに完成する。今回のケースは「死亡演出」という一時的な状態で、他のステートとの相互作用(Enter/Exit)が特に必要なかったため軽量実装で十分だった。
+
+**ハマった点3(本命): エフェクトが敵モデルの「後ろ」に隠れて見える**
+- 上記の対策後も、爆発エフェクトが敵モデルのシルエットの背後で光っているように見えて違和感が消えなかった。「モデルを描画しない(=結局即消えるのと同じ)」という誤った代替案を検討したが、これは何も解決しないと気づき却下。
+- **真因はEffekseer側のノード設定**: `.efkefc`の各ノード(`Impact`等)に「深度テスト」が有効(チェック有り)になっていたため、実際の奥行きに応じて敵モデルの背後にあるパーティクル部分が隠されていた。「深度書き込み」は元々無効(正しい設定)だったが、「深度テスト」もセットで見る必要があった。
+- **対処**: Effekseerエディタで該当ノードの「深度テスト」のチェックを外し、常に手前に描画されるようにして解決。
+- **教訓**: 半透明エフェクトがモデルに埋もれて見える系の不具合は、コード側(描画順・座標オフセット)より先に、**Effekseerエディタ側のノードごとの「深度テスト」/「深度書き込み」設定を疑うべき**。同様の問題が今後別のエフェクトでも起きたら、まずここを確認すること。
+
+**残タスク:**
+1. 敵・プレイヤーのパラメータCSV化（継続中の積み残し）。
+2. `WormEnemy`など他の敵にも同様の死亡演出を追加するかは未検討。

@@ -44,7 +44,7 @@ void ResourceLoader::ReleaseAll()
 	//エフェクト
 	for (auto& effectH : m_effectHandles)
 	{
-		DeleteGraph(effectH.second);
+		DeleteEffekseerEffect(effectH.second);
 	}
 }
 
@@ -271,7 +271,7 @@ void ResourceLoader::KeepEffect()
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::PlayerBullet] = handle;
 	//爆発エフェクト
-	int handle = LoadEffekseerEffect(L"Data/Effect/PlayerBullet/PlayerBullet.efk",1.5f);
+	handle = LoadEffekseerEffect(L"Data/Effect/Exprosion2/Exprosion2.efk",3.0f);
 	assert(handle >= 0);
-	m_effectHandles[ResourceLoader::EffectID::PlayerBullet] = handle;
-}
+	m_effectHandles[ResourceLoader::EffectID::Death] = handle;
+	}
