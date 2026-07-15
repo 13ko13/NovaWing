@@ -162,9 +162,23 @@ void Player::Update()
 
 void Player::ClampPosition()
 {
-	//移動範囲を制限する
-	/*m_pos.m_x = std::clamp(m_pos.m_x, -move_limit_x, move_limit_x);
-	m_pos.m_y = std::clamp(m_pos.m_y, -move_limit_y, move_limit_y);*/
+	//視錐台クランプを行う
+	//カメラをshared_ptrに変換
+	std::shared_ptr<CameraBase> pCamera = m_pCamera.lock();
+	//今どれくらいの範囲が画面に映っているかを数値として求めるために
+	//カメラとプレイヤーの位置の差からZ方向の距離を求める
+	Vector3 cameraPos = pCamera->GetPos();//カメラ位置
+	Vector3 playerPos = m_pos;
+	float distZ = std::abs((playerPos - cameraPos).m_z);
+	
+	//求めたdistZを使用してプレイヤーが移動できる範囲を
+	//ワールド座標で算出する
+	Vector2 frustumHalf = pCamera->GetFrustumHalfSize(distZ);
+
+	//プレイヤーの位置をそれぞれ求めた範囲でクランプする
+	//-screenWToWorld～screenWToWorldがクランプ範囲
+	m_pos.m_x = std::clamp(m_pos.m_x,-frustumHalf.m_x,frustumHalf.m_x);
+	m_pos.m_y = std::clamp(m_pos.m_y,-frustumHalf.m_y,frustumHalf.m_y);
 }
 
 void Player::Somersault(InputManager& input)

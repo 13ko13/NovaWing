@@ -36,6 +36,12 @@ public:
 	/// <returns>正面ベクトル</returns>
 	Vector3 const GetForward() const;
 
+	//視野角を取得
+	float GetFov() const;
+
+	//視錐台の半分のサイズを返す
+	Vector2 GetFrustumHalfSize(float distZ) const;
+
 	/// <summary>
 	/// カメラの揺れの開始
 	/// </summary>
