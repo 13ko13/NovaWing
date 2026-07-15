@@ -4,6 +4,7 @@
 
 #include "Charactor/Charactor.h"
 #include "Utility/Sphere.h"
+#include "Utility/Vector2.h"
 
 class Player;
 class BulletManager;
@@ -23,7 +24,10 @@ public:
 		const ResourceLoader::ModelID Id,
 		const std::shared_ptr<BulletManager> pBulletManager,
 		int segmentCount,
-		std::weak_ptr<CameraBase> camera);
+		std::weak_ptr<CameraBase> camera,
+		const Vector3& pos,
+		float direction//移動方向
+	);
 	~WormEnemy();
 
 	void OnInit() override;//初期化処理
@@ -48,7 +52,7 @@ private:
 	int m_segmentCount = 0;
 	//螺旋移動用
 	float m_rotationAngle = 0.0f;
-	//弾発射タイミング用のフレーム
+	//間隔を決めるときのフレーム
 	int m_frame = 0;
 
 	Sphere m_headSphere;//当たり判定(球)
@@ -57,5 +61,19 @@ private:
 
 	//頭の位置を履歴として持つ
 	std::vector<Vector3> m_headHistory;
+
+	//死亡エフェクトのプレイハンドル
+	int m_deathPlayHandle = -1;
+	//エフェクトを再生するかどうか
+	bool m_isCanPlayEffect = false;
+	//胴体の死亡エフェクトを何回出したか
+	int m_deathEffectNum = 0;
+	//死亡待機状態か
+	bool m_isWatingDeath = false;
+
+	//Z+方向かZ-方向かどちらに進むかの移動方向
+	float m_moveDirection = 0;//移動方向(1.0:Z+方向、-1.0:Z-方向)
+	//コンストラクタで受け取ったposのx,yを螺旋の中心とする
+	Vector2 m_spiralCenter;
 };
 

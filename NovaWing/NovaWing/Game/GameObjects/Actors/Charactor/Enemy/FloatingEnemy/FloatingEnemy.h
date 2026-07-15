@@ -14,7 +14,8 @@ public:
 	FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 		const ResourceLoader::ModelID Id,
 		const std::shared_ptr<BulletManager> pBulletManager,
-		std::weak_ptr<CameraBase> camera);
+		std::weak_ptr<CameraBase> camera,
+		const Vector3& pos);
 	~FloatingEnemy();
 
 	void OnInit() override;//初期化処理

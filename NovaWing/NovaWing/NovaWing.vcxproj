@@ -160,6 +160,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CSVData\CSVData.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemyDataSetter.cpp" />
     <ClCompile Include="Game\BackGround\SkyBox.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Rock\Rock.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Rock\RockDataSetter.cpp" />
@@ -224,9 +225,11 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.cpp" />
     <ClCompile Include="Manager\WaterManager.cpp" />
     <ClCompile Include="Manager\WaterRevealManager.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemyDataSetter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSVData\CSVData.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemyDataSetter.h" />
     <ClInclude Include="Game\BackGround\SkyBox.h" />
     <ClInclude Include="Game\GameObjects\Actors\Rock\Rock.h" />
     <ClInclude Include="Game\GameObjects\Actors\Rock\RockDataSetter.h" />
@@ -293,6 +296,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.h" />
     <ClInclude Include="Manager\WaterManager.h" />
     <ClInclude Include="Manager\WaterRevealManager.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemyDataSetter.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">

@@ -15,6 +15,5 @@ public:
         std::weak_ptr<CameraBase> pCamera);
 
 private:
-    //wstringをModelIDに変換する
-    static ResourceLoader::ModelID WStringToModelID(const std::wstring id);
+   
 };

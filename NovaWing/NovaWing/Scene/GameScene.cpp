@@ -30,7 +30,9 @@
 #include "Game/GameObjects/Actors/Rock/Rock.h"
 #include "Manager/WaterRevealManager.h"
 #include "Rock/RockDataSetter.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/FloatingEnemy/FloatingEnemyDataSetter.h"
 #include "Stage/Stage.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/WormEnemy/WormEnemyDataSetter.h"
 
 namespace
 {
@@ -82,31 +84,42 @@ void GameScene::Init()
 	//衝突判定マネージャーの初期化
 	m_pCollisionManager = std::make_shared<CollisionManager>(m_pPlayer, m_pBulletManager);
 
-	//エネミーの初期化
-	m_pFloatingEnemy = std::make_shared<FloatingEnemy>(m_pPlayer,
-		ResourceLoader::ModelID::FloatingEnemy,
-		m_pBulletManager,
-		m_pCamera);
-	m_pFloatingEnemy->Init();
-	//衝突判定マネージャーに敵を登録する
-	m_pCollisionManager->RegisterFloatingEnemy(m_pFloatingEnemy);
-	
-	//ワームエネミーの初期化
-	m_pWormEnemy = std::make_shared<WormEnemy>(m_pPlayer,
-		ResourceLoader::ModelID::WormHead,
-		m_pBulletManager, 5,
-		m_pCamera);
-	m_pWormEnemy->Init();
-	//衝突判定マネージャーにワームエネミーを登録する
-	m_pCollisionManager->RegisterWormEnemy(m_pWormEnemy);
-
 	//ターゲットマネージャーの初期化
 	m_pTargetManager = std::make_shared<TargetManager>(m_pPlayer);
 	//プレイヤーにターゲットマネージャーをセットする
 	m_pPlayer->SetTargetManager(m_pTargetManager);
-	//ターゲットマネージャーにエネミーを登録する
-	m_pTargetManager->RegisterFloatingEnemy(m_pFloatingEnemy);
-	m_pTargetManager->RegisterWormEnemy(m_pWormEnemy);
+
+	//浮遊エネミーの初期化
+	//データの数分のエネミーを作成
+	m_pFloatingEnemies = FloatingEnemyDataSetter::CreateEnemy(
+		m_pPlayer,
+		m_pCamera,
+		m_pBulletManager
+	);
+	//それぞれの初期化
+	for(std::shared_ptr<FloatingEnemy> pEnemy : m_pFloatingEnemies)
+	{
+		pEnemy->Init();
+		//衝突判定マネージャーに敵を登録する
+		m_pCollisionManager->RegisterFloatingEnemy(pEnemy);
+		//ターゲットマネージャーにエネミーを登録する
+		m_pTargetManager->RegisterFloatingEnemy(pEnemy);
+	}
+	
+	//ワームエネミーの初期化
+	m_pWormEnemies = WormEnemyDataSetter::CreateEnemy(
+		m_pPlayer,
+		m_pCamera,
+		m_pBulletManager
+		);
+	for(std::shared_ptr<WormEnemy> pEnemy : m_pWormEnemies)
+	{
+		pEnemy->Init();
+		//衝突判定マネージャーに敵を登録する
+		m_pCollisionManager->RegisterWormEnemy(pEnemy);
+		//ターゲットマネージャーにエネミーを登録する
+		m_pTargetManager->RegisterWormEnemy(pEnemy);
+	}
 
 	//UIManagerの初期化
 	m_pUIManager = std::make_shared<UIManager>();
@@ -200,14 +213,18 @@ void GameScene::Draw()
 	//全GameObjectのDrawを呼ぶ
 	GameObjectManager::GetInstance().DrawAll();
 	
+	//水マネージャーの描画
+	m_pWaterManager->Draw();
+
 	//Effekseerのエフェクト描画
 	DrawEffekseer3D();
 
-	//水マネージャーの描画
-	m_pWaterManager->Draw();
-	
 	//全てのUIを描画する
 	m_pUIManager->Draw();
+
+	//レティクルよりプレイヤーが優先的に描画されてほしいので
+	//プレイヤーをもう一度描画する
+	m_pPlayer->Draw();
 }
 
 void GameScene::DrawGrid()

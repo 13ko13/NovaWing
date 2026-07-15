@@ -32,7 +32,8 @@ std::vector<std::shared_ptr<Rock>> RockDataSetter::CreateRock(
         dataString = data->GetData();
         
         //モデルID(文字列)をModelIDに変換
-        ResourceLoader::ModelID modelID = WStringToModelID(dataString[0]);
+        ResourceLoader::ModelID modelID =
+            ResourceLoader::WStringToModelID(dataString[0]);
 
         //位置(文字列)をVector3に変換
         Vector3 pos = Vector3::FromWString(
@@ -43,28 +44,4 @@ std::vector<std::shared_ptr<Rock>> RockDataSetter::CreateRock(
     }
 
     return pRocks; 
-}
-
-ResourceLoader::ModelID RockDataSetter::WStringToModelID(const std::wstring id)
-{
-    //渡された文字列に応じて岩のモデルを返す
-    if(id == L"Rock1")
-    {
-        return ResourceLoader::ModelID::Rock1;
-    }
-    else if(id == L"Rock2")
-    {
-        return ResourceLoader::ModelID::Rock2;
-    }
-    else if(id == L"Rock3")
-    {
-        return ResourceLoader::ModelID::Rock3;
-    }
-    else
-    {
-        //それ以外の文字列ならクラッシュ
-        assert(-1 + L"そのモデルIDはありません");
-        //Release版では異常事態なので1番を返しておく
-        return ResourceLoader::ModelID::Rock1;
-    }
 }

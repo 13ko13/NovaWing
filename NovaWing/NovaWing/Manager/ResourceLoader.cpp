@@ -1,6 +1,7 @@
 ﻿#include <DxLib.h>
 #include <cassert>
 #include <EffekseerForDXLib.h>
+#include <unordered_map>
 
 #include "ResourceLoader.h"
 
@@ -109,6 +110,32 @@ int ResourceLoader::GetSound(SoundID id) const
 	{
 		assert(false && "サウンドIDが見つかりません");
 		return -1;
+	}
+}
+
+ResourceLoader::ModelID ResourceLoader::WStringToModelID(const std::wstring id)
+{
+	//wstringとmodelIDの対応表を作成
+	static std::unordered_map <std::wstring, ResourceLoader::ModelID> table =
+	{
+		{L"Rock1",ModelID::Rock1},
+		{L"Rock2",ModelID::Rock2},
+		{L"Rock3",ModelID::Rock3},
+		{L"FloatingEnemy",ModelID::FloatingEnemy},
+		{L"WormHead",ModelID::WormHead},
+	};
+	//受け取ったidを使ってtableからそのモデルのIDを受け取る
+	auto it = table.find(id);
+	if (it != table.end())//見つかった場合
+	{
+		return it->second;
+	}
+	else
+	{
+		//見つからなかった場合はクラッシュ
+		assert(false && L"そのモデルIDは見つかりません");
+		//Rock1を返す
+		return ModelID::Rock1;
 	}
 }
 
@@ -267,11 +294,15 @@ void ResourceLoader::KeepEffect()
 {
 	//Effekseerのエフェクトをロードする
 	//プレイヤーの弾
-	int handle = LoadEffekseerEffect(L"Data/Effect/PlayerBullet/PlayerBullet.efk",1.5f);
+	int handle = LoadEffekseerEffect(L"Data/Effect/PlayerBullet/PlayerBullet.efk",1.0f);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::PlayerBullet] = handle;
-	//爆発エフェクト
-	handle = LoadEffekseerEffect(L"Data/Effect/Exprosion2/Exprosion2.efk",3.0f);
+	//ワームエネミーの死亡エフェクト
+	handle = LoadEffekseerEffect(L"Data/Effect/Exprosion/Exprosion.efk",3.0f);
 	assert(handle >= 0);
-	m_effectHandles[ResourceLoader::EffectID::Death] = handle;
-	}
+	m_effectHandles[ResourceLoader::EffectID::WormDeath] = handle;
+	//浮遊エネミーの死亡エフェクト
+	handle = LoadEffekseerEffect(L"Data/Effect/Exprosion2/Exprosion2.efk", 1.5f);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::FloatingDeath] = handle;
+}

@@ -90,7 +90,8 @@ void Application::Run()
 		controller.Draw();
 		ScreenFlip();
 		//ESCキーが押されたらウィンドウを閉じる
-		if (CheckHitKey(KEY_INPUT_ESCAPE))
+		if (CheckHitKey(KEY_INPUT_ESCAPE) ||
+			m_isExitRequested)
 		{
 			break;
 		}

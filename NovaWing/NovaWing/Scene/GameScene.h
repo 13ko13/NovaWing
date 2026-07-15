@@ -41,13 +41,13 @@ private:
 	//カメラの実体
 	std::shared_ptr<CameraBase> m_pCamera;
 	//浮遊エネミーの実体
-	std::shared_ptr<FloatingEnemy> m_pFloatingEnemy;
+	std::vector<std::shared_ptr<FloatingEnemy>> m_pFloatingEnemies;
 	//バレットマネージャーの実体
 	std::shared_ptr<BulletManager> m_pBulletManager;
 	//衝突判定マネージャーの実体
 	std::shared_ptr<CollisionManager> m_pCollisionManager;
 	//ワームエネミーの実体
-	std::shared_ptr<WormEnemy> m_pWormEnemy;
+	std::vector<std::shared_ptr<WormEnemy>> m_pWormEnemies;
 	//ターゲットマネージャーの実体
 	std::shared_ptr<TargetManager> m_pTargetManager;
 	//UIマネージャー

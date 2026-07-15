@@ -13,19 +13,21 @@ namespace
 	//敵自身の球の当たり判定の半径
 	constexpr float col_radius = 132.0f;
 	//死亡待機状態から完全死亡になるまでのフレーム
-	constexpr int true_dead_frame = 30;
+	constexpr int true_dead_frame = 10;
 }
 
 FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 	const ResourceLoader::ModelID Id,
 	const std::shared_ptr<BulletManager> pBulletManager,
-	std::weak_ptr<CameraBase> camera) :
+	std::weak_ptr<CameraBase> camera,
+		const Vector3& pos) :
 	Charactor(Id,camera),
 	m_pPlayer(pPlayer),
-	m_colSphere(m_pos),
+	m_colSphere(pos),
 	m_pBulletManager(pBulletManager)
 {
-	
+	//位置を反映
+	SetPos(pos);
 }
 
 FloatingEnemy::~FloatingEnemy()
@@ -47,8 +49,6 @@ void FloatingEnemy::OnInit()
 
 	//ステートに入った時の処理
 	m_pState->Enter();
-	m_pos.m_z += 900.0f;
-	m_pos.m_y += 500.0f;
 
 	//定数バッファを作成
 	CreateShaderBuffers();
@@ -165,7 +165,7 @@ void FloatingEnemy::TakeDamage(int damage)
 
 		//Effekseerのエフェクト再生を呼ぶ
 		m_effectPlayHandle = PlayEffekseer3DEffect(
-			ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::Death)
+			ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::FloatingDeath)
 		);
 
 		//再生直後に正しい位置へ即座にセットする(1フレーム目のワープ軌跡を防ぐ)

@@ -3,7 +3,7 @@
 
 namespace
 {
-	constexpr float boost_speed = 13.0f;
+	constexpr float boost_speed = 17.0f;
 }
 
 BoostState::BoostState(const std::weak_ptr<Player> pPlayer):

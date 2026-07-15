@@ -111,8 +111,8 @@ void TitleScene::Update()
 		}
 		case TitleSelect::ExitGame:
 		{
-			//ゲームを終了する
-			DxLib_End();
+			//アプリケーションに終了を要求する
+			Application::GetInstance().RequestExit();
 			break;
 		}
 		}

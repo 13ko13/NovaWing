@@ -42,12 +42,17 @@ public:
 	/// <returns></returns>
 	const Size& GetWindowSize() const;
 
+	//ゲーム終了をリクエストされるときに呼んでもらう
+	void RequestExit() { m_isExitRequested = true; }
+
 private:
 	Size m_windowSize;//ウィンドウサイズ
 private:
 	Application();//newも変数宣言もできなくなる
 	Application(const Application& app) = delete;//コピーコンストラクタを無効
 	void operator=(const Application& app) = delete;//代入を禁止
+	//終了リクエストをもらったか
+	bool m_isExitRequested = false;
 
 	//void SoundLoad(SoundManager& sm);
 };

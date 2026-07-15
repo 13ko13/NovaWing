@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <unordered_map>
+#include <string>
 
 class ResourceLoader
 {
@@ -55,7 +56,8 @@ public:
 	enum class EffectID : int
 	{
 		PlayerBullet,//プレイヤーの弾エフェクト
-		Death,//死亡エフェクト
+		WormDeath,//ワームの死亡エフェクト
+		FloatingDeath,//浮遊敵の死亡エフェクト
 	};
 
 	//音の種類
@@ -77,6 +79,9 @@ public:
 	int GetGraphic(GraphicID id) const;
 	int GetEffect(EffectID id) const;
 	int GetSound(SoundID id) const;
+
+	//wstringをModelIDに変換する
+    static ResourceLoader::ModelID WStringToModelID(const std::wstring id);
 
 private:
 	//=defaultでデフォルトコンストラクタを生成する

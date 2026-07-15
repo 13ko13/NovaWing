@@ -11,7 +11,7 @@ namespace
 	constexpr float camera_far = 5500.0f;//カメラのFar
 	const Vector3 first_pos = { 0.0f,600.0f,00.0f };
 	//注視点からカメラ位置に向かうベクトル
-	const Vector3 target_to_camera = { 0.0f,200.0f,-1500.0f };
+	const Vector3 target_to_camera = { 0.0f,200.0f,-1200.0f };
 	//右スティックを動かしたときのカメラの回転角の増減量
 	constexpr float camera_rotate_speed = 0.04f;
 	//カメラが回転するまでのデッドゾーン

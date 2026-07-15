@@ -15,5 +15,7 @@ public:
 	void Enter() override;
 
 private:
+	//クールタイム管理
+	int m_shootCT = 0;
 };
 

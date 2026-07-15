@@ -7,7 +7,7 @@
 
 namespace
 {
-	constexpr float move_speed = 6.0f;//移動速度
+	constexpr float move_speed = 8.0f;//移動速度
 	constexpr float stick_dead_zone = 0.1f;//スティックのデッドゾーン
 
 	//移動制限範囲

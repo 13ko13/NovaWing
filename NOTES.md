@@ -197,10 +197,15 @@
 - `KeepEffect()`を新規実装(`KeepModel()`/`KeepGraph()`と同じパターン)。`LoadAll()`から呼び出し、`ReleaseAll()`にも解放処理(`DeleteEffekseerEffect`)を追加済み。
 
 **次回やること:**
-1. ~~`PlayerBullet.h`に再生ハンドル用のメンバ変数(`int`、初期値-1)を追加。~~ → 完了。プレイヤー弾のエフェクト表示は正常に動作している。
-2. ~~`PlayerBullet.cpp`の再生/追従/停止実装。~~ → 完了。
-3. `UpdateEffekseer3D()`/`DrawEffekseer3D()`/`Effekseer_Sync3DSetting()`をどこで呼ぶかは、プレイヤー弾の実装がうまくいった時点で解決済み(具体的な呼び出し箇所はGameSceneのUpdate/Draw)。
+1. ~~`PlayerBullet.h`に再生ハンドル用のメンバ変数(`int`、初期値-1)を追加。~~ → 完了。
+2. ~~`PlayerBullet.cpp`の再生/追従/停止実装。~~ → 完了(コンストラクタで`PlayEffekseer3DEffect`、`Update()`で`SetPosPlayingEffekseer3DEffect`、`OnHitEnemy()`/デストラクタで`StopEffekseer3DEffect`)。
+3. ~~`UpdateEffekseer3D()`/`DrawEffekseer3D()`/`Effekseer_Sync3DSetting()`の呼び出し箇所。~~ → 完了。`GameScene::Update()`は`UpdateAll()`の直後に`Effekseer_Sync3DSetting()`→`UpdateEffekseer3D()`。`GameScene::Draw()`は**2回目の`DrawAll()`(通常描画)の後、水描画より前**に`DrawEffekseer3D()`。1回目の`DrawAll()`は透過水キャプチャパスなので、ここにエフェクトを混ぜるとオフスクリーンにしか描画されず失敗する(実際に一度誤って混入させて気づいた)。
 4. 敵・プレイヤーのCSV化はまだ未着手。次はこちらを再開予定。
+
+**発覚したバグ(2026-07-15・修正提案済み、コード反映は未確認):**
+- 弾を撃つと、プレイヤーの現在位置から画面下方向(ワールド原点Y=0付近)に向かって一直線の光の軌跡が残ってしまう問題が発生。
+- 原因: `PlayerBullet`のコンストラクタで`PlayEffekseer3DEffect`を呼んだ直後は`SetPosPlayingEffekseer3DEffect`をまだ一度も呼んでいないため、Effekseer側はデフォルト位置(原点付近)でエフェクトの再生・軌跡の起点を作ってしまう。次の`Update()`で初めて弾の本当の位置にジャンプするため、その「原点→本来の位置」への移動そのものが軌跡として残っていた。
+- 対処: コンストラクタ内、`PlayEffekseer3DEffect`の直後に`SetPosPlayingEffekseer3DEffect(m_effectPlayHandle, pos.m_x, pos.m_y, pos.m_z)`を追加して、初回から正しい位置にエフェクトを配置する。→ **反映・動作確認済み。解決済み。**
 
 ### 進捗（2026-07-15・浮遊敵の死亡爆発エフェクト完成）
 
@@ -222,4 +227,89 @@
 
 **残タスク:**
 1. 敵・プレイヤーのパラメータCSV化（継続中の積み残し）。
-2. `WormEnemy`など他の敵にも同様の死亡演出を追加するかは未検討。
+2. ~~`WormEnemy`など他の敵にも同様の死亡演出を追加するかは未検討。~~ → 下記の通り実装・デバッグ完了。
+
+### 進捗（2026-07-15・続き・ワームエネミーの死亡爆発エフェクト完成、水面/エフェクト描画順の修正）
+
+**`WormEnemy`にも死亡演出（頭→胴体の順に一定間隔で爆発エフェクトを出しつつ消えていく）を実装した。ユーザー自身が実装し、Claudeはコードを直接編集せず説明とレビューのみ行う形で進めた（[[feedback_no_direct_code_edit]]のルール通り）。**
+
+**実装の骨子:**
+- `WormEnemy`に`int m_deathPlayHandle`、`bool m_isCanPlayEffect`、`int m_deathEffectNum`（何回エフェクトを出したか）、`bool m_isWatingDeath`を追加。
+- `TakeDamage()`で体力0になったら`m_isCanPlayEffect = true`、`m_isWatingDeath = true`にするだけ（`FloatingEnemy`と同じ軽量フラグ方式）。
+- `Update()`は`m_isCanPlayEffect`が立っていたら、`death_effect_interval`(30F)ごとに頭→胴体の順で`EffectID::WormDeath`を1体分ずつ再生。`m_deathEffectNum`が`m_segmentCount`を超えたら`OnDead()`。
+
+**ハマった点1: if/elseのネストが2段階とも逆だった**
+- 最初の実装は「一定間隔かどうか」と「まだ出し終えていないか」の2つの条件の親子関係が逆転しており、`m_frame % interval != 0`の**ほぼ全フレーム**で`else`（`OnDead()`）に落ちて即死亡していた。「未完了かどうか」を外側のif、「一定間隔かどうか」をその内側のifにする形に修正して解決。
+- 続けて`m_deathEffectNum++`が「一定間隔のif」の外にあり、間隔待ちの毎フレーム加算され続けるバグも発覚。実際にエフェクトを出したときだけ増やす位置（一定間隔のifブロックの中）に移動して解決。
+- **教訓**: 「Aが起きたときにXする、Aが起きていないときはYする」という一見単純なifelseでも、「一定間隔かどうか」のような周期条件と「完了したかどうか」のような状態条件が2つ絡むと、ネストの親子関係を逆にしたまま気づきにくいバグになりやすい。図や具体的なフレーム数を書き出して確認するとよい。
+
+**ハマった点2: `PlayEffekseer3DEffect`直後に`StopEffekseer3DEffect`を呼んでいてエフェクトが一瞬で消えていた**
+- 「同じ変数(`m_deathPlayHandle`)に次の再生ハンドルを代入すると、前のエフェクトが消えてしまうのでは」という誤解から、毎回のエフェクト再生後に即座に`StopEffekseer3DEffect`を呼んでいた。
+- 実際は`PlayEffekseer3DEffect`を呼ぶたびに完全に独立した新しい再生インスタンスが作られるだけで、変数への代入自体は前の再生には一切影響しない。単発エフェクトは放っておいても自然に再生完了して消えるため、`StopEffekseer3DEffect`は「途中で強制的に打ち切りたいとき」以外は不要。該当行を削除して解決。
+
+**ハマった点3: 爆発済みの部位のモデルがそのまま描画され続ける**
+- `m_deathEffectNum`（何番目まで爆発済みか）を使い、`Draw()`側で「頭は`m_deathEffectNum == 0`のときだけ」「胴体iは`m_deathEffectNum < i + 1`のときだけ」描画する条件分岐を追加して解決。爆発した部位から順にモデルが消えていく見た目になった。
+
+**ハマった点4: 爆発エフェクトが海(水面)の背面に隠れて見えない**
+- 半透明パーティクル(Effekseerエフェクト)は基本的に深度バッファに書き込まないため、後から描画される不透明な水面ポリゴンが深度テストで常に勝ってしまい、水面より奥にあるエフェクトを覆い隠していた。
+- `GameScene::Draw()`で`DrawEffekseer3D()`が`m_pWaterManager->Draw()`より**前**に呼ばれていたのが原因。**`DrawEffekseer3D()`を水の描画の後に移動して解決**。今回のワームは海上で爆発する想定のため、この順序変更で十分（水中の爆発まで正しく前後関係を出したい場合は別途シェーダー側の深度テスト調整が必要になる）。
+
+**別件で発覚・修正: `TitleScene`で「ゲーム終了」を選ぶと例外が発生する不具合**
+- `TitleScene::Update()`内、決定キー押下時に`DxLib_End()`を直接呼んでいたのが原因。`DxLib_End()`はメインループの真っ只中で呼ぶべきではなく、呼んだ後もループが回り続けて次のフレームで破棄済みのDxLibリソースにアクセスし例外が発生していた。
+- 正しい終了処理(`ResourceLoader::ReleaseAll()`→`Effkseer_End()`→`DxLib_End()`)は`Application::Terminate()`に既に用意されており、`main.cpp`で`Run()`の後に呼ばれる設計だった。
+- **対処**: `Application`に`bool m_isExitRequested`と`RequestExit()`を追加。`TitleScene`側は`DxLib_End()`を直接呼ばず`Application::GetInstance().RequestExit()`を呼ぶだけにし、`Application::Run()`のメインループのESCキー判定と同じ`break`条件に`m_isExitRequested`を追加。これでループを正常に抜けてから`main.cpp`側で`Terminate()`が呼ばれる正しい順序になった。動作確認済み。
+
+### 次回以降の方針（2026-07-15時点で合意済み・未着手）
+
+今後は以下の順番で進める合意ができている。
+
+1. ~~`FloatingEnemy`のCSV化。~~ → 完成（下記参照）。
+2. ~~`WormEnemy`のCSV化。~~ → 完成、さらに移動方向のCSV対応・螺旋移動のバグ修正も実施（下記参照）。
+3. **岩・ステージとプレイヤーの当たり判定（プレイヤーのみダメージを受ける）**。敵とは異なり岩・ステージ側はダメージを受けない一方通行の判定でよいと合意済み。`Rock`にはまだ`Sphere`当たり判定が無い。`Stage`は地形メッシュなので、単純な球判定で表現しきれるか（岩と同様に球で近似するか、複数球を並べるか等）は着手時に改めて検討が必要。**次回はここから着手する。**
+
+### 進捗（2026-07-15・続き・FloatingEnemy/WormEnemyのCSV化完成）
+
+**`FloatingEnemy`と`WormEnemy`両方のCSV化が完成した。** `RockDataSetter`と同じ設計パターン（CSV読み込み→種別ごとに生成→`std::vector`で返す）を踏襲。ユーザー自身が実装し、Claudeはコードを直接編集せず説明とレビューのみ行う形で進めた（[[feedback_no_direct_code_edit]]のルール通り）。
+
+**共通の設計変更:**
+- `FloatingEnemy`・`WormEnemy`ともにコンストラクタに`const Vector3& pos`引数を追加し、`SetPos(pos)`で位置を反映する形に変更。`OnInit()`にあった固定オフセット（`m_pos.m_z += 1900.0f`等）は削除。
+- `GameScene.h`の`m_pFloatingEnemy`/`m_pWormEnemy`（単数）を`m_pFloatingEnemies`/`m_pWormEnemies`（`std::vector`）に変更し、`Rock`と同じくCSVの行数分だけ生成・登録するループ処理に統一。
+
+**新規作成したファイル:**
+- `FloatingEnemyDataSetter.h/.cpp`（`Game/GameObjects/Actors/Charactor/Enemy/FloatingEnemy/`）
+- `WormEnemyDataSetter.h/.cpp`（`Game/GameObjects/Actors/Charactor/Enemy/WormEnemy/`）
+- `Data/CSV/FloatingEnemyData.csv`（列: `modelID,x,y,z`）
+- `Data/CSV/WormEnemyData.csv`（列: `modelID,x,y,z,segmentCount,direction`）
+
+**「文字列→ModelID変換」を`ResourceLoader`に共通化:**
+- 元々`RockDataSetter`が自前で持っていた`WStringToModelID`（`if/else if`の羅列）を、ユーザーが「モデルが増えるたびにifを増やすのが非効率では」と指摘。検討の結果、`ResourceLoader::WStringToModelID`という`static`関数に一本化。
+- 中身は`if/else if`ではなく`static const std::unordered_map<std::wstring, ModelID>`の対応表＋`find()`方式に変更（新しいモデルを追加する際は対応表に1行足すだけで済む）。`RockDataSetter`・`FloatingEnemyDataSetter`・`WormEnemyDataSetter`すべてがこの共通関数を呼ぶ形に統一。
+- **教訓**: 同じ「文字列→enum」変換ロジックが複数箇所で重複しそうになったら、その変換対象のenumを定義しているクラス（今回は`ResourceLoader`）に寄せるのが自然。羅列的なif/elseは`unordered_map`の対応表に置き換えるとスケールしやすい。
+
+**ハマった点1: `WormEnemyDataSetter`のシグネチャ不一致**
+- `.h`で`CreateEnemy`の`private:`を書き忘れて`public:`が抜けており、外部から呼べずビルドエラー。
+- `segmentCount`をCSVから読む設計にしたにも関わらず、`.h`の関数引数にも`int segmentNum`を残してしまい、`.cpp`側のローカル変数`segmentNum`と名前が被って引数の方が完全に無視される状態になっていた。引数からは削除し、CSVから読んだ値だけを使う形に統一して解決。
+
+**ハマった点2: `WormEnemyData.csv`がタブ区切りになっていた**
+- `CSVDataLoader`はカンマ区切り固定でパースするため、タブ区切りのままだと全列が1列として読み込まれ、`dataString[1]`以降で範囲外アクセスになる。カンマ区切りに修正して解決（`FloatingEnemyData.csv`でも同様の問題が過去に一度発生し、同じ修正をした）。
+
+**ハマった点3(本命): Worm出現方向のZ+固定と螺旋移動の座標バグ**
+- 従来`WormEnemy`は`m_pos.m_z += move_speed;`固定でZ+方向にしか進めず、「前からもワームが来るようにしたい」という要望から`float direction`（1.0でZ+、-1.0でZ-）をコンストラクタに追加し`m_pos.m_z += move_speed * m_moveDirection;`に変更。CSVにも`direction`列を追加。
+- 合わせて、螺旋の中心が常にワールド原点基準（`cosf(...) * spiral_radius`のみ）になっており、CSVで指定した初期x,yが1フレーム目で上書きされてしまう問題も発覚。コンストラクタで受け取った`pos`のx,yを`m_spiralCenter`(`Vector2`)として保存し、`Update()`側は`m_spiralCenter.m_x/m_y + 三角関数(...) * spiral_radius`という相対座標に変更して解決。
+- **ケアレスミス**: `.h`のコンストラクタ宣言で`float direction//移動方向);`のように、閉じ括弧とセミコロンを行コメントの中に書いてしまいビルドエラー（`//`から行末までは全部コメント扱いになるため）。`float direction);//移動方向`の順に直して解決。
+- **ケアレスミス2**: コンストラクタ引数`direction`を受け取ったのに初期化リストで`m_moveDirection`に代入し忘れており、常にデフォルト値0のままでワームが全く前進しなくなっていた。初期化リストに`m_moveDirection(direction)`を追加して解決。
+- **ケアレスミス3(本命)**: 螺旋移動のx,y座標計算で、xとyの両方に`sinf`を使ってしまい（本来はcosfとsinfを別々に使うべき）、円運動にならず斜め45度の直線を往復するだけの動きになっていた。xの方を`cosf`に直して解決。
+- **教訓**: 円・螺旋運動の実装では「x軸とy軸(またはx軸とz軸)で必ず異なる三角関数(cos/sin)を使う」という基本を書き換え作業のたびに見落としやすい。動きが「直線的」「斜め」になったら、まずcos/sinの取り違えを疑うとよい。
+
+### 進捗（2026-07-15・続き・自機をレティクルより手前に描画）
+
+**本家スターフォックスをプレイ中に気づいた仕様「レティクル(照準UI)より自機の方が手前に描画される」をNovaWingでも再現した。**
+
+**背景:**
+- NovaWingの`ReticleUI`は`DrawRotaGraph`(Zバッファを無視する2D描画)を使っており、`GameScene::Draw()`内でも全3Dオブジェクト・水・Effekseerエフェクトの一番最後にUI(`m_pUIManager->Draw()`)を呼んでいたため、レティクルは常に自機を含めた全てより手前に表示されていた。
+- 本家はこれと逆で、自機がレティクルより優先して手前に表示される場面がある。
+
+**対処:**
+- `GameScene::Draw()`の`m_pUIManager->Draw()`の直後に、`m_pPlayer->Draw()`をもう一度手動で呼ぶ処理を追加。`Player::Draw()`は`ApplyMatrix`→`UpdateShaderMatrixData`→`MV1DrawModel`という自己完結した処理なので2回呼んでも副作用がなく安全（Zバッファに書き込む通常の3D描画のため、UIの2D描画ピクセルの上に強制的に上書きされる形になる）。
+- 描画順序: 3Dオブジェクト一式(自機含む)→水→Effekseerエフェクト→UI(レティクル含む)→自機(2回目)、という並びになった。
+- **教訓**: 「UIは常に最前面」という設計は、ジャンルによっては仕様として崩したい場合がある(今回は自機とレティクルの前後関係)。その場合、全体のレイヤー構造を作り直すより、「該当オブジェクトだけ最後にもう一度描画する」という力技の方が変更範囲が小さく安全なことがある。

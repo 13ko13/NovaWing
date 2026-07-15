@@ -10,6 +10,8 @@ namespace
 	constexpr float move_speed = 60.0f;
 	//攻撃力
 	constexpr int attack_power = 100;
+	//クールタイム
+	constexpr int cool_time = 10;
 }
 
 NormalShootState::NormalShootState(const std::weak_ptr<Player> pPlayer,
@@ -28,11 +30,15 @@ void NormalShootState::Exit()
 
 void NormalShootState::Update()
 {
+	//クールタイム更新
+	m_shootCT++;
+
 	//インプットマネージャーを借りてくる
 	InputManager& input = InputManager::GetInstance();
 
 	//shootボタンが押されたら弾を発射する
-	if (input.IsTriggered("shoot"))
+	if (input.IsTriggered("shoot") &&
+		m_shootCT > cool_time)
 	{
 		//BulletManagerに弾の生成を依頼する
 		std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock();//一時的にshared_ptrに変換
@@ -42,6 +48,9 @@ void NormalShootState::Update()
 		
 		pBulletManager->CreateBullet(BulletManager::BulletType::PlayerBullet,
 			pos, vel, attack_power);
+
+		//クールタイムをリセット
+		m_shootCT = 0;
 	}
 	//ボタンが押され続けていたら
 	else if(input.IsPressed("shoot"))
