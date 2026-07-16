@@ -4,6 +4,7 @@
 #include "../../../Utility/Quaternion.h"
 #include "../../../Utility/Vector3.h"
 #include "../GameObject.h"
+#include "Utility/Vector2.h"
 
 class Input;
 class Player;
@@ -23,12 +24,6 @@ public:
 	/// 描画処理
 	/// </summary>
 	virtual void Draw();
-
-	/// <summary>
-	/// Y軸回転角を取得する
-	/// </summary>
-	/// <returns>Y軸回転角</returns>
-	float GetAngleY() const { return m_angleY; }
 
 	/// <summary>
 	/// 自身の正面ベクトルを取得する
@@ -53,9 +48,6 @@ public:
 	void SetUpCamera();
 
 private:
-	float m_angleX = 0.0f;//カメラの回転角横
-	float m_angleY = 0.0f;//カメラの回転角縦
-
 	//揺れ
 	float m_shakePower = 0.0f;//揺れるときの力
 	int m_shakeFrame = 0;//揺れの持続フレーム数

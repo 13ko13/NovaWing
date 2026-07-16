@@ -1,9 +1,6 @@
 ﻿#include "CameraBase.h"
-#include "Manager/InputManager.h"
-#include "Utility/Matrix4x4.h"
 #include "Game/GameObjects/Actors/Charactor/Player/Player.h"
 #include "Utility/Vector3.h"
-#include "Utility/Quaternion.h"
 #include "Main/Application.h"
 
 namespace
@@ -12,13 +9,20 @@ namespace
 	constexpr float camera_far = 5500.0f;//カメラのFar
 	const Vector3 first_pos = { 0.0f,600.0f,00.0f };
 	//注視点からカメラ位置に向かうベクトル
-	const Vector3 target_to_camera = { 0.0f,200.0f,-1200.0f };
+	const Vector3 target_to_camera = { 0.0f,400.0f,-800.0f };
 
 	//カメラの視野角
 	constexpr float fov = DX_PI_F / 2.0f;
 
 	//カメラのLerpに使うtの値
-	constexpr float lerp_t = 0.2f;
+	constexpr float lerp_t = 0.05f;
+
+	//プレイヤーの移動に対してカメラの移動をどれぐらいにするか
+	constexpr float camera_move_strength = 0.1f;
+	//カメラのYオフセット
+	constexpr float camera_offset_y = 200.0f;
+	//プレイヤーからどれぐらい離したZ位置にカメラを置くか
+	constexpr float camera_offset_z = 600.0f;
 }
 
 CameraBase::CameraBase(const std::shared_ptr<Player> pPlayer)
@@ -47,29 +51,6 @@ CameraBase::~CameraBase()
 
 void CameraBase::Update()
 {
-	//カメラの注視点
-	Vector3 target = m_targetPos;
-	//見ている方向から回転行列を作る
-	Matrix4x4 rotMtxY = Matrix4x4::RotationY(m_angleY);
-	Matrix4x4 rotMtxX = Matrix4x4::RotationX(m_angleX);
-	//回転行列を掛け合わせる
-	Matrix4x4 rotMtx = rotMtxX * rotMtxY;
-	//注視点からカメラの位置に向かうベクトルに回転行列をかけることで
-	//回転させたベクトルを求める
-	Vector3 targetToCamera = rotMtx.Transform(target_to_camera);
-	Vector3 endCameraPos = target + targetToCamera;
-
-	//m_posからendCameraPosへのベクトル
-	Vector3 tempCameraPos = endCameraPos - m_pos;
-	tempCameraPos *= lerp_t;//カメラの移動速度を調整するために、ベクトルを0.1倍する
-
-	//回転させたカメラへのベクトルとターゲットの位置を足して、
-	//カメラの位置を求める
-	m_pos += tempCameraPos;
-
-	// m_pos.m_x = m_pPlayer.lock()->GetPos().m_x;
-	// m_pos.m_y = m_pPlayer.lock()->GetPos().m_y + 100.0f;
-
 	//カメラの揺れを更新して、カメラの位置に加算する
 	m_pos += UpdateShake();
 
@@ -82,7 +63,13 @@ void CameraBase::Update()
 	//ターゲットの位置も補間する
 	m_targetPos = Vector3::Lerp(m_prevTargetPos, m_targetPos, lerp_t);
 
-	//プレイヤーが
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+	//プレイヤーの位置
+	Vector3 playerPos = pPlayer->GetPos();
+
+	m_pos.m_x = playerPos.m_x *camera_move_strength;
+	m_pos.m_y = playerPos.m_y * camera_move_strength  + camera_offset_y;
+	m_pos.m_z = playerPos.m_z -camera_offset_z;
 
 	//カメラの位置とターゲットの位置をセットする
 	SetCameraPositionAndTarget_UpVecY(m_pos.ToDxLib(), m_targetPos.ToDxLib());
@@ -169,7 +156,5 @@ void CameraBase::UpdateTargetPos()
 	if(pPlayer != nullptr)//Nullチェック
 	{
 		m_targetPos.m_z = pPlayer->GetPos().m_z + 605.0f;
-		// m_targetPos.m_y = pPlayer->GetPos().m_y-300.0f;
-		// m_targetPos.m_x = pPlayer->GetPos().m_x;
 	}
 }

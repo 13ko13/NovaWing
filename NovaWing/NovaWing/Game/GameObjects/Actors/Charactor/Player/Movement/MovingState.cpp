@@ -7,7 +7,11 @@
 
 namespace
 {
-	constexpr float move_speed = 8.0f;//移動速度
+	constexpr float move_speed_z = 8.0f;//移動速度
+
+	constexpr float move_speed_x = 15.0f;//横方向の移動速度
+	constexpr float move_speed_y = 15.0f;//縦方向の移動速度
+
 	constexpr float stick_dead_zone = 0.1f;//スティックのデッドゾーン
 
 	//移動制限範囲
@@ -63,12 +67,12 @@ void MovingState::Update()
 	Vector3 vel;
 
 	//上下入力
-	vel.m_y = -stick.m_y * move_speed;
+	vel.m_y = -stick.m_y * move_speed_y;
 	//左右入力
-	vel.m_x = stick.m_x * move_speed;
+	vel.m_x = stick.m_x * move_speed_x;
 
 	//進むときのスピードを設定する
-	vel.m_z = move_speed;
+	vel.m_z = move_speed_z;
 	pPlayer->SetVel(vel);
 
 	//lengthが0.1以下ならIdleMovementStateに戻る
