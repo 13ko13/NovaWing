@@ -9,7 +9,7 @@
 namespace
 {
 	//速度
-	constexpr float move_speed =6.0f;
+	constexpr float move_speed =8.0f;
 	//周期
 	constexpr float wave_speed = 0.05f;
 	//ActiveStateを何フレーム続けるか

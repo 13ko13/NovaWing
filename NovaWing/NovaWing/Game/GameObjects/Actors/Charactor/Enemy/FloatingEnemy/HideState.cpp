@@ -7,7 +7,7 @@
 namespace
 {
 	//出現条件の距離
-	constexpr float appear_distance =500.0f;
+	constexpr float appear_distance =1800.0f;
 	//待機アニメーション名前
 	const wchar_t* idle_anim_name = L"01_Idle_Fly";
 }

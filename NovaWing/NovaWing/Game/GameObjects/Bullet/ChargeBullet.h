@@ -18,4 +18,7 @@ private:
 
 	//受け取った弾の速度を保存しておく
 	float m_speed = 0.0f;
+
+	//Effekseerのエフェクト再生中のハンドル
+	int m_effectPlayHandle = -1;
 };

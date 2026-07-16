@@ -1,28 +1,32 @@
-﻿#include "CameraBase.h"
+﻿#define NOMINMAX
+
+#include "CameraBase.h"
 #include "Game/GameObjects/Actors/Charactor/Player/Player.h"
 #include "Utility/Vector3.h"
 #include "Main/Application.h"
+#include "Constants/Game.h"
 
 namespace
 {
 	constexpr float camera_near = 200.0f;//カメラのNear
 	constexpr float camera_far = 5500.0f;//カメラのFar
-	const Vector3 first_pos = { 0.0f,600.0f,00.0f };
-	//注視点からカメラ位置に向かうベクトル
-	const Vector3 target_to_camera = { 0.0f,400.0f,-800.0f };
 
 	//カメラの視野角
 	constexpr float fov = DX_PI_F / 2.0f;
 
 	//カメラのLerpに使うtの値
-	constexpr float lerp_t = 0.05f;
+	constexpr float lerp_t = 0.04f;
 
 	//プレイヤーの移動に対してカメラの移動をどれぐらいにするか
-	constexpr float camera_move_strength = 0.1f;
+	constexpr float camera_move_strength_y = 0.01f;
+	constexpr float camera_move_strength_x = 0.3f;
 	//カメラのYオフセット
 	constexpr float camera_offset_y = 200.0f;
 	//プレイヤーからどれぐらい離したZ位置にカメラを置くか
 	constexpr float camera_offset_z = 600.0f;
+
+	//カメラからターゲットまでの距離
+	constexpr float camera_to_target = 15000.0f;
 }
 
 CameraBase::CameraBase(const std::shared_ptr<Player> pPlayer)
@@ -32,9 +36,6 @@ CameraBase::CameraBase(const std::shared_ptr<Player> pPlayer)
 
 	//ターゲットの位置を更新
 	UpdateTargetPos();
-
-	//初期座標
-	m_pos = first_pos;
 
 	//カメラの設定
 	//プレイヤーの位置を取得して、そこをカメラのターゲットにする
@@ -67,8 +68,12 @@ void CameraBase::Update()
 	//プレイヤーの位置
 	Vector3 playerPos = pPlayer->GetPos();
 
-	m_pos.m_x = playerPos.m_x *camera_move_strength;
-	m_pos.m_y = playerPos.m_y * camera_move_strength  + camera_offset_y;
+	//プレイヤーが動くと、カメラもプレイヤーよりも小さい量で移動する
+	m_pos.m_x = playerPos.m_x *camera_move_strength_x;
+	//yはxよりも小さく動いて、海面より下にはならないようにする
+	playerPos.m_y * camera_move_strength_y * -1.0f + camera_offset_y;
+	m_pos.m_y = std::max(m_pos.m_y,Game::sea_camera_margin);
+	//zはプレイヤーよりも少し手前
 	m_pos.m_z = playerPos.m_z -camera_offset_z;
 
 	//カメラの位置とターゲットの位置をセットする
@@ -155,6 +160,7 @@ void CameraBase::UpdateTargetPos()
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	if(pPlayer != nullptr)//Nullチェック
 	{
-		m_targetPos.m_z = pPlayer->GetPos().m_z + 605.0f;
+		//注視点を求める
+		m_targetPos = pPlayer->GetPos() + (-pPlayer->GetForward() * camera_to_target);
 	}
 }

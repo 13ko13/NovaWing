@@ -58,6 +58,7 @@ public:
 		PlayerBullet,//プレイヤーの弾エフェクト
 		WormDeath,//ワームの死亡エフェクト
 		FloatingDeath,//浮遊敵の死亡エフェクト
+		PlayerChargeBullet,//プレイヤーのチャージ弾エフェクト
 	};
 
 	//音の種類

@@ -305,4 +305,8 @@ void ResourceLoader::KeepEffect()
 	handle = LoadEffekseerEffect(L"Data/Effect/Exprosion2/Exprosion2.efk", 1.5f);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::FloatingDeath] = handle;
+	//プレイヤーのチャージ弾エフェクト
+	handle = LoadEffekseerEffect(L"Data/Effect/PlayerChargeBullet/PlayerChargeBullet.efk", 1.0f);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::PlayerChargeBullet] = handle;
 }

@@ -2,8 +2,13 @@
 
 namespace Game
 {
-	//ゲーム全体で使用する定数
+	//繧ｲ繝ｼ繝蠖｢繧剃ｽ懊ｋ髫帙↓蠢�隕√↑螳壽焚
 	constexpr int screen_width = 1280;
 	constexpr int screen_height = 720;
 	constexpr int color_bit_num = 32;
+
+	//豬ｷ髱｢縺九ｉ縺ｩ繧後＄繧峨＞髮｢繧後◆縺ｨ縺薙ｍ縺ｫ繝励Ξ繧､繝､繝ｼ繧呈款縺玲綾縺吶°
+	constexpr float sea_player_margin = 100.0f;
+	//豬ｷ髱｢縺九ｉ縺ｩ繧後＄繧峨＞髮｢繧後◆縺ｨ縺薙ｍ縺ｫ繧ｫ繝｡繝ｩ繧呈款縺玲綾縺吶°
+	constexpr float sea_camera_margin = 300.0f;
 }

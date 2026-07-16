@@ -1,4 +1,6 @@
-﻿#include "ChargeBullet.h"
+﻿#include <EffekseerForDXLib.h>
+
+#include "ChargeBullet.h"
 
 namespace
 {
@@ -11,10 +13,22 @@ ChargeBullet::ChargeBullet(const Vector3& pos, const Vector3& vel, int attackPow
 	m_pTarget(pTarget)
 {
 	m_speed = vel.Length();
+
+	//Effekseerのエフェクト再生を呼ぶ
+	m_effectPlayHandle = PlayEffekseer3DEffect(
+		ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::PlayerChargeBullet)
+	);
+
+	//再生直後に正しい位置へ即座にセットする(1フレーム目のワープ軌跡を防ぐ)
+	SetPosPlayingEffekseer3DEffect(
+		m_effectPlayHandle, pos.m_x, pos.m_y, pos.m_z
+	);
 }
 
 ChargeBullet::~ChargeBullet()
 {
+	//エフェクトを止める
+	StopEffekseer3DEffect(m_effectPlayHandle);
 }
 
 void ChargeBullet::Update()
@@ -42,6 +56,11 @@ void ChargeBullet::Update()
 		//新しい進行方向を計算
 		m_velocity = homingDir * m_speed;
 	}
+
+	//エフェクトの位置の調整する
+	SetPosPlayingEffekseer3DEffect(
+		m_effectPlayHandle, GetPos().m_x, GetPos().m_y, GetPos().m_z
+	);
 }
 
 void ChargeBullet::Draw()
@@ -52,6 +71,9 @@ void ChargeBullet::Draw()
 
 void ChargeBullet::OnHitEnemy()
 {
+	//エフェクトを止める
+	StopEffekseer3DEffect(m_effectPlayHandle);
+
 	//消す処理
 	OnDead();
 }

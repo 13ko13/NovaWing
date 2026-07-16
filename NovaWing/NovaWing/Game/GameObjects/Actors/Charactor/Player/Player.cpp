@@ -1,4 +1,5 @@
-﻿#include <algorithm>
+﻿#define NOMINMAX
+#include <algorithm>
 #include <cassert>
 
 #include "Player.h"
@@ -18,6 +19,7 @@
 #include "Movement/BrakeState.h"
 #include "Manager/TargetManager.h"
 #include "Charactor/Player/Shoot/ChargeReadyState.h"
+#include "Constants/Game.h"
 
 namespace
 {
@@ -178,7 +180,11 @@ void Player::ClampPosition()
 	//プレイヤーの位置をそれぞれ求めた範囲でクランプする
 	//-screenWToWorld～screenWToWorldがクランプ範囲
 	m_pos.m_x = std::clamp(m_pos.m_x,-frustumHalf.m_x,frustumHalf.m_x);
-	m_pos.m_y = std::clamp(m_pos.m_y,-frustumHalf.m_y,frustumHalf.m_y);
+	//海面と、視錐台の下限を比べて制限が厳しい方を実際の下限として使用する
+	m_pos.m_y = std::clamp(
+		m_pos.m_y,
+		std::max(-frustumHalf.m_y,Game::sea_player_margin),
+		frustumHalf.m_y);
 }
 
 void Player::Somersault(InputManager& input)
