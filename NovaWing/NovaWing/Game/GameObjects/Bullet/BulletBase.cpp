@@ -4,9 +4,9 @@
 namespace
 {
 	//寿命
-	constexpr int life_time = 180;//3秒
+	constexpr int life_time = 300;//3秒
 	//球のサイズ
-	constexpr float sphere_size = 16.0f;
+	constexpr float sphere_size = 32.0f;
 	//モデルのサイズ
 	const Vector3 model_size = Vector3(0.4f, 0.4f, 0.4f);
 }

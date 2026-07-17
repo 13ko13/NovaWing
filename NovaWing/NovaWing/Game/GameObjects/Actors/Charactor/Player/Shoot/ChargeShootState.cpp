@@ -1,4 +1,6 @@
-﻿#include "ChargeShootState.h"
+﻿#include <EffekseerForDXLib.h>
+
+#include "ChargeShootState.h"
 #include "Manager/InputManager.h"
 #include "NormalShootState.h"
 #include "ChargeReadyState.h"
@@ -13,6 +15,8 @@ namespace
 	constexpr float move_speed = 60.0f;
 	//攻撃力
 	constexpr int attack_power = 10;
+	//チャージ完了エフェクトを出す前後位置のオフセット
+	constexpr float effect_offset_z = 200.0f;
 }
 
 ChargeShootState::ChargeShootState(const std::weak_ptr<Player> pPlayer,
@@ -27,10 +31,33 @@ ChargeShootState::~ChargeShootState()
 
 void ChargeShootState::Exit()
 {
+	//もしチャージ未完了であればエフェクトは停止する
+	if (m_chargeFrame < charge_comp_frame)
+	{
+		StopEffekseer3DEffect(m_chargingPlayEffectH);
+	}
 }
 
 void ChargeShootState::Update()
 {
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+
+	//位置を設定(プレイヤーの位置)
+	Vector3 playerPos = pPlayer->GetPos();
+	//プレイヤーの前方向
+	Vector3 playerForward = -pPlayer->GetForward();
+
+	//エフェクトを出す位置
+	Vector3 effectPos = playerPos + playerForward * effect_offset_z;
+
+	//エフェクトの位置をプレイヤーの位置に設定する
+	SetPosPlayingEffekseer3DEffect(
+		m_chargingPlayEffectH,
+		effectPos.m_x,
+		effectPos.m_y,
+		effectPos.m_z);
+
+
 	InputManager& input = InputManager::GetInstance();
 
 	//ボタンを押している間時間を計測
@@ -67,4 +94,28 @@ void ChargeShootState::Enter()
 {
 	//チャージフレームをリセットする
 	m_chargeFrame = 0;
+
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+
+	//チャージ中のエフェクトの再生を行い、そのハンドルをプレイヤーに渡す
+	m_chargingPlayEffectH = PlayEffekseer3DEffect(
+		ResourceLoader::GetInstance().GetEffect(
+			ResourceLoader::EffectID::Charging));
+	
+	pPlayer->SetChargingEffectHandle(m_chargingPlayEffectH);
+
+	//位置を設定(プレイヤーの位置)
+	Vector3 playerPos = pPlayer->GetPos();
+	//プレイヤーの前方向
+	Vector3 playerForward = -pPlayer->GetForward();
+
+	//エフェクトを出す位置
+	Vector3 effectPos = playerPos + playerForward * effect_offset_z;
+
+	//エフェクトの位置をプレイヤーの位置に設定する
+	SetPosPlayingEffekseer3DEffect(
+		m_chargingPlayEffectH,
+		effectPos.m_x,
+		effectPos.m_y,
+		effectPos.m_z);
 }

@@ -14,6 +14,8 @@ namespace
 	constexpr float move_speed = 10.0f;
 	//ゲージ消費量
 	constexpr float gauge_consumption = -0.3f;
+	//宙返り開始時にY回転を180度へ寄せるLerpのt値
+	constexpr float enter_rot_lerp_t = 0.6f;
 }
 
 SomersaultState::SomersaultState(const std::weak_ptr<Player> pPlayer) :
@@ -35,7 +37,7 @@ void SomersaultState::Enter()
 
 	m_frame = 0;
 	//プレイヤーの左右回転をリセット
-	pPlayer->LerpToAngleY(DX_PI_F, 0.6f);
+	pPlayer->LerpToAngleY(DX_PI_F, enter_rot_lerp_t);
 }
 
 void SomersaultState::Update()

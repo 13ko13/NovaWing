@@ -3,6 +3,7 @@
 
 #include "LightingManager.h"
 #include "WaterRevealManager.h"
+#include "Constants/ShaderRegister.h"
 
 LightingManager& LightingManager::GetInstance()
 {
@@ -50,7 +51,7 @@ void LightingManager::ApplyShader()
 		//普通のライティング用のシェーダをセット
 		SetUsePixelShader(m_lightingPSH);
 		//定数バッファをシェーダにセットする
-		SetShaderConstantBuffer(m_cbufferLightInfo, DX_SHADERTYPE_PIXEL, 4);
+		SetShaderConstantBuffer(m_cbufferLightInfo, DX_SHADERTYPE_PIXEL, ShaderRegister::cbuffer_light);
 	}
 }
 
@@ -59,7 +60,7 @@ void LightingManager::ResetShader()
 	//シェーダを解除してデフォルトに戻す
 	SetUseVertexShader(-1);
 	SetUsePixelShader(-1);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 4);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::cbuffer_light);
 	MV1SetUseOrigShader(false);
 }
 

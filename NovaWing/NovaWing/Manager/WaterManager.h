@@ -41,6 +41,8 @@ private:
 	int m_skyLeftH = -1;
 	int m_skyUpH = -1;
 	int m_skyBottomH = -1;
+	//コースティクステクスチャ
+	int m_causticsH = -1;
 
 	//↓なぜunsigned shortなのか
 	//intは32ビット、unsigned shordは16ビット

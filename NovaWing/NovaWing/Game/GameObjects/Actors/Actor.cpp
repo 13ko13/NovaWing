@@ -3,6 +3,7 @@
 #include "Actor.h"
 #include "Utility/Matrix4x4.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
+#include "Constants/ShaderRegister.h"
 
 Actor::Actor(ResourceLoader::ModelID modelID,
 	std::weak_ptr<CameraBase> pCamera) :
@@ -71,16 +72,16 @@ void Actor::UpdateShaderMatrixData()
 
 void Actor::BindShaderBuffers()
 {
-	SetShaderConstantBuffer(m_cbufferMatrix, DX_SHADERTYPE_VERTEX, 5);
-	SetShaderConstantBuffer(m_cbufferCamera, DX_SHADERTYPE_VERTEX, 6);
-	SetShaderConstantBuffer(m_cbufferCamera, DX_SHADERTYPE_PIXEL, 6);
+	SetShaderConstantBuffer(m_cbufferMatrix, DX_SHADERTYPE_VERTEX, ShaderRegister::cbuffer_matrix);
+	SetShaderConstantBuffer(m_cbufferCamera, DX_SHADERTYPE_VERTEX, ShaderRegister::cbuffer_camera);
+	SetShaderConstantBuffer(m_cbufferCamera, DX_SHADERTYPE_PIXEL, ShaderRegister::cbuffer_camera);
 }
 
 void Actor::ReleaseShaderBuffers()
 {
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 5);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 6);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 6);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, ShaderRegister::cbuffer_matrix);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, ShaderRegister::cbuffer_camera);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::cbuffer_camera);
 }
 
 Vector3 Actor::GetCameraPos() const

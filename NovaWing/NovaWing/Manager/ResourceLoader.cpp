@@ -288,6 +288,11 @@ void ResourceLoader::KeepGraph()
 	handle = LoadGraph(L"Data/Image/SelectFrame/Select_BackGround.png");
 	assert(handle >= 0);
 	m_graphicHandles[ResourceLoader::GraphicID::SelectBackGround] = handle;
+
+	//コースティクス効果用のテクスチャ
+	handle = LoadGraph(L"Data/Image/Caustics.png");
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::Caustics] = handle;
 }
 
 void ResourceLoader::KeepEffect()
@@ -297,16 +302,24 @@ void ResourceLoader::KeepEffect()
 	int handle = LoadEffekseerEffect(L"Data/Effect/PlayerBullet/PlayerBullet.efk",1.0f);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::PlayerBullet] = handle;
+
 	//ワームエネミーの死亡エフェクト
 	handle = LoadEffekseerEffect(L"Data/Effect/Exprosion/Exprosion.efk",3.0f);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::WormDeath] = handle;
+
 	//浮遊エネミーの死亡エフェクト
 	handle = LoadEffekseerEffect(L"Data/Effect/Exprosion2/Exprosion2.efk", 1.5f);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::FloatingDeath] = handle;
+
 	//プレイヤーのチャージ弾エフェクト
 	handle = LoadEffekseerEffect(L"Data/Effect/PlayerChargeBullet/PlayerChargeBullet.efk", 1.0f);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::PlayerChargeBullet] = handle;
+
+	//プレイヤーのチャージ中エフェクト
+	handle = LoadEffekseerEffect(L"Data/Effect/Charging/Charging.efk", 1.0f);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::Charging] = handle;
 }

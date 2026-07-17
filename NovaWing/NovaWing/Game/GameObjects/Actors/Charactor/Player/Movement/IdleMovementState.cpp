@@ -9,6 +9,11 @@
 namespace
 {
 	constexpr float move_speed = 8.0f;
+
+	//アナログスティックの入力値を-1～1に正規化するための割る数
+	constexpr float stick_input_max = 1000.0f;
+	//この値を超えたらMovingStateに切り替えるしきい値
+	constexpr float moving_trigger_threshold = 0.1f;
 }
 
 IdleMovementState::IdleMovementState(const std::weak_ptr<Player> pPlayer):
@@ -33,9 +38,9 @@ void IdleMovementState::Update()
 	InputManager& input = InputManager::GetInstance();
 
 	//左スティックの値を取得して-1～1にする
-	Vector2 stick = { 
-		static_cast<float>(input.GetBufY()) / 1000.0f,
-		static_cast<float>(input.GetBufX()) / 1000.0f
+	Vector2 stick = {
+		static_cast<float>(input.GetBufY()) / stick_input_max,
+		static_cast<float>(input.GetBufX()) / stick_input_max
 	};
 
 	//先に正規化しておく
@@ -49,7 +54,7 @@ void IdleMovementState::Update()
 	}
 
 	//少しでも入力が入っていればステートを変更する
-	if (length > 0.1f)
+	if (length > moving_trigger_threshold)
 	{
 		ChangeState(std::make_shared<MovingState>(m_pPlayer));
 	}

@@ -8,6 +8,11 @@ namespace
 {
 	constexpr float rot_lerp_t = 0.1f;//Lerpに使うtの値
 	constexpr float stick_dead_zone = 0.1f;//スティックのデッドゾーン
+
+	//アナログスティックの入力値を-1～1に正規化するための割る数
+	constexpr float stick_input_max = 1000.0f;
+	//スティック入力から求める機体の最大傾き角度
+	constexpr float max_tilt_angle = DX_PI_F / 8.0f;
 }
 
 DefaultRotationState::DefaultRotationState(const std::weak_ptr<Player> pPlayer) :
@@ -29,8 +34,8 @@ void DefaultRotationState::Update()
 
 	//左スティックの値を取得して-1～1にする
 	Vector2 stick = {
-		static_cast<float>(input.GetBufX()) / 1000.0f,
-		static_cast<float>(input.GetBufY()) / 1000.0f
+		static_cast<float>(input.GetBufX()) / stick_input_max,
+		static_cast<float>(input.GetBufY()) / stick_input_max
 	};
 
 	//先に正規化しておく
@@ -59,14 +64,14 @@ void DefaultRotationState::Update()
 
 	//上下入力
 	//X軸回転
-	targetAngle = stick.m_y * (DX_PI_F / 8.0f);
+	targetAngle = stick.m_y * max_tilt_angle;
 	pPlayer->LerpToAngleX(targetAngle, rot_lerp_t);
 
 	//左右入力
 	//Y軸回転
 	//モデルの前後が逆なので180度回した状態を基準として
 	//回転を行う
-	targetAngle = DX_PI_F + (stick.m_x * (DX_PI_F / 8.0f));
+	targetAngle = DX_PI_F + (stick.m_x * max_tilt_angle);
 	pPlayer->LerpToAngleY(targetAngle, rot_lerp_t);
 }
 

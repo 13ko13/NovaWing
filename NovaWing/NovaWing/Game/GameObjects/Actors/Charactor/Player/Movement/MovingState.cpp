@@ -17,6 +17,11 @@ namespace
 	//移動制限範囲
 	constexpr float move_limit_x = 500.0f;
 	constexpr float move_limit_y = 300.0f;
+
+	//アナログスティックの入力値を-1～1に正規化するための割る数
+	constexpr float stick_input_max = 1000.0f;
+	//この値未満ならIdleMovementStateに戻すしきい値
+	constexpr float idle_return_threshold = 0.1f;
 }
 
 MovingState::MovingState(const std::weak_ptr<Player> pPlayer) :
@@ -38,8 +43,8 @@ void MovingState::Update()
 
 	//左スティックの値を取得して-1～1にする
 	Vector2 stick = {
-		static_cast<float>(input.GetBufX()) / 1000.0f,
-		static_cast<float>(input.GetBufY()) / 1000.0f
+		static_cast<float>(input.GetBufX()) / stick_input_max,
+		static_cast<float>(input.GetBufY()) / stick_input_max
 	};
 	//先に正規化しておく
 	float length = std::sqrtf(
@@ -75,8 +80,8 @@ void MovingState::Update()
 	vel.m_z = move_speed_z;
 	pPlayer->SetVel(vel);
 
-	//lengthが0.1以下ならIdleMovementStateに戻る
-	if (length < 0.1f)
+	//lengthがしきい値未満ならIdleMovementStateに戻る
+	if (length < idle_return_threshold)
 	{
 		ChangeState(std::make_shared<IdleMovementState>(m_pPlayer));
 	}

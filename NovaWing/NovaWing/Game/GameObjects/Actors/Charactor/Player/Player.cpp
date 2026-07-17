@@ -18,6 +18,7 @@
 #include "Movement/BoostState.h"
 #include "Movement/BrakeState.h"
 #include "Manager/TargetManager.h"
+#include "Constants/ShaderRegister.h"
 #include "Charactor/Player/Shoot/ChargeReadyState.h"
 #include "Constants/Game.h"
 
@@ -32,7 +33,14 @@ namespace
 
 	//ゲージの毎フレームの回復量
 	constexpr float gauge_recovery_amount = 0.5f;
-	
+	//ゲージの最大値
+	constexpr float gauge_max = 100.0f;
+
+	//アナログスティックの入力値を-1～1に正規化するための割る数
+	constexpr float stick_input_max = 1000.0f;
+	//宙返りの入力と判定するスティック下方向のしきい値
+	constexpr float somersault_stick_threshold = -0.2f;
+
 	//当たり判定の球の半径
 	constexpr float coll_sphere_radius = 50.0f;
 	//当たり判定位置のオフセット
@@ -192,13 +200,13 @@ void Player::Somersault(InputManager& input)
 	//宙返りの処理
 	//左スティックの値を取得して-1～1にする
 	Vector2 stick = {
-		static_cast<float>(input.GetBufX()) / 1000.0f,
-		static_cast<float>(input.GetBufY()) / 1000.0f
+		static_cast<float>(input.GetBufX()) / stick_input_max,
+		static_cast<float>(input.GetBufY()) / stick_input_max
 	};
 
 	//宙返りボタンが押されていたらステートをそれぞれ切り替える
 	if (input.IsTriggered("somersault") &&
-		stick.m_y < -0.2f)
+		stick.m_y < somersault_stick_threshold)
 	{
 		//射撃のみできるようにする
 		//全ての入った時の処理も呼ぶ
@@ -226,7 +234,7 @@ void Player::Boost(const InputManager& input)
 {
 	//ゲージマックス中にブースト入力されたら
 	if (input.IsTriggered("boost") &&
-		m_gauge >= 100.0f)
+		m_gauge >= gauge_max)
 	{
 		//移動ステートをブースト状態に変更
 		std::shared_ptr<IMovementState> newState =
@@ -241,7 +249,7 @@ void Player::Brake(const InputManager & input)
 {
 	//ゲージマックス中にブレーキ入力されたら
 	if (input.IsTriggered("brake") &&
-		m_gauge >= 100.0f)
+		m_gauge >= gauge_max)
 	{
 		//移動ステートをブレーキ状態に変更
 		std::shared_ptr<IMovementState> newState =
@@ -317,11 +325,11 @@ void Player::DrawPlayer()
 		ResourceLoader::GraphicID::PlayerEmissionMap);
 
 	//法線マップをシェーダに渡す
-	SetUseTextureToShader(1, normGraphH);
+	SetUseTextureToShader(ShaderRegister::tex_normal, normGraphH);
 	//メタリックマップを渡す
-	SetUseTextureToShader(2, metalicGraphH);
+	SetUseTextureToShader(ShaderRegister::tex_metalic, metalicGraphH);
 	//エミッションマップを渡す
-	SetUseTextureToShader(3, emissionGraphH);
+	SetUseTextureToShader(ShaderRegister::tex_emission, emissionGraphH);
 
 	LightingManager::GetInstance().ApplyShader();
 	BindShaderBuffers();
@@ -329,9 +337,9 @@ void Player::DrawPlayer()
 	//プレイヤーのモデルを描画する
 	MV1DrawModel(m_modelHandle);
 
-	SetUseTextureToShader(1, -1);//法線マップを解除
-	SetUseTextureToShader(2, -1);//メタリックマップを解除
-	SetUseTextureToShader(3, -1);//エミッションマップを解除
+	SetUseTextureToShader(ShaderRegister::tex_normal, -1);//法線マップを解除
+	SetUseTextureToShader(ShaderRegister::tex_metalic, -1);//メタリックマップを解除
+	SetUseTextureToShader(ShaderRegister::tex_emission, -1);//エミッションマップを解除
 	//シェーダを解除
 	LightingManager::GetInstance().ResetShader();
 	ReleaseShaderBuffers();
@@ -368,8 +376,8 @@ void Player::ChangeGauge(float delta)
 {
 	//増減量を足す
 	m_gauge += delta;
-	//0～100にクランプ
-	m_gauge = std::clamp(m_gauge, 0.0f, 100.0f);
+	//0～ゲージ最大値にクランプ
+	m_gauge = std::clamp(m_gauge, 0.0f, gauge_max);
 }
 
 void Player::StartUseGauge()

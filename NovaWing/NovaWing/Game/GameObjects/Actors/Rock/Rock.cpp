@@ -2,6 +2,7 @@
 #include "Game/GameObjects/GameObject.h"
 #include "Manager/LightingManager.h"
 #include "Manager/ResourceLoader.h"
+#include "Constants/ShaderRegister.h"
 
 namespace
 {
@@ -38,10 +39,10 @@ void Rock::Draw()
     //ロード済みのテクスチャのハンドルを受け取る
     int normHandle = ResourceLoader::GetInstance().GetGraphic(ResourceLoader::GraphicID::RockNorm);
     //テクスチャをシェーダにセットする
-    SetUseTextureToShader(1, normHandle);
+    SetUseTextureToShader(ShaderRegister::tex_normal, normHandle);
     //ほかのテクスチャはないので、明示的にないことを伝える
-    SetUseTextureToShader(2, -1);
-    SetUseTextureToShader(3, -1);
+    SetUseTextureToShader(ShaderRegister::tex_metalic, -1);
+    SetUseTextureToShader(ShaderRegister::tex_emission, -1);
 
     //ライティングを適用する
     LightingManager::GetInstance().ApplyShader();
@@ -53,7 +54,7 @@ void Rock::Draw()
     MV1DrawModel(m_modelHandle);
 
     //それぞれを解除する
-    SetUseTextureToShader(1, -1);
+    SetUseTextureToShader(ShaderRegister::tex_normal, -1);
     LightingManager::GetInstance().ResetShader();
     ReleaseShaderBuffers();
 }

@@ -15,7 +15,6 @@ public:
 	void Enter() override;
 
 private:
-	//チャージが完了して
-	//次またボタンを押されるまでの時間
-	int m_waitFrame = 0;
+	//チャージ中のプレイエフェクト
+	int m_chargingPlayEffectH = -1;
 };

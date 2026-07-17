@@ -63,6 +63,11 @@ public:
 	//チャージ完了しているか
 	bool IsChargeReady() const;
 
+	//チャージ中エフェクトの再生ハンドルを取得
+	int& GetChargingEffectHandle() { return m_chargingEffectH; }
+	//チャージ中エフェクトの再生ハンドルを設定
+	void SetChargingEffectHandle(int handle) { m_chargingEffectH = handle; }
+
 private:
 	//回転の更新
 	void UpdateRotation();
@@ -137,4 +142,7 @@ private:
 
 	//ターゲットマネージャー
 	std::weak_ptr<TargetManager> m_pTargetManager;
+
+	//チャージ中エフェクト再生ハンドル
+	int m_chargingEffectH = -1;
 };

@@ -5,6 +5,7 @@
 #include "Charactor/Player/Player.h"
 #include "HideState.h"
 #include "Manager/LightingManager.h"
+#include "Constants/ShaderRegister.h"
 
 namespace
 {
@@ -133,9 +134,9 @@ void FloatingEnemy::DrawEnemy()
 		ResourceLoader::GraphicID::EnemyEmissionMap);
 
 	//テクスチャをシェーダにセットする
-	SetUseTextureToShader(1, normGraphH);//t1
-	SetUseTextureToShader(2, -1);//t2
-	SetUseTextureToShader(3, emissionGraphH);//t3
+	SetUseTextureToShader(ShaderRegister::tex_normal, normGraphH);
+	SetUseTextureToShader(ShaderRegister::tex_metalic, -1);
+	SetUseTextureToShader(ShaderRegister::tex_emission, emissionGraphH);
 
 	LightingManager::GetInstance().ApplyShader();
 	//定数バッファをシェーダレジスタにセットする
@@ -145,9 +146,9 @@ void FloatingEnemy::DrawEnemy()
 	MV1DrawModel(m_modelHandle);
 
 	//テクスチャを解除する
-	SetUseTextureToShader(1, -1);//法線マップを解除
-	SetUseTextureToShader(2, -1);//メタリックマップを解除
-	SetUseTextureToShader(3, -1);//エミッションマップを解除
+	SetUseTextureToShader(ShaderRegister::tex_normal, -1);//法線マップを解除
+	SetUseTextureToShader(ShaderRegister::tex_metalic, -1);//メタリックマップを解除
+	SetUseTextureToShader(ShaderRegister::tex_emission, -1);//エミッションマップを解除
 	//シェーダを解除
 	LightingManager::GetInstance().ResetShader();
 	ReleaseShaderBuffers();

@@ -8,6 +8,12 @@
 #include "Charactor/Enemy/WormEnemy/WormEnemy.h"
 #include "TargetManager.h"
 
+namespace
+{
+	//ワームエネミー(頭・胴体共通)に接触した際のプレイヤーへのダメージ
+	constexpr int worm_contact_damage = 1;
+}
+
 CollisionManager::CollisionManager(const std::weak_ptr<Player> pPlayer, 
 	const std::weak_ptr<BulletManager> pBulletManager):
 	m_pPlayer(pPlayer),
@@ -187,7 +193,7 @@ void CollisionManager::Update()
 		if(playerCol.HitCollision(wormHeadCol))
 		{
 			//プレイヤーのHPを減らす
-			pPlayer->TakeDamage(1);
+			pPlayer->TakeDamage(worm_contact_damage);
 		}
 		//胴体の当たり判定を取得
 		const std::vector<Sphere>& segmentSpheres = pWormEnemy->GetSegmentSpheres();
@@ -196,7 +202,7 @@ void CollisionManager::Update()
 			if(playerCol.HitCollision(segmentSphere))
 			{
 				//プレイヤーのHPを減らす
-				pPlayer->TakeDamage(1);
+				pPlayer->TakeDamage(worm_contact_damage);
 				break;
 			}
 		}

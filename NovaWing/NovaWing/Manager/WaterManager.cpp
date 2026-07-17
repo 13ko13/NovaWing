@@ -8,6 +8,7 @@
 #include "Manager/ResourceLoader.h"
 #include "Constants/Game.h"
 #include "Manager/WaterRevealManager.h"
+#include "Constants/ShaderRegister.h"
 
 namespace
 {
@@ -18,6 +19,11 @@ namespace
 
 	//グリッド全体の広さ
 	constexpr Size grid_size = {10000.0f,10000.0f };
+
+	//波アニメーションの時間経過速度(小さいほどゆっくり動く)
+	constexpr float time_speed = 0.01f;
+	//水面の頂点ワールド座標をカメラのZ座標に追従させる際のオフセット
+	constexpr float water_z_offset = 300.0f;
 }
 
 WaterManager::WaterManager(const std::shared_ptr<CameraBase> pCamera) :
@@ -64,6 +70,7 @@ void WaterManager::Init()
 	m_skyLeftH = loader.GetGraphic(ResourceLoader::GraphicID::SkyBoxLeft);
 	m_skyUpH = loader.GetGraphic(ResourceLoader::GraphicID::SkyBoxUp);
 	m_skyBottomH = loader.GetGraphic(ResourceLoader::GraphicID::SkyBoxBottom);
+	m_causticsH = loader.GetGraphic(ResourceLoader::GraphicID::Caustics);
 }
 void WaterManager::Update()
 {
@@ -73,7 +80,7 @@ void WaterManager::Update()
 	//時間をシェーダ側に渡す
 	//timeの変化が速すぎると波が高速で動いてしまうので
 	//ゆっくり動かすために0.01をかける
-	m_pCBufferWaterData->time = m_frame * 0.01f;
+	m_pCBufferWaterData->time = m_frame * time_speed;
 	UpdateShaderConstantBuffer(m_cbufferWater);
 }
 
@@ -92,24 +99,26 @@ void WaterManager::Draw()
 	SetUsePixelShader(m_waterPSH);
 
 	//定数バッファを頂点シェーダにセットする
-	SetShaderConstantBuffer(m_cbufferWater, DX_SHADERTYPE_VERTEX, 4);
-	SetShaderConstantBuffer(m_cbufferMatrix, DX_SHADERTYPE_VERTEX, 2);
-	SetShaderConstantBuffer(m_cbufferCamera, DX_SHADERTYPE_PIXEL, 5);
+	SetShaderConstantBuffer(m_cbufferWater, DX_SHADERTYPE_VERTEX, ShaderRegister::water_cbuffer_water_vs);
+	SetShaderConstantBuffer(m_cbufferWater, DX_SHADERTYPE_PIXEL, ShaderRegister::water_cbuffer_water_ps);
+	SetShaderConstantBuffer(m_cbufferMatrix, DX_SHADERTYPE_VERTEX, ShaderRegister::water_cbuffer_matrix);
+	SetShaderConstantBuffer(m_cbufferCamera, DX_SHADERTYPE_PIXEL, ShaderRegister::water_cbuffer_camera);
 	SetShaderConstantBuffer(
 		LightingManager::GetInstance().GetLightCBuffer(),
-		DX_SHADERTYPE_PIXEL, 3
+		DX_SHADERTYPE_PIXEL, ShaderRegister::water_cbuffer_light
 	);
 
 	//スカイボックスのテクスチャをシェーダにセットする
-	SetUseTextureToShader(0, m_skyFrontH);
-	SetUseTextureToShader(1, m_skyBackH);
-	SetUseTextureToShader(2, m_skyRightH);
-	SetUseTextureToShader(3, m_skyLeftH);
-	SetUseTextureToShader(4, m_skyUpH);
-	SetUseTextureToShader(5, m_skyBottomH);
+	SetUseTextureToShader(ShaderRegister::water_tex_sky_front, m_skyFrontH);
+	SetUseTextureToShader(ShaderRegister::water_tex_sky_back, m_skyBackH);
+	SetUseTextureToShader(ShaderRegister::water_tex_sky_right, m_skyRightH);
+	SetUseTextureToShader(ShaderRegister::water_tex_sky_left, m_skyLeftH);
+	SetUseTextureToShader(ShaderRegister::water_tex_sky_up, m_skyUpH);
+	SetUseTextureToShader(ShaderRegister::water_tex_sky_bottom, m_skyBottomH);
+	SetUseTextureToShader(ShaderRegister::water_tex_caustics, m_causticsH);
 
 	//透過水表現用のキャプチャテクスチャをシェーダにセットする
-	SetUseTextureToShader(6, WaterRevealManager::GetInstance().GetCaptureTextureHandle());
+	SetUseTextureToShader(ShaderRegister::water_tex_scene_capture, WaterRevealManager::GetInstance().GetCaptureTextureHandle());
 
 	//頂点バッファとインデックスバッファを使用して3Dポリゴンを描画する
 	DrawPolygonIndexed3DToShader_UseVertexBuffer(
@@ -118,12 +127,13 @@ void WaterManager::Draw()
 
 	SetUseVertexShader(-1);
 	SetUsePixelShader(-1);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 4);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, 2);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 5);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, 3);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, ShaderRegister::water_cbuffer_water_vs);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::water_cbuffer_water_ps);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_VERTEX, ShaderRegister::water_cbuffer_matrix);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::water_cbuffer_camera);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::water_cbuffer_light);
 	//テクスチャを解除
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < ShaderRegister::water_tex_slot_count; i++)
 	{
 		SetUseTextureToShader(i, -1);
 	}
@@ -231,7 +241,7 @@ void WaterManager::UpdateShaderMatrixData()
 	//プレイヤーが動くのに合わせて水面も一緒に動くようにするために
 	//カメラのZ座標を使用して頂点のワールド座標が平行移動するようにする
 	//カメラのZ座標
-	float cameraZ = m_pCamera.lock()->GetPos().m_z + 300.0f;
+	float cameraZ = m_pCamera.lock()->GetPos().m_z + water_z_offset;
 	Matrix4x4 trans = Matrix4x4::Translate(Vector3(0.0f, 0.0f, cameraZ));
 
 	//m_pCbufferMatrixData->world = trans.ToDxLib();

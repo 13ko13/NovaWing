@@ -50,6 +50,8 @@ public:
 		GameStartOnCursor,//カーソルが乗っているときのゲーム開始選択肢画像
 		GameEndOnCursor,////カーソルが乗っているときのゲーム終了選択肢画像
 		SelectBackGround,//選択肢の背景画像
+
+		Caustics,//コースティクス効果用のテクスチャ
 	};
 
 	//エフェクトの種類
@@ -59,6 +61,7 @@ public:
 		WormDeath,//ワームの死亡エフェクト
 		FloatingDeath,//浮遊敵の死亡エフェクト
 		PlayerChargeBullet,//プレイヤーのチャージ弾エフェクト
+		Charging,//プレイヤーのチャージ中のエフェクト
 	};
 
 	//音の種類

@@ -181,6 +181,14 @@ void GameScene::Update()
 			std::make_shared<GameoverScene>(
 				m_controller), frame_per_second);
 	}
+
+#ifdef _DEBUG
+	//Startボタンでリスタート
+	if (InputManager::GetInstance().IsTriggered("restart"))
+	{
+		m_controller.ChangeScene(std::make_shared<GameScene>(m_controller), 0.0f);
+	}
+#endif
 }
 
 void GameScene::Draw()
@@ -216,15 +224,15 @@ void GameScene::Draw()
 	//水マネージャーの描画
 	m_pWaterManager->Draw();
 
-	//Effekseerのエフェクト描画
-	DrawEffekseer3D();
-
 	//全てのUIを描画する
 	m_pUIManager->Draw();
 
 	//レティクルよりプレイヤーが優先的に描画されてほしいので
 	//プレイヤーをもう一度描画する
 	m_pPlayer->Draw();
+
+	//Effekseerのエフェクト描画
+	DrawEffekseer3D();
 }
 
 void GameScene::DrawGrid()

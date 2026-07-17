@@ -266,6 +266,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Charactor.h" />
     <ClInclude Include="Manager\BulletManager.h" />
     <ClInclude Include="Constants\Game.h" />
+    <ClInclude Include="Constants\ShaderRegister.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Player.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IPlayerState.h" />
     <ClInclude Include="Main\Application.h" />

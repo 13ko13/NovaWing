@@ -18,5 +18,7 @@ public:
 private:
 	//チャージしている時間
 	int m_chargeFrame = 0;
+	//チャージ中のプレイエフェクト
+	int m_chargingPlayEffectH = -1;
 };
 

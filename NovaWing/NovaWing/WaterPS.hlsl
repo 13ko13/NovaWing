@@ -5,6 +5,7 @@ Texture2D<float4> skyLeft : register(t3);
 Texture2D<float4> skyUp : register(t4);
 Texture2D<float4> skyBottom : register(t5);
 Texture2D<float4> sceneCapture : register(t6);
+Texture2D<float4> causticsTex : register(t7);
 
 SamplerState smp : register(s0);
 
@@ -27,6 +28,12 @@ cbuffer CameraBuffer : register(b5)
     float screenWidth;//画面の幅
     float screenHeight;//画面の高さ
     float3 padding;
+}
+
+cbuffer WaterBuffer : register(b6)
+{
+    float time;//時間管理
+    float3 padding2;
 }
 
 float3 SampleSkyReflection(float3 reflectVec)
@@ -238,9 +245,35 @@ float4 main(PS_INPUT input) : SV_TARGET
         //それを1.0 - にすることでdeltaが小さいほど透明度が1、deltaが大きいほど透明度が0になる
         reveal = (1.0f - smoothstep(0.0f, 0.15f, delta)) * 0.6f;
     }
+    
+    //ワールド座標をUVに変換する
+    //worldPosにかける値が大きいほどテクスチャが粗く広がる
+    //小さいほど細かく繰り返す
+    float2 causticsUV = input.worldPos.xz * 0.001f;
+    //距離に応じてコースティクスの強度を変えるための係数
+    //1.0から引くことで手前の方が強度が高くなる
+    float distanceStrength = 1.0f - smoothstep(1500.0f,3000.0f,dist);
+    
+    //時間に合わせて2枚のUVをずらして揺れているように見せる
+    float2 causticsUV1 = causticsUV + time * float2(0.1f, 0.1f);
+    float2 causticsUV2 = causticsUV + time * float2(-0.1f, 0.1f);
+    
+    //UVから色をサンプリングする
+    float4 baseCausticsCol1 = causticsTex.Sample(smp, frac(causticsUV1));
+    float4 baseCausticsCol2 = causticsTex.Sample(smp, frac(causticsUV2));
+    //コースティクスのテクスチャがアルファ値に網目模様が入っているので
+    //アルファのみを合成する
+    float causticsAlpha = baseCausticsCol1.a * baseCausticsCol2.a;
+
+    //距離が近い海面ほどコースティクス効果を出す
+    //アルファに模様が入っているので、まず白を作ってから
+    //アルファ値をかけて模様を作成
+    float4 causticsFinal = float4(1.0f,1.0f,1.0f,1.0f) * causticsAlpha * distanceStrength;
 
     //霧を適用させたカラーと、キャプチャーしたカラーをrevealで補間する
     float3 finalCol = lerp(foggedColor,captureCol.rgb, reveal);
+    //最終的な色にコースティクス効果を付け足す
+    finalCol += causticsFinal.rgb;
     
     //不透明で返す
     return float4(finalCol,1.0f);

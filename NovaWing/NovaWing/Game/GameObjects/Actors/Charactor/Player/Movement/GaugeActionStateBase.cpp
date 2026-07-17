@@ -13,6 +13,9 @@ namespace
 
 	//ゲージ消費量
 	constexpr float gauge_consumption = -0.5f;
+
+	//アナログスティックの入力値を-1～1に正規化するための割る数
+	constexpr float stick_input_max = 1000.0f;
 }
 
 GaugeActionStateBase::GaugeActionStateBase(
@@ -58,8 +61,8 @@ void GaugeActionStateBase::Update()
 	//移動処理
 	//左スティックの値を取得して-1～1にする
 	Vector2 stick = {
-		static_cast<float>(input.GetBufX()) / 1000.0f,
-		static_cast<float>(input.GetBufY()) / 1000.0f
+		static_cast<float>(input.GetBufX()) / stick_input_max,
+		static_cast<float>(input.GetBufY()) / stick_input_max
 	};
 	//先に正規化しておく
 	float length = std::sqrtf(

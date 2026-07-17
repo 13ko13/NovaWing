@@ -37,13 +37,9 @@ InputManager::InputManager() :
 	m_inputTable["down"] = { {PeripheralType::keyboard,KEY_INPUT_DOWN},	//キーボード:下矢印
 							{PeripheralType::pad1,PAD_INPUT_DOWN } };	//パッド:スティック下又は十字下
 	
-#ifdef _DEBUG
-	//デバッグ用キー
-	m_inputTable["left"] = { {PeripheralType::keyboard,KEY_INPUT_LEFT},	//キーボード:左矢印
-								{PeripheralType::pad1,PAD_INPUT_LEFT } };//パッド:スティック左又は十字左
-
-	m_inputTable["right"] = { {PeripheralType::keyboard,KEY_INPUT_RIGHT},//キーボード:右矢印
-							{PeripheralType::pad1,PAD_INPUT_RIGHT } };	 //パッド:スティック右又は十字右
+#ifdef _DEBUG	
+	m_inputTable["restart"] = { {PeripheralType::keyboard,KEY_INPUT_R},//キーボード:R
+							{PeripheralType::pad1,PAD_INPUT_START } };//パッド:スティック右又は十字右
 #endif
 
 	//あらかじめ入力データのための枠を開けておく

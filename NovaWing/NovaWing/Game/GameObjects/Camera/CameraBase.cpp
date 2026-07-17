@@ -37,6 +37,18 @@ CameraBase::CameraBase(const std::shared_ptr<Player> pPlayer)
 	//ターゲットの位置を更新
 	UpdateTargetPos();
 
+	//プレイヤーの位置
+	Vector3 playerPos = pPlayer->GetPos();
+
+	//初期位置を設定
+	//プレイヤーが動くと、カメラもプレイヤーよりも小さい量で移動する
+	m_pos.m_x = playerPos.m_x *camera_move_strength_x;
+	//yはxよりも小さく動いて、海面より下にはならないようにする
+	m_pos.m_y = playerPos.m_y * camera_move_strength_y * -1.0f + camera_offset_y;
+	m_pos.m_y = std::max(m_pos.m_y,Game::sea_camera_margin);
+	//zはプレイヤーよりも少し手前
+	m_pos.m_z = playerPos.m_z -camera_offset_z;
+
 	//カメラの設定
 	//プレイヤーの位置を取得して、そこをカメラのターゲットにする
 	SetCameraPositionAndTarget_UpVecY(m_pos.ToDxLib(), m_targetPos.ToDxLib());
@@ -71,7 +83,7 @@ void CameraBase::Update()
 	//プレイヤーが動くと、カメラもプレイヤーよりも小さい量で移動する
 	m_pos.m_x = playerPos.m_x *camera_move_strength_x;
 	//yはxよりも小さく動いて、海面より下にはならないようにする
-	playerPos.m_y * camera_move_strength_y * -1.0f + camera_offset_y;
+	m_pos.m_y = playerPos.m_y * camera_move_strength_y * -1.0f + camera_offset_y;
 	m_pos.m_y = std::max(m_pos.m_y,Game::sea_camera_margin);
 	//zはプレイヤーよりも少し手前
 	m_pos.m_z = playerPos.m_z -camera_offset_z;

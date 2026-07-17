@@ -1,9 +1,14 @@
 ﻿#include "Stage.h"
 #include "Manager/LightingManager.h"
+#include "Constants/ShaderRegister.h"
 
 namespace
 {
     const Vector3 model_scale = Vector3(0.4f,0.4f,0.4f);
+    //ステージの初期位置
+    const Vector3 first_pos = Vector3(0.0f,0.0f,17700.0f);
+    //光の方向ベクトル
+    const Vector3 light_dir = Vector3(0.0f,-0.5f,-1.0f);
 }
 
 Stage::Stage(ResourceLoader::ModelID modelID, std::weak_ptr<CameraBase> pCamera):
@@ -15,7 +20,7 @@ Stage::Stage(ResourceLoader::ModelID modelID, std::weak_ptr<CameraBase> pCamera)
 void Stage::OnInit()
 {
     //ステージの位置を設定
-    SetPos(Vector3(0.0f,0.0f,17700.0f));
+    SetPos(first_pos);
     //カメラと行列情報定数バッファを作成
     CreateShaderBuffers();
     //光情報の定数バッファ作成
@@ -26,7 +31,7 @@ void Stage::OnInit()
     m_stagePSH =  LoadPixelShader(L"StagePS.pso");
     m_lightVSH = LoadVertexShader(L"LightingVS.vso");
     //光の向きをセットする
-    m_pCBuffLightData->lightVec = Vector3(0.0f,-0.5f,-1.0f);
+    m_pCBuffLightData->lightVec = light_dir;
     //定数バッファを更新する
     UpdateShaderConstantBuffer(m_cBufferLight);
 }
@@ -47,7 +52,7 @@ void Stage::Draw()
     SetUsePixelShader(m_stagePSH);
     SetUseVertexShader(m_lightVSH);
     //定数バッファをセットする
-    SetShaderConstantBuffer(m_cBufferLight,DX_SHADERTYPE_PIXEL,4);
+    SetShaderConstantBuffer(m_cBufferLight,DX_SHADERTYPE_PIXEL,ShaderRegister::stage_cbuffer_light);
     BindShaderBuffers();
    
     //モデルを描画する
@@ -59,6 +64,6 @@ void Stage::Draw()
     SetUsePixelShader(-1);
     SetUseVertexShader(-1);
     //定数バッファも解除する
-    SetShaderConstantBuffer(-1,DX_SHADERTYPE_PIXEL,4);
+    SetShaderConstantBuffer(-1,DX_SHADERTYPE_PIXEL,ShaderRegister::stage_cbuffer_light);
     ReleaseShaderBuffers();
 }
