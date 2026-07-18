@@ -476,3 +476,30 @@
 - `Game/GameObjects/Actors/Stage/Stage.cpp`: `Vector3(0.0f, 0.0f, 17700.0f)`（ステージの初期配置座標。他のActor(`Player`など)は`first_pos`のような名前付き定数にしているのに、ここだけ直書きのまま）。
 
 **調査済みで問題なし（既に定数化されている）と確認できたファイル**: `Movement/BoostState.cpp`、`BrakeState.cpp`、`FloatingEnemy/ActiveState.cpp`、`HideState.cpp`、`LeaveState.cpp`、`FloatingEnemy.cpp`、`WormEnemy.cpp`、`Shoot/NormalShootState.cpp`、`ChargeReadyState.cpp`、`ChargeShootState.cpp`、`ChargeBullet.cpp`、`BulletBase.cpp`、`TargetManager.cpp`、`InputManager.cpp`、`CameraBase.cpp`。マネージャー系(`GameObjectManager`、`UIManager`、`LightingManager`、`WaterRevealManager`)はシェーダーレジスタ番号・ループ境界等の構造的な値のみで対象外と判断。
+
+### 進捗（2026-07-18・マジックナンバー再調査完了、岩のニアクリップディゾルブ完成）
+
+**マジックナンバー再調査（完了）:**
+- 調査エージェントで再調査した結果、前回(2026-07-17)指摘した重複値・単一ファイル未定数化はすべて修正済みと確認。`stick_input_max`、`gauge_max`、`worm_contact_damage`、`somersault_stick_threshold`、`max_tilt_angle`、`enter_rot_lerp_t`、`time_speed`/`water_z_offset`等、意味のある名前の定数に置き換わっていた。
+- 新たに軽微な項目2件を発見（優先度低、未対応）: `Player.h`の`m_gauge`初期値`100.0f`が`Player.cpp`の`gauge_max`定数と重複した直書きのまま、`Scene/GameoverScene.cpp`のデバッグUI座標・色が直書き。
+- 結論: 「概ね解消されている」で調査完了。
+
+**岩のニアクリップディゾルブ（完成）:**
+- 課題: カメラのNear(200.0f)に近づいた岩などのオブジェクトが、ポリゴンがスパッと切れて不自然に見えていた。フェード(半透明)案とディゾルブ(discard)案を検討し、過去の透過水デバッグで苦労した「半透明・乗算済みアルファ」の問題を再燃させたくないという理由でディゾルブ案を採用。
+- ノイズテクスチャ`Data/Image/Noise.png`を新規用意し`ResourceLoader`に`GraphicID::DissolveNoise`として登録。`ShaderRegister.h`に`tex_noise = 4`を追加（既存の`tex_diffuse`〜`tex_emission`と同じ並びの命名規則に統一）。
+- `LightingPS.hlsl`にディゾルブロジックを追加。**ユーザー自身がシェーダー計算式を考え、Claudeはレビューとヒント出しに徹する形で進めた（学習目的の方針を踏襲）**。
+  - `cameraToPixelD = distance(cameraPos, input.worldPos)`でカメラ〜ピクセル距離を算出。
+  - `noise_threshold = 1.0f - smoothstep(near, start_disolve, cameraToPixelD)`で、Near(200)に近づくほど閾値が1に近づく値を計算（`smoothstep`の引数を意図的に逆順(400,200)にする案が最初出たが、HLSL仕様上`edge0>edge1`は未定義動作のため、正順で呼んで`1.0f -`で反転する形に修正）。
+  - `if (noiseCol.r < noise_threshold) discard;`でノイズの暗い部分から順にピクセルを消す。
+- **ハマった点(本命): 岩のUVレイアウトが模様表示に向いていなかった**。`input.uv`でノイズをサンプリングすると、岩全体がノイズ模様ではなく面ごとのベタ塗り(単色)にしかならなかった。UV可視化(`return float4(input.uv,0,1)`)で「UV展開が面ごとに極小範囲へ押し込まれている(法線マップ用途向けの展開)」と判明。
+- **対処**: `input.worldPos.xy`をノイズのUVとして使う方式に変更（`float2 worldBaseUV = input.worldPos.xy / noise_uv_scale;`）。ワールド座標ベースなのでUV展開に依存せず、連続的な模様になった。
+  - ハマったミス: 最初`float worldBaseUV = ...`と型を`float`のままにしてしまい(`float2`であるべき)、コンパイルエラーで気づいて修正。
+- 最終確認で「岩の一部だけディゾルブじゃない消え方に見える」という懸念が出たが、`noise_threshold`を直接可視化した結果、同じモデル内でもピクセルごとにカメラからの距離が微妙に違うため閾値にムラが出るのは正常な挙動と判明（カメラに近い部分から先に消え始めるのは意図通り）。
+
+**教訓（デバッグ手法として蓄積）:**
+- 「テクスチャの模様が均一なベタ塗りにしか見えない」系のバグは、以前のコースティクス問題(アルファチャンネル)とは別に、**モデルのUV展開そのものが模様表現に向いていない**（法線マップ等ディテール用の極小UV展開）というパターンもあると判明。`input.uv`を色として可視化し、面ごとにベタ塗りの色パッチになっていないか確認するのが有効。
+- UVレイアウトに依存したくない模様表現（ディゾルブ、床の模様等）は、`input.worldPos`の適切な2成分を縮小して代替UVとして使うと、UV展開に関係なく安定した模様が得られる。
+
+**残タスク:**
+- 現状Rockのみ対応。`Player`/`FloatingEnemy`/`WormEnemy`など、`LightingPS.hlsl`を使う他のActorにも同様に`SetUseTextureToShader(ShaderRegister::tex_noise, ...)`のバインド追加が必要（Rockで動作確認できたので横展開するだけ）。
+- `near`/`start_disolve`/`noise_uv_scale`の値は仮の初期値のまま。見た目を見ながら微調整の余地あり。

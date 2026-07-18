@@ -293,6 +293,11 @@ void ResourceLoader::KeepGraph()
 	handle = LoadGraph(L"Data/Image/Caustics.png");
 	assert(handle >= 0);
 	m_graphicHandles[ResourceLoader::GraphicID::Caustics] = handle;
+
+	//ディゾルブ用のノイズテクスチャ
+	handle = LoadGraph(L"Data/Image/Noise.png");
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::DissolveNoise] = handle;
 }
 
 void ResourceLoader::KeepEffect()

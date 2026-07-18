@@ -52,6 +52,7 @@ public:
 		SelectBackGround,//選択肢の背景画像
 
 		Caustics,//コースティクス効果用のテクスチャ
+		DissolveNoise,//ニアクリップフェード対処用のノイズテクスチャ
 	};
 
 	//エフェクトの種類

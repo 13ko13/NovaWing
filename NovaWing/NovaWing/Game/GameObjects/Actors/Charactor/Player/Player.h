@@ -108,7 +108,7 @@ private:
 
 private:
 	//ブースト関連
-	float m_gauge = 100.0f;//ブーストゲージ
+	float m_gauge = 0.0f;//ブーストゲージ
 	float m_boostSpeed = 0;//ブースト時のスピード
 	float m_brakeSpeed = 0;//ブレーキ時のスピード
 

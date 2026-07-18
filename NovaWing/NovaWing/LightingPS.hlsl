@@ -1,7 +1,8 @@
-Texture2D tex : register(t0);
-Texture2D normTex : register(t1);
-Texture2D metalicTex : register(t2);
-Texture2D emissionTex : register(t3);
+Texture2D<float4> tex : register(t0);
+Texture2D<float4> normTex : register(t1);
+Texture2D<float4> metalicTex : register(t2);
+Texture2D<float4> emissionTex : register(t3);
+Texture2D<float4> noiseTex : register(t4);
 
 SamplerState smp : register(s0);
 
@@ -26,9 +27,27 @@ cbuffer CameraBuffer : register(b6)
     float padding;
 }
 
+static const float near = 200.0f;//カメラのニア
+static const float start_disolve = 400.0f;//ディゾルブ開始距離
+static const float noise_uv_scale = 100.0f;//ノイズUVの縮小率
+
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    //return float4(normTex.Sample(smp, input.uv).rgb, 1.0f);
+    //物体がNearに近づくにつれてディゾルブで消えていくようにする
+    //カメラからピクセルまでの距離を求める
+    float cameraToPixelD = distance(cameraPos,input.worldPos);
+    //この距離がNearに近づくにつれてノイズの閾値をあげていく
+    float noise_threshold = 1.0f - smoothstep(near,start_disolve,cameraToPixelD);
+    
+    //ノイズをサンプリングする
+    //岩のuvが変なので、worldPosを使ったuvを作成する
+    float2 worldBaseUV = input.worldPos.xy / noise_uv_scale;
+    float3 noiseCol = noiseTex.Sample(smp,worldBaseUV);
+    // return float4(worldBaseUV,0.0f,1.0f);
+    // return float4(noise_threshold,noise_threshold,noise_threshold,1.0f);
+
+    //ノイズのカラーの値が閾値よりも小さければそのピクセルの描画を行わない
+    if(noiseCol.r < noise_threshold) discard;
     
     //メタリックマップのカラーを取得
     float4 metCol = metalicTex.Sample(smp, input.uv);

@@ -51,16 +51,23 @@ std::vector<std::shared_ptr<WormEnemy>> WormEnemyDataSetter::CreateEnemy(
         //移動方向(Z+:1,Z-:-1)
         float direction = std::stof(dataString[5]);
 
+        //プレイヤーがどの位置(Z)まで来たら動き出すか
+        float activatePlayerZ = std::stof(dataString[6]);
+
+        WormEnemyData wormData;
+        wormData.modelID = modelID;
+        wormData.pos = pos;
+        wormData.segmentCount = segmentNum;
+        wormData.direction = direction;
+        wormData.activatePlayerZ = activatePlayerZ;
+
         //その位置と、pCameraで敵を一つ作成する
         pEnemies.push_back(std::make_shared<WormEnemy>(
             pPlayer,//プレイヤー
-            modelID,//モデルID
             pBulletManager,//バレットマネージャー
-            segmentNum,//胴体の数
             pCamera,//カメラ
-            pos,//位置
-            direction//移動方向
-            ));
+            wormData
+        ));
     }
 
     return pEnemies;

@@ -1,4 +1,4 @@
-modelID,x,y,z,segmentCount,direction
-WormHead,0,500,-1200,5,1
-WormHead,200,500,2900,5,-1
-WormHead,-300,300,5000,7,-1
+modelID,x,y,z,segmentCount,direction,activatePlayerZ
+WormHead,0,500,-1200,5,1,3000
+WormHead,200,500,2900,5,-1,100
+WormHead,-300,300,5000,7,-1,2000

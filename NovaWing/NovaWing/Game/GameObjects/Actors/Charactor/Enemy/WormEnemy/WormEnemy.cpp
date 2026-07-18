@@ -33,23 +33,23 @@ namespace
 	constexpr int death_effect_interval = 13;
 }
 
-WormEnemy::WormEnemy(
-	const std::weak_ptr<Player> pPlayer,const ResourceLoader::ModelID Id,
-	const std::shared_ptr<BulletManager> pBulletManager,int segmentCount,
-	std::weak_ptr<CameraBase> camera,const Vector3& pos,
-	float direction) :
-	Charactor(Id, camera),
+WormEnemy::WormEnemy(const std::weak_ptr<Player> pPlayer,//プレイヤー
+		const std::shared_ptr<BulletManager> pBulletManager,//バレットマネージャー
+		std::weak_ptr<CameraBase> camera,//カメラ
+		const WormEnemyData& data) :
+	Charactor(data.modelID, camera),
 	m_pPlayer(pPlayer),
 	m_pBulletManager(pBulletManager),
-	m_segmentCount(segmentCount),
-	m_headSphere(pos),
-	m_moveDirection(direction)
+	m_segmentCount(data.segmentCount),
+	m_headSphere(data.pos),
+	m_moveDirection(data.direction),
+	m_activatePlayerZ(data.activatePlayerZ)
 {
 	//位置を反映
-	SetPos(pos);
+	SetPos(data.pos);
 
 	//螺旋の中心を保存
-	m_spiralCenter = Vector2(pos.m_x, pos.m_y);
+	m_spiralCenter = Vector2(data.pos.m_x, data.pos.m_y);
 }
 
 WormEnemy::~WormEnemy()
@@ -87,6 +87,9 @@ void WormEnemy::OnInit()
 
 void WormEnemy::Update()
 {
+	//プレイヤーがワームの動き出し距離まで来ていなければ処理を飛ばす
+	if(m_pPlayer.lock()->GetPos().m_z < m_activatePlayerZ) return;
+
 	//フレーム更新
 	m_frame++;
 
@@ -217,6 +220,9 @@ void WormEnemy::Update()
 
 void WormEnemy::Draw()
 {
+	//プレイヤーがワームの動き出し距離まで来ていなければ処理を飛ばす
+	if(m_pPlayer.lock()->GetPos().m_z < m_activatePlayerZ) return;
+
 	//頭がまだ爆発していなければ描画する
 	if (m_deathEffectNum == 0)
 	{
@@ -273,12 +279,16 @@ void WormEnemy::DrawWormHead()
 	//エミッションマップを取得
 	const int emissionGraphH = resourceLoader.GetGraphic(
 		ResourceLoader::GraphicID::WormHeadEmissionMap);
+		//ディゾルブ用ノイズ
+    int noiseHandle = ResourceLoader::GetInstance().GetGraphic(
+        ResourceLoader::GraphicID::DissolveNoise
+    );
 	
-
 	//シェーダにテクスチャをセットする
 	SetUseTextureToShader(ShaderRegister::tex_normal, normGraphH);
 	SetUseTextureToShader(ShaderRegister::tex_metalic, metalicGraphH);
 	SetUseTextureToShader(ShaderRegister::tex_emission, emissionGraphH);
+	SetUseTextureToShader(ShaderRegister::tex_noise, noiseHandle);
 
 	LightingManager::GetInstance().ApplyShader();
 	//定数バッファをシェーダレジスタにセットする
@@ -291,6 +301,7 @@ void WormEnemy::DrawWormHead()
 	SetUseTextureToShader(ShaderRegister::tex_normal, -1);//法線マップを解除
 	SetUseTextureToShader(ShaderRegister::tex_metalic, -1);//メタリックマップを解除
 	SetUseTextureToShader(ShaderRegister::tex_emission, -1);//エミッションマップを解除
+	SetUseTextureToShader(ShaderRegister::tex_noise, -1);//ノイズテクスチャを解除
 	//シェーダを解除
 	LightingManager::GetInstance().ResetShader();
 	ReleaseShaderBuffers();

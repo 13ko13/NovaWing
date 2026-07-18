@@ -37,12 +37,19 @@ void Rock::Draw()
     UpdateShaderMatrixData();
 
     //ロード済みのテクスチャのハンドルを受け取る
-    int normHandle = ResourceLoader::GetInstance().GetGraphic(ResourceLoader::GraphicID::RockNorm);
+    int normHandle = ResourceLoader::GetInstance().GetGraphic(
+        ResourceLoader::GraphicID::RockNorm
+    );
+    int noiseHandle = ResourceLoader::GetInstance().GetGraphic(
+        ResourceLoader::GraphicID::DissolveNoise
+    );
+
     //テクスチャをシェーダにセットする
     SetUseTextureToShader(ShaderRegister::tex_normal, normHandle);
     //ほかのテクスチャはないので、明示的にないことを伝える
     SetUseTextureToShader(ShaderRegister::tex_metalic, -1);
     SetUseTextureToShader(ShaderRegister::tex_emission, -1);
+    SetUseTextureToShader(ShaderRegister::tex_noise, noiseHandle);
 
     //ライティングを適用する
     LightingManager::GetInstance().ApplyShader();
@@ -55,6 +62,7 @@ void Rock::Draw()
 
     //それぞれを解除する
     SetUseTextureToShader(ShaderRegister::tex_normal, -1);
+    SetUseTextureToShader(ShaderRegister::tex_noise, -1);
     LightingManager::GetInstance().ResetShader();
     ReleaseShaderBuffers();
 }

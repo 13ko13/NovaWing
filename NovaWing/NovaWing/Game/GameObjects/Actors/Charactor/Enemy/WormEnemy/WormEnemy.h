@@ -6,27 +6,25 @@
 #include "Utility/Sphere.h"
 #include "Utility/Vector2.h"
 
+struct WormEnemyData
+{
+	ResourceLoader::ModelID modelID;//モデルID
+	int segmentCount;//胴体の数
+	Vector3 pos;//初期位置
+	float direction;//移動方向
+	float activatePlayerZ;//プレイヤーがどのあたり(Z値)まで来たら動き出すか
+};
+
 class Player;
 class BulletManager;
 class CameraBase;
 class WormEnemy : public Charactor
 {
 public:
-	/// <summary>
-	/// ワームエネミーのコンストラクタ
-	/// </summary>
-	/// <param name="pPlayer">プレイヤーのポインタ</param>
-	/// <param name="Id">モデルのID</param>
-	/// <param name="pBulletManager">弾の管理者</param>
-	/// <param name="segmentCount">胴体の数</param>
-	/// <param name="camera">カメラ</param>
-	WormEnemy(const std::weak_ptr<Player> pPlayer,
-		const ResourceLoader::ModelID Id,
-		const std::shared_ptr<BulletManager> pBulletManager,
-		int segmentCount,
-		std::weak_ptr<CameraBase> camera,
-		const Vector3& pos,
-		float direction//移動方向
+	WormEnemy(const std::weak_ptr<Player> pPlayer,//プレイヤー
+		const std::shared_ptr<BulletManager> pBulletManager,//バレットマネージャー
+		std::weak_ptr<CameraBase> camera,//カメラ
+		const WormEnemyData& data//ワームエネミーに必要なデータ
 	);
 	~WormEnemy();
 
@@ -75,5 +73,7 @@ private:
 	float m_moveDirection = 0;//移動方向(1.0:Z+方向、-1.0:Z-方向)
 	//コンストラクタで受け取ったposのx,yを螺旋の中心とする
 	Vector2 m_spiralCenter;
+	//プレイヤーがどの位置(Z)まで来たら動き出すか
+	float m_activatePlayerZ = 0.0f;
 };
 

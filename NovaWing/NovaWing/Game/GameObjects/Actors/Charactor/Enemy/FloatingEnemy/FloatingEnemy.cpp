@@ -132,11 +132,16 @@ void FloatingEnemy::DrawEnemy()
 	//エミッションマップを取得
 	const int emissionGraphH = resourceLoader.GetGraphic(
 		ResourceLoader::GraphicID::EnemyEmissionMap);
+	//ディゾルブ用ノイズ
+    int noiseHandle = ResourceLoader::GetInstance().GetGraphic(
+        ResourceLoader::GraphicID::DissolveNoise
+    );
 
 	//テクスチャをシェーダにセットする
 	SetUseTextureToShader(ShaderRegister::tex_normal, normGraphH);
 	SetUseTextureToShader(ShaderRegister::tex_metalic, -1);
 	SetUseTextureToShader(ShaderRegister::tex_emission, emissionGraphH);
+	SetUseTextureToShader(ShaderRegister::tex_noise, noiseHandle);
 
 	LightingManager::GetInstance().ApplyShader();
 	//定数バッファをシェーダレジスタにセットする
@@ -149,6 +154,7 @@ void FloatingEnemy::DrawEnemy()
 	SetUseTextureToShader(ShaderRegister::tex_normal, -1);//法線マップを解除
 	SetUseTextureToShader(ShaderRegister::tex_metalic, -1);//メタリックマップを解除
 	SetUseTextureToShader(ShaderRegister::tex_emission, -1);//エミッションマップを解除
+	SetUseTextureToShader(ShaderRegister::tex_noise, -1);//ノイズを解除
 	//シェーダを解除
 	LightingManager::GetInstance().ResetShader();
 	ReleaseShaderBuffers();

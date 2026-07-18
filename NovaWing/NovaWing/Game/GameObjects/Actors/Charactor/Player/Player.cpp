@@ -75,6 +75,8 @@ void Player::OnInit()
 
 	//初期座標
 	m_pos = first_pos;
+	//ゲージ初期化
+	m_gauge = 100.0f;
 
 	//シェーダに渡す定数バッファを作成
 	CreateShaderBuffers();

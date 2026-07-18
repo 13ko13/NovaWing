@@ -19,6 +19,8 @@ namespace ShaderRegister
 	constexpr int tex_metalic = 2;
 	//エミッションマップ
 	constexpr int tex_emission = 3;
+	//ディゾルブ用のノイズテクスチャ
+	constexpr int tex_noise = 4;
 
 	//---------- WaterManager専用 ----------
 	//行列情報(Matrix)の定数バッファ(頂点シェーダ)
