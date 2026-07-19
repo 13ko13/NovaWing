@@ -63,6 +63,7 @@ public:
 		FloatingDeath,//浮遊敵の死亡エフェクト
 		PlayerChargeBullet,//プレイヤーのチャージ弾エフェクト
 		Charging,//プレイヤーのチャージ中のエフェクト
+		EnemyBullet,//エネミーの弾エフェクト
 	};
 
 	//音の種類

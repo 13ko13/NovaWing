@@ -33,6 +33,7 @@
 #include "Game/GameObjects/Actors/Charactor/Enemy/FloatingEnemy/FloatingEnemyDataSetter.h"
 #include "Stage/Stage.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/WormEnemy/WormEnemyDataSetter.h"
+#include "Scene/ClearScene.h"
 
 namespace
 {
@@ -41,6 +42,8 @@ namespace
 
 	//1秒あたりのフレーム数
 	constexpr int frame_per_second = 60;
+	//プレイヤーの位置がどのあたりに行ったらクリアにするか(仮)
+	constexpr float clear_pos_z = 10000.0f;
 }
 
 GameScene::GameScene(SceneController& controller) :
@@ -181,10 +184,17 @@ void GameScene::Update()
 			std::make_shared<GameoverScene>(
 				m_controller), frame_per_second);
 	}
+	//今は仮でプレイヤーがある程度のＺ位置まで来たらクリアにする
+	if (m_pPlayer->GetPos().m_z > clear_pos_z)
+	{
+		m_controller.ChangeScene(
+			std::make_shared<ClearScene>(
+				m_controller), frame_per_second);
+	}
 
 #ifdef _DEBUG
 	//Startボタンでリスタート
-	if (InputManager::GetInstance().IsTriggered("restart"))
+	if (InputManager::GetInstance().IsTriggered(InputEvent::restart))
 	{
 		m_controller.ChangeScene(std::make_shared<GameScene>(m_controller), 0.0f);
 	}

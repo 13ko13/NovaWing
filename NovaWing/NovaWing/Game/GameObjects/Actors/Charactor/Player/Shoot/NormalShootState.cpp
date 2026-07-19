@@ -37,7 +37,7 @@ void NormalShootState::Update()
 	InputManager& input = InputManager::GetInstance();
 
 	//shootボタンが押されたら弾を発射する
-	if (input.IsTriggered("shoot") &&
+	if (input.IsTriggered(InputEvent::shoot) &&
 		m_shootCT > cool_time)
 	{
 		//BulletManagerに弾の生成を依頼する
@@ -53,7 +53,7 @@ void NormalShootState::Update()
 		m_shootCT = 0;
 	}
 	//ボタンが押され続けていたら
-	else if(input.IsPressed("shoot"))
+	else if(input.IsPressed(InputEvent::shoot))
 	{
 		//ChargeShootStateに遷移する
 		ChangeState(std::make_shared<ChargeShootState>(m_pPlayer, m_pBulletManager));

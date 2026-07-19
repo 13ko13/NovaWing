@@ -75,7 +75,7 @@ void TitleScene::Update()
 	InputManager& input = InputManager::GetInstance();
 
 	//下入力で選択肢を下に移動(indexを増やす) 
-	if (input.IsTriggered("down"))
+	if (input.IsTriggered(InputEvent::down))
 	{
 		//選択肢の最大数で割った余りを取ることで、
 		//選択肢の範囲内に収める
@@ -86,7 +86,7 @@ void TitleScene::Update()
 					));
 	}
 	//上入力で選択肢を上に移動(indexを減らす)
-	if (input.IsTriggered("up"))
+	if (input.IsTriggered(InputEvent::up))
 	{
 		//選択肢の最大数で割った余りを取ることで、
 		//選択肢の範囲内に収める
@@ -97,7 +97,7 @@ void TitleScene::Update()
 				);
 	}
 	//決定入力で選択肢を決定する
-	if (input.IsTriggered("ok"))
+	if (input.IsTriggered(InputEvent::ok))
 	{
 		switch (m_selectIndex)
 		{

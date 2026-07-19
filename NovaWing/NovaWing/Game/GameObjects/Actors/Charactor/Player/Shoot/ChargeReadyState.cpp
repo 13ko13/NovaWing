@@ -58,7 +58,7 @@ void ChargeReadyState::Update()
 	InputManager& input = InputManager::GetInstance();
 
 	//ボタンが押されていればチャージ弾を発射
-	if (input.IsTriggered("shoot"))
+	if (input.IsTriggered(InputEvent::shoot))
 	{
 		//BulletManagerにチャージ弾発射を依頼する
 		std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock();//一時的にshared_ptrに変換

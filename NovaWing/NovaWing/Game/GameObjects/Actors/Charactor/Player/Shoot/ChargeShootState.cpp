@@ -61,12 +61,12 @@ void ChargeShootState::Update()
 	InputManager& input = InputManager::GetInstance();
 
 	//ボタンを押している間時間を計測
-	if (input.IsPressed("shoot"))
+	if (input.IsPressed(InputEvent::shoot))
 	{
 		m_chargeFrame++;
 	}
 	//もしボタンを離したときにチャージ未完了フレームだったら
-	if (input.IsReleased("shoot") && 
+	if (input.IsReleased(InputEvent::shoot) && 
 		m_chargeFrame < charge_comp_frame)
 	{
 		//通常弾を発射して、ノーマルステートに戻す

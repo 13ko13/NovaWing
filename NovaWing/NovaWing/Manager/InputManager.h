@@ -5,6 +5,20 @@
 
 #include "../Utility/Vector2.h"
 
+//入力イベント名(InputManagerの対応表・IsTriggered等の呼び出しで共通して使う定数)
+namespace InputEvent
+{
+	constexpr const char* ok = "ok";
+	constexpr const char* shoot = "shoot";
+	constexpr const char* somersault = "somersault";
+	constexpr const char* boost = "boost";
+	constexpr const char* brake = "brake";
+	constexpr const char* up = "up";
+	constexpr const char* down = "down";
+	constexpr const char* restart = "restart";
+	constexpr const char* any_key = "anyKey";
+}
+
 /// <summary>
 /// 周辺機器種別
 /// </summary>

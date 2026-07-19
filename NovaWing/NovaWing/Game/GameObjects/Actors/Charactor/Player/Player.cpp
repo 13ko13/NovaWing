@@ -207,7 +207,7 @@ void Player::Somersault(InputManager& input)
 	};
 
 	//宙返りボタンが押されていたらステートをそれぞれ切り替える
-	if (input.IsTriggered("somersault") &&
+	if (input.IsTriggered(InputEvent::somersault) &&
 		stick.m_y < somersault_stick_threshold)
 	{
 		//射撃のみできるようにする
@@ -235,7 +235,7 @@ void Player::Somersault(InputManager& input)
 void Player::Boost(const InputManager& input)
 {
 	//ゲージマックス中にブースト入力されたら
-	if (input.IsTriggered("boost") &&
+	if (input.IsTriggered(InputEvent::boost) &&
 		m_gauge >= gauge_max)
 	{
 		//移動ステートをブースト状態に変更
@@ -250,7 +250,7 @@ void Player::Boost(const InputManager& input)
 void Player::Brake(const InputManager & input)
 {
 	//ゲージマックス中にブレーキ入力されたら
-	if (input.IsTriggered("brake") &&
+	if (input.IsTriggered(InputEvent::brake) &&
 		m_gauge >= gauge_max)
 	{
 		//移動ステートをブレーキ状態に変更

@@ -4,3 +4,5 @@ FloatingEnemy,180,300,1900
 FloatingEnemy,-180,300,3000
 FloatingEnemy,-200,200,3000
 FloatingEnemy,20,400,3000
+FloatingEnemy,0,200,6000
+FloatingEnemy,200,300,7000

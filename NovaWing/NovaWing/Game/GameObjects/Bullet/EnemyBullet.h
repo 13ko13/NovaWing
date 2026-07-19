@@ -12,5 +12,9 @@ public:
 
 	//弾がプレイヤーに当たった時の処理
 	void OnHitEnemy() override;
+
+private:
+	//Effekseerのエフェクト再生中のハンドル
+	int m_effectPlayHandle = -1;
 };
 

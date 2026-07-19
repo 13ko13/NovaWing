@@ -159,6 +159,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Scene\ClearScene.cpp" />
     <ClCompile Include="CSVData\CSVData.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemyDataSetter.cpp" />
     <ClCompile Include="Game\BackGround\SkyBox.cpp" />
@@ -228,6 +229,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemyDataSetter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scene\ClearScene.h" />
     <ClInclude Include="CSVData\CSVData.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemyDataSetter.h" />
     <ClInclude Include="Game\BackGround\SkyBox.h" />

@@ -16,29 +16,29 @@ InputManager::InputManager() :
 	m_rightStickDir({ 0.0f,0.0f })
 {
 	//イベント名を添え時にして、右辺値に実際の入力種別と押されたボタンの配列を置く
-	m_inputTable["ok"] = { {PeripheralType::keyboard,KEY_INPUT_A},	//キーボード:エンターキー
+	m_inputTable[InputEvent::ok] = { {PeripheralType::keyboard,KEY_INPUT_A},	//キーボード:エンターキー
 							{PeripheralType::pad1,PAD_INPUT_A } };	//パッド:A
 
-	m_inputTable["shoot"] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
+	m_inputTable[InputEvent::shoot] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
 							{PeripheralType::pad1,PAD_INPUT_B} };		//パッド:Bボタン
 
-	m_inputTable["somersault"] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
+	m_inputTable[InputEvent::somersault] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
 							{PeripheralType::pad1,PAD_INPUT_X} };//パッド:Yボタン
 
-	m_inputTable["boost"] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
+	m_inputTable[InputEvent::boost] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
 							{PeripheralType::pad1,PAD_INPUT_C} };//パッド:?ボタン
 
-	m_inputTable["brake"] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
+	m_inputTable[InputEvent::brake] = { {PeripheralType::keyboard,KEY_INPUT_Z},	//キーボード:Z
 							{PeripheralType::pad1,PAD_INPUT_A} };//パッド:Aボタン
 
-	m_inputTable["up"] = { {PeripheralType::keyboard,KEY_INPUT_UP},		//キーボード:上矢印
+	m_inputTable[InputEvent::up] = { {PeripheralType::keyboard,KEY_INPUT_UP},		//キーボード:上矢印
 						{PeripheralType::pad1,PAD_INPUT_UP } };		//パッド:スティック上又は十字上
 
-	m_inputTable["down"] = { {PeripheralType::keyboard,KEY_INPUT_DOWN},	//キーボード:下矢印
+	m_inputTable[InputEvent::down] = { {PeripheralType::keyboard,KEY_INPUT_DOWN},	//キーボード:下矢印
 							{PeripheralType::pad1,PAD_INPUT_DOWN } };	//パッド:スティック下又は十字下
-	
-#ifdef _DEBUG	
-	m_inputTable["restart"] = { {PeripheralType::keyboard,KEY_INPUT_R},//キーボード:R
+
+#ifdef _DEBUG
+	m_inputTable[InputEvent::restart] = { {PeripheralType::keyboard,KEY_INPUT_R},//キーボード:R
 							{PeripheralType::pad1,PAD_INPUT_START } };//パッド:スティック右又は十字右
 #endif
 
@@ -51,8 +51,8 @@ InputManager::InputManager() :
 	}
 
 	//AnyKey,AnyButtonの枠も開けておく
-	m_inputData["anyKey"] = false;
-	m_lastInputData["anyKey"] = false;
+	m_inputData[InputEvent::any_key] = false;
+	m_lastInputData[InputEvent::any_key] = false;
 }
 
 void InputManager::Update()
@@ -140,7 +140,7 @@ void InputManager::Update()
 	}
 
 	//結果を保存する
-	m_inputData["anyKey"] = anyPressed;
+	m_inputData[InputEvent::any_key] = anyPressed;
 }
 
 InputManager& InputManager::GetInstance()
