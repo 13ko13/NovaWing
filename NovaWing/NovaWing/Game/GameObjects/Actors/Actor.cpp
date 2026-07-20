@@ -4,6 +4,7 @@
 #include "Utility/Matrix4x4.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Constants/ShaderRegister.h"
+#include "Manager/LightingManager.h"
 
 Actor::Actor(ResourceLoader::ModelID modelID,
 	std::weak_ptr<CameraBase> pCamera) :
@@ -88,4 +89,31 @@ Vector3 Actor::GetCameraPos() const
 {
     //shared_ptrに変換して位置を返す
 	return m_pCamera.lock()->GetPos();
+}
+
+void Actor::DrawWithLighting(const std::vector<std::pair<int, int>>& textures)
+{
+	//テクスチャの中身を1つずつ取り出し、テクスチャレジスタにセット
+	for(const std::pair<int,int>& tex : textures)
+	{
+		//テクスチャをセット
+		SetUseTextureToShader(tex.first,tex.second);
+	}
+
+	//シェーダを適用
+	LightingManager::GetInstance().ApplyShader();
+	BindShaderBuffers();//シェーダをセットする
+	//モデルを描画
+	MV1DrawModel(m_modelHandle);
+
+	//テクスチャを開放する
+	for(const std::pair<int,int>& tex : textures)
+	{
+		//テクスチャを解除
+		SetUseTextureToShader(tex.first,-1);
+	}
+	//シェーダを解除
+	LightingManager::GetInstance().ResetShader();
+	//開放する
+	ReleaseShaderBuffers();
 }

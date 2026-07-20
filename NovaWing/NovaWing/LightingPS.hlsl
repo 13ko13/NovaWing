@@ -27,9 +27,22 @@ cbuffer CameraBuffer : register(b6)
     float padding;
 }
 
+//カメラ
 static const float near = 200.0f;//カメラのニア
+
+//ディゾルブ
 static const float start_disolve = 400.0f;//ディゾルブ開始距離
 static const float noise_uv_scale = 100.0f;//ノイズUVの縮小率
+
+//環境光
+static const float ambient_light = 0.2f;//環境光の強さ
+
+//法線マップの強調度
+static const float normal_map_strength = 1.5f;
+
+//滑らかさ
+static const float smoothness_min = 1.0f;//滑らかさの最小値
+static const float smoothness_range = 29.0f;//滑らかさの変化させる幅
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
@@ -43,8 +56,6 @@ float4 main(PS_INPUT input) : SV_TARGET
     //岩のuvが変なので、worldPosを使ったuvを作成する
     float2 worldBaseUV = input.worldPos.xy / noise_uv_scale;
     float3 noiseCol = noiseTex.Sample(smp,worldBaseUV);
-    // return float4(worldBaseUV,0.0f,1.0f);
-    // return float4(noise_threshold,noise_threshold,noise_threshold,1.0f);
 
     //ノイズのカラーの値が閾値よりも小さければそのピクセルの描画を行わない
     if(noiseCol.r < noise_threshold) discard;
@@ -62,7 +73,7 @@ float4 main(PS_INPUT input) : SV_TARGET
     //法線方向は-1～1の範囲なので変換する(タンジェント空間)
     float3 normalTS = normMapColor * 2.0 - 1.0;
     //凹凸がしょぼいのでタンジェント空間の法線を強めにする
-    normalTS.xy *= 1.5;
+    normalTS.xy *= normal_map_strength;
     
     //法線を正規化(ワールド空間)
     float3 normVec = normalize(input.normalWS);
@@ -82,10 +93,9 @@ float4 main(PS_INPUT input) : SV_TARGET
     normalWSFinal = normalize(normalWSFinal);
     
     //光のベクトルを正規化
-    // 一時的に固定値で確認
     float3 normLightDir = normalize(lightVec);
     // アンビエントを追加（完全な暗闇を防ぐ）
-    float ambient = 0.2f;
+    float ambient = ambient_light;
     
     //その二つの内積を計算
     //内積の結果が1:明るい,0以下:暗い
@@ -101,7 +111,7 @@ float4 main(PS_INPUT input) : SV_TARGET
     //-で反転させる
     float3 reflectVec = reflect(normLightDir, normalWSFinal);
     //滑らかさを計算
-    float smoothness = metCol.r * 29.0 + 1.0;//1～30
+    float smoothness = metCol.r * smoothness_range + smoothness_min;//1～30
     
     //スペキュラの計算
     float specular = pow(saturate(dot(viewDir, reflectVec)), smoothness);

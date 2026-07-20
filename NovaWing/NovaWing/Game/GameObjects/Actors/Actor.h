@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include <memory>
+#include <vector>
+#include <utility>
 
 #include "../../../Utility/Vector3.h"
 #include "../../../Utility/Quaternion.h"
@@ -68,5 +70,8 @@ protected:
 	void ReleaseShaderBuffers();
 	//カメラの位置を取得する
 	Vector3 GetCameraPos() const;
+
+	//テクスチャをテクスチャレジスタにセットして描画する
+	void DrawWithLighting(const std::vector<std::pair<int,int>>& textures);
 };
 

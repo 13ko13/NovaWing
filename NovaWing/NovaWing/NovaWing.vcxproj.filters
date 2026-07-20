@@ -442,6 +442,7 @@
     <FxCompile Include="WaterPS.hlsl" />
     <FxCompile Include="CapturePS.hlsl" />
     <FxCompile Include="StagePS.hlsl" />
+    <FxCompile Include="GlitchPS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\CSV\RockData.csv" />

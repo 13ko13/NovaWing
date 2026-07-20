@@ -62,7 +62,7 @@ float ValueNoise(float2 vecXZ)
 //横の波
 static const float wave_frequency = 0.0025f; //波の周波数(小さいほど波が長い)
 static const float wave_speed = 1.0f; //波の速度
-static const float wave_height =5.0f; //波の高さ
+static const float wave_height =10.0f; //波の高さ
 
 //縦の波
 static const float wave_frequency2 = 0.005f; //波の周波数(小さいほど波が長い)

@@ -141,8 +141,42 @@ float3 SampleSkyReflection(float3 reflectVec)
     }
 }
 
+//カメラのnearとfar
 static const float near_clip = 200.0f;
 static const float far_clip = 5500.0f;
+
+//海の色(ベースの色)
+static const float3 shallow_color = float3(0.0f, 0.5f, 0.9f);
+static const float3 deep_color  = float3(0.0f, 0.05f, 0.2f);
+
+//泡
+static const float foam_height_min = 50.0f;//泡が出始める高さ
+static const float foam_height_max = 130.0f;//完全に泡になる高さ
+
+//霧
+static const float fog_dist_min = 800.0f;//霧がかかり始める距離
+static const float fog_dist_max = 2000.0f;//完全に霧になる距離
+
+//スペキュラ(反射光)
+static const float specular_power = 30.0f;//ハイライトの鋭さ
+static const float specular_strength = 0.5f;//反射光の強さ
+
+//アンビエント(環境光)
+static const float ambient_light = 0.2f;
+
+//フレネル効果
+static const float fresnel_power = 20.0f;//フレネルの強さ
+
+//reveal(水面下の物体を透かす処理)
+static const float reveal_alpha_threshold = 0.001f;//背景判定用の閾値
+static const float reveal_delta_range = 0.15f;//深さの差の許容範囲
+static const float reveal_strength = 0.6f;//revealの最大強度
+
+//コースティクス(海の模様)
+static const float caustics_uv_scale = 0.001f;//テクスチャの広がり方
+static const float caustics_flow_speed = 0.1f;//揺れる速さ
+static const float caustics_dist_min = 1500.0f;//効果が弱まり始める距離
+static const float caustics_dist_max = 3000.0f;//効果が消える距離
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
@@ -152,10 +186,8 @@ float4 main(PS_INPUT input) : SV_TARGET
     //光のベクトルを計算
     float3 normLightDir = normalize(lightVec);
     
-    //return float4(normalize(lightVec) * 0.5 + 0.5, 1.0f);
-    
     //環境光を追加
-    float ambient = 0.2f;
+    float ambient = ambient_light;
     //法線と光のベクトルの内積から暗い部分と明るい部分を出す
     float diffuse = saturate(dot(input.normalWS, -normLightDir));
     //最終的な光の強さ
@@ -163,9 +195,13 @@ float4 main(PS_INPUT input) : SV_TARGET
     
     //光の反射用のベクトル(specular用)
     float3 lightRefVec = reflect(normLightDir, input.normalWS);
+    //反射光の計算
+    //少しまぶしいので値を小さくする
+    float specular = pow(saturate(dot(
+        viewDir, lightRefVec)), specular_power) * specular_strength;
     
     //空を海に反射させるために
-    //入射ベクトルとワールド座標から反射ベクトルを計算
+    //視線ベクトルとワールド座標から反射ベクトルを計算
     //今回はカメラ→水面ではなく
     //水面→カメラのベクトルが欲しいので既にある
     //視線ベクトルを反転させる
@@ -174,25 +210,16 @@ float4 main(PS_INPUT input) : SV_TARGET
     //空の色を求める
     float3 skyColor = SampleSkyReflection(viewRefVec);
 
-    //反射光の計算
-    //少しまぶしいので値を小さくする
-    float specular = pow(saturate(dot(viewDir, lightRefVec)), 30.0f) * 0.5f;
-    
     //フレネル効果
     //水面を真上から見ると透明
     //水面を斜めから見ると反射が強くなる
     //これを活かして透明感と深みを表現する
     //視線方向と法線の角度を使用する
     float fresnel = pow(
-    1.0f - saturate(dot(viewDir, input.normalWS)), 20.0f);
+    1.0f - saturate(dot(viewDir, input.normalWS)), fresnel_power);
     
-    //浅い色
-    float3 shallowColor = float3(0.0f, 0.5f, 0.9f);
-    //深い色
-    float3 deepColor = float3(0.0f, 0.05f, 0.2f);
-    //二つを組み合わせてフレネル効果を付けた水の色
     float3 waterColor = lerp(
-    shallowColor, deepColor, fresnel);
+    shallow_color, deep_color, fresnel);
     
     //求めた空の色と水の色をフレネルで補間する　
     float3 finalWaterCol = lerp(waterColor, skyColor, fresnel);
@@ -204,7 +231,7 @@ float4 main(PS_INPUT input) : SV_TARGET
     //smoothstep(min,max,x)は、
     //min以下は0,max以上は1
     //その間は滑らかに0～1へ変化する
-    float foam = smoothstep(50.0f, 130.0f, waveHeight);
+    float foam = smoothstep(foam_height_min, foam_height_max, waveHeight);
     //海の色(空の反射も混ざっている色)と白を混ぜる
     //lerpで泡の部分は白に補間する
     float3 finalColor = lerp(finalWaterCol.rgb, float3(1, 1, 1), foam);
@@ -217,7 +244,7 @@ float4 main(PS_INPUT input) : SV_TARGET
     //カメラから水面までの距離を求める
     float dist = length(cameraPos - input.worldPos);
     //距離に応じた霧の強さ(0～1)
-    float fogFactor = smoothstep(800.0f, 2000.0f, dist);
+    float fogFactor = smoothstep(fog_dist_min, fog_dist_max, dist);
     
     //最終的な色に霧を適用する
     float3 foggedColor = lerp(litColor, skyColor, fogFactor);
@@ -231,9 +258,9 @@ float4 main(PS_INPUT input) : SV_TARGET
     float4 captureCol =  sceneCapture.Sample(smp,screenUV);
 
     //アルファがほぼ0の場所はrevealを0にする
-    //何もない場所でたまたまdeltaが小さくなり、不自然に薄くなってしまう可能性があるため
+    //何もない場所でたまたまdeltaが小さくなり、不自然に水面が薄くなってしまう可能性があるため
     float reveal = 0.0f;
-    if(captureCol.a > 0.001f)
+    if(captureCol.a > reveal_alpha_threshold)
     {
         //水面自体の正規化距離を求める
         float normDistNtoF = saturate((dist - near_clip) / (far_clip - near_clip));
@@ -243,20 +270,20 @@ float4 main(PS_INPUT input) : SV_TARGET
         float delta =  abs(captureCol.a - normDistNtoF);
         //smoothstep(0.0f,0.05f,delta)で出るのは、deltaが小さいほど0になってしまうので
         //それを1.0 - にすることでdeltaが小さいほど透明度が1、deltaが大きいほど透明度が0になる
-        reveal = (1.0f - smoothstep(0.0f, 0.15f, delta)) * 0.6f;
+        reveal = (1.0f - smoothstep(0.0f, reveal_delta_range, delta)) * reveal_strength;
     }
     
     //ワールド座標をUVに変換する
     //worldPosにかける値が大きいほどテクスチャが粗く広がる
     //小さいほど細かく繰り返す
-    float2 causticsUV = input.worldPos.xz * 0.001f;
+    float2 causticsUV = input.worldPos.xz * caustics_uv_scale;
     //距離に応じてコースティクスの強度を変えるための係数
     //1.0から引くことで手前の方が強度が高くなる
-    float distanceStrength = 1.0f - smoothstep(1500.0f,3000.0f,dist);
+    float distanceStrength = 1.0f - smoothstep(caustics_dist_min,caustics_dist_max,dist);
     
     //時間に合わせて2枚のUVをずらして揺れているように見せる
-    float2 causticsUV1 = causticsUV + time * float2(0.1f, 0.1f);
-    float2 causticsUV2 = causticsUV + time * float2(-0.1f, 0.1f);
+    float2 causticsUV1 = causticsUV + time * float2(caustics_flow_speed, caustics_flow_speed);
+    float2 causticsUV2 = causticsUV + time * float2(-caustics_flow_speed, caustics_flow_speed);
     
     //UVから色をサンプリングする
     float4 baseCausticsCol1 = causticsTex.Sample(smp, frac(causticsUV1));

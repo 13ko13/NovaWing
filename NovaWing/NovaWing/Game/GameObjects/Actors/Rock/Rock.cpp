@@ -43,26 +43,13 @@ void Rock::Draw()
     int noiseHandle = ResourceLoader::GetInstance().GetGraphic(
         ResourceLoader::GraphicID::DissolveNoise
     );
+    //ハンドルとレジスタ番号をセットで保持しておく
+    std::vector<std::pair<int,int>> textures;
+    textures.push_back({ShaderRegister::tex_normal,normHandle});//法線マップ
+    textures.push_back({ShaderRegister::tex_metalic,-1});//メタリックマップはないので-1
+    textures.push_back({ShaderRegister::tex_emission,-1});//エミッションも同じ
+    textures.push_back({ShaderRegister::tex_noise,noiseHandle});//ノイズテクスチャ
 
-    //テクスチャをシェーダにセットする
-    SetUseTextureToShader(ShaderRegister::tex_normal, normHandle);
-    //ほかのテクスチャはないので、明示的にないことを伝える
-    SetUseTextureToShader(ShaderRegister::tex_metalic, -1);
-    SetUseTextureToShader(ShaderRegister::tex_emission, -1);
-    SetUseTextureToShader(ShaderRegister::tex_noise, noiseHandle);
-
-    //ライティングを適用する
-    LightingManager::GetInstance().ApplyShader();
-
-    //定数バッファをシェーダにセットする
-    BindShaderBuffers();
-
-    //モデルを描画
-    MV1DrawModel(m_modelHandle);
-
-    //それぞれを解除する
-    SetUseTextureToShader(ShaderRegister::tex_normal, -1);
-    SetUseTextureToShader(ShaderRegister::tex_noise, -1);
-    LightingManager::GetInstance().ResetShader();
-    ReleaseShaderBuffers();
+    //DrawWithLightingにペアの配列を渡してモデルを描画
+    DrawWithLighting(textures);
 }

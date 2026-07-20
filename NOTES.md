@@ -503,3 +503,92 @@
 **残タスク:**
 - 現状Rockのみ対応。`Player`/`FloatingEnemy`/`WormEnemy`など、`LightingPS.hlsl`を使う他のActorにも同様に`SetUseTextureToShader(ShaderRegister::tex_noise, ...)`のバインド追加が必要（Rockで動作確認できたので横展開するだけ）。
 - `near`/`start_disolve`/`noise_uv_scale`の値は仮の初期値のまま。見た目を見ながら微調整の余地あり。
+
+### 進捗（2026-07-20・企業見学に向けたシェーダー理解の口頭確認＋WaterPS/LightingPS/StagePSの定数化）
+
+**背景**: 学校に企業の方が来てコードを見てもらう予定があり、既存の海シェーダー(`WaterVS.hlsl`)の実装を「なぜこうなっているか」自分の言葉で説明できるか、クイズ形式で繰り返し確認する回。
+
+**シェーダー理解の口頭確認（`WaterVS.hlsl`中心）:**
+- `WaterPS.hlsl`の`captureCol.a`が「透明度」ではなく「距離をnear~farで正規化した値」であることを、`CapturePS.hlsl`側の実装と突き合わせて確認。
+- reveal処理（水面下の物体を透かす仕組み）の`delta = abs(captureCol.a - normDistNtoF)`が「物体までの距離」と「水面までの距離」の差＝「物体が水面からどれだけ深い位置にあるか」を表すことを、具体例（手前にある場合／深い場所にある場合）で確認。最初は大小関係を逆に捉えていたが、修正後は正しく説明できた。
+- `captureCol.a > 0.001f`のガード（何もない背景でdeltaがたまたま小さくなり誤ってrevealが立ってしまうのを防ぐ）の必要性も確認。
+- **微分を初めて学ぶ状態だったため、`sin`の傾き＝`cos`という関係、合成関数の微分（`sin(3x)`を微分すると`3cos(3x)`になる理由）を、坂道・自転車の例え話まで掘り下げて説明**。最終的に「周波数(frequency)が高い＝波が密集＝傾きが急、だから微分結果に`wave_frequency`が追加で掛かる」という理屈まで自分の言葉で言えるようになった。
+- 法線ベクトル`float3(-(傾きX), 1.0f, -(傾きZ))`について、マイナス符号の意味（坂の傾きと法線の向きは逆）、Y成分が常に`1.0f`固定の理由（傾きが0のとき法線は真上を向くべきで、Yが0だと長さ0のベクトルになり方向が定義できなくなるため）を確認。
+- ノイズの傾き計算（`noiseEpsilon`を使った数値微分）についても、「近い点で測るほど正確な傾きに近づく」という直感を坂道の例えで確認。
+- 複数の波の傾きを単純に足し合わせている理由（高さの合成が線形和なら、傾きの合成も線形和になる）も確認。
+- 同じ範囲を一度クイズし直して定着を確認する場面もあり、「理解できた気になっているだけかもしれない」と自己申告して再確認を求める場面があった。
+
+**マジックナンバー精査・定数化（`WaterPS.hlsl`/`LightingPS.hlsl`/`StagePS.hlsl`）:**
+- 就活を見据えて「本当に全部定数化できているか」の精査を実施。調査エージェントで洗い出した結果、`WaterVS.hlsl`は既に`static const`で丁寧に定数化されているのに、同じ水シェーダーである`WaterPS.hlsl`側は未定数化のマジックナンバーが大量に残っていることが判明（一貫性の欠如）。
+- `WaterPS.hlsl`: 泡・霧・コースティクス・specular・フレネル・reveal閾値・浅い色/深い色・環境光をすべて`static const`化。デバッグ用の`//return float4(...)`コメント残骸も削除。
+- `LightingPS.hlsl`: 環境光(`ambient_light`)、法線マップ強調度(`normal_map_strength`)、smoothnessの範囲(`smoothness_min`/`smoothness_range`)を定数化。実装と矛盾していた「一時的に固定値で確認」というコメントも削除。
+- `StagePS.hlsl`: 環境光を定数化。
+- **あえて対応しなかった箇所**: `near_clip`/`far_clip`が`CapturePS.hlsl`/`WaterPS.hlsl`/`LightingPS.hlsl`の3ファイルに重複定義されている問題は、共通ヘッダ(`.hlsli`)切り出しが必要な設計変更のため今回はスコープ外として据え置き。`causticsFinal`の白色`float4(1,1,1,1)`は意味が単純すぎるため定数化不要と判断。
+- ビルド＆動作確認OK。見た目の変化なし。
+
+**残タスク:**
+- `near_clip`/`far_clip`の3ファイル間重複を解消したい場合は、共通`.hlsli`インクルードファイルへの切り出しを検討。
+- ディゾルブ関連の残タスク（上記参照）は未着手のまま。
+
+### 進捗（2026-07-20続き・プロジェクト全体の重複コード精査＋Actor::DrawWithLightingへの共通化）
+
+**背景**: マジックナンバー精査に続き、就活を見据えて「無駄なコード（重複・関数化できる箇所）」がないかプロジェクト全体を調査。調査エージェントで敵クラス群/DataSetter群/シェーダー間/State系を横断的に洗い出し、実物を目視確認したうえで優先度付け。
+
+**発見した重複（優先度順）:**
+1. **敵・岩の描画処理が丸ごとコピペ（対応済み）**: `Rock::Draw()`、`FloatingEnemy::DrawEnemy()`、`WormEnemy::DrawWormHead()`/`DrawWormBody()`の4箇所で「テクスチャSet→ApplyShader→BindShaderBuffers→MV1DrawModel→テクスチャ解除→ResetShader→ReleaseShaderBuffers」という同一パターンが繰り返されていた。
+2. DataSetter群（`RockDataSetter`/`FloatingEnemyDataSetter`/`WormEnemyDataSetter`）の「CSVロード→ループ→modelID/pos変換→生成」の骨格が3クラスで重複（未対応、次回候補）。
+3. `LightingPS.hlsl`/`WaterPS.hlsl`間で視線ベクトル・反射ベクトル・specular計算式が重複（未対応）。
+4. `WaterPS.hlsl`の`SampleSkyReflection`内、X/Y/Z面のUV計算パターンが3回繰り返し（未対応、可読性とのトレードオフあり優先度低）。
+
+**対応した内容（1番）:**
+- `Actor`基底クラス（`Charactor`ではなく`Actor`。`Rock`が`Charactor`を継承せず直接`Actor`を継承しているため、共通化の置き場所は`Actor`が適切と判断）に`DrawWithLighting(const std::vector<std::pair<int,int>>& textures)`を追加。テクスチャの(レジスタ番号, ハンドル)ペアのリストを受け取り、セット→シェーダ適用→描画→解除までを一括で行う。
+- `Rock::Draw()`（28行→24行）、`FloatingEnemy::DrawEnemy()`、`WormEnemy::DrawWormHead()`/`DrawWormBody()`の4箇所を書き換え、重複していた100行超のコードを解消。
+- **副産物のバグ修正**: `WormEnemy::DrawWormBody()`は元々`tex_noise`（ディゾルブ用ノイズ）のセット/解除が漏れており、頭だけディゾルブ効果が付いて胴体には付いていなかった。今回の共通化で胴体側にも`tex_noise`を追加し、実装漏れを修正（ユーザーに確認の上、意図的な仕様差ではなく実装漏れと判明）。
+- **学習方針**: `std::pair`/`std::vector<std::pair<int,int>>`/`push_back`/範囲for文（`for (const std::pair<int,int>& tex : textures)`）が初見だったため、コードを提示せず一つずつ「なぜその型が必要か」「pairとmapの違い」などを確認しながらユーザー自身に書かせる形で進めた。構造化束縛(`auto& [a,b]`)は分かりにくいとの申告があり、`tex.first`/`tex.second`の明示的な書き方を採用。
+- ビルド＆動作確認OK（岩・浮遊敵・ワームの頭/胴体、全て正常描画）。
+
+**残タスク:**
+- DataSetter群（2番）の共通化は未着手。テンプレート基底クラスかフリー関数での共通化を検討。
+- シェーダー間の計算重複（3番）は`.hlsli`共通ヘッダ化を検討（`near_clip`/`far_clip`の重複ともまとめて対応するとよい）。
+- FloatingEnemyのState系（HideState/ActiveState/LeaveState）はまだ実物未確認、共通化の余地があるか要調査。
+
+### 進捗（2026-07-20続き・UIに電子風スキャンラインシェーダーを追加開始、`GlitchPS.hlsl`本体は完成）
+
+**背景**: 参考動画（スターフォックス2風UI）を見て、UI画像に電子的な質感を足したいという要望。最初「グリッチ（横ズレ）」で提案したが、ユーザーの実際のイメージをすり合わせた結果、「古い携帯の画面のような、常時薄く入る横線（スキャンライン）」であり、時々ノイズが走るような演出は不要と判明。ノイズテクスチャ(`Noise.png`)は雲状で滑らかすぎるため今回は不使用と判断し、`sin`計算のみで実現する方針に決定。
+
+**シェーダー本体(`GlitchPS.hlsl`)は完成、DxLib側の配線は次回に持ち越し:**
+- 新規ファイル`GlitchPS.hlsl`を作成。`CapturePS.hlsl`を参考に、UI(2D画像)向けのシンプルな構成（`Texture2D`1枚、`SamplerState`、`PS_Input`は`pos`/`uv`のみ、3D情報は不要）にした。
+- `scanline = sin(input.uv.y * scanline_frequency) * 0.5f + 0.5f` で横縞パターンを0〜1に正規化（`WaterVS.hlsl`の波の周波数、ノイズの`*0.5+0.5`正規化の知識をそのまま応用）。
+- `lerp(1.0f, scanline, scanline_strength)`で「変化なし(1.0)」を基準に、`scanline_strength`の割合だけ暗い方に引っ張る「明るさの倍率」を計算(`brightnessScanline`、0.7〜1.0の範囲になる設計)。この`lerp`の使い方（色を直接ブレンドするのではなく、明るさの倍率をブレンドしてから元の色に掛ける）の理解に苦戦し、複数回説明し直した。
+- `baseCol.rgb * brightnessScanline`で最終色を計算し、`baseCol.a`（元画像の透明度）をそのまま維持して`return`（一度`return float4(finalCol, 1.0f)`とアルファを固定してしまい、UI画像の透明部分が消える不具合になるところをレビューで指摘・修正）。
+- 完成版:
+```hlsl
+Texture2D<float4> uiTex : register(t0);
+SamplerState smp : register(s0);
+
+struct PS_Input
+{
+    float4 pos : SV_Position;
+    float2 uv : TEXCOORD0;
+};
+
+static const float scanline_frequency = 300.0f;//スキャンラインを入れる間隔
+static const float scanline_strength = 0.3f;//最大でどれぐらい明るさが落ちるか
+
+float4 main(PS_Input input) : SV_TARGET
+{
+    float4 baseCol = uiTex.Sample(smp,input.uv);
+
+    float scanline = sin(input.uv.y * scanline_frequency);//-1~1
+    scanline = scanline * 0.5f + 0.5f;//0~1に正規化
+
+    float brightnessScanline = lerp(1.0f,scanline,scanline_strength);//0.7～1.0になる
+    float3 finalCol = baseCol * brightnessScanline;
+    return float4(finalCol,baseCol.a);
+}
+```
+- **仕様確定事項**: スキャンラインは完全に静止（時間経過で動かさない）。`time`変数は不要。
+
+**残タスク（次回・学校で継続予定）:**
+- DxLib側の配線が未着手: ①`.pso`へのシェーダーコンパイル設定を追加、②`LoadPixelShader(L"GlitchPS.pso")`でロードする場所を決める（既存の`LightingManager`のような専用管理クラスを新設するか検討）、③UI描画（`UIBase`派生クラスの`Draw()`）の直前後で`SetUsePixelShader(glitchPSH)` / `SetUsePixelShader(-1)`を呼ぶ配線、④どのUI（全部か、特定の画面のみか）に適用するかの設計。
+- 現状`GlitchPS.hlsl`は既存の`UIManager`/`UIBase`/`ReticleUI`のどの描画呼び出しにも接続されていない、シェーダーファイル単体の状態。

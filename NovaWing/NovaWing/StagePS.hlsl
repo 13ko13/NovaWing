@@ -13,6 +13,9 @@ cbuffer LightingBuffer : register(b4)
     float3 lightVec;//光の方向ベクトル
 };
 
+//環境光
+static const float ambient_light = 0.2f;
+
 float4 main(PS_INPUT input) : SV_TARGET
 {
 	//法線を正規化
@@ -22,7 +25,7 @@ float4 main(PS_INPUT input) : SV_TARGET
 	//明るさを算出
 	float diffuse = saturate(dot(normVec,-normLightVec));
 	//環境光
-	float ambient = 0.2f;
+	float ambient = ambient_light;
 	//最終的な明るさ
 	float light = saturate(diffuse + ambient);
 	//ベースの色

@@ -137,27 +137,15 @@ void FloatingEnemy::DrawEnemy()
         ResourceLoader::GraphicID::DissolveNoise
     );
 
-	//テクスチャをシェーダにセットする
-	SetUseTextureToShader(ShaderRegister::tex_normal, normGraphH);
-	SetUseTextureToShader(ShaderRegister::tex_metalic, -1);
-	SetUseTextureToShader(ShaderRegister::tex_emission, emissionGraphH);
-	SetUseTextureToShader(ShaderRegister::tex_noise, noiseHandle);
+	//ハンドルとレジスタ番号をセットで保持しておく
+    std::vector<std::pair<int,int>> textures;
+    textures.push_back({ShaderRegister::tex_normal,normGraphH});//法線マップ
+    textures.push_back({ShaderRegister::tex_metalic,-1});//メタリックマップはないので-1
+    textures.push_back({ShaderRegister::tex_emission,emissionGraphH});//エミッション
+    textures.push_back({ShaderRegister::tex_noise,noiseHandle});//ノイズテクスチャ
 
-	LightingManager::GetInstance().ApplyShader();
-	//定数バッファをシェーダレジスタにセットする
-	BindShaderBuffers();
-
-	//モデル描画
-	MV1DrawModel(m_modelHandle);
-
-	//テクスチャを解除する
-	SetUseTextureToShader(ShaderRegister::tex_normal, -1);//法線マップを解除
-	SetUseTextureToShader(ShaderRegister::tex_metalic, -1);//メタリックマップを解除
-	SetUseTextureToShader(ShaderRegister::tex_emission, -1);//エミッションマップを解除
-	SetUseTextureToShader(ShaderRegister::tex_noise, -1);//ノイズを解除
-	//シェーダを解除
-	LightingManager::GetInstance().ResetShader();
-	ReleaseShaderBuffers();
+    //DrawWithLightingにペアの配列を渡してモデルを描画
+    DrawWithLighting(textures);
 }
 
 void FloatingEnemy::TakeDamage(int damage)
