@@ -5,6 +5,9 @@
 #include "SceneController.h"
 #include "GameScene.h"
 #include "Main/Application.h"
+#include "Utility/Size.h"
+#include "Utility/SizeF.h"
+#include "Utility/GraphShaderDraw.h"
 
 namespace
 {
@@ -64,6 +67,8 @@ void TitleScene::Init()
 	//選択肢の背景画像をロード
 	m_selectBackGroundH = loader.GetGraphic(
 		ResourceLoader::GraphicID::SelectBackGround);
+	//グリッチシェーダのロード
+	m_glitchPSH = LoadPixelShader(L"GlitchPS.pso");
 }
 
 void TitleScene::Update()
@@ -158,22 +163,18 @@ void TitleScene::Draw()
 		wsize.m_height * logo_ratio_y,
 		logo_scale, 0.0, m_titleLogoH, true);
 
-	//選択肢の背景
-	DrawRotaGraph(
+	//シェーダを適用
+	SetUsePixelShader(m_glitchPSH);
+
+	//選択肢の背景をシェーダを通して描画
+	DrawGraphToShaderByCenter(
 		wsize.m_width * back_ground_ratio_x,
 		wsize.m_height * back_ground_ratio_y,
-		back_ground_graph_scale, 0.0, m_selectBackGroundH, true);
+		back_ground_graph_scale,
+		m_selectBackGroundH
+	);
 
-	//画像の幅と高さ
-	int graphWidth, graphHeight;
-	GetGraphSize(m_gameStartGraphH, &graphWidth, &graphHeight);
-	//画像の中心
-	int graphCenter = wsize.m_width * start_ratio_x;
-	//画像の左端のX座標
-	int leftX = graphCenter - (graphWidth * start_graph_scale) / 2;
-
-	//とりあえず左上に選択肢を表示する
-	//選択中の選択肢に矢印を表示する
+	//選択肢の描画
 	switch (m_selectIndex)
 	{
 	case TitleSelect::StartGame:
@@ -183,45 +184,50 @@ void TitleScene::Draw()
 		//カーソルが乗っている画像を左から進行度の範囲だけ切り取って描画
 		if (m_wipeProgress[static_cast<int>(TitleSelect::StartGame)] > 0.0f)
 		{
-			DrawRectRotaGraph(
-			leftX + (graphWidth * m_wipeProgress[static_cast<int>(TitleSelect::StartGame)] *
-			start_graph_scale / 2),
-			wsize.m_height * start_ratio_y,
-			0,0,
-			graphWidth * m_wipeProgress[static_cast<int>(m_selectIndex)],
-			graphHeight,
-			start_graph_scale, 0.0, m_gameStartOnCursorGraphH, true);
+			DrawGraphToShaderByCenter(
+				wsize.m_width * start_ratio_x,
+				wsize.m_height * start_ratio_y,
+				start_graph_scale,
+				m_gameStartOnCursorGraphH,
+				m_wipeProgress[static_cast<int>(TitleSelect::StartGame)]
+			);
 		}
 
 		//ゲーム終了選択肢描画
-		DrawRotaGraph(
-		wsize.m_width * end_ratio_x,
-		wsize.m_height * end_ratio_y,
-		end_graph_scale, 0.0, m_gameEndGraphH, true);
+		DrawGraphToShaderByCenter(
+			wsize.m_width * end_ratio_x,
+			wsize.m_height * end_ratio_y,
+			end_graph_scale,
+			m_gameEndGraphH
+		);
 		break;
 	}
 	case TitleSelect::ExitGame:
 	{
 		//ゲーム開始選択肢描画
-		DrawRotaGraph(
-		wsize.m_width * start_ratio_x,
-		wsize.m_height * start_ratio_y,
-		start_graph_scale, 0.0, m_gameStartGraphH, true);
+		DrawGraphToShaderByCenter(
+			wsize.m_width * start_ratio_x,
+			wsize.m_height * start_ratio_y,
+			start_graph_scale,
+			m_gameStartGraphH
+		);
 
 		//ゲーム終了選択肢描画
 		//もしゲームスタートのワイプ進行度が0より大きければ
 		//カーソルが乗っている画像を左から進行度の範囲だけ切り取って重ね描きする
 		if (m_wipeProgress[static_cast<int>(TitleSelect::ExitGame)] > 0.0f)
 		{
-			DrawRectRotaGraph(
-			leftX + (graphWidth * m_wipeProgress[static_cast<int>(TitleSelect::ExitGame)] * end_graph_scale) / 2,
-			wsize.m_height * end_ratio_y,
-			0,0,
-			graphWidth * m_wipeProgress[static_cast<int>(m_selectIndex)],
-			graphHeight,
-			end_graph_scale, 0.0, m_gameEndOnCursorGraphH, true);
+			//ゲーム終了選択肢描画
+			DrawGraphToShaderByCenter(
+				wsize.m_width * end_ratio_x,
+				wsize.m_height * end_ratio_y,
+				end_graph_scale,
+				m_gameEndOnCursorGraphH,
+				m_wipeProgress[static_cast<int>(TitleSelect::ExitGame)]
+			);
 		}
 		break;
 	}
 	}
+	SetUsePixelShader(-1);
 }

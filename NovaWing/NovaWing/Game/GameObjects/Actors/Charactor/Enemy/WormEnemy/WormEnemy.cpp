@@ -23,7 +23,7 @@ namespace
 	//弾の速度
 	constexpr float bullet_speed = 8.0f;
 	//弾の攻撃力
-	constexpr int bullet_power = 1;
+	constexpr int bullet_power = 5;
 	//胴体間の間隔フレーム数
 	constexpr int spacing = 4;
 

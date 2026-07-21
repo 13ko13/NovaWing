@@ -4,7 +4,6 @@
 #include "UIBase.h"
 
 class Player;
-struct SizeF;
 class HPGaugeUI : public UIBase
 {
 public:
@@ -12,13 +11,6 @@ public:
     HPGaugeUI(std::weak_ptr<Player> pPlayer);
     //描画
     void Draw() override;
-
-private:
-    //矩形1枚をシェーダ付きで描画する
-    void DrawGraphToShader(
-        float left, float top,
-        const SizeF& size, float uvMaxU, int texH
-    );
 
 private:
     //プレイヤーの弱参照

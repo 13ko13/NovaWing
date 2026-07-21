@@ -45,5 +45,8 @@ private:
 	int m_gameEndOnCursorGraphH = -1;
 	//選択肢の背景画像
 	int m_selectBackGroundH = -1;
+
+	//グリッチシェーダのハンドル
+	int m_glitchPSH = -1;
 };
 

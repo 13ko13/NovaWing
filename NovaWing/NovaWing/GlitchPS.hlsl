@@ -10,7 +10,7 @@ struct PS_Input
 };
 
 static const float scanline_frequency = 205.0f;//スキャンラインを入れる周期(数字が小さいほど間隔が短い)
-static const float scanline_strength = 0.1f;//最大でどれぐらい明るさが落ちるか
+static const float scanline_strength = 0.15f;//最大でどれぐらい明るさが落ちるか
 
 float4 main(PS_Input input) : SV_TARGET
 {

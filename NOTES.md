@@ -629,10 +629,33 @@ float4 main(PS_Input input) : SV_TARGET
 - `HPGaugeUI.cpp`内にはまだ動作確認済みの`DrawGraphToShader`実装がそのままメンバー関数として残っている（105〜162行目）。この中身を`GraphShaderDraw.cpp`に移植し、`HPGaugeUI`側は`#include "Utility/GraphShaderDraw.h"`して呼び出すだけの形に書き換える必要がある。
 - `TitleScene.cpp`はまだ未着手。`DrawRotaGraph`/`DrawRectRotaGraph`(固定機能)のまま。GlitchPS適用対象はユーザーとの合意で「選択肢背景(SelectBackGround)とボタン画像(GameStart/GameEnd/OnCursor版含む)」、ロゴ(TitleLogo)は対象外。
 
-**次回やること:**
-1. `Utility/GraphShaderDraw.h`をクラスからフリー関数に書き換える（`SizeF`の前方宣言は`struct SizeF;`にすること）。
-2. `HPGaugeUI.cpp`の`DrawGraphToShader`の中身を`GraphShaderDraw.cpp`に移植し、`HPGaugeUI`側の重複コードを削除。
-3. `HPGaugeUI`をビルド・動作確認（GlitchPSがこれまで通りかかるか、共通化による regression がないか）。
-4. `TitleScene`に`m_glitchPSH`メンバーを追加し、コンストラクタ(または`Init()`)で`LoadPixelShader(L"GlitchPS.pso")`。
-5. `TitleScene::Draw()`のSelectBackGround/GameStart/GameEnd(通常・OnCursor両方)の描画を、`DrawRotaGraph`/`DrawRectRotaGraph`から`DrawGraphToShader`呼び出しに置き換え、前後に`SetUsePixelShader(m_glitchPSH)`/`SetUsePixelShader(-1)`を追加。座標系が「中心基準→左上基準」に変わる点に注意（`ratio_x`/`ratio_y`の位置計算をやり直す必要がある）。
-6. ロゴ(TitleLogo)は対象外なので`DrawRotaGraph`のまま変更しない。
+**次回やること（旧・完了済み、下記の続き参照）:**
+1. ~~`Utility/GraphShaderDraw.h`をクラスからフリー関数に書き換える~~ 完了
+2. ~~`HPGaugeUI.cpp`の`DrawGraphToShader`の中身を`GraphShaderDraw.cpp`に移植~~ 完了
+3. ~~`HPGaugeUI`をビルド・動作確認~~ 完了
+4. ~~`TitleScene`に`m_glitchPSH`メンバーを追加~~ 完了
+5. ~~`TitleScene::Draw()`のSelectBackGround/GameStart/GameEndをDrawGraphToShader化~~ 完了
+6. ロゴ(TitleLogo)は対象外、`DrawRotaGraph`のまま据え置き（変更なし）
+
+### 進捗（2026-07-21続き・GraphShaderDrawのフリー関数化完了、TitleSceneへのGlitchPS適用完了）
+
+**`GraphShaderDraw`のフリー関数化とHPGaugeUIへの適用（完了）:**
+- `Utility/GraphShaderDraw.h`/`.cpp`を空のクラステンプレートから、`void DrawGraphToShader(float left, float top, const SizeF& size, float uvMaxU, int texH)`というフリー関数に書き換え。`SizeF`は`struct SizeF;`で前方宣言（`class`と`struct`の不一致エラーを過去に踏んでいたための注意点）。
+- `HPGaugeUI.cpp`にあった実装本体（頂点データ組み立て・UV計算・`DrawPolygonIndexed2DToShader`呼び出し）を`GraphShaderDraw.cpp`に移植。`HPGaugeUI.h`からメンバー関数宣言と使わなくなった`struct SizeF;`前方宣言を削除、`HPGaugeUI.cpp`は`#include "Utility/GraphShaderDraw.h"`するだけで既存の呼び出しがそのままフリー関数に向くようになった。
+- ビルド・動作確認OK（HPゲージの見た目・スキャンライン共に変化なし）。
+
+**`TitleScene`への適用（完了、途中でハマった点あり）:**
+- `TitleScene.h`に`int m_glitchPSH = -1;`を追加、`Init()`で`LoadPixelShader(L"GlitchPS.pso")`。
+- 「選択肢の背景(SelectBackGround)」から着手。中心座標(`ratio_x`/`ratio_y`)→左上座標への変換式(`centerX - width/2`)を、既存コードの`leftX`計算(173行目)から類推させる形で導出。
+- **ハマった点(本命): `SetUsePixelShader`を呼ばずに`DrawGraphToShader`を使うと画像が全く見えなくなる**。座標・サイズをデバッグ表示で検証し理論値は正しいことを確認した後、原因を切り分け。`DrawPolygonIndexed2DToShader`はシェーダー前提の描画関数であり、ピクセルシェーダーが未セット(-1のまま)だと正しく描画できないと判明。`TitleScene`はこの時点でまだ`m_glitchPSH`をロードしていなかったため、シェーダーなしで`DrawPolygonIndexed2DToShader`を呼んでいたのが原因。`m_glitchPSH`のロードと`SetUsePixelShader`呼び出しを追加して解決。
+- **リファクタ: 面倒な定型処理をまとめる`DrawGraphToShaderByCenter`を新設**。「`GetGraphSize`→`SizeF`計算→中心から左上への変換→`DrawGraphToShader`呼び出し」という4手順を毎回書くのが面倒という指摘を受け、`GraphShaderDraw.h/.cpp`に`void DrawGraphToShaderByCenter(float centerX, float centerY, double scale, int texH, float uvMaxU = 1.0f)`を追加（`DrawRotaGraph`感覚で使えるシェーダー版ヘルパー）。実装時、一度`uvMaxU`引数を受け取ったのに使わず`1.0f`固定で渡してしまうミスがあったが、レビューで指摘し修正。
+- ワイプ演出（カーソルが乗った選択肢を`uvMaxU`で左から徐々に表示）も含めて`GameStart`/`GameEnd`両方の描画を`DrawGraphToShaderByCenter`に統一。
+- **`switch`文の`case TitleSelect::StartGame`に`break;`が抜けており、フォールスルーで`ExitGame`のケースまで実行されてしまうバグを作り込んだが、レビューで指摘し即座に修正**（元のコードには`break;`があったのに、書き換え時に消えてしまっていた）。
+- `SetUsePixelShader(m_glitchPSH)`/`SetUsePixelShader(-1)`の範囲を、背景だけでなく選択肢ボタンの描画も含む`switch`文全体を囲む位置に配置し直し、背景・ボタン両方にスキャンラインがかかるようにした。
+- ビルド・動作確認OK（背景・ボタン両方にスキャンライン適用、選択肢切り替え、ワイプ演出、全て正常動作）。
+
+**現状のまとめ**: UIへの電子風スキャンラインシェーダー(`GlitchPS.hlsl`)は、`HPGaugeUI`と`TitleScene`の両方で完全に配線・動作確認済み。共通処理は`Utility/GraphShaderDraw.h/.cpp`（フリー関数、シングルトン不使用）に一本化されている。
+
+**残タスク:**
+- 他にもUI要素があれば同様に`DrawGraphToShaderByCenter`+GlitchPS適用を検討可能（現状はHPGaugeUIとTitleSceneのみ対応）。
+- `DrawGraphToShaderByCenter`は中心座標基準で左上を計算するため、`uvMaxU`で幅が変わると中心位置がズレる可能性がある設計上の注意点が残っている（今回のワイプでは大きな違和感はなかったが、将来「中心を固定してほしい」ケースが出たら再検討）。

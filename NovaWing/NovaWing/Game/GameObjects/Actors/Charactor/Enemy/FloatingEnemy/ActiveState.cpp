@@ -19,7 +19,7 @@ namespace
 	//弾の速度
 	constexpr float bullet_speed = 7.0f;
 	//弾の攻撃力
-	constexpr int bullet_power = 1;
+	constexpr int bullet_power = 5;
 }
 
 ActiveState::ActiveState(std::weak_ptr<FloatingEnemy> pEnemy):
