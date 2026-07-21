@@ -53,6 +53,9 @@ public:
 
 		Caustics,//コースティクス効果用のテクスチャ
 		DissolveNoise,//ニアクリップフェード対処用のノイズテクスチャ
+
+		HPFrame,//HPの枠
+		HPGauge,//HPゲージ
 	};
 
 	//エフェクトの種類

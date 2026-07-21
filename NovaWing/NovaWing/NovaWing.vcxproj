@@ -159,6 +159,8 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\UI\HPGaugeUI.cpp" />
+    <ClCompile Include="Utility\GraphShaderDraw.cpp" />
     <ClCompile Include="Scene\ClearScene.cpp" />
     <ClCompile Include="CSVData\CSVData.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemyDataSetter.cpp" />
@@ -229,6 +231,8 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemyDataSetter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\UI\HPGaugeUI.h" />
+    <ClInclude Include="Utility\GraphShaderDraw.h" />
     <ClInclude Include="Scene\ClearScene.h" />
     <ClInclude Include="CSVData\CSVData.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemyDataSetter.h" />
@@ -286,6 +290,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClInclude Include="Game\UI\UIBase.h" />
     <ClInclude Include="Manager\UIManager.h" />
     <ClInclude Include="Game\GameObjects\Actors\Stage\Stage.h" />
+    <ClInclude Include="Utility\SizeF.h" />
     <ClInclude Include="Utility\Fade.h" />
     <ClInclude Include="Utility\Matrix4x4.h" />
     <ClInclude Include="Utility\ModelAnimator.h" />

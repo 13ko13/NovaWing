@@ -26,4 +26,9 @@ void Charactor::Update()
 	m_pos += m_velocity;
 }
 
+int Charactor::GetMaxHealth() const
+{
+	return max_health;
+}
+
 

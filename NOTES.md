@@ -592,3 +592,47 @@ float4 main(PS_Input input) : SV_TARGET
 **残タスク（次回・学校で継続予定）:**
 - DxLib側の配線が未着手: ①`.pso`へのシェーダーコンパイル設定を追加、②`LoadPixelShader(L"GlitchPS.pso")`でロードする場所を決める（既存の`LightingManager`のような専用管理クラスを新設するか検討）、③UI描画（`UIBase`派生クラスの`Draw()`）の直前後で`SetUsePixelShader(glitchPSH)` / `SetUsePixelShader(-1)`を呼ぶ配線、④どのUI（全部か、特定の画面のみか）に適用するかの設計。
 - 現状`GlitchPS.hlsl`は既存の`UIManager`/`UIBase`/`ReticleUI`のどの描画呼び出しにも接続されていない、シェーダーファイル単体の状態。
+
+### 進捗（2026-07-21・HPゲージUI新規実装＋GlitchPS配線完了、DrawGraphToShaderの共通化に着手中）
+
+**HPゲージUIが完成した。** `Data/Image/HPGauge/`に用意された`HP_Frame_fix.png`/`HP_Gauge_fix.png`（Frame=枠、Gauge=緑帯、どちらも1280×140、透明部分あり）を使い、`Game/UI/HPGaugeUI.h/.cpp`（新規、`UIBase`継承）で実装。`Charactor`に`GetMaxHealth()`を追加（`Charactor.cpp`の匿名namespaceの`max_health`を返すだけ）。
+
+**このセッションで踏襲した学習方針**: 座標計算（`DrawRectRotaGraph`の中心座標指定、左端/幅/中心の関係）を、具体的な数字の実験→式の一般化という順で段階的に導く形でユーザー自身に組み立てさせた。「めんどくさい」「わからない」という反応が出たときは、実際の計算や画像編集ソフトでの確認など負担の大きい手順を提案する前に、そもそも作業自体が不要になる設計変更（画像トリミング、UV座標方式への転換）を優先して提案するとうまくいった。
+
+**ハマった点1: HP変化時にゲージ左端が1〜2pxガタつく**
+- 原因調査で`int`への切り捨て（`gaugeWidth`、`DrawRectRotaGraph`のint版x,y引数）を複数箇所直したが、最終的にHP100/96での`gaugePosX`を実際に数値で比較すると理論値上は左端が動いていないことが判明。1〜2px程度はDxLibの拡大縮小描画（縮小サンプリングの丸め）に起因する残差と判断し、ユーザーの合意で許容範囲として受け入れて終了。
+
+**ハマった点2(本命・大きな学び): `DrawRotaGraph`/`DrawRectRotaGraphF`にSetUsePixelShaderが一切効かない**
+- HPGaugeUIにGlitchPS(スキャンライン)を適用しようとしたが、`SetUsePixelShader(m_glitchPSH)`を呼んでも見た目が一切変化しない（真っ赤に強制してみても赤くならない）ことが発覚。
+- Web調査の結果、**DxLibの固定機能2D描画関数(`DrawRotaGraph`系)は独自ピクセルシェーダーを反映できない仕様**と判明（[Qiita記事](https://qiita.com/YYSS_101/items/b72234e09ba8a6b43e07)で確認）。3D側で`MV1DrawModel`(固定機能)と`LightingManager`のシェーダー付き描画が別物だったのと同じ構造。
+- シェーダーを効かせるには`DrawPolygonIndexed2DToShader`（`VERTEX2DSHADER`で頂点を自前で組み立てて描画する関数）に作り直す必要があると判明し、方針転換。
+
+**ハマった点3: UV可視化デバッグで黄色一色になる(構造体セマンティクス不一致)**
+- `DrawPolygonIndexed2DToShader`で描画し直したところ、`GlitchPS.hlsl`の`main`を一時的に`return float4(input.uv,0,1);`にしてUV可視化しても黄色一色（変化なし）になる不具合が発生。
+- 原因: `PS_Input`構造体が`SV_Position`の次に`TEXCOORD0`だけを書いていたが、DxLibが固定で渡す頂点データの並び順は`SV_POSITION→COLOR0(dif)→COLOR1(spc)→TEXCOORD0(uv)→TEXCOORD1(suv)`（[DxLib公式掲示板](https://dxlib.xsrv.jp/cgi/patiobbs/patio.cgi?mode=view&no=5490)で確認）。`COLOR0`/`COLOR1`を省略したことで、`uv`が実際には`dif`(白=1,1,1,1)の位置にズレて読み込まれ、`(u,v)=(1,1)`固定になっていた。
+- 対処: `PS_Input`に`float4 dif : COLOR0;`と`float4 spc : COLOR1;`を(使わなくても)追加してセマンティクス順を合わせて解決。**教訓**: DxLibの`***2DToShader`系関数を使うときは、たとえ使わない値でも`PS_Input`構造体はDxLib側の頂点出力順と完全に一致させる必要がある。
+
+**ハマった点4: 透過部分が塗りつぶされる**
+- 構造体修正後は正しく表示されたが、Frame画像の透明な余白部分まで不透明なグレーで塗りつぶされて表示された。
+- 原因: `DrawRotaGraph`系は透過フラグ引数(`true`)を持っていたが、自作の`DrawGraphToShader`にはブレンドモード設定がなかった。`SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255)`を描画前に、`SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0)`を描画後に追加して解決。
+
+**ハマった点5: 拡大率(0.3倍)を掛けたサイズがintで丸められる**
+- `Size`構造体(`m_width`,`m_height`が`int`)に拡大率を掛けようとして、比較的単純な問題だが「情報の欠落」を避けるため、`float`版の`Utility/SizeF.h`(新規)を作成して解決。
+- 副次的なハマりどころ: `HPGaugeUI.h`で`class SizeF;`と前方宣言してしまい、`SizeF`が`struct`定義なのに`class`前方宣言と食い違ったことで「不完全な型」エラーが発生。`struct SizeF;`に修正して解決。**教訓**: 前方宣言は対象が`class`/`struct`どちらで定義されているか一致させる必要がある(一部コンパイラでは警告のみだが、DxLib::Sizeの構成では実害のあるエラーになった)。
+
+**設計上の議論・決定事項**:
+- `ShaderRegister.h`にUI用のテクスチャスロット定数(`ui_tex_diffuse = 0`)を新規追加（Actor用の`tex_diffuse`とは意味が異なるグループとして別セクション化）。
+- 学校の先生の資料（Singletonは1つのみ推奨、増やすと悪いロールモデル変数になるという方針）をユーザーが提示。これを受けて、GlitchPS用のシェーダー管理を`GlitchManager`のような新規シングルトンにする案を撤回し、**`DrawGraphToShader`を`Utility/GraphShaderDraw.h/.cpp`としてクラス化しないフリー関数に切り出す**方針に転換。GlitchPS.psoのロード自体は、既存の「各機能のオーナー(LightingManager/WaterManager/Stage/WaterRevealManagerと同様、今回はHPGaugeUI・TitleSceneそれぞれ)が自分でLoadPixelShaderして自分のメンバーとして持つ」パターンを踏襲する。
+
+**現在の状態（中断時点）**:
+- `Utility/GraphShaderDraw.h`/`.cpp`をVisual Studioで新規作成済みだが、**まだ中身は空のクラステンプレートのまま**（`class GraphShaderDraw { public: GraphShaderDraw(); ~GraphShaderDraw(); };`のみ）。今回の方針(フリー関数化)に合わせて、クラスをやめて`void DrawGraphToShader(float left, float top, const SizeF& size, float uvMaxU, int texH);`という素の関数宣言に書き換える必要がある。
+- `HPGaugeUI.cpp`内にはまだ動作確認済みの`DrawGraphToShader`実装がそのままメンバー関数として残っている（105〜162行目）。この中身を`GraphShaderDraw.cpp`に移植し、`HPGaugeUI`側は`#include "Utility/GraphShaderDraw.h"`して呼び出すだけの形に書き換える必要がある。
+- `TitleScene.cpp`はまだ未着手。`DrawRotaGraph`/`DrawRectRotaGraph`(固定機能)のまま。GlitchPS適用対象はユーザーとの合意で「選択肢背景(SelectBackGround)とボタン画像(GameStart/GameEnd/OnCursor版含む)」、ロゴ(TitleLogo)は対象外。
+
+**次回やること:**
+1. `Utility/GraphShaderDraw.h`をクラスからフリー関数に書き換える（`SizeF`の前方宣言は`struct SizeF;`にすること）。
+2. `HPGaugeUI.cpp`の`DrawGraphToShader`の中身を`GraphShaderDraw.cpp`に移植し、`HPGaugeUI`側の重複コードを削除。
+3. `HPGaugeUI`をビルド・動作確認（GlitchPSがこれまで通りかかるか、共通化による regression がないか）。
+4. `TitleScene`に`m_glitchPSH`メンバーを追加し、コンストラクタ(または`Init()`)で`LoadPixelShader(L"GlitchPS.pso")`。
+5. `TitleScene::Draw()`のSelectBackGround/GameStart/GameEnd(通常・OnCursor両方)の描画を、`DrawRotaGraph`/`DrawRectRotaGraph`から`DrawGraphToShader`呼び出しに置き換え、前後に`SetUsePixelShader(m_glitchPSH)`/`SetUsePixelShader(-1)`を追加。座標系が「中心基準→左上基準」に変わる点に注意（`ratio_x`/`ratio_y`の位置計算をやり直す必要がある）。
+6. ロゴ(TitleLogo)は対象外なので`DrawRotaGraph`のまま変更しない。

@@ -43,6 +43,8 @@ namespace
 	constexpr const wchar_t* select_background_path = L"Data/Image/SelectFrame/Select_BackGround.png";
 	constexpr const wchar_t* caustics_path = L"Data/Image/Caustics.png";
 	constexpr const wchar_t* dissolve_noise_path = L"Data/Image/Noise.png";
+	constexpr const wchar_t* hp_frame_path = L"Data/Image/HPGauge/HP_Frame_fix.png";
+	constexpr const wchar_t* hp_gauge_path = L"Data/Image/HPGauge/HP_Gauge_fix.png";
 
 	//---------- エフェクトのパス ----------
 	constexpr const wchar_t* player_bullet_effect_path = L"Data/Effect/PlayerBullet/PlayerBullet.efk";
@@ -356,6 +358,16 @@ void ResourceLoader::KeepGraph()
 	handle = LoadGraph(dissolve_noise_path);
 	assert(handle >= 0);
 	m_graphicHandles[ResourceLoader::GraphicID::DissolveNoise] = handle;
+
+	//HPの枠
+	handle = LoadGraph(hp_frame_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::HPFrame] = handle;
+
+	//HPゲージ
+	handle = LoadGraph(hp_gauge_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::HPGauge] = handle;
 }
 
 void ResourceLoader::KeepEffect()

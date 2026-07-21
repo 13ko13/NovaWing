@@ -4,14 +4,18 @@ SamplerState smp : register(s0);
 struct PS_Input
 {
 	float4 pos : SV_Position;
+	float4 dif : COLOR0;
+	float4 spc : COLOR1;
 	float2 uv : TEXCOORD0;
 };
 
-static const float scanline_frequency = 300.0f;//スキャンラインを入れる間隔
-static const float scanline_strength = 0.3f;//最大でどれぐらい明るさが落ちるか
+static const float scanline_frequency = 205.0f;//スキャンラインを入れる周期(数字が小さいほど間隔が短い)
+static const float scanline_strength = 0.1f;//最大でどれぐらい明るさが落ちるか
 
 float4 main(PS_Input input) : SV_TARGET
 {
+	// return float4(input.uv, 0.0f, 1.0f);//UV座標を色として可視化
+
 	//ベースのカラー
 	float4 baseCol = uiTex.Sample(smp,input.uv);
 

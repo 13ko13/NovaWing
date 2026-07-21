@@ -34,6 +34,7 @@
 #include "Stage/Stage.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/WormEnemy/WormEnemyDataSetter.h"
 #include "Scene/ClearScene.h"
+#include "Game/UI/HPGaugeUI.h"
 
 namespace
 {
@@ -126,7 +127,8 @@ void GameScene::Init()
 
 	//UIManagerの初期化
 	m_pUIManager = std::make_shared<UIManager>();
-	m_pUIManager->Register(std::make_shared<ReticleUI>(m_pTargetManager,m_pPlayer));
+	m_pUIManager->Register(std::make_shared<ReticleUI>(m_pTargetManager, m_pPlayer));
+	m_pUIManager->Register(std::make_shared<HPGaugeUI>(m_pPlayer));
 
 	//水マネージャーの初期化
 	m_pWaterManager = std::make_shared<WaterManager>(m_pCamera);

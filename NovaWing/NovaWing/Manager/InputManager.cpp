@@ -40,6 +40,8 @@ InputManager::InputManager() :
 #ifdef _DEBUG
 	m_inputTable[InputEvent::restart] = { {PeripheralType::keyboard,KEY_INPUT_R},//キーボード:R
 							{PeripheralType::pad1,PAD_INPUT_START } };//パッド:スティック右又は十字右
+	m_inputTable[InputEvent::gaugeUp] = { {PeripheralType::keyboard,KEY_INPUT_UP} };//キーボード:上
+	m_inputTable[InputEvent::gaugeDown] = { {PeripheralType::keyboard,KEY_INPUT_DOWN} };//キーボード:下
 #endif
 
 	//あらかじめ入力データのための枠を開けておく

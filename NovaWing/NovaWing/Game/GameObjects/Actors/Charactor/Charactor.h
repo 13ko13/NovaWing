@@ -15,7 +15,11 @@ public:
 	virtual void Draw() = 0;
 	virtual void TakeDamage(int damage) = 0;//ダメージを受ける
 
+	//HP
 	int GetHealth() const { return m_health; }//HPを取得
+	//最大HPを取得
+	int GetMaxHealth() const;
+
 
 protected:
 	//機体情報

@@ -48,6 +48,9 @@ namespace
 
 	//初期座標
 	const Vector3 first_pos = { 0.0f,500.0f,0.0f };
+
+	//HPの最大値
+	constexpr int max_health = 100;
 }
 
 Player::Player(
@@ -170,6 +173,20 @@ void Player::Update()
 	//ちょっとずれているのでオフセットで修正
 	Vector3 collPos = m_pos + coll_sphere_offset;
 	m_collSphere.Update(collPos, coll_sphere_radius);
+
+#ifdef _DEBUG
+	//ボタンでゲージを減らしたり増やしたりできるようにする
+	if (input.IsPressed(InputEvent::gaugeUp))
+	{
+		m_health++;
+	}
+	else if (input.IsPressed(InputEvent::gaugeDown))
+	{
+		m_health--;
+	}
+#endif
+	//HPのクランプを行う
+	m_health = std::clamp(m_health, 0, max_health);
 }
 
 void Player::ClampPosition()

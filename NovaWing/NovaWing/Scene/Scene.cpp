@@ -5,3 +5,8 @@ Scene::Scene(SceneController& controller) :
 {
 
 }
+
+Scene::~Scene()
+{
+	//処理なし
+}

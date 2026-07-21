@@ -15,8 +15,14 @@ namespace InputEvent
 	constexpr const char* brake = "brake";
 	constexpr const char* up = "up";
 	constexpr const char* down = "down";
-	constexpr const char* restart = "restart";
 	constexpr const char* any_key = "anyKey";
+
+#ifdef _DEBUG
+	//デバッグ用
+	constexpr const char* restart = "restart";
+	constexpr const char* gaugeUp = "gaugeUp";
+	constexpr const char* gaugeDown = "gaugeDown";
+#endif
 }
 
 /// <summary>

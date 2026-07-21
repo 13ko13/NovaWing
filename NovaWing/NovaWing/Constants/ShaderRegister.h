@@ -51,4 +51,8 @@ namespace ShaderRegister
 	//---------- Stage専用 ----------
 	//ライト情報(Light)の定数バッファ(ピクセルシェーダ)
 	constexpr int stage_cbuffer_light = 4;
+
+	//----------UI(GlitchPS)専用
+	//ディフューズマップ(テクスチャ)
+	constexpr int ui_tex_diffuse = 0;
 }
