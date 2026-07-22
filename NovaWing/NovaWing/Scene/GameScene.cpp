@@ -44,7 +44,7 @@ namespace
 	//1秒あたりのフレーム数
 	constexpr int frame_per_second = 60;
 	//プレイヤーの位置がどのあたりに行ったらクリアにするか(仮)
-	constexpr float clear_pos_z = 10000.0f;
+	constexpr float clear_pos_z = 30000.0f;
 }
 
 GameScene::GameScene(SceneController& controller) :
