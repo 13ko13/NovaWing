@@ -55,8 +55,10 @@ void Stage::Draw()
     SetShaderConstantBuffer(m_cBufferLight,DX_SHADERTYPE_PIXEL,ShaderRegister::stage_cbuffer_light);
     BindShaderBuffers();
    
+    //現在はまだ必要ないので、コメント化しておく
+    //いずれ遠景の島として描画する際にこのモデル描画は使用する
     //モデルを描画する
-    MV1DrawModel(m_modelHandle);
+    // MV1DrawModel(m_modelHandle);
 
     //自前のシェーダーを一度解除
     MV1SetUseOrigShader(false);
