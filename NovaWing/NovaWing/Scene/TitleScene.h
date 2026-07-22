@@ -48,5 +48,13 @@ private:
 
 	//グリッチシェーダのハンドル
 	int m_glitchPSH = -1;
-};
 
+	//グリッチシェーダに渡すためのシェーダバッファ
+	struct GlitchBuffer
+	{
+		float time;
+		float dummy[3];//16バイトアライメント
+	};
+	int m_cbufferGlitch = -1;
+	GlitchBuffer* m_pCBuffGlitchData = nullptr;
+};

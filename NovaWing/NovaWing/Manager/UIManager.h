@@ -9,6 +9,8 @@ public:
 	//生成されたUIを登録する
 	void Register(std::shared_ptr<UIBase> pUI);
 
+	//全てのUIの更新処理を呼ぶ
+	void Update();
 	//すべてのUIの描画処理を呼ぶ
 	void Draw();
 

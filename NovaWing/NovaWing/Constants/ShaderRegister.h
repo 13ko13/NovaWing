@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 //シェーダーの定数バッファ・テクスチャスロットのレジスタ番号を一元管理する
 namespace ShaderRegister
@@ -52,7 +52,9 @@ namespace ShaderRegister
 	//ライト情報(Light)の定数バッファ(ピクセルシェーダ)
 	constexpr int stage_cbuffer_light = 4;
 
-	//----------UI(GlitchPS)専用
+	//----------UI(GlitchPS)専用-----
 	//ディフューズマップ(テクスチャ)
 	constexpr int ui_tex_diffuse = 0;
+	//グリッチシェーダに渡す定数バッファ(ピクセルシェーダ)
+	constexpr int glitch_buffer = 0;
 }

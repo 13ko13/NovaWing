@@ -106,3 +106,8 @@ void ReticleUI::Draw()
 		m_animProgress = 0.0f;
 	}
 }
+
+void ReticleUI::Update()
+{
+	//処理なし
+}

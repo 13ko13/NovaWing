@@ -7,6 +7,15 @@ void UIManager::Register(std::shared_ptr<UIBase> pUI)
 	m_pUIs.push_back(pUI);
 }
 
+void UIManager::Update()
+{
+	//全てのUIの更新処理を行う
+	for (std::shared_ptr<UIBase>& pUI : m_pUIs)
+	{
+		pUI->Update();
+	}
+}
+
 void UIManager::Draw()
 {
 	//全てのUIの描画を行う

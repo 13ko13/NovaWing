@@ -1,4 +1,5 @@
 ﻿#include <algorithm>
+#include <memory>
 
 #include "TitleScene.h"
 #include "Manager/InputManager.h"
@@ -8,6 +9,7 @@
 #include "Utility/Size.h"
 #include "Utility/SizeF.h"
 #include "Utility/GraphShaderDraw.h"
+#include "Constants/ShaderRegister.h"
 
 namespace
 {
@@ -32,6 +34,9 @@ namespace
 	constexpr double back_ground_graph_scale = 1.0;//背景画像のサイズ
 
 	constexpr int wipe_max = 10;//カーソルが乗った時に何秒で画像を切り替えるか
+
+	//シェーダにフレームを渡すときに値が大きすぎるので小さくするための値
+	constexpr float time_speed = 0.1f;
 }
 
 TitleScene::TitleScene(SceneController& controller):
@@ -69,12 +74,19 @@ void TitleScene::Init()
 		ResourceLoader::GraphicID::SelectBackGround);
 	//グリッチシェーダのロード
 	m_glitchPSH = LoadPixelShader(L"GlitchPS.pso");
+
+	//シェーダバッファを作成
+	m_cbufferGlitch = CreateShaderConstantBuffer(sizeof(GlitchBuffer));
+	m_pCBuffGlitchData = static_cast<GlitchBuffer*>(GetBufferShaderConstantBuffer(m_cbufferGlitch));
 }
 
 void TitleScene::Update()
 {
 	//フレーム更新
 	m_frame++;
+	//シェーダに時間を渡す
+	m_pCBuffGlitchData->time = m_frame * time_speed;
+	UpdateShaderConstantBuffer(m_cbufferGlitch);
 
 	//InputManagerのインスタンスを取得
 	InputManager& input = InputManager::GetInstance();
@@ -88,7 +100,7 @@ void TitleScene::Update()
 			static_cast<TitleSelect>(
 				(static_cast<int>(m_selectIndex) + 1) %
 				static_cast<int>(TitleSelect::SelectMax
-					));
+				));
 	}
 	//上入力で選択肢を上に移動(indexを減らす)
 	if (input.IsTriggered(InputEvent::up))
@@ -165,6 +177,7 @@ void TitleScene::Draw()
 
 	//シェーダを適用
 	SetUsePixelShader(m_glitchPSH);
+	SetShaderConstantBuffer(m_cbufferGlitch, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
 
 	//選択肢の背景をシェーダを通して描画
 	DrawGraphToShaderByCenter(
@@ -230,4 +243,5 @@ void TitleScene::Draw()
 	}
 	}
 	SetUsePixelShader(-1);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
 }

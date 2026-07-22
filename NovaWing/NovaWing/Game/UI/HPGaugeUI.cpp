@@ -18,6 +18,9 @@ namespace
 
     //HPゲージ画像
     constexpr double hp_gauge_size = 0.3;//HPゲージの大きさ
+
+    //シェーダにフレームを渡すときに値が大きすぎるので小さくするための値
+    constexpr float time_speed = 0.1f;
 }
 
 HPGaugeUI::HPGaugeUI(std::weak_ptr<Player> pPlayer) :
@@ -26,6 +29,19 @@ HPGaugeUI::HPGaugeUI(std::weak_ptr<Player> pPlayer) :
     //グリッチシェーダをロード
     m_glitchPSH = LoadPixelShader(L"GlitchPS.pso");
     assert(m_glitchPSH >= 0);
+
+    //シェーダバッファを作成
+    m_cbufferGlitch = CreateShaderConstantBuffer(sizeof(GlitchBuffer));
+    m_pCBuffGlitchData = static_cast<GlitchBuffer*>(GetBufferShaderConstantBuffer(m_cbufferGlitch));
+}
+
+void HPGaugeUI::Update()
+{
+    //フレームを更新
+    m_frame++;
+    //シェーダに時間を渡す
+    m_pCBuffGlitchData->time = m_frame * time_speed;
+    UpdateShaderConstantBuffer(m_cbufferGlitch);
 }
 
 void HPGaugeUI::Draw()
@@ -41,6 +57,7 @@ void HPGaugeUI::Draw()
 
     //グリッチシェーダを適用
     SetUsePixelShader(m_glitchPSH);
+    SetShaderConstantBuffer(m_cbufferGlitch, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
     
     //枠の画像サイズを取得
     Size frameSize;
@@ -84,6 +101,7 @@ void HPGaugeUI::Draw()
     );
 
     SetUsePixelShader(-1);
+    SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
 
 #ifdef _DEBUG
     DrawFormatString(0, 515, 0xff0000, L"gaugePosX: %f", gaugePos.m_x);

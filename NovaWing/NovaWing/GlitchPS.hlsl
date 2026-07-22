@@ -9,6 +9,12 @@ struct PS_Input
 	float2 uv : TEXCOORD0;
 };
 
+cbuffer GlitchBuffer : register(b0)
+{
+    float time;//時間
+	float3 dummy;//16バイトアライメント
+};
+
 static const float scanline_frequency = 205.0f;//スキャンラインを入れる周期(数字が小さいほど間隔が短い)
 static const float scanline_strength = 0.15f;//最大でどれぐらい明るさが落ちるか
 
@@ -21,7 +27,7 @@ float4 main(PS_Input input) : SV_TARGET
 
 	//横線(スキャンライン)を計算
 	//uvにスキャンラインを入れる間隔をかける
-	float scanline = sin(input.uv.y * scanline_frequency);//-1~1
+	float scanline = sin(input.uv.y * scanline_frequency + time * 1.0f);//-1~1
 	//それだけでは明るさとして使えないので、0~1に正規化する
 	scanline = scanline * 0.5f + 0.5f;
 
