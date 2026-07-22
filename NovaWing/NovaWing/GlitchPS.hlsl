@@ -27,7 +27,7 @@ float4 main(PS_Input input) : SV_TARGET
 
 	//横線(スキャンライン)を計算
 	//uvにスキャンラインを入れる間隔をかける
-	float scanline = sin(input.uv.y * scanline_frequency + time * 1.0f);//-1~1
+	float scanline = sin(input.uv.y * scanline_frequency + time);//-1~1
 	//それだけでは明るさとして使えないので、0~1に正規化する
 	scanline = scanline * 0.5f + 0.5f;
 
