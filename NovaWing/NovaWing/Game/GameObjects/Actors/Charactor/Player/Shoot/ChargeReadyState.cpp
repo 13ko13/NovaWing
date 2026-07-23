@@ -1,4 +1,5 @@
 ﻿#include <EffekseerForDXLib.h>
+#include <algorithm>
 
 #include "ChargeReadyState.h"
 #include "Manager/InputManager.h"
@@ -10,18 +11,22 @@
 namespace
 {
 	//チャージ弾を打てる許容時間
-	constexpr int can_shoot_frame = 120;//2秒
+	constexpr int can_shoot_frame = 60;//2秒
 	//弾の速度
 	constexpr float move_speed = 25.0f;
 	//攻撃力
 	constexpr int attack_power = 100;
 	//チャージ完了エフェクトを出す前後位置のオフセット
 	constexpr float effect_offset_z = 200.0f;
+
+	//エフェクトの最初の大きさ
+	const Vector3 first_effect_scale = Vector3(1.0f, 1.0f, 1.0f);
 }
 
 ChargeReadyState::ChargeReadyState(const std::weak_ptr<Player> pPlayer,
 	std::weak_ptr<BulletManager> pBulletManager) :
-	IShootState(pPlayer, pBulletManager)
+	IShootState(pPlayer, pBulletManager),
+	m_effectScale(first_effect_scale)
 {
 
 }
@@ -57,29 +62,63 @@ void ChargeReadyState::Update()
 
 	InputManager& input = InputManager::GetInstance();
 
-	//ボタンが押されていればチャージ弾を発射
-	if (input.IsTriggered(InputEvent::shoot))
+	//ボタンが離されていて、時間内にボタンが押されていなければ
+	//弾を打たずに通常状態に戻る
+	if (!input.IsPressed(InputEvent::shoot))
 	{
-		//BulletManagerにチャージ弾発射を依頼する
-		std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock();//一時的にshared_ptrに変換
-		std::shared_ptr<Player> pPlayer = m_pPlayer.lock();//一時的にshared_ptrに変換
-		const Vector3 pos = pPlayer->GetPos();//プレイヤーの位置
-		const Vector3 vel = -pPlayer->GetForward() * move_speed;//速度
+		//離されている間の時間を計測
+		m_notPressdFrame++;
 
-		//プレイヤーからターゲットを受け取る
-		std::weak_ptr<GameObject> pTarget = m_pPlayer.lock()->GetFocusTarget();
+		if (m_notPressdFrame < can_shoot_frame)
+		{
+			//時間内に弾を打った場合
+			if (input.IsTriggered(InputEvent::shoot))
+			{
+				//BulletManagerにチャージ弾発射を依頼する
+				std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock();//一時的にshared_ptrに変換
+				std::shared_ptr<Player> pPlayer = m_pPlayer.lock();//一時的にshared_ptrに変換
+				const Vector3 pos = pPlayer->GetPos();//プレイヤーの位置
+				const Vector3 vel = -pPlayer->GetForward() * move_speed;//速度
 
-		pBulletManager->CreateBullet(BulletManager::BulletType::ChargeBullet,
-			pos, vel, attack_power, pTarget);
+				//プレイヤーからターゲットを受け取る
+				std::weak_ptr<GameObject> pTarget = m_pPlayer.lock()->GetFocusTarget();
 
-		//ノーマルステートに戻す
-		ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager));
+				pBulletManager->CreateBullet(BulletManager::BulletType::ChargeBullet,
+					pos, vel, attack_power, pTarget);
+			}
+		}
+		//エフェクトを小さくするフラグを立てる
+		m_canShrink = true;
 	}
 
-#ifdef _DEBUG
-	//チャージ完了デバッグ
-	DrawFormatString(0, 350, 0xff0000, L"チャージ完了");
-#endif // _DEBUG
+	//エフェクトを小さくしていいフラグがたっていれば小さくする
+	//エフェクトの大きさが0になればノーマルステートに戻す
+	if (m_canShrink)
+	{
+		//全方向の大きさを下げる
+		m_effectScale.m_x--;
+		m_effectScale.m_y--;
+		m_effectScale.m_z--;
+		//0未満にならないようにクランプする
+		m_effectScale.m_x = std::clamp(m_effectScale.m_x, 0.0f, m_effectScale.m_x);
+		m_effectScale.m_y = std::clamp(m_effectScale.m_y, 0.0f, m_effectScale.m_y);
+		m_effectScale.m_z = std::clamp(m_effectScale.m_z, 0.0f, m_effectScale.m_z);
+
+		//大きさをセットする
+		SetScalePlayingEffekseer3DEffect(
+			m_chargingPlayEffectH,
+			m_effectScale.m_x,
+			m_effectScale.m_y,
+			m_effectScale.m_z
+		);
+
+		//もし大きさが0になったらノーマルステートに戻す
+		if (m_effectScale.m_x == 0.0f)
+		{
+			//ノーマルステートに戻す
+			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager));
+		}
+	}
 }
 
 void ChargeReadyState::Enter()

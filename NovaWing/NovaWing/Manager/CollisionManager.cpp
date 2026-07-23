@@ -7,11 +7,14 @@
 #include "Charactor/Player/Player.h"
 #include "Charactor/Enemy/WormEnemy/WormEnemy.h"
 #include "TargetManager.h"
+#include "Game/GameObjects/Actors/Rock/Rock.h"
 
 namespace
 {
 	//ワームエネミー(頭・胴体共通)に接触した際のプレイヤーへのダメージ
 	constexpr int worm_contact_damage = 1;
+	//プレイヤーが岩に当たった時のダメージ
+	constexpr int hit_rock_damage = 30;
 }
 
 CollisionManager::CollisionManager(const std::weak_ptr<Player> pPlayer, 
@@ -37,6 +40,12 @@ void CollisionManager::RegisterWormEnemy(std::shared_ptr<WormEnemy> pEnemy)
 {
 	//敵の配列に渡された敵を格納
 	m_pWormEnemies.push_back(pEnemy);
+}
+
+void CollisionManager::RegisterRock(std::shared_ptr<Rock> pRock)
+{
+	//渡された岩を配列として管理する
+	m_pRocks.push_back(pRock);
 }
 
 void CollisionManager::Update()
@@ -206,6 +215,54 @@ void CollisionManager::Update()
 				break;
 			}
 		}
+	}
+
+	std::vector<std::shared_ptr<Rock>> sharedRocks;
+	for (std::weak_ptr<Rock> pWeakRock : m_pRocks)
+	{
+		//shared_ptrに変換
+		std::shared_ptr<Rock> pSharedRock = pWeakRock.lock();
+		//nullチェック
+		if (!pSharedRock) continue;
+		//変換したものを格納
+		sharedRocks.push_back(pSharedRock);
+	}
+
+	//どれか一つでも岩が持っている球に当たっていれば記録する
+	bool isHit = false;
+
+	//岩とプレイヤーが当たっているかを1つずつ調べる
+	for (std::shared_ptr<Rock> pRock : sharedRocks)
+	{
+		//プレイヤーの当たり判定を取得
+		Sphere playerCol = pPlayer->GetSphere();
+		//岩の当たり判定を取得
+		std::vector<Sphere> rockCollisions = pRock->GetSpheres();
+
+		//その岩の中のすべての球とプレイヤーの球が当たっているかを検出
+		for (Sphere& rockColl : rockCollisions)
+		{
+			//当たっていて、ダメージを食らっていないときのみダメージを食らうようにする
+			if (playerCol.HitCollision(rockColl))
+			{
+				//球と当たったことを記録
+				isHit = true;
+
+				if (!pPlayer->IsTakingDamage())
+				{
+					//一度当たったら離れるまで当たらないようにする
+					//プレイヤーのHPを減らす
+					pPlayer->TakeDamage(hit_rock_damage);
+				}	
+			}
+		}
+	}
+
+	//どの球にもあたっていない場合は
+	if (!isHit)
+	{
+		//プレイヤーにダメージを食らっていないことを知らせる
+		pPlayer->OnLeaveDamaging();
 	}
 }
 

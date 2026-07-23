@@ -6,6 +6,7 @@ class Player;
 class BulletManager;
 class FloatingEnemy;
 class WormEnemy;
+class Rock;
 class CollisionManager
 {
 public:
@@ -16,6 +17,7 @@ public:
 	//敵を配列に格納する
 	void RegisterFloatingEnemy(std::shared_ptr<FloatingEnemy> pEnemy);
 	void RegisterWormEnemy(std::shared_ptr<WormEnemy> pEnemy);
+	void RegisterRock(std::shared_ptr<Rock> pRock);
 	void Update();//更新処理
 
 private:
@@ -27,5 +29,7 @@ private:
 	std::vector<std::weak_ptr<FloatingEnemy>> m_pEnemies;
 	//ワームエネミーの配列
 	std::vector<std::weak_ptr<WormEnemy>> m_pWormEnemies;
+	//岩の配列
+	std::vector<std::weak_ptr<Rock>> m_pRocks;
 };
 

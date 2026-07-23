@@ -6,20 +6,21 @@
 #include "Utility/Sphere.h"
 #include "Utility/Vector2.h"
 
-struct WormEnemyData
-{
-	ResourceLoader::ModelID modelID;//モデルID
-	int segmentCount;//胴体の数
-	Vector3 pos;//初期位置
-	float direction;//移動方向
-	float activatePlayerZ;//プレイヤーがどのあたり(Z値)まで来たら動き出すか
-};
-
 class Player;
 class BulletManager;
 class CameraBase;
 class WormEnemy : public Charactor
 {
+public:
+	struct WormEnemyData
+	{
+		ResourceLoader::ModelID modelID;//モデルID
+		int segmentCount;//胴体の数
+		Vector3 pos;//初期位置
+		float direction;//移動方向
+		float activatePlayerZ;//プレイヤーがどのあたり(Z値)まで来たら動き出すか
+	};
+
 public:
 	WormEnemy(const std::weak_ptr<Player> pPlayer,//プレイヤー
 		const std::shared_ptr<BulletManager> pBulletManager,//バレットマネージャー

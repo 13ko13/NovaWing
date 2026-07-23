@@ -6,10 +6,12 @@ namespace
 {
 	//ホーミング時の方向を変えるときのlerpの値
 	constexpr float homing_lerp_t = 0.8f;
+	//当たり判定の球の半径
+	constexpr float radius = 32.0f;
 }
 
 ChargeBullet::ChargeBullet(const Vector3& pos, const Vector3& vel, int attackPower, std::weak_ptr<GameObject> pTarget):
-	BulletBase(pos,vel,attackPower),
+	BulletBase(pos,vel,attackPower,radius),
 	m_pTarget(pTarget)
 {
 	m_speed = vel.Length();

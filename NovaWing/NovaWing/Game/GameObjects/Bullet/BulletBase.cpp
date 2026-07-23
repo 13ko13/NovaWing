@@ -5,16 +5,14 @@ namespace
 {
 	//寿命
 	constexpr int life_time = 300;//3秒
-	//球のサイズ
-	constexpr float sphere_size = 32.0f;
 	//モデルのサイズ
 	const Vector3 model_size = Vector3(0.4f, 0.4f, 0.4f);
 }
 
-BulletBase::BulletBase(const Vector3& pos, const Vector3& vel, int attackPower):
-	m_sphere(pos),
+BulletBase::BulletBase(const Vector3& pos, const Vector3& vel, int attackPower, float radius):
 	m_attackPower(attackPower),
-	m_lifeTime(0)
+	m_lifeTime(0),
+	m_radius(radius)
 {
 	//位置を設定
 	SetPos(pos);
@@ -42,7 +40,7 @@ void BulletBase::Update()
 	//TODO:画面外判定を決めてそこを越えたら死亡判定にする
 
 	//球の位置を更新
-	m_sphere.Update(m_pos, sphere_size);
+	m_sphere.Update(m_pos, m_radius);
 }
 
 void BulletBase::Draw()

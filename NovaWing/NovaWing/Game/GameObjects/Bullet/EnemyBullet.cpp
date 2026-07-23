@@ -2,8 +2,14 @@
 
 #include "EnemyBullet.h"
 
+namespace
+{
+	//当たり判定の球の半径
+	constexpr float radius = 32.0f;
+}
+
 EnemyBullet::EnemyBullet(const Vector3& pos, const Vector3& vel, const int attackPower):
-	BulletBase(pos,vel,attackPower)
+	BulletBase(pos,vel,attackPower, radius)
 {
 	//Effekseerのエフェクト再生を呼ぶ
 	m_effectPlayHandle = PlayEffekseer3DEffect(

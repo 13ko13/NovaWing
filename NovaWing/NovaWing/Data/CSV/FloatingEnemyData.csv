@@ -6,3 +6,12 @@ FloatingEnemy,-200,200,3000
 FloatingEnemy,20,400,3000
 FloatingEnemy,0,200,6000
 FloatingEnemy,200,300,7000
+FloatingEnemy,100,300,10000
+FloatingEnemy,300,300,11500
+FloatingEnemy,0,300,12000
+FloatingEnemy,200,300,15000
+FloatingEnemy,100,300,15150
+FloatingEnemy,300,300,16800
+FloatingEnemy,400,300,18000
+FloatingEnemy,100,300,17000
+FloatingEnemy,200,300,19000

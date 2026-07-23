@@ -1,4 +1,4 @@
-#include <cassert>
+﻿#include <cassert>
 
 #include "RockDataSetter.h"
 #include "Manager/CSVDataLoader.h"
@@ -8,7 +8,24 @@
 
 namespace
 {
-    const wchar_t* const rock_csv_name = L"RockData";
+    const wchar_t* const rock_csv_name = L"RockData";//CSVの名前
+    const int model_id_number = 0;//モデルのIDの要素番号
+    const int model_x_number = 1;//モデルのX位置要素番号
+    const int model_y_number = 2;//モデルのY位置要素番号
+    const int model_z_number = 3;//モデルのZ位置要素番号
+    const int sphere_radius1 = 4;//1つ目球の半径要素番号
+    const int sphere_offset1 = 5;//1つ目球のYオフセット位置要素番号
+    const int sphere_radius2 = 6;//2つ目球の半径要素番号
+    const int sphere_offset2 = 7;//2つ目球のYオフセット位置要素番号
+    const int sphere_radius3 = 8;//3つ目球の半径要素番号
+    const int sphere_offset3 = 9;//3つ目球のYオフセット位置要素番号
+
+    //球の数
+    constexpr int sphere_num = 3;
+    //何番目の球か
+    constexpr int first_sphere = 0;
+    constexpr int second_sphere = 1;
+    constexpr int third_sphere = 2;
 }
 
 std::vector<std::shared_ptr<Rock>> RockDataSetter::CreateRock(
@@ -33,14 +50,51 @@ std::vector<std::shared_ptr<Rock>> RockDataSetter::CreateRock(
         
         //モデルID(文字列)をModelIDに変換
         ResourceLoader::ModelID modelID =
-            ResourceLoader::WStringToModelID(dataString[0]);
+            ResourceLoader::WStringToModelID(dataString[model_id_number]);
 
         //位置(文字列)をVector3に変換
         Vector3 pos = Vector3::FromWString(
-            dataString[1],dataString[2],dataString[3]);
+            dataString[model_x_number],
+            dataString[model_y_number],
+            dataString[model_z_number]
+        );
+
+        //半径とYオフセット
+        std::vector<float> radii;
+        std::vector<float> yOffsets;
+
+        radii.resize(sphere_num);
+        yOffsets.resize(sphere_num);
+
+        //モデルが岩1なら球は一つなので最初の2列しか読み込まない(半径とYオフセット)
+        if (modelID == ResourceLoader::ModelID::Rock1)
+        {
+            radii[first_sphere] = std::stof(dataString[sphere_radius1]);//半径
+            yOffsets[first_sphere] = std::stof(dataString[sphere_offset1]);//Yオフセット
+        }
+        //他の二つのモデルは球が3つないと当たり判定を再現できないので6列読み込む
+        else
+        {
+            //1つ目の球
+            radii[first_sphere] = std::stof(dataString[sphere_radius1]);//半径
+            yOffsets[first_sphere] = std::stof(dataString[sphere_offset1]);//Yオフセット
+            //2つ目の球
+            radii[second_sphere] = std::stof(dataString[sphere_radius2]);//半径
+            yOffsets[second_sphere] = std::stof(dataString[sphere_offset2]);//Yオフセット
+            //3つ目の球
+            radii[third_sphere] = std::stof(dataString[sphere_radius3]);//半径
+            yOffsets[third_sphere] = std::stof(dataString[sphere_offset3]);//Yオフセット
+        }
+
+        //岩のデータ構造体にいれる
+        Rock::RockData data;
+        data.modelId = modelID;
+        data.pos = pos;
+        data.sphereRadii = radii;
+        data.sphereYOffsets = yOffsets;
 
         //その位置と、pCameraで岩を一つ作成する
-        pRocks.push_back(std::make_shared<Rock>(modelID,pCamera,pos));
+        pRocks.push_back(std::make_shared<Rock>(pCamera,pos, data));
     }
 
     return pRocks; 

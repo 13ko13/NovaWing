@@ -55,8 +55,8 @@ namespace
 
 Player::Player(
 	std::shared_ptr<BulletManager> bulletManager,
-		ResourceLoader::ModelID modelID,
-		std::weak_ptr<CameraBase> camera) :
+	ResourceLoader::ModelID modelID,
+	std::weak_ptr<CameraBase> camera) :
 	Charactor(modelID,camera),
 	m_pBulletManager(bulletManager),
 	m_collSphere(m_pos)
@@ -368,6 +368,10 @@ void Player::TakeDamage(int damage)
 {
 	//HPを減らす
 	m_health -= damage;
+
+	//ダメージを食らっているフラグを立てる
+	m_isTakingDamage = true;
+
 	//HP0以下になったら脂肪処理を行う
 	if (m_health <= 0)
 	{

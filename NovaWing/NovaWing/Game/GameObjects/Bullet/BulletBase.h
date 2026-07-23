@@ -7,7 +7,7 @@
 class BulletBase : public GameObject
 {
 public:
-	BulletBase(const Vector3& pos,const Vector3& vel,int attackPower);
+	BulletBase(const Vector3& pos,const Vector3& vel,int attackPower,float radius);
 	virtual ~BulletBase();
 
 	virtual void Update();//更新処理
@@ -27,8 +27,10 @@ protected:
 	Sphere m_sphere;
 
 	//攻撃力
-	int m_attackPower;
+	int m_attackPower = 0;
 	//生存時間
-	int m_lifeTime;
+	int m_lifeTime = 0;
+	//球の半径
+	float m_radius = 0.0f;
 };
 

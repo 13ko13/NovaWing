@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "IShootState.h"
+#include "Utility/Vector3.h"
 
 class Player;
 class BulletManager;
@@ -17,4 +18,13 @@ public:
 private:
 	//チャージ中のプレイエフェクト
 	int m_chargingPlayEffectH = -1;
+
+	//ボタンを離してからのフレームを計測する
+	int m_notPressdFrame = 0;
+
+	//エフェクトの大きさを変更するためにメンバ変数で保持
+	Vector3 m_effectScale;
+
+	//エフェクトのサイズを小さくするかのフラグ
+	bool m_canShrink = false;
 };

@@ -68,6 +68,12 @@ public:
 	//チャージ中エフェクトの再生ハンドルを設定
 	void SetChargingEffectHandle(int handle) { m_chargingEffectH = handle; }
 
+	//今ダメージを食らっているかを返す
+	bool IsTakingDamage() const { return m_isTakingDamage; }
+
+	//ダメージ状態を終了するときに呼ぶ関数
+	void OnLeaveDamaging() { m_isTakingDamage = false; }
+
 private:
 	//回転の更新
 	void UpdateRotation();
@@ -145,4 +151,7 @@ private:
 
 	//チャージ中エフェクト再生ハンドル
 	int m_chargingEffectH = -1;
+
+	//今ダメージを食らっているか
+	bool m_isTakingDamage = false;
 };

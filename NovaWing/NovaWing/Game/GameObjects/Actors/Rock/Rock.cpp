@@ -1,4 +1,4 @@
-#include "Rock.h"
+﻿#include "Rock.h"
 #include "Game/GameObjects/GameObject.h"
 #include "Manager/LightingManager.h"
 #include "Manager/ResourceLoader.h"
@@ -6,16 +6,32 @@
 
 namespace
 {
-    const Vector3 model_scale = Vector3(3.0f, 5.0f, 3.0f);
+    const Vector3 model_scale = Vector3(3.0f, 5.0f, 3.0f);//モデルのサイズ
+    constexpr int sphere_num = 3;//球の数
 }
 
-Rock::Rock(ResourceLoader::ModelID modelId,
-    std::weak_ptr<CameraBase> pCamera,
-    const Vector3& pos) :
-    Actor(modelId,pCamera)
+Rock::Rock(std::weak_ptr<CameraBase> pCamera, const Vector3& pos, const RockData& data):
+    Actor(data.modelId, pCamera)
 {
     //位置を反映
     SetPos(pos);
+
+    //球を3つ用意する
+    for (int i = 0; i < sphere_num;i++)
+    {
+        //受け取った岩のデータからYオフセットと半径をセットする
+        Vector3 posWithOffset = Vector3(
+            pos.m_x,
+            pos.m_y + data.sphereYOffsets[i],
+            pos.m_z
+        );
+
+        //その球の半径を受け取ってセットする
+        float radius = data.sphereRadii[i];
+
+        Sphere sphere = Sphere(posWithOffset, radius);
+        m_spheres.push_back(sphere);
+    }
 }
 
 void Rock::OnInit()
@@ -26,6 +42,7 @@ void Rock::OnInit()
 
 void Rock::Update()
 {
+    //岩は動かないので処理なし
 }
 
 void Rock::Draw()
@@ -52,4 +69,12 @@ void Rock::Draw()
 
     //DrawWithLightingにペアの配列を渡してモデルを描画
     DrawWithLighting(textures);
+
+#ifdef _DEBUG
+    //全ての球を描画
+    for (Sphere& sphere : m_spheres)
+    {
+        sphere.Draw(0xff0000);
+    }
+#endif // _DEBUG
 }

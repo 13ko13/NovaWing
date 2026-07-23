@@ -54,7 +54,7 @@ std::vector<std::shared_ptr<WormEnemy>> WormEnemyDataSetter::CreateEnemy(
         //プレイヤーがどの位置(Z)まで来たら動き出すか
         float activatePlayerZ = std::stof(dataString[6]);
 
-        WormEnemyData wormData;
+        WormEnemy::WormEnemyData wormData;
         wormData.modelID = modelID;
         wormData.pos = pos;
         wormData.segmentCount = segmentNum;

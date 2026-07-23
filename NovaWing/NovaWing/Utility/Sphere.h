@@ -6,6 +6,7 @@ class Sphere
 public:
 	Sphere();
 	Sphere(const Vector3& pos);
+	Sphere(const Vector3& pos, float radius);
 	~Sphere();
 
 	void Update(const Vector3& pos, const float radius);

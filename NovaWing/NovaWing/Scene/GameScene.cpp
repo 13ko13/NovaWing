@@ -150,6 +150,8 @@ void GameScene::Init()
 	for(std::shared_ptr<Rock> pRock : m_pRocks)
 	{
 		pRock->Init();
+		//当たり判定のマネージャーに登録する
+		m_pCollisionManager->RegisterRock(pRock);
 	}
 
 	//ステージの初期化
