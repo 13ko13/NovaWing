@@ -749,3 +749,71 @@ float4 main(PS_Input input) : SV_TARGET
 
 **残タスク:**
 - 上記の1〜5番、次回セッションで続きから着手。
+
+### 進捗（2026-07-23・岩の当たり判定 実装完了）
+
+**岩の当たり判定(球判定)が完成した。CSV設計(前回完了)に続き、`Rock`/`RockDataSetter`/`CollisionManager`の実装まで完了、動作確認済み。**
+
+**`Rock`/`RockDataSetter`の実装レビューで見つけた設計問題と修正:**
+- 当初、`RockData`の`sphereRadii`/`sphereYOffsets`を`std::vector<float>`で持ちつつ、`resize(sphere_num)`で常に3個確保し、Rock1(球1個のみ)でも残り2個を「半径0のダミー球」として作ってしまっていた。実害は起きにくいが「実際に使う球の数」という情報が構造体の外(if分岐)にしか存在しない隠れた前提になっており、設計上の問題として指摘。
+- 修正: `RockDataSetter.cpp`側でRock1なら`resize(1)`、他は`resize(3)`と実際の個数だけ確保するように変更。`Rock.cpp`のコンストラクタも`for (int i = 0; i < sphere_num; i++)`という固定回数ループから`for (int i = 0; i < data.sphereRadii.size(); i++)`に変更し、`.size()`を使った可変長ループに修正（固定ループのままだと`std::vector`の範囲外アクセスで未定義動作になる箇所だった）。
+- 副次的な重複解消: `Rock`のコンストラクタが`pos`引数と`RockData.pos`の両方を受け取っていて情報が重複していたのを、`RockData`にまとめる形に統一（`Rock(pCamera, data)`のみに変更）。
+
+**`CollisionManager`の岩判定・ワーム判定に「連続ダメージ防止」を追加、デバッグで複数回ハマった:**
+- 岩は`hit_rock_damage=30`と重いため、「一度当たったら離れるまで再ダメージしない」仕組みをユーザー自身が発案。`Player`に`m_isTakingDamage`/`IsTakingDamage()`/`OnLeaveDamaging()`を追加（ダメージ要因を問わない汎用フラグとして設計、今後敵弾なども同様に扱う想定）。
+- ワーム側の接触ダメージ処理にも同じ仕組みを追加する過程で、複数のバグを作り込み→レビューで発見→修正、を繰り返した:
+  1. `if(!pPlayer->IsTakingDamage()) return;`と書いてしまい、ダメージ中に接触すると`CollisionManager::Update()`関数全体を`return`で抜けてしまい、以降の処理(岩の判定含む)が丸ごとスキップされるバグ。`continue`への修正を経て、最終的にループ外側での一括ガードに変更。
+  2. 一括ガード(`if(!pPlayer->IsTakingDamage()) { for(...){...} }`)にする過程で、胴体判定の`if(playerCol.HitCollision(segmentSphere))`という当たり判定の条件式そのものを消してしまい、無条件で1回だけダメージを与えて`break`する状態になっていたミスをレビューで発見・修正。
+  3. **本命のバグ(「一瞬で死ぬ」)**: `isHitWorm`(当たったかどうかの記録用フラグ)を`if(!pPlayer->IsTakingDamage()){ ... isHitWorm = true; ... }`という**IsTakingDamage()のチェックの内側**に置いてしまっていたため、「既にダメージ中で判定処理自体をスキップした」状況と「本当に当たっていない」状況を区別できなくなり、`if(!isHit && !isHitWorm)`の判定で誤って`OnLeaveDamaging()`が呼ばれ続け、ダメージがリセット→再度TakeDamageの無限ループのような状態になり、岩・ワームどちらも「一瞬で死ぬ」不具合になった。
+  - **解決の型（岩側のコードと同じパターンに統一）**: 「当たったかどうかの記録(`isHitWorm = true` / `isHit = true`)」は`IsTakingDamage()`のチェックより**外側**（当たっていれば無条件で実行）、「実際にダメージを与えるかどうか」だけを`IsTakingDamage()`のチェックの**内側**に置く、という設計に統一して解決。
+- **教訓**: 複数の判定処理（岩・ワームなど）が同じ状態フラグ(`m_isTakingDamage`)を共有する設計にする場合、「当たったかどうかの記録」と「ダメージを実際に与えるかどうかの制御」を必ず分離すること。同じ`if`の中に両方を混ぜると、片方の判定処理が(ガードによって)スキップされた時に、もう片方の判定結果に基づいて誤ったリセットが起きる。
+
+**現状**: 岩の当たり判定（球判定、Rock1=1球/Rock2・Rock3=3球）、CollisionManagerでのプレイヤー-岩ダメージ判定、ワーム接触ダメージの連続ヒット防止、すべて動作確認済みで完成。
+
+**残タスク:**
+- `CollisionManager::Update()`関数のネストが深くなった点は、後で関数分割などのリファクタリング候補として残っている（今回は動作の正しさを優先し先送りにした、ユーザーと合意済み）。
+- 他のダメージ要因（敵弾など）にも`IsTakingDamage()`の連続ダメージ防止を広げるかどうかは未定（`m_isTakingDamage`はダメージ要因を問わない汎用フラグとして設計されている）。
+
+### 進捗（2026-07-23続き・エディタ設定の統一（Visual Studio ⇔ VS Code））
+
+**インデント・波括弧位置がVisual StudioとVS Codeで食い違い、切り貼りするたびに崩れる問題に対応。**
+- Visual Studio側の実設定（`ツール>オプション>テキストエディター>C/C++>タブ`）を確認: タブサイズ4、インデントサイズ4、「タブの保持」（スペース変換なし）。既存コードはタブ4幅とスペース4幅が混在していたため、これがズレの一因と判明。
+- `NovaWing/.editorconfig`に`indent_style = tab` / `tab_width = 4` / `indent_size = 4`を追加。
+- `.vscode/settings.json`（新規）: `editor.insertSpaces: false`、`tabSize: 4`、`detectIndentation: false`に加え、`formatOnPaste`/`formatOnSave`/`formatOnType`を全て有効化（「貼り付けた瞬間から自動整形してほしい」という要望のため）。C++の既定フォーマッタを`ms-vscode.cpptools`（clang-format内蔵）に指定。
+- `.vscode/extensions.json`（新規）: `editorconfig.editorconfig`と`ms-vscode.cpptools`を推奨拡張として登録。
+- `.clang-format`（新規、リポジトリ直下）: 既存の`.editorconfig`のVisual C++書式設定（`cpp_new_line_before_open_brace_*`等）を参照し、プロジェクトの実コードが一貫して採用している「波括弧を次の行に改行するAllmanスタイル」を`BreakBeforeBraces: Allman`として指定。タブ4幅、`ColumnLimit: 0`（自動改行なし）などをVisual Studio側の挙動に合わせて設定。
+
+**現状**: VS Code側で新しく書く・貼り付けるコードは、タブ4幅・Allmanスタイルの波括弧に自動整形されるようになった。既存ファイル（スペース4幅で書かれてしまったもの、例:`Rock.cpp`等）は自動では直っておらず、今後編集する際に自然と統一されていく想定。
+
+### 進捗（2026-07-23続き2・チャージショットが撃てなくなるバグを修正）
+
+**背景**: チャージショットに「ボタンを離してから1秒以内に再度押さないと通常弾になり、エフェクトが徐々に小さくなる」機能(本家スターフォックス準拠)を追加しようとした際、チャージショット自体が一切撃てなくなる不具合が発生。`ChargeShootState.cpp`のデバッグセッション。
+
+**発生した実装ミスと修正の流れ（複数回の書き直しあり）:**
+1. `if (input.IsReleased(...) && m_chargeFrame < charge_comp_frame) {...} else if (m_chargeFrame >= charge_comp_frame) {...}`という元のコードを書き換える過程で、一時`if(!pPlayer->IsTakingDamage()) return;`のような`return`を使ってしまい関数全体を抜けるミス（これは実際には別セッションのCollisionManagerのデバッグと混同していた可能性があるが、同種の「returnで関数全体を抜けてしまう」パターンのバグが本ファイルでも複数回発生）。
+2. 「ボタンを離した瞬間、未完了なら通常弾」の分岐(`if (input.IsReleased(...)) { if (m_chargeFrame < charge_comp_frame) {...} }`)に、`ChangeState(NormalShootState)`への遷移が抜けており、通常弾を撃った後も`ChargeShootState`に留まり続けるバグがあった（このため一度チャージを中断して弾を撃つと、そのまま`ChargeShootState`に居座り、次にボタンを押すと`m_chargeFrame`が0からではなく中断前の値から再開する状態になっていた）。
+3. **本命のバグ**: 「ボタンを離した瞬間に完了/未完了を判定する」ロジック(`if (input.IsReleased(...)) { if(未完了){通常弾} else{ChargeReadyStateへ} }`)を追加した後も、**それとは別に**「押しっぱなしのまま完了した場合」の`else if (m_chargeFrame >= charge_comp_frame) { ChangeState(ChargeReadyState); }`という古い分岐がユーザー自身の手で残されており、**ボタンをまだ離していない最中に`ChargeReadyState`へ遷移してしまう**バグになっていた。
+   - ユーザーの仕様定義: `ChargeReadyState`は「ボタンが離されていて、再度押されるのを待っている状態」であり、押しっぱなしの最中に入るべきステートではない。この定義に基づき、押しっぱなし中に完了判定する`else if`ブロックを削除して解決。
+- **最終形**: `ChargeShootState::Update()`は「ボタンを押している間はチャージ時間を計測するだけ」「ボタンを離した瞬間にのみ、完了/未完了を判定してNormalShootState/ChargeReadyStateへ分岐する」というシンプルな形に収束。動作確認済み（1秒以上長押し→離す→ChargeReadyStateへ正しく遷移→1秒以内の再押下でチャージショット発射、を確認）。
+
+**このセッションでの進め方の振り返り**: デバッグ中、Claude側の説明・質問が長く冗長になり、ユーザーから「質問は簡潔に」「事象は箇条書きで」「自分で確認できることは聞かずに自分で確認して」という具体的なフィードバックがあった。以降このセッション内では、事象整理は箇条書き・質問は最小限・ファイル確認は自分で行う、という形に切り替えて対応した。
+
+**残タスク（旧・下記で全て解決済み）:**
+- ~~「1秒以内に再度押さないと通常弾になり、エフェクトが小さくなっていく」という`ChargeReadyState`側の実装~~ → 下記で発見・修正完了。
+
+### 進捗（2026-07-24・チャージショット関連バグの完全解決、UI表示タイミングの調整）
+
+**背景**: 前回セッションで`ChargeShootState`側は解決したが、実際に動かすとまだチャージショットが撃てなかった。原因は`ChargeReadyState.cpp`側にも複数のバグが残っていたため。芋づる式に発見・修正し、最終的に一連の不具合を全て解決した。
+
+**発見・修正したバグ（発生順）:**
+1. **`ChargeReadyState.cpp`: `IsTriggered`のチェックが論理的に発火しない場所にあった**。`if (!input.IsPressed(shoot)) { m_notPressdFrame++; if (input.IsTriggered(shoot)) {...} }`という構造になっており、「ボタンが押されていない」条件の内側で「今まさに押された瞬間」をチェックしていて矛盾していた（`IsTriggered`が`true`になる瞬間は必ず`IsPressed`も`true`のため、この`if`ブロックには絶対に入れない）。`if (m_notPressdFrame < can_shoot_frame) { if (IsTriggered) {...} }`という形に外側のガードを分離して解決。
+2. **`std::clamp`の引数ミス（`ChargeReadyState.cpp`・`ChargeShootState.cpp`の両方）**: `std::clamp(m_effectScale.m_x, 0.0f, m_effectScale.m_x)`のように第3引数(max)にクランプ対象の変数自身を渡してしまっていた。`m_effectScale.m_x`が毎フレーム`--`されマイナスになると`min(0.0) > max(負の値)`という不正な範囲になり、`Debug Assertion Failed! invalid bounds arguments passed to std::clamp`でクラッシュ。第3引数を`1.0f`（`first_effect_scale`の最大値）に修正して解決。
+3. **`Player::IsChargeReady()`の判定漏れ**: ターゲットUI(チャージレティクル)の表示条件`IsChargeReady()`が「`ChargeReadyState`かどうか」しか見ておらず、チャージ中(`ChargeShootState`)にはUIが出ない状態だった。ユーザーの仕様「チャージ中〜ChargeReadyState終了まで、ずっとUIを出したい」を踏まえ、`ChargeShootState`か`ChargeReadyState`のどちらかであれば`true`を返すよう修正（実装時、2つ目の`dynamic_pointer_cast`が誤って`ChargeShootState`のままコピペされていたミスも発見・修正）。
+4. **`NormalShootState.cpp`: 通常ショットを撃っただけでもUIが出てしまう新たな副作用**: 3番の修正でUIが`ChargeShootState`もカバーするようになった結果、`NormalShootState`の`else if(input.IsPressed(shoot))`（「押された瞬間ではないが、まだ押されている」だけで即`ChargeShootState`に遷移する設計）が原因で、単発クリックでもボタンが数フレーム押され続けているだけで一瞬`ChargeShootState`に入ってしまい、UIが見えてしまっていた。「一定フレーム(10F)以上の長押しを検知してから`ChargeShootState`に遷移する」`m_pressingShootButton`カウンタを新設して解決（実装時、「ボタンが離されたらリセット」のつもりで`if (input.IsPressed(shoot)) { m_pressingShootButton = 0; }`と書いてしまい、押している間ずっとリセットされ続けて長押し判定に絶対に到達できないミスがあったが、`IsReleased`への修正で解決）。
+5. **UIアニメーションと実際のチャージ時間のズレ**: チャージレティクルの拡大→縮小＋回転アニメーション(`anim_speed`)が約12.5フレームで完了するのに対し、実際のチャージ完了(`charge_comp_frame`)は60フレームかかるため、「アニメーションは完了しているのに、まだチャージ中」という期間が長く続き違和感があった。3番の修正でUI表示開始が早まった(チャージ中から見えるようになった)ことで、このズレが目立つようになったと判明。`anim_speed`を`1.0f / 40.0f`に変更し、アニメーション完了とチャージ完了のタイミングを近づけて解決（60フレーム丁度ではなく、ユーザーが実際に動かして調整した結果40フレームに設定）。
+
+**このセッションでの進め方**: 前回に続き、事象整理は箇条書き・質問は1問ずつ・ファイル確認は聞かずに自分で行う、という進め方を徹底した。ユーザーから「質問は1つの会話で1つにしてほしい」という追加フィードバックがあり、以降1メッセージにつき質問は1つのみに絞る形に統一した。
+
+**現状**: チャージショット関連の一連の機能（長押しでチャージ→離す→1秒以内の再入力でチャージショット、時間切れなら通常状態に戻る、UI表示タイミング、エフェクトの拡大・縮小演出）は全て動作確認済みで完成。
+
+**残タスク:** 特になし。

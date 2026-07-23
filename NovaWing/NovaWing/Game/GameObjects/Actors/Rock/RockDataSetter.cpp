@@ -22,6 +22,7 @@ namespace
 
     //球の数
     constexpr int sphere_num = 3;
+    constexpr int rock1_sphere_num = 1;
     //何番目の球か
     constexpr int first_sphere = 0;
     constexpr int second_sphere = 1;
@@ -63,18 +64,21 @@ std::vector<std::shared_ptr<Rock>> RockDataSetter::CreateRock(
         std::vector<float> radii;
         std::vector<float> yOffsets;
 
-        radii.resize(sphere_num);
-        yOffsets.resize(sphere_num);
-
         //モデルが岩1なら球は一つなので最初の2列しか読み込まない(半径とYオフセット)
         if (modelID == ResourceLoader::ModelID::Rock1)
         {
+            radii.resize(rock1_sphere_num);
+            yOffsets.resize(rock1_sphere_num);
+
             radii[first_sphere] = std::stof(dataString[sphere_radius1]);//半径
             yOffsets[first_sphere] = std::stof(dataString[sphere_offset1]);//Yオフセット
         }
         //他の二つのモデルは球が3つないと当たり判定を再現できないので6列読み込む
         else
         {
+             radii.resize(sphere_num);
+            yOffsets.resize(sphere_num);
+
             //1つ目の球
             radii[first_sphere] = std::stof(dataString[sphere_radius1]);//半径
             yOffsets[first_sphere] = std::stof(dataString[sphere_offset1]);//Yオフセット
@@ -94,7 +98,7 @@ std::vector<std::shared_ptr<Rock>> RockDataSetter::CreateRock(
         data.sphereYOffsets = yOffsets;
 
         //その位置と、pCameraで岩を一つ作成する
-        pRocks.push_back(std::make_shared<Rock>(pCamera,pos, data));
+        pRocks.push_back(std::make_shared<Rock>(pCamera, data));
     }
 
     return pRocks; 

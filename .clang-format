@@ -1,0 +1,16 @@
+# Visual Studio [ツール > オプション > テキストエディター > C/C++] の設定に合わせたclang-format設定
+# タブ幅4・タブ文字を使用、波括弧は次の行に改行(プロジェクトの既存コードに合わせたAllmanスタイル)
+BasedOnStyle: Microsoft
+UseTab: Always
+TabWidth: 4
+IndentWidth: 4
+BreakBeforeBraces: Allman
+IndentCaseLabels: false
+SpaceAfterCStyleCast: false
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+SpaceInEmptyParentheses: false
+SpacesInSquareBrackets: false
+SpaceBeforeAssignmentOperators: true
+PointerAlignment: Left
+ColumnLimit: 0

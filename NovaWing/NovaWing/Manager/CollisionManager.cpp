@@ -12,13 +12,13 @@
 namespace
 {
 	//ワームエネミー(頭・胴体共通)に接触した際のプレイヤーへのダメージ
-	constexpr int worm_contact_damage = 1;
+	constexpr int worm_contact_damage = 40;
 	//プレイヤーが岩に当たった時のダメージ
 	constexpr int hit_rock_damage = 30;
 }
 
-CollisionManager::CollisionManager(const std::weak_ptr<Player> pPlayer, 
-	const std::weak_ptr<BulletManager> pBulletManager):
+CollisionManager::CollisionManager(const std::weak_ptr<Player> pPlayer,
+	const std::weak_ptr<BulletManager> pBulletManager) :
 	m_pPlayer(pPlayer),
 	m_pBulletManager(pBulletManager)
 {
@@ -100,8 +100,8 @@ void CollisionManager::Update()
 
 	//チャージ弾とノーマル弾を一つにまとめる
 	std::vector<std::shared_ptr<BulletBase>> sharedBullets;
-	sharedBullets.insert(sharedBullets.end(),sharedPlayerBullet.begin(),sharedPlayerBullet.end());
-	sharedBullets.insert(sharedBullets.end(),sharedChargeBullets.begin(),sharedChargeBullets.end());
+	sharedBullets.insert(sharedBullets.end(), sharedPlayerBullet.begin(), sharedPlayerBullet.end());
+	sharedBullets.insert(sharedBullets.end(), sharedChargeBullets.begin(), sharedChargeBullets.end());
 
 	//敵も同様にshared_ptrに変換
 	std::vector<std::shared_ptr<FloatingEnemy>> pSharedEnemies;//浮遊敵
@@ -115,12 +115,12 @@ void CollisionManager::Update()
 		pSharedEnemies.push_back(pSharedEnemy);
 	}
 	std::vector<std::shared_ptr<WormEnemy>> pSharedWormEnemies;//ワームエネミー
-	for(std::weak_ptr<WormEnemy> pWeakWormEnemy : m_pWormEnemies)
+	for (std::weak_ptr<WormEnemy> pWeakWormEnemy : m_pWormEnemies)
 	{
 		//shared_ptrに変換
 		std::shared_ptr<WormEnemy> pSharedWormEnemy = pWeakWormEnemy.lock();
 		//nullチェック
-		if(!pSharedWormEnemy) continue;
+		if (!pSharedWormEnemy) continue;
 		//変換したものを格納
 		pSharedWormEnemies.push_back(pSharedWormEnemy);
 	}
@@ -147,7 +147,7 @@ void CollisionManager::Update()
 			}
 		}
 	}
-	
+
 	//プレイヤーとすべての敵の弾が当たっているかを一つずつ調べる
 	for (std::shared_ptr<EnemyBullet> pEnemyBullet : sharedEnemyBullets)
 	{
@@ -190,32 +190,50 @@ void CollisionManager::Update()
 		}
 	}
 
+	//ワームの頭、胴体、どれか一つでも当たっていればtrueにする
+	bool isHitWorm = false;
+
 	//プレイヤーとワームの頭、胴体の当たり判定が当たっているかを一つずつ調べる
-	for(std::shared_ptr<WormEnemy> pWormEnemy : pSharedWormEnemies)
+	//多重ヒットを起こさないために
+	//プレイヤーがダメージをすでに食らっていれば処理を行わない
+
+	for (std::shared_ptr<WormEnemy> pWormEnemy : pSharedWormEnemies)
 	{
 		//もしその敵が死んでいるなら処理をせずに次の敵の処理に移る
-		if(pWormEnemy->IsDead()) continue;
+		if (pWormEnemy->IsDead()) continue;
 		//プレイヤーの当たり判定を取得
 		Sphere playerCol = pPlayer->GetSphere();
 		//ワームエネミーの頭の当たり判定を取得
 		Sphere wormHeadCol = pWormEnemy->GetHeadSphere();
-		if(playerCol.HitCollision(wormHeadCol))
+		if (playerCol.HitCollision(wormHeadCol))
 		{
-			//プレイヤーのHPを減らす
-			pPlayer->TakeDamage(worm_contact_damage);
+			//当たったことを記録する
+			isHitWorm = true;
+
+			if (!pPlayer->IsTakingDamage())
+			{
+				//食らっていなければプレイヤーのHPを減らす
+				pPlayer->TakeDamage(worm_contact_damage);
+			}
 		}
 		//胴体の当たり判定を取得
 		const std::vector<Sphere>& segmentSpheres = pWormEnemy->GetSegmentSpheres();
-		for(const Sphere& segmentSphere : segmentSpheres)
+		for (const Sphere& segmentSphere : segmentSpheres)
 		{
-			if(playerCol.HitCollision(segmentSphere))
+			if (playerCol.HitCollision(segmentSphere))
 			{
-				//プレイヤーのHPを減らす
-				pPlayer->TakeDamage(worm_contact_damage);
-				break;
+				//当たったことを記録する
+				isHitWorm = true;
+
+				if (!pPlayer->IsTakingDamage())
+				{
+					//食らっていなければプレイヤーのHPを減らす
+					pPlayer->TakeDamage(worm_contact_damage);
+				}
 			}
 		}
 	}
+
 
 	std::vector<std::shared_ptr<Rock>> sharedRocks;
 	for (std::weak_ptr<Rock> pWeakRock : m_pRocks)
@@ -253,13 +271,14 @@ void CollisionManager::Update()
 					//一度当たったら離れるまで当たらないようにする
 					//プレイヤーのHPを減らす
 					pPlayer->TakeDamage(hit_rock_damage);
-				}	
+				}
 			}
 		}
 	}
 
+	//ワームの球と岩の球で
 	//どの球にもあたっていない場合は
-	if (!isHit)
+	if (!isHit && !isHitWorm)
 	{
 		//プレイヤーにダメージを食らっていないことを知らせる
 		pPlayer->OnLeaveDamaging();

@@ -7,23 +7,22 @@
 namespace
 {
     const Vector3 model_scale = Vector3(3.0f, 5.0f, 3.0f);//モデルのサイズ
-    constexpr int sphere_num = 3;//球の数
 }
 
-Rock::Rock(std::weak_ptr<CameraBase> pCamera, const Vector3& pos, const RockData& data):
+Rock::Rock(std::weak_ptr<CameraBase> pCamera, const RockData& data):
     Actor(data.modelId, pCamera)
 {
     //位置を反映
-    SetPos(pos);
+    SetPos(data.pos);
 
-    //球を3つ用意する
-    for (int i = 0; i < sphere_num;i++)
+    //半径が入れられたデータの数分ループを回す(必要な球の数だけ)
+    for (int i = 0; i < data.sphereRadii.size();i++)
     {
         //受け取った岩のデータからYオフセットと半径をセットする
         Vector3 posWithOffset = Vector3(
-            pos.m_x,
-            pos.m_y + data.sphereYOffsets[i],
-            pos.m_z
+            data.pos.m_x,
+            data.pos.m_y + data.sphereYOffsets[i],
+            data.pos.m_z
         );
 
         //その球の半径を受け取ってセットする

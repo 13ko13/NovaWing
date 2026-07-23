@@ -16,7 +16,6 @@ public:
 	};
 
 	Rock(std::weak_ptr<CameraBase> pCamera,
-		const Vector3& pos,
 		const RockData& data
 	);
 
