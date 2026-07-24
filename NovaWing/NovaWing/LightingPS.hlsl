@@ -122,5 +122,5 @@ float4 main(PS_INPUT input) : SV_TARGET
     specular *= texColor.a;
 
     //テクスチャの色に明るさを適用してそのピクセルの色を返す
-    return float4(texColor.rgb * light + specular + emission.rgb, 1.0f);
+    return float4(texColor.rgb * light + specular + emission.rgb*1.2f, 1.0f);
 }

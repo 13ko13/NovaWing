@@ -74,6 +74,9 @@ public:
 	//ダメージ状態を終了するときに呼ぶ関数
 	void OnLeaveDamaging() { m_isTakingDamage = false; }
 
+	//今宙返り中かどうかを返す
+	bool IsSomersault() const;
+
 private:
 	//回転の更新
 	void UpdateRotation();

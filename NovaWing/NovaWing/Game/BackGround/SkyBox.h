@@ -24,10 +24,10 @@ private:
 		Up,
 		Down,
 		
-		FaceNum,
+		Max,
 	};
 
-	int m_skyTextures[static_cast<int>(Face::FaceNum)]; //空のテクスチャIDを格納する配列
+	int m_skyTextures[static_cast<int>(Face::Max)]; //空のテクスチャIDを格納する配列
 	
 	void DrawFace(
 		const Vector3& leftTop,

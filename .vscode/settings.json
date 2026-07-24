@@ -2,25 +2,25 @@
     "editor.insertSpaces": false,
     "editor.tabSize": 4,
     "editor.detectIndentation": false,
-    "editor.formatOnPaste": true,
-    "editor.formatOnSave": true,
-    "editor.formatOnType": true,
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
     "C_Cpp.clang_format_style": "file",
     "C_Cpp.formatting": "clangFormat",
     "[cpp]": {
         "editor.insertSpaces": false,
         "editor.tabSize": 4,
         "editor.defaultFormatter": "ms-vscode.cpptools",
-        "editor.formatOnPaste": true,
-        "editor.formatOnSave": true,
-        "editor.formatOnType": true
+        "editor.formatOnPaste": false,
+        "editor.formatOnSave": false,
+        "editor.formatOnType": false
     },
     "[c]": {
         "editor.insertSpaces": false,
         "editor.tabSize": 4,
         "editor.defaultFormatter": "ms-vscode.cpptools",
-        "editor.formatOnPaste": true,
-        "editor.formatOnSave": true,
-        "editor.formatOnType": true
+        "editor.formatOnPaste": false,
+        "editor.formatOnSave": false,
+        "editor.formatOnType": false
     }
 }

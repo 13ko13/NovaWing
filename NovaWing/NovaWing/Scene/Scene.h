@@ -15,7 +15,7 @@ protected:
 
 public:
 	Scene(SceneController& controller);
-	~Scene();
+	virtual ~Scene();
 
 	virtual void Init() abstract;
 

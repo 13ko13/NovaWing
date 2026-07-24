@@ -25,41 +25,47 @@
 
 namespace
 {
-// モデルのサイズ
-const Vector3 model_scale = {0.3f, 0.3f, 0.3f};
+	// モデルのサイズ
+	const Vector3 model_scale = {0.3f, 0.3f, 0.3f};
 
-// 移動制限範囲
-constexpr float move_limit_x = 500.0f;
-constexpr float move_limit_y = 300.0f;
+	// 移動制限範囲
+	constexpr float move_limit_x = 500.0f;
+	constexpr float move_limit_y = 300.0f;
 
-// ゲージの毎フレームの回復量
-constexpr float gauge_recovery_amount = 0.5f;
-// ゲージの最大値
-constexpr float gauge_max = 100.0f;
+	// ゲージの毎フレームの回復量
+	constexpr float gauge_recovery_amount = 0.5f;
+	// ゲージの最大値
+	constexpr float gauge_max = 100.0f;
 
-// アナログスティックの入力値を-1～1に正規化するための割る数
-constexpr float stick_input_max = 1000.0f;
-// 宙返りの入力と判定するスティック下方向のしきい値
-constexpr float somersault_stick_threshold = -0.2f;
+	// アナログスティックの入力値を-1～1に正規化するための割る数
+	constexpr float stick_input_max = 1000.0f;
+	// 宙返りの入力と判定するスティック下方向のしきい値
+	constexpr float somersault_stick_threshold = -0.2f;
 
-// 当たり判定の球の半径
-constexpr float coll_sphere_radius = 50.0f;
-// 当たり判定位置のオフセット
-const Vector3 coll_sphere_offset = {0.0f, 0.0f, -90.0f};
+	// 当たり判定の球の半径
+	constexpr float coll_sphere_radius = 50.0f;
+	// 当たり判定位置のオフセット
+	const Vector3 coll_sphere_offset = {0.0f, 0.0f, -90.0f};
 
-// 初期座標
-const Vector3 first_pos = {0.0f, 500.0f, 0.0f};
+	// 初期座標
+	const Vector3 first_pos = {0.0f, 500.0f, 0.0f};
 
-// HPの最大値
-constexpr int max_health = 100;
+	// HPの最大値
+	constexpr int max_health = 100;
+
+	//視錐台クランプの際に視錐台が広まりきる前に
+	//クランプされていたので、カメラからプレイヤーまでの距離を測るのではなく
+	//別で定数を用意する
+	constexpr float clamp_frustum_distz = 900.0f;
 } // namespace
 
 Player::Player(
 	std::shared_ptr<BulletManager> bulletManager,
 	ResourceLoader::ModelID modelID,
-	std::weak_ptr<CameraBase> camera) : Charactor(modelID, camera),
-										m_pBulletManager(bulletManager),
-										m_collSphere(m_pos)
+	std::weak_ptr<CameraBase> camera) :
+	Charactor(modelID, camera),
+	m_pBulletManager(bulletManager),
+	m_collSphere(m_pos)
 {
 }
 
@@ -187,6 +193,9 @@ void Player::Update()
 
 void Player::ClampPosition()
 {
+	// 宙返り中はクランプしてほしくないので処理を飛ばす
+	if (IsSomersault()) return;
+
 	// 視錐台クランプを行う
 	// カメラをshared_ptrに変換
 	std::shared_ptr<CameraBase> pCamera = m_pCamera.lock();
@@ -198,7 +207,7 @@ void Player::ClampPosition()
 
 	// 求めたdistZを使用してプレイヤーが移動できる範囲を
 	// ワールド座標で算出する
-	Vector2 frustumHalf = pCamera->GetFrustumHalfSize(distZ);
+	Vector2 frustumHalf = pCamera->GetFrustumHalfSize(clamp_frustum_distz);
 
 	// プレイヤーの位置をそれぞれ求めた範囲でクランプする
 	//-screenWToWorld～screenWToWorldがクランプ範囲
@@ -429,13 +438,23 @@ bool Player::IsFocus() const
 
 bool Player::IsChargeReady() const
 {
-	// m_pShootStateをChargeReadyStateChargeShootStateに
+	// m_pShootStateをChargeReadyState、ChargeShootStateに
+	// あてはめて、nullならチャージ中、チャージ完了中ではないので
+	// falseを返す。nullではないということはチャージ中、チャージ完了中ということ
 	if (std::dynamic_pointer_cast<ChargeShootState>(m_pShootState) != nullptr)
 	{
 		return true;
 	}
 	// ダイナミックキャストしてnullじゃなければtrueを返す
 	return std::dynamic_pointer_cast<ChargeReadyState>(m_pShootState) != nullptr;
+}
+
+bool Player::IsSomersault() const
+{
+	// m_pSpecialStateをSomersaultStateに
+	// あてはめてnullなら宙返り中ではないことを表す
+	// nullではないということは当てはまるので、宙返り中ということを表す
+	return std::dynamic_pointer_cast<SomersaultState>(m_pSpecialState) != nullptr;
 }
 
 void Player::UpdateRotation()

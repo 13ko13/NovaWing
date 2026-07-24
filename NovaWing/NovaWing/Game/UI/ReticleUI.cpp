@@ -8,27 +8,29 @@
 
 namespace
 {
-// 手前のレティクルの大きさ
-constexpr double front_reticle_size = 0.2;
-// 奥のレティクルの大きさ
-constexpr double depth_reticle_size = 0.1;
-// チャージレティクルの大きさ
-constexpr double charge_reticle_size = 0.2;
+	// 手前のレティクルの大きさ
+	constexpr double front_reticle_size = 0.2;
+	// 奥のレティクルの大きさ
+	constexpr double depth_reticle_size = 0.1;
+	// チャージレティクルの大きさ
+	constexpr double charge_reticle_size = 0.2;
 
-// フォーカスのアルファ値が1フレームでどれぐらい変化するか
-constexpr float focus_alpha_speed = 25.0f;
+	// フォーカスのアルファ値が1フレームでどれぐらい変化するか
+	constexpr float focus_alpha_speed = 25.0f;
 
-// アニメーションスピード
-constexpr float anim_speed = 1.0f / 20.0f;
-// チャージレティクルの最大サイズ
-constexpr double charge_reticle_max_size = 0.8;
-// 最大回転角
-constexpr double max_rotation = DX_TWO_PI_F;
+	// アニメーションスピード
+	constexpr float anim_speed = 1.0f / 20.0f;
+	// チャージレティクルの最大サイズ
+	constexpr double charge_reticle_max_size = 0.8;
+	// 最大回転角
+	constexpr double max_rotation = DX_TWO_PI_F;
 } // namespace
 
-ReticleUI::ReticleUI(std::weak_ptr<TargetManager> pTargetManager,
-					 std::weak_ptr<Player> pPlayer) : m_pTargetManager(pTargetManager),
-													  m_pPlayer(pPlayer)
+ReticleUI::ReticleUI(
+	std::weak_ptr<TargetManager> pTargetManager,
+	std::weak_ptr<Player> pPlayer) : 
+	m_pTargetManager(pTargetManager),
+	m_pPlayer(pPlayer)
 {
 }
 

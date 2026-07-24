@@ -18,7 +18,7 @@ namespace
 	constexpr int horizontal_grid_num = 100;
 
 	//グリッド全体の広さ
-	constexpr Size grid_size = {10000,30000 };
+	constexpr Size grid_size = Size(10000,30000 );
 
 	//波アニメーションの時間経過速度(小さいほどゆっくり動く)
 	constexpr float time_speed = 0.01f;

@@ -62,7 +62,7 @@ namespace
 	constexpr const wchar_t* worm_head_csv_name = L"WormHead";
 
 	//---------- エフェクトの再生スケール ----------
-	constexpr float player_bullet_effect_scale = 1.0f;
+	constexpr float player_bullet_effect_scale = 2.0f;
 	constexpr float worm_death_effect_scale = 3.0f;
 	constexpr float floating_death_effect_scale = 1.5f;
 	constexpr float player_charge_bullet_effect_scale = 1.0f;
