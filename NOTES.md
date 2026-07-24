@@ -817,3 +817,24 @@ float4 main(PS_Input input) : SV_TARGET
 **現状**: チャージショット関連の一連の機能（長押しでチャージ→離す→1秒以内の再入力でチャージショット、時間切れなら通常状態に戻る、UI表示タイミング、エフェクトの拡大・縮小演出）は全て動作確認済みで完成。
 
 **残タスク:** 特になし。
+
+### 進捗（2026-07-24・カメラのLerp追従化 完成／2026-07-25・BulletManagerの重さ調査、修正は途中で中断）
+
+**カメラの移動をLerpによる遅延追従に変更（完成）:**
+- `Player`が動くと`CameraBase`が完全追従(毎フレーム位置を直接代入)していたのを、`m_targetPos`(注視点)と同じ「前フレームの値を保存→Lerpで補間」パターンに統一。
+- `CameraBase.h`に`Position3 m_prevPos;`を追加、`CameraBase::Update()`で`m_prevPos = m_pos`(揺れ加算後の値を保存)→目標位置を計算→`m_pos = Vector3::Lerp(m_prevPos, m_pos, lerp_t)`という順序で実装。ユーザー自身が一度で正しく実装できた。動作確認済み、完成。
+
+**ゲームが重くなる問題を調査、原因は特定済み・修正は未完了で中断:**
+- 症状: プレイヤーが弾を連打し、同時に敵も弾を撃っている時にフレームレートが低下する。
+- **原因判明**: `BulletManager`の弾配列(`m_pPlayerBullets`/`m_pEnemyBullets`/`m_pChargeBullets`、いずれも`std::weak_ptr`)が`push_back`で増え続けるだけで、**死んだ弾を配列から取り除く処理が一切存在しなかった**。弾の実体自体は`GameObjectManager::RemoveGameObject()`(`std::remove_if`+`erase`、`IsDead()`判定)で正しく解放されているが、`BulletManager`側の`weak_ptr`は死後も配列に残り続け、`CollisionManager::Update()`が毎フレームこの肥大化した配列を総当りでループし続けることが重さの原因と特定。
+- **対応方針**: `GameObjectManager::RemoveGameObject()`と同じ`std::remove_if`+`erase`パターンを`BulletManager`にも実装する方針で合意。`BulletManager`に`Update()`関数自体が存在しなかったため新設が必要（`GameScene::Update()`から毎フレーム呼ぶ必要があるが、この配線はまだ未着手）。
+- **設計変更**: 個別の3配列に加えて、共通基底クラス`BulletBase`の`std::weak_ptr<BulletBase>`を持つ`m_pAllBullets`という統合配列をユーザー自身が新設。`CreateBullet()`内の3つの`case`全てで、既存の個別配列への`push_back`に加えて`m_pAllBullets`にも`push_back`する形にした（3配列それぞれに削除処理を書く重複を避ける設計判断）。
+- **`BulletManager::Update()`実装中に発生したミスと修正**:
+  1. `std::remove_if(...).begin()/.end()`に渡す`erase`の第2引数に`m_pAllBullets.back()`(最後の要素への参照、イテレータではない)を渡してしまい型不一致。`.end()`に修正して解決。
+  2. ラムダ式`[](const std::weak_ptr<BulletBase>& pBullet) { if(pBullet.lock() != nullptr) { return pBullet.lock()->IsDead(); } }`で、`if`が`false`(=`lock()`が`nullptr`、実体は既に破棄済み)の場合に`return`が無く、全経路でreturnしていないコンパイルエラーになっていた。「実体が破棄済みなら死んでいる扱いにして削除する」という意図で`return true;`を`if`ブロックの外に追加する対応を提示、ユーザーが眠気のため今回はコード適用前に中断。
+
+**次回やること:**
+1. `BulletManager::Update()`のラムダに`return true;`を追加してビルドを通す（提示済み、未適用）。
+2. `BulletManager.h`に追加された`Update()`宣言と、`.cpp`の実装内容を確認する。
+3. `GameScene.cpp`に`BulletManager::Update()`の呼び出しを追加する配線がまだ未着手（`GameObjectManager::UpdateAll()`と同様、毎フレーム呼ぶ必要がある）。
+4. ビルド・動作確認：弾を連打しても配列サイズが増え続けず、フレームレート低下が解消されるか確認。

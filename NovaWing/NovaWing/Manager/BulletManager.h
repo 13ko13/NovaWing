@@ -8,11 +8,15 @@ class EnemyBullet;
 class ChargeBullet;
 class GameObject;
 struct Vector3;
+class BulletBase;
 class BulletManager
 {
 public:
 	BulletManager();
 	~BulletManager();
+
+	//更新処理
+	void Update();
 
 	//弾の種類
 	enum class BulletType
@@ -42,4 +46,7 @@ private:
 	std::vector<std::weak_ptr<PlayerBullet>> m_pPlayerBullets;
 	//チャージ弾の配列
 	std::vector<std::weak_ptr<ChargeBullet>> m_pChargeBullets;
+
+	//弾全ての配列
+	std::vector<std::weak_ptr<BulletBase>> m_pAllBullets;
 };

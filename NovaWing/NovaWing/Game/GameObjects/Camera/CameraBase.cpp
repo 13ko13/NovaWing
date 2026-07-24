@@ -15,10 +15,10 @@ namespace
 	constexpr float fov = DX_PI_F / 2.0f;
 
 	// カメラのLerpに使うtの値
-	constexpr float lerp_t = 0.08f;
+	constexpr float lerp_t = 0.06f;
 
 	// プレイヤーの移動に対してカメラの移動をどれぐらいにするか
-	constexpr float camera_move_strength_y = 0.2f;
+	constexpr float camera_move_strength_y = 0.3f;
 	constexpr float camera_move_strength_x = 0.3f;
 	constexpr float camera_move_strength = 0.3f;
 	// カメラのYオフセット
@@ -80,13 +80,19 @@ void CameraBase::Update()
 	// プレイヤーの位置
 	Vector3 playerPos = pPlayer->GetPos();
 
+	//前フレームのカメラの位置を保存
+	m_prevPos = m_pos;
+
 	// プレイヤーが動くと、カメラもプレイヤーよりも小さい量で移動する
-	m_pos = Vector3::Lerp(m_pos, playerPos * camera_move_strength, 0.01f);
+	m_pos.m_x = playerPos.m_x * camera_move_strength_x;
 	// yはxよりも小さく動いて、海面より下にはならないようにする
 	m_pos.m_y = playerPos.m_y * camera_move_strength_y  + camera_offset_y;
 	m_pos.m_y = std::max(m_pos.m_y, Game::sea_camera_margin);
 	// zはプレイヤーよりも少し手前
 	m_pos.m_z = playerPos.m_z - camera_offset_z;
+
+	//前フレームのカメラの位置から今のフレームの位置まで補間する
+	m_pos = Vector3::Lerp(m_prevPos,m_pos,lerp_t);
 
 	// カメラの位置とターゲットの位置をセットする
 	SetCameraPositionAndTarget_UpVecY(m_pos.ToDxLib(), m_targetPos.ToDxLib());

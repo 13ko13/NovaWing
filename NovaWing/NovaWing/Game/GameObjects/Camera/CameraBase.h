@@ -55,6 +55,9 @@ private:
 	Position3 m_targetPos;
 	Position3 m_prevTargetPos;
 
+	//前フレームの位置
+	Position3 m_prevPos;
+
 	//プレイヤーは借りてくるだけなのでweak_ptrで持っておく
 	std::weak_ptr<Player> m_pPlayer;
 

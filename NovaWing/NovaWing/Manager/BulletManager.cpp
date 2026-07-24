@@ -13,6 +13,25 @@ BulletManager::~BulletManager()
 {
 }
 
+void BulletManager::Update()
+{
+	//死んだ弾は削除する
+	m_pAllBullets.erase(
+		std::remove_if(
+			m_pAllBullets.begin(),
+			m_pAllBullets.end(),
+			[](const std::weak_ptr<BulletBase>& pBullet)
+			{
+				if(pBullet.lock() != nullptr) 
+				{
+					return pBullet.lock()->IsDead();
+				}
+				return true;
+			}),
+			m_pAllBullets.end()
+		);
+}
+
 void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos,
 	const Vector3& vel, const int attackPower,
 		std::weak_ptr<GameObject> pTarget)
@@ -30,6 +49,7 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 
 		//それを配列に格納する
 		m_pPlayerBullets.push_back(pBullet);
+		m_pAllBullets.push_back(pBullet);
 
 		break;
 	}
@@ -45,6 +65,8 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 
 		//それを配列に格納する
 		m_pEnemyBullets.push_back(pBullet);
+		m_pAllBullets.push_back(pBullet);
+
 		break;
 	}
 	case BulletType::ChargeBullet://プレイヤーのチャージ弾
@@ -58,6 +80,8 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 
 		//それを配列に格納する
 		m_pChargeBullets.push_back(pBullet);
+		m_pAllBullets.push_back(pBullet);
+
 		break;
 	}
 	}
