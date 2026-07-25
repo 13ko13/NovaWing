@@ -36,28 +36,28 @@ private:
 	//フレームカウンター
 	int m_frame;
 
-	//プレイヤーの実体
+	//プレイヤーへのポインタ
 	std::shared_ptr<Player> m_pPlayer;
-	//カメラの実体
+	//カメラへのポインタ
 	std::shared_ptr<CameraBase> m_pCamera;
-	//浮遊エネミーの実体
+	//浮遊エネミーへのポインタの配列
 	std::vector<std::shared_ptr<FloatingEnemy>> m_pFloatingEnemies;
-	//バレットマネージャーの実体
+	//バレットマネージャーへのポインタ
 	std::shared_ptr<BulletManager> m_pBulletManager;
-	//衝突判定マネージャーの実体
+	//衝突判定マネージャーへのポインタの配列
 	std::shared_ptr<CollisionManager> m_pCollisionManager;
-	//ワームエネミーの実体
+	//ワームエネミーへのポインタの配列
 	std::vector<std::shared_ptr<WormEnemy>> m_pWormEnemies;
-	//ターゲットマネージャーの実体
+	//ターゲットマネージャーへのポインタ
 	std::shared_ptr<TargetManager> m_pTargetManager;
-	//UIマネージャー
+	//UIマネージャーへのポインタ
 	std::shared_ptr<UIManager> m_pUIManager;
-	//海用の水マネージャー
+	//海用の水マネージャーへのポインタ
 	std::shared_ptr<WaterManager> m_pWaterManager;
-	//スカイボックス
+	//スカイボックスへのポインタ
 	std::shared_ptr<SkyBox> m_pSkyBox;
-	//岩
+	//岩へのポインタの配列
 	std::vector<std::shared_ptr<Rock>> m_pRocks;
-	//ステージ
+	//ステージへのポインタ
 	std::shared_ptr<Stage> m_pStage;
 };

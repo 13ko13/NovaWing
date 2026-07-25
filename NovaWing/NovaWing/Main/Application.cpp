@@ -88,6 +88,13 @@ void Application::Run()
 		controller.Update();
 		//シーンの描画
 		controller.Draw();
+
+#ifdef _DEBUG
+		//FPSを表示
+		float fps = 1000000.0f / (GetNowHiPerformanceCount() - startTime);
+		DrawFormatString(600,15,0x0000ff,L"FPS:%f",fps);
+#endif
+
 		ScreenFlip();
 		//ESCキーが押されたらウィンドウを閉じる
 		if (CheckHitKey(KEY_INPUT_ESCAPE) ||

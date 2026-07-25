@@ -7,11 +7,14 @@ class BulletManager;
 class FloatingEnemy;
 class WormEnemy;
 class Rock;
+class CameraBase;
 class CollisionManager
 {
 public:
 	CollisionManager(const std::weak_ptr<Player> pPlayer,
-		const std::weak_ptr<BulletManager> pBulletManager);
+		const std::weak_ptr<BulletManager> pBulletManager,
+		const std::weak_ptr<CameraBase> pCamera
+	);
 	~CollisionManager();
 
 	//敵を配列に格納する
@@ -23,6 +26,8 @@ public:
 private:
 	//プレイヤー
 	std::weak_ptr<Player> m_pPlayer;
+	//カメラ
+	std::weak_ptr<CameraBase> m_pCamera;
 	//弾のマネージャー
 	std::weak_ptr<BulletManager> m_pBulletManager;
 	//浮遊敵の配列

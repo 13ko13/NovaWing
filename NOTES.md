@@ -833,8 +833,90 @@ float4 main(PS_Input input) : SV_TARGET
   1. `std::remove_if(...).begin()/.end()`に渡す`erase`の第2引数に`m_pAllBullets.back()`(最後の要素への参照、イテレータではない)を渡してしまい型不一致。`.end()`に修正して解決。
   2. ラムダ式`[](const std::weak_ptr<BulletBase>& pBullet) { if(pBullet.lock() != nullptr) { return pBullet.lock()->IsDead(); } }`で、`if`が`false`(=`lock()`が`nullptr`、実体は既に破棄済み)の場合に`return`が無く、全経路でreturnしていないコンパイルエラーになっていた。「実体が破棄済みなら死んでいる扱いにして削除する」という意図で`return true;`を`if`ブロックの外に追加する対応を提示、ユーザーが眠気のため今回はコード適用前に中断。
 
-**次回やること:**
-1. `BulletManager::Update()`のラムダに`return true;`を追加してビルドを通す（提示済み、未適用）。
-2. `BulletManager.h`に追加された`Update()`宣言と、`.cpp`の実装内容を確認する。
-3. `GameScene.cpp`に`BulletManager::Update()`の呼び出しを追加する配線がまだ未着手（`GameObjectManager::UpdateAll()`と同様、毎フレーム呼ぶ必要がある）。
-4. ビルド・動作確認：弾を連打しても配列サイズが増え続けず、フレームレート低下が解消されるか確認。
+**次回やること（旧、下記で全て完了・解決）:**
+1. ~~`BulletManager::Update()`のラムダに`return true;`を追加~~ → 完了。
+2. ~~`GameScene.cpp`に`BulletManager::Update()`の呼び出しを配線~~ → 完了(`GameScene::Update()`内、`m_pCollisionManager->Update()`の直後に追加)。
+3. ~~ビルド・動作確認~~ → 実施したが、下記の通り真の原因は別にあった。
+
+### 進捗（2026-07-25続き・重さ問題の真因はEffekseerエフェクト側と判明、解決）
+
+**`BulletManager`の削除処理・配線は完了させたが、それでもゲームが重いままだった。ユーザーの観察により真因を特定、解決した。**
+
+- `return true;`の追加、`GameScene::Update()`への`m_pBulletManager->Update()`配線、両方完了させてビルド・確認したが、弾を連打すると相変わらず重くなる症状は解消しなかった。
+- **ユーザーの鋭い指摘**: 「もし配列にゴミが溜まり続けているのが原因なら、弾を全部消した後もしばらく重いままのはず。しかし実際は弾がたくさん存在する瞬間だけ重くなる」→ これは配列の肥大化(蓄積型の問題)ではなく、「今存在する弾の数に比例して単純に処理量が増えている」ことを示す観察で、`BulletManager`側の修正だけでは説明がつかないと見抜いた。
+- ユーザーが「Effekseerエディタ上で`PlayerBullet.efkefc`を単体再生していても重かった」と気づき、ゲーム側のロジックではなくエフェクトアセット自体を疑う方向に方針転換。
+- Effekseerエディタで各ノード(`Trail`/`Particle`/`Core`×3)を1つずつ表示・非表示にして切り分けた結果、`Particle`ノードが原因と特定。
+- **真の原因**: `Particle`ノードの設定で「生成数: 無限」にチェックが入っている一方、「削除」セクションの「寿命により削除」のチェックが**外れていた**。「生存時間: 中心23」という見た目上のフェードアウト設定はあったが、これは表示用のパラメータであり、「寿命により削除」のチェックが無いとパーティクルの内部データそのものは削除されず、エフェクトが再生され続ける限りパーティクルが無限に蓄積し、負荷が増大し続けていた。
+- **対処**: 「寿命により削除」にチェックを入れて保存 → 動作確認したところ即座に軽くなり、解決。
+
+**教訓（今後の参考用）:**
+- 「弾を撃つ量に比例して重くなるが、弾が無くなれば軽さが戻る」ような症状は、ゲーム側のロジック(コードの配列管理)よりも先に、**その瞬間再生されているエフェクトアセット自体の負荷**を疑う価値がある。
+- Effekseerでは「生存時間」(見た目のフェード)と「寿命により削除」(内部データの破棄)は別の設定であり、両方セットで正しく設定されていないと、パーティクルが際限なく蓄積するバグになり得る。新しいエフェクトを作る際は「生成数」と「寿命により削除」の組み合わせを必ず確認すること。
+- コード側の原因調査(`BulletManager`の削除漏れ)自体は無駄ではなく、実際に本来必要だった正当な修正(死んだ弾のweak_ptrを配列から除去する処理)であり、これはこれで完成・妥当な改善として残った。
+
+**残タスク:** 特になし。ゲームの重さ問題は解決。
+
+### 進捗（2026-07-25続き2・LightingPS/DamagePS共通化(途中)、弾連打時の重さ第2弾の調査・FPS表示機能追加）
+
+**ダメージリアクション(機体が赤くなる演出)の実装に着手。共通ライティング計算の切り出しが完成、DamagePS本体の実装は次回。**
+- ユーザーの要望: プレイヤーがダメージを受けた際、本家スターフォックスのように機体が強い赤(マゼンタ系)に染まるリアクションを追加したい。参考画像を確認し、質感(法線・陰影)は保ちつつ強めに色を混ぜる方向で合意。
+- 実装方針の検討: 骨格のみ用意されていた`DamagePS.hlsl`に、`LightingPS.hlsl`と同じライティング計算をコピーする案が出たが、ユーザー自身が「コピーは効率が悪い、保守性が下がる」と気づき、共通化する方針に転換。
+- **`LightingCommon.hlsli`を新規作成し、共通のライティング計算を切り出し完了**:
+  - `LightingResult`構造体(`light`, `specular`の2メンバー)を新設。HLSLの関数は1つの値しか返せないため、複数の戻り値をまとめる目的（C++の`std::pair`に相当する発想をユーザー自身が導出）。
+  - `CalcLighting(normMapCol, metCol, normalWS, tangentWS, lightVec, cameraPos, worldPos)`関数に、法線マップ変換〜specular計算までを移植。テクスチャのサンプリング自体とディゾルブ判定(`discard`)は各シェーダ固有の処理として関数の外に残す設計判断も、ユーザー自身が「サンプリングは各シェーダで違う可能性があるので引数で渡す方が柔軟」と正しく導出。
+  - `ambient_light`/`normal_map_strength`/`smoothness_min`/`smoothness_range`の4定数も`LightingCommon.hlsli`に移動（`near`/`start_disolve`/`noise_uv_scale`はRock固有のディゾルブ用定数のため`LightingPS.hlsl`側に残置）。
+  - `LightingPS.hlsl`を`#include "LightingCommon.hlsli"`し、`CalcLighting`呼び出しに置き換え。ビルド・動作確認済み(Rock/FloatingEnemy/WormEnemy等、既存の見た目に変化なし)。
+  - 実装中の細かいミス(すぐ自己修正): `light`という変数名が`LightingResult.light`と衝突しそうと気づき`lightStrength`に改名、`result.specular`のタイプミス(`resspecular`)、`light`/`specular`の生変数参照忘れ、全てユーザー自身が発見・修正。
+- **残タスク**: `DamagePS.hlsl`は骨格(テクスチャ1枚、`main`が白を返すだけ)のまま。`CalcLighting`を呼び出しつつ、最後に赤みを`lerp`等で混ぜる本体の実装がまだ。`Player::DrawPlayer()`側で、`LightingManager::ApplyShader()`の代わりに(または後に上書きする形で)`DamagePS`を使う配線もまだ未着手（`m_isTakingDamage`が既にPlayerにあるのでこれをトリガーに使う想定）。
+
+**弾連打時の重さ問題、第2弾の調査（前回のParticle無限蓄積とは別原因、解決）:**
+- 前回の`PlayerBullet.efkefc`修正後も、「敵が複数体+敵弾多数な状態でプレイヤーが弾を連打すると重い」症状が残っていた（プレイヤー弾単体では重くならない）。
+- `CollisionManager::Update()`の当たり判定ループ(「敵の数×弾の数」の総当り)を疑い、ユーザー自身が中身を空にして検証 → それでも重い → 当たり判定ロジックは無罪と判明。
+- **重要な発見: Debugビルドでは重いが、Releaseビルドでは全く重くない**。Debugは最適化なし+STLの境界チェック等で元々何倍も遅く、実配布版(Release)には実害がないと判明。ただしユーザーは「開発中の制作速度に直結する」との理由でDebug側の軽量化も追求する方針を選択。
+- Effekseerエディタでの切り分け実験(`Trail`ノードの表示/非表示)で、`Trail`(軌跡)ノードがDebug時の重さの主犯と特定。パーティクル数(Player:28個, Enemy:40個)自体はEnemy側が多いにも関わらずPlayer側だけ重かった理由は、「プレイヤーは連射できるため同時に存在する発数がEnemyより多くなりやすい」ため(1発あたりの負荷×同時発射数、で考える必要があった)。
+- スプラインの分割数(4→1)を下げる対策は効果が薄いと判明。最終的に**敵弾のTrailノードの「生存時間」を半分に短縮**したところ、40FPS→80FPSまで改善。見た目への影響も軽微で許容範囲と判断し、これで解決とした（プレイヤー弾側のTrail短縮は「80あれば十分」として見送り）。
+
+**FPS表示機能を新規実装（完成）:**
+- `Application::Run()`のメインループに、`_DEBUG`限定でFPS表示を追加。`GetNowHiPerformanceCount()`で計測した「1フレームにかかった時間(待機処理込み)」から`1000000.0f / elapsedTime`でFPSを算出。
+- ハマった点1: 除算の演算子優先順位を誤り`1000000.0f / GetNowHiPerformanceCount() - startTime`と書いてしまい、意図と異なる計算になっていた。カッコで囲み`1000000.0f / (GetNowHiPerformanceCount() - startTime)`に修正して解決。
+- ハマった点2: `DrawFormatString`を`ScreenFlip()`の**後**に書いてしまい、文字が画面に表示されなかった。DxLibの描画は裏画面に描くだけで`ScreenFlip()`で表画面に反映する仕組みのため、`ScreenFlip()`より前に描画命令を置く必要があると理解し、位置を修正して解決。
+- この機能により、上記のTrail負荷検証を感覚ではなく数値で比較できるようになった。
+
+**教訓（今後の参考用）:**
+- 「Debugでは重いがReleaseでは軽い」場合、実配布に実害はないが、開発効率(頻繁なDebugビルドでの動作確認)に影響するなら軽量化する価値がある。判断はプロジェクトの開発フェーズ次第。
+- Effekseerの`Trail`(軌跡)ノードは、パーティクル数以上に負荷が高くなりやすい機能。「1回の発射あたりの負荷」だけでなく「連射可能な弾かどうか(同時に何個存在しうるか)」を掛け合わせて負荷を見積もる必要がある。
+- HLSLの共通コード切り出しは`.hlsli`ファイル+`#include`で行い、複数戻り値が必要な関数は`struct`にまとめて返す。
+
+**残タスク:**
+1. `DamagePS.hlsl`本体の実装（`CalcLighting`呼び出し+赤み合成）。
+2. `Player::DrawPlayer()`から`DamagePS`を使う配線（`m_isTakingDamage`をトリガーに使用）。
+3. プレイヤー弾側のTrail短縮は見送り中、必要になれば再検討。
+
+### 進捗（2026-07-25続き3・ダメージ時のカメラ揺れが効かないバグを修正）
+
+**背景**: ダメージを受けた時にカメラを揺らす処理(`CollisionManager`側で既に`sharedCamera->OnShake(...)`を呼ぶ実装は完了済み)を追加したが、実際には揺れている感じがしなかった。
+
+**原因**: `CameraBase::Update()`内、`m_pos += UpdateShake();`（揺れの加算）が関数の**一番最初**に実行されていたが、その直後にプレイヤー位置から`m_pos.m_x`/`m_pos.m_y`/`m_pos.m_z`を**直接代入**する処理があり、揺れの加算分が毎フレーム即座に上書きされて消えていた。これは前回追加した「カメラのLerp追従」の計算順序とも関係しており、揺れは全ての位置計算(目標位置の算出→前フレームとのLerp補間)が終わった**最後**に加算する必要があった。
+
+**修正**: `m_pos += UpdateShake();`を`Update()`の先頭から削除し、`m_pos = Vector3::Lerp(m_prevPos, m_pos, lerp_t);`（Lerp補間）の直後、`SetCameraPositionAndTarget_UpVecY(...)`を呼ぶ直前に移動。動作確認済み、ダメージ時にカメラが正しく揺れるようになった。
+
+**教訓**: 複数の要素(基本位置の計算、Lerp補間、揺れなどのオフセット)が同じ変数(`m_pos`)に対して順番に処理される設計では、「最終的な位置に対する加算・オフセット」は必ず一連の計算の一番最後に置く必要がある。基本位置の計算処理を直接代入(`=`)で書いていると、途中の加算(`+=`)は上書きされて消えてしまう。
+
+### 進捗（2026-07-25続き4・VS CodeのIntelliSenseエラー調査、未解決のまま保留）
+
+**背景**: `GameScene.cpp`や`InputManager.cpp`で、`DxLib::VECTOR`/`DxLib::XINPUT_STATE`等、DxLib由来の型を使う行全てが「不完全な型」と表示される。実際にはVisual Studioでのビルドは正常に通っており(実害なし)、VS Code上でのIntelliSense表示だけの問題と判明。ユーザーによれば、以前Visual Studio 2026を使っていた時にも同様のエラーがVisual Studio自体で出ており、2022に切り替えたら直った経緯があるとのこと(コンパイラのバージョン相性が絡んでいる可能性を示唆)。
+
+**調査したが原因特定に至らなかった項目一覧:**
+1. `c_cpp_properties.json`の配置ミス — ワークスペースルート直下(`c:\Users\Admin\Documents\GitHub\NovaWing\.vscode\`)に同ファイルが存在せず、1階層下のサブフォルダ(`NovaWing\.vscode\`)にしかなかった。ワークスペースルート直下に正しいインクルードパス(`${workspaceFolder}/NovaWing/DxLib_h`等)で新規作成したが、**エラーは解消しなかった**（当初「解消した」と記録したが、後のユーザー確認で実際には直っていないと判明、この記録を訂正）。
+2. `windowsSdkVersion`の不一致 — 設定値`10.0.19041.0`が実機に存在せず(`Test-Path`で確認)、実際にインストールされているのは`10.0.26100.0`のみと判明。正しい値に修正したが改善なし。
+3. `defines`への`_WIN64`/`_WIN32`追加、`compilerArgs`の明示 — 改善なし。
+4. `DxLib.h`内の`namespace DxLib { ... }`ブロック、`#ifndef DX_NON_NAMESPACE`等の条件分岐、`DxCompileConfig.h`/`DxDataTypeWin.h`の中身を読み込み、構文的な問題がないか確認 — 明確な異常は見つからず。`.vcxproj`の`PreprocessorDefinitions`にも`DX_NON_NAMESPACE`等の問題になりうるマクロは無いことを確認。
+5. 拡張機能の競合(`clangd`等)を疑ったが、インストール済み拡張機能は「EditorConfig」「HLSL Tools」「Japanese Language Pack」「Rainbow CSV」「Shader languages support」＋`ms-vscode.cpptools`のみで、競合の心当たりなし。
+6. Visual Studioの「MSBuildプロジェクトビルド出力の詳細」を「診断」にして実際の`cl.exe`呼び出しコマンドラインを取得しようとしたが、このプロジェクトのビルド出力形式では詳細なコンパイラ引数が表示されず、確認できなかった。
+
+**確定した事実**: `GameScene.cpp`固有の問題ではなく、**DxLib由来の型を使う箇所全般**（`VECTOR`、`XINPUT_STATE`等）でIntelliSenseだけがエラーを出す。「不完全な型」というエラーメッセージ自体は、型の宣言はIntelliSenseに認識されているが定義(中身)が見えていない状態を示す。
+
+**現状の判断**: ビルド自体は正常に通り実害が無いこと、Visual Studio側でも過去に同種の現象があったこと(コンパイラバージョン相性の可能性)を踏まえ、**これ以上のIntelliSense設定の深追いは費用対効果が低いと判断し、一旦保留**とした。今後気が向いたら`ms-vscode.cpptools`の再インストール、または`compile_commands.json`方式（実際のビルドコマンドをそのまま使う、CMake等がないと生成が難しい）を試す余地はある。
+
+**残タスク:**
+- IntelliSenseエラーは実害なしのまま放置中。再発・悪化した場合や、新しい手がかりが見つかった場合に再調査する。

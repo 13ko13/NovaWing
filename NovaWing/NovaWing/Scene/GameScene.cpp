@@ -78,7 +78,7 @@ void GameScene::Init()
 	//プレイヤーの初期化処理
 	m_pPlayer->Init();
 
-	//カメラの実体を確保
+	//カメラへのポインタを確保
 	m_pCamera = std::make_shared<CameraBase>(m_pPlayer);
 	//カメラの初期化処理
 	m_pCamera->Init();
@@ -86,7 +86,10 @@ void GameScene::Init()
 	m_pPlayer->SetCamera(m_pCamera);
 
 	//衝突判定マネージャーの初期化
-	m_pCollisionManager = std::make_shared<CollisionManager>(m_pPlayer, m_pBulletManager);
+	m_pCollisionManager = std::make_shared<CollisionManager>(
+		m_pPlayer, 
+		m_pBulletManager,
+		m_pCamera);
 
 	//ターゲットマネージャーの初期化
 	m_pTargetManager = std::make_shared<TargetManager>(m_pPlayer);
@@ -175,6 +178,9 @@ void GameScene::Update()
 	//衝突判定マネージャーの更新
 	m_pCollisionManager->Update();
 
+	//バレットマネージャーの更新
+	m_pBulletManager->Update();
+
 	//タッゲットマネージャーの更新
 	m_pTargetManager->Update();
 
@@ -214,6 +220,7 @@ void GameScene::Draw()
 	//視野角とNearFarを再設定
 	m_pCamera->SetUpCamera();
 	//キャプチャのほうに全オブジェクトの描画を行う
+	//これはキャプチャの方に描画しただけなので、のちにまたすべてを描画する必要がある
 	GameObjectManager::GetInstance().DrawAll();
 	
 	//キャプチャを終了

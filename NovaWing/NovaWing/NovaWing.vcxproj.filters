@@ -464,8 +464,10 @@
     <FxCompile Include="CapturePS.hlsl" />
     <FxCompile Include="StagePS.hlsl" />
     <FxCompile Include="GlitchPS.hlsl" />
+    <FxCompile Include="DamagePS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\CSV\RockData.csv" />
+    <None Include="LightingCommon.hlsli" />
   </ItemGroup>
 </Project>
