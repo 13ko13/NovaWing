@@ -8,6 +8,7 @@
 #include "Charactor/Enemy/WormEnemy/WormEnemy.h"
 #include "TargetManager.h"
 #include "Game/GameObjects/Actors/Rock/Rock.h"
+#include "Game/GameObjects/Camera/CameraBase.h"
 
 namespace
 {
@@ -15,12 +16,18 @@ namespace
 	constexpr int worm_contact_damage = 40;
 	//プレイヤーが岩に当たった時のダメージ
 	constexpr int hit_rock_damage = 30;
+	//プレイヤーがダメージを食らった時のカメラを揺らす力
+	constexpr float shake_power = 3.9f;
+	//プレイヤーがダメージを食らった時にどのくらいの時間カメラを揺らすか
+	constexpr int shake_frame = 15;
 }
 
 CollisionManager::CollisionManager(const std::weak_ptr<Player> pPlayer,
-	const std::weak_ptr<BulletManager> pBulletManager) :
+	const std::weak_ptr<BulletManager> pBulletManager,
+	const std::weak_ptr<CameraBase> pCamera) :
 	m_pPlayer(pPlayer),
-	m_pBulletManager(pBulletManager)
+	m_pBulletManager(pBulletManager),
+	m_pCamera(pCamera)
 {
 
 }
@@ -65,6 +72,9 @@ void CollisionManager::Update()
 	//チャージ弾の配列を取得
 	std::vector<std::weak_ptr<ChargeBullet>> weakChargeBullets = pBulletManager->GetChargeBullets();
 	std::vector<std::shared_ptr<ChargeBullet>> sharedChargeBullets;
+
+	//カメラのshared_ptr化
+	std::shared_ptr<CameraBase> sharedCamera = m_pCamera.lock();
 
 	//弾のすべてのweak_ptrをshared_ptrに変換
 	for (std::weak_ptr<PlayerBullet>& weakBullet : weakPlayerBullets)//プレイヤー弾
@@ -125,7 +135,7 @@ void CollisionManager::Update()
 		pSharedWormEnemies.push_back(pSharedWormEnemy);
 	}
 
-	//全ての浮遊敵と弾が当たっているか
+	//全ての浮遊敵とプレイヤーの弾が当たっているか
 	for (std::shared_ptr<FloatingEnemy> pEnemy : pSharedEnemies)
 	{
 		//もしその敵が死んでいるなら処理をせずに次の敵の処理に移る
@@ -165,6 +175,8 @@ void CollisionManager::Update()
 			pPlayer->TakeDamage(pEnemyBullet->GetAttackPower());
 			//敵弾の当たったときの処理
 			pEnemyBullet->OnHitEnemy();
+			//カメラを揺らす
+			sharedCamera->OnShake(shake_power,shake_frame);
 		}
 	}
 
@@ -214,6 +226,8 @@ void CollisionManager::Update()
 			{
 				//食らっていなければプレイヤーのHPを減らす
 				pPlayer->TakeDamage(worm_contact_damage);
+				//カメラを揺らす
+				sharedCamera->OnShake(shake_power,shake_frame);
 			}
 		}
 		//胴体の当たり判定を取得
@@ -229,6 +243,8 @@ void CollisionManager::Update()
 				{
 					//食らっていなければプレイヤーのHPを減らす
 					pPlayer->TakeDamage(worm_contact_damage);
+					//カメラを揺らす
+					sharedCamera->OnShake(shake_power,shake_frame);
 				}
 			}
 		}
@@ -271,6 +287,8 @@ void CollisionManager::Update()
 					//一度当たったら離れるまで当たらないようにする
 					//プレイヤーのHPを減らす
 					pPlayer->TakeDamage(hit_rock_damage);
+					//カメラを揺らす
+					sharedCamera->OnShake(shake_power,shake_frame);
 				}
 			}
 		}

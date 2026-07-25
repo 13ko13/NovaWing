@@ -64,9 +64,6 @@ CameraBase::~CameraBase()
 
 void CameraBase::Update()
 {
-	// カメラの揺れを更新して、カメラの位置に加算する
-	m_pos += UpdateShake();
-
 	// 前のターゲットの位置を保存
 	m_prevTargetPos = m_targetPos;
 
@@ -93,6 +90,9 @@ void CameraBase::Update()
 
 	//前フレームのカメラの位置から今のフレームの位置まで補間する
 	m_pos = Vector3::Lerp(m_prevPos,m_pos,lerp_t);
+
+	// カメラの揺れを更新して、カメラの位置に加算する
+	m_pos += UpdateShake();
 
 	// カメラの位置とターゲットの位置をセットする
 	SetCameraPositionAndTarget_UpVecY(m_pos.ToDxLib(), m_targetPos.ToDxLib());
