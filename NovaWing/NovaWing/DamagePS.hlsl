@@ -21,17 +21,20 @@ cbuffer LightingBuffer : register(b4)
     float padding;//16バイトアライメント
 }
 
-cbuffer CameraBuffer : register(b5)
+cbuffer CameraBuffer : register(b6)
 {
     float3 cameraPos; //カメラの位置
     float padding2; //16バイトアライメント
 }
 
-cbuffer DamageBuffer : register(b6)
+cbuffer DamageBuffer : register(b7)
 {
     float redAmount; //赤の強さ
     float3 padding3; //16バイトアライメント
 }
+
+//赤くなる時の上限値
+static const float red_limit = 0.5f;
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
@@ -58,7 +61,7 @@ float4 main(PS_INPUT input) : SV_TARGET
     //ライトを適用した色と、真赤に向かってredAmountの割合だけ混ぜる
     float4 finalCol = float4(lerp(
                         float3(baseCol.rgb * result.light + result.specular + emmisionCol.rgb),
-                            float3(1.0f, 0.0f, 0.0f), redAmount), 1.0f);
+                            float3(1.0f, 0.0f, 0.0f), redAmount * red_limit), 1.0f);
     
 	return finalCol;
 }

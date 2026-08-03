@@ -73,6 +73,35 @@ float4 main(PS_INPUT input) : SV_TARGET
 		input.worldPos
 	);
     
+    //法線方向は-1～1の範囲なので変換する(タンジェント空間)
+    float3 normalTS = normMapColor * 2.0 - 1.0;
+    //凹凸がしょぼいのでタンジェント空間の法線を強めにする
+    normalTS.xy *= normal_map_strength;
+    
+    //法線を正規化(ワールド空間)
+    float3 normVec = normalize(input.normalWS);
+    
+    //正規化した接線(ワールド空間)
+    float3 normTangent = normalize(input.tangentWS);
+    
+    //ワールド空間のtangentとnormalから外積を使用してbinormalを作る
+    //どちらもワールド空間なのでbinormalもワールド空間になる
+    float3 binormal = normalize(cross(normVec, normTangent));
+    
+    //タンジェント空間の法線をワールド空間に変換する
+    float3 normalWSFinal = float3(normTangent * normalTS.x +
+                                binormal * normalTS.y +
+                                normVec * normalTS.z);
+    //それを正規化
+    normalWSFinal = normalize(normalWSFinal);
+    //光のベクトルを正規化
+    float3 normLightDir = normalize(lightVec);
+    
+    float diffuse = saturate(dot(normalWSFinal, -normLightDir));
+    //return float4(normalWSFinal * 0.5f + 0.5f, 1.0f);
+    //return float4(abs(lightVec), 1.0f);
+    return diffuse;
+    
     //拡散色テクスチャのアルファをスペキュラ強度マップとして使用
     //(このシェーダーは元々テクスチャのアルファを使っておらず、出力アルファも1.0f固定なので競合しない。
     //アルファチャンネルを持たないテクスチャはサンプル結果が1.0になるため既存モデルへの影響もない)

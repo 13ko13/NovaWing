@@ -1,6 +1,7 @@
 ﻿#define NOMINMAX
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 
 #include "Charactor/Player/Movement/IdleMovementState.h"
 #include "Charactor/Player/Rotation/DefaultRotationState.h"
@@ -57,6 +58,12 @@ namespace
 	//クランプされていたので、カメラからプレイヤーまでの距離を測るのではなく
 	//別で定数を用意する
 	constexpr float clamp_frustum_distz = 900.0f;
+
+	//ダメージエフェクトをどれぐらいのフレーム間で出すか
+	constexpr float damage_eff_frame = 30.0f;
+
+	//ダメージシェーダのハンドル
+	constexpr const wchar_t* damage_shader_pass = L"DamagePS.pso";
 } // namespace
 
 Player::Player(
@@ -90,7 +97,7 @@ void Player::OnInit()
 	CreateShaderBuffers();
 
 	// ライトの方向ベクトルをセットする
-	LightingManager::GetInstance().SetLightDirection(Vector3(0.0f, -0.5f, -1.0f));
+	LightingManager::GetInstance().SetLightDirection(Vector3(0.0f, -0.5f, 0.6f));
 
 	// MovementStateの初期化
 	// 待機状態
@@ -115,10 +122,34 @@ void Player::OnInit()
 	m_pSpecialState =
 		std::make_shared<NoneState>(
 			std::static_pointer_cast<Player>(shared_from_this()));
+
+	//ダメージバッファを作成
+	m_cbufferDamage = CreateShaderConstantBuffer(sizeof(DamageBuffer));
+	m_pCBufferDamageData = static_cast<DamageBuffer*>(GetBufferShaderConstantBuffer(m_cbufferDamage));
+
+	//ダメージシェーダのロード
+	m_damageShaderPSH = LoadPixelShader(damage_shader_pass);
 }
 
 void Player::Update()
 {
+	//ダメージエフェクト許可されている間にエフェクトの値計算
+	if (m_isDamageEffect)
+	{
+		m_damageTime++;
+		//sinfの結果が-1までいかないように180
+		float angle = 180.0f * (static_cast<float>(m_damageTime) / damage_eff_frame);
+		m_pCBufferDamageData->redAmount = sinf(angle * DX_PI_F / 180.0f); 
+		//ダメージエフェクトを出さないようにする
+		if (m_damageTime > damage_eff_frame)
+		{
+			m_isDamageEffect = false;
+			m_damageTime = 0;
+		}
+	}
+	//定数バッファを更新
+	UpdateShaderConstantBuffer(m_cbufferDamage);
+
 	InputManager& input = InputManager::GetInstance();
 	// 宙返り入力
 	Somersault(input);
@@ -357,8 +388,17 @@ void Player::DrawPlayer()
 	LightingManager::GetInstance().ApplyShader();
 	BindShaderBuffers();
 
+	if (m_isDamageEffect)
+	{
+		//ダメージシェーダに定数バッファをセットする
+		SetShaderConstantBuffer(m_cbufferDamage, DX_SHADERTYPE_PIXEL, ShaderRegister::cbuffer_damage);
+		SetUsePixelShader(m_damageShaderPSH);
+	}
+
 	// プレイヤーのモデルを描画する
 	MV1DrawModel(m_modelHandle);
+
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::cbuffer_damage);
 
 	SetUseTextureToShader(ShaderRegister::tex_normal, -1);	 // 法線マップを解除
 	SetUseTextureToShader(ShaderRegister::tex_metalic, -1);	 // メタリックマップを解除
@@ -366,6 +406,7 @@ void Player::DrawPlayer()
 	// シェーダを解除
 	LightingManager::GetInstance().ResetShader();
 	ReleaseShaderBuffers();
+	SetUsePixelShader(-1);
 }
 
 void Player::TakeDamage(int damage)
@@ -375,6 +416,8 @@ void Player::TakeDamage(int damage)
 
 	// ダメージを食らっているフラグを立てる
 	m_isTakingDamage = true;
+	//ダメージエフェクトを出すフラグ
+	m_isDamageEffect = true;
 
 	// HP0以下になったら脂肪処理を行う
 	if (m_health <= 0)

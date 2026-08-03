@@ -934,8 +934,35 @@ float4 main(PS_Input input) : SV_TARGET
 - 赤みの混ぜ方は`finalCol.a *= redAmount`(アルファ操作、誤り)→`finalCol.r *= redAmount`(通常時0で赤が消えるミス)→`finalCol.r += redAmount`(GB成分が残り続け赤一色にならない)→**`lerp(元の色, float3(1,0,0), redAmount)`**という順で、ユーザー自身が試行錯誤しながら正しい形に到達。Claudeは各段階で「この演算だとredAmountが最大の時どうなるか」を問うレビューに徹し、答えは出さなかった。
 - ビルド確認済み、シェーダー本体は正常にコンパイルが通ることを確認。
 
+**残タスク（旧、下記で全て完了・解決）:**
+1. ~~C++側（`Player.h`/`Player.cpp`）に、ダメージを受けてからの経過時間を管理し、`redAmount`(弱→強→元に戻るカーブ)を計算する仕組みを追加。~~ → 完了。
+2. ~~`DamagePS`用の`cbuffer`(`DamageBuffer`, register(b6))へ`redAmount`を渡す配線。~~ → 完了（最終的にb7、下記参照）。
+3. ~~`Player::DrawPlayer()`から、`m_isTakingDamage`(既存)をトリガーに`DamagePS`を使うか`LightingPS`を使うか切り替える配線。~~ → 完了。
+4. ~~ビルド・実機での見た目確認。~~ → 完了。
+
+### 進捗（2026-08-03続き・DamagePS.hlslのC++側配線完了、ライティングの暗さ問題を調査中・未解決）
+
+**`redAmount`計算〜cbuffer配線〜赤み上限調整まで、DamagePS関連は一通り完成した。**
+
+**`redAmount`計算の実装（ユーザー主体、Claudeはヒント形式のみで直接答えは出さない進め方を継続）:**
+- `m_damageTime`(経過フレーム)を`0°〜180°`の角度に変換し、ラジアンに直して`sinf`に渡すことで「0→山(1.0)→0」の左右対称カーブを実装。`180.0f * (m_damageTime / 60)`のように整数同士の割り算になっていたバグ(0になる)を`static_cast<float>`で修正、`60`は`damage_eff_frame`という定数に切り出し。
+- `m_isTakingDamage`とは別に`m_isDamageEffect`という専用フラグを新設し、`TakeDamage()`で`true`に、`Update()`で`damage_eff_frame`経過後に`false`+`m_damageTime`リセットする設計にユーザー自身が到達。
+- `ShaderRegister::cbuffer_damage`を新規追加する際、最初`b6`にしてしまい既存の`cbuffer_camera`(b6)と衝突しかけたが、レビューで指摘し`b7`に修正(過去のDxLib予約スロット問題の教訓を踏まえ、レジスタ番号の重複は都度確認する必要がある)。
+- `DrawPlayer()`内、`BindShaderBuffers()`の後に`m_isDamageEffect`のときだけ`SetShaderConstantBuffer(m_cbufferDamage, DX_SHADERTYPE_PIXEL, ShaderRegister::cbuffer_damage)`をセットする形で配線完了。
+- 「真っ赤に染まりすぎる」問題は、`redAmount`(0〜1)に上限係数を掛けて弱める方針で解決（ユーザー自身が実装、詳細な式は未記録だが動作確認済み）。
+
+**新たに発覚: プレイヤー機体・岩と比べて、`FloatingEnemy`（浮遊敵）だけが不自然に暗い問題。デバッグ中、原因未特定のまま次回に持ち越し。**
+- ユーザーの気づきがきっかけ。「ライティングを適用させてからずっと暗い」とのことで、今回のDamagePS作業とは無関係の既存の問題と判明。
+- 段階的なデバッグ手法（このプロジェクトで何度も使ってきた「値を色として可視化する」）で切り分けを実施:
+  1. `diffuse`(法線とライトの内積)を可視化 → プレイヤー機体・岩は手前(カメラ側の面)が正しく明るいのに、`FloatingEnemy`だけ手前を含め全体的に暗いことを確認。
+  2. `normalWSFinal`(法線)を`*0.5+0.5`で正規化して可視化 → 機体上面はきちんと緑(Y+方向)になっており、法線計算自体は正常と判明。
+  3. `lightVec`(ライト方向)を絶対値化して可視化 → 全オブジェクトで一定の値になっており、ライト方向の値自体も正常と判明。
+  4. `Actor::BindShaderBuffers()`/`LightingManager`のコードを確認 → `FloatingEnemy`が特別な値をセットしている箇所はなく、`Player`/`Rock`と同じ共通処理(`LightingBuffer`はシングルトンの`LightingManager`が保持)を使っていることを確認。
+- **ユーザーの重要な気づき**: `FloatingEnemy`は`HideState`/`ActiveState`/`LeaveState`のどこにも回転処理が無く、`m_rotation`は常にデフォルト(単位クォータニオン)のはずなのに、見た目はプレイヤー側(カメラ側)を向いている。「回転していないのに正面を向いているのはおかしいのでは」という疑問から、`Player`と同様にモデル自体が逆向きに作られている可能性を疑い、`FloatingEnemy::OnInit()`に`m_rotation = Quaternion(Vector3(0,1,0), DX_PI_F)`(Y軸180度回転)を試験的に追加。
+- **この仮説は否定された**: `GetForward()`の値は正しく反転することを確認できた(回転自体は効いている)が、180度回転を加えると`diffuse`は逆にさらに暗くなった。モデルの逆向き問題ではないと判明したため、この回転追加はロールバックする必要がある(**次回作業再開時、`FloatingEnemy::OnInit()`にこの180度回転のコードが残っていないか確認すること**)。
+- **次に確認すべき方向性**: `Rock::Draw()`と`FloatingEnemy::DrawEnemy()`はどちらも`Actor::DrawWithLighting()`(共通化済み)を経由しているはずだが、コードの書き方・呼び出し方に何か違いがないか比較する必要がある。`Player`/`Rock`は明るく`FloatingEnemy`だけ暗いという条件の違いを、コードレベルで洗い出すところから次回再開する。
+
 **残タスク:**
-1. C++側（`Player.h`/`Player.cpp`）に、ダメージを受けてからの経過時間を管理し、`redAmount`(弱→強→元に戻るカーブ)を計算する仕組みを追加。
-2. `DamagePS`用の`cbuffer`(`DamageBuffer`, register(b6))へ`redAmount`を渡す配線。
-3. `Player::DrawPlayer()`から、`m_isTakingDamage`(既存)をトリガーに`DamagePS`を使うか`LightingPS`を使うか切り替える配線（`LightingManager::ApplyShader()`をそのまま使うか、`WaterRevealManager`のキャプチャ分岐のように独自に`SetUsePixelShader`で上書きする形にするか、設計はまだ未着手）。
-4. ビルド・実機での見た目確認（ダメージを受けた瞬間、機体が赤く染まってから元に戻るか）。
+1. `FloatingEnemy::OnInit()`に残っている検証用の180度回転コードを削除(ロールバック)。
+2. `FloatingEnemy`だけが暗くなる原因調査を継続。`Rock`/`Player`との描画コードの違いを比較するところから再開。
+3. ボス(移動・回転・雑魚敵出現・死亡・ビーム、コスト表でアルファ扱い・全て未着手)に着手する予定だったが、上記の暗さ問題の解決を優先することで合意。

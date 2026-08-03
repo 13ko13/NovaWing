@@ -54,6 +54,7 @@ void FloatingEnemy::OnInit()
 	//定数バッファを作成
 	CreateShaderBuffers();
 
+	m_rotation = Quaternion(Vector3(0.0f, 1.0f, 0.0f), DX_PI_F);
 }
 
 void FloatingEnemy::Update()
@@ -118,6 +119,8 @@ void FloatingEnemy::Draw()
 	m_colSphere.Draw(0xffffff);
 	//位置
 	DrawFormatString(0, 320, 0xffffff, L"EPosX:%f,Y:%f,Z:%f", m_pos.m_x, m_pos.m_y, m_pos.m_z);
+
+	DrawFormatString(0, 460, 0xffffff, L"ForwardX : %f,Y:%f,Z:%f", GetForward().m_x,GetForward().m_y,GetForward().m_z);
 #endif
 }
 

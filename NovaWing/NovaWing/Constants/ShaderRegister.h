@@ -57,4 +57,7 @@ namespace ShaderRegister
 	constexpr int ui_tex_diffuse = 0;
 	//グリッチシェーダに渡す定数バッファ(ピクセルシェーダ)
 	constexpr int glitch_buffer = 0;
+
+	//----------プレイヤーのダメージ専用------
+	constexpr int cbuffer_damage = 7;
 }

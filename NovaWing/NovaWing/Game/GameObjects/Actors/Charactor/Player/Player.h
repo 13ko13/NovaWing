@@ -121,6 +121,19 @@ private:
 	float m_boostSpeed = 0;//ブースト時のスピード
 	float m_brakeSpeed = 0;//ブレーキ時のスピード
 
+	//ダメージエフェクトの経過時間
+	int m_damageTime = 0;
+
+	//ダメージシェーダ用の定数バッファ
+	struct DamageBuffer
+	{
+		float redAmount;
+		float paddng[3];//16バイトアライメント
+	};
+	int m_cbufferDamage = -1;
+	DamageBuffer* m_pCBufferDamageData = nullptr;
+	
+
 	//外部クラス参照
 	//借りてくるだけなのでweak_ptrにする
 	std::weak_ptr<BulletManager> m_pBulletManager;//弾の管理
@@ -155,6 +168,11 @@ private:
 	//チャージ中エフェクト再生ハンドル
 	int m_chargingEffectH = -1;
 
+	//ダメージシェーダのハンドル
+	int m_damageShaderPSH = -1;
+
 	//今ダメージを食らっているか
 	bool m_isTakingDamage = false;
+	//ダメージエフェクトを出すか
+	bool m_isDamageEffect = false;
 };

@@ -17,9 +17,9 @@ namespace
 	//プレイヤーが岩に当たった時のダメージ
 	constexpr int hit_rock_damage = 30;
 	//プレイヤーがダメージを食らった時のカメラを揺らす力
-	constexpr float shake_power = 3.9f;
+	constexpr float shake_power = 7.0f;
 	//プレイヤーがダメージを食らった時にどのくらいの時間カメラを揺らすか
-	constexpr int shake_frame = 15;
+	constexpr int shake_frame = 18;
 }
 
 CollisionManager::CollisionManager(const std::weak_ptr<Player> pPlayer,
