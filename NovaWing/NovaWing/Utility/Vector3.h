@@ -39,6 +39,15 @@ public:
 		const std::wstring& y,
 		const std::wstring& z
 	);
+
+	//DXlibのVECTOR型を代入できるようにする
+	Vector3& operator=(const VECTOR& v)
+	{
+		m_x = v.x;
+		m_y = v.y;
+		m_z = v.z;
+		return *this;
+	}
 };
 
 //別名(座標を表すこともあるため)

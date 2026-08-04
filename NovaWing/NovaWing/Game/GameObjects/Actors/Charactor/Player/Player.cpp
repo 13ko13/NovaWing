@@ -63,7 +63,7 @@ namespace
 	constexpr float damage_eff_frame = 30.0f;
 
 	//ダメージシェーダのハンドル
-	constexpr const wchar_t* damage_shader_pass = L"DamagePS.pso";
+	constexpr const wchar_t* damage_shader_path = L"DamagePS.pso";
 } // namespace
 
 Player::Player(
@@ -97,7 +97,7 @@ void Player::OnInit()
 	CreateShaderBuffers();
 
 	// ライトの方向ベクトルをセットする
-	LightingManager::GetInstance().SetLightDirection(Vector3(0.0f, -0.5f, 0.6f));
+	LightingManager::GetInstance().SetLightDirection(Vector3(0.0f, -1.0f, 0.6f));
 
 	// MovementStateの初期化
 	// 待機状態
@@ -128,7 +128,7 @@ void Player::OnInit()
 	m_pCBufferDamageData = static_cast<DamageBuffer*>(GetBufferShaderConstantBuffer(m_cbufferDamage));
 
 	//ダメージシェーダのロード
-	m_damageShaderPSH = LoadPixelShader(damage_shader_pass);
+	m_damageShaderPSH = LoadPixelShader(damage_shader_path);
 }
 
 void Player::Update()

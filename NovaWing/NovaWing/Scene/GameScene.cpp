@@ -35,6 +35,8 @@
 #include "Game/GameObjects/Actors/Charactor/Enemy/WormEnemy/WormEnemyDataSetter.h"
 #include "Scene/ClearScene.h"
 #include "Game/UI/HPGaugeUI.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossEnemy.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossEnemyDataSetter.h"
 
 namespace
 {
@@ -127,6 +129,14 @@ void GameScene::Init()
 		//ターゲットマネージャーにエネミーを登録する
 		m_pTargetManager->RegisterWormEnemy(pEnemy);
 	}
+
+	//ボスエネミーの初期化
+	m_pBoss = BossEnemyDataSetter::CreateEnemy(
+		m_pPlayer,
+		m_pCamera,
+		m_pBulletManager
+	);
+	m_pBoss->Init();
 
 	//UIManagerの初期化
 	m_pUIManager = std::make_shared<UIManager>();

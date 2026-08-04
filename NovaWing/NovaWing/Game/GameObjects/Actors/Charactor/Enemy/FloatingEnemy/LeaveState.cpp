@@ -16,7 +16,7 @@ namespace
 } // namespace
 
 LeaveState::LeaveState(std::weak_ptr<FloatingEnemy> pEnemy)
-	: IEnemyState(pEnemy)
+	: IFloatingEnemyState(pEnemy)
 {
 }
 

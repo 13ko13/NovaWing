@@ -23,7 +23,7 @@ namespace
 }
 
 ActiveState::ActiveState(std::weak_ptr<FloatingEnemy> pEnemy):
-	IEnemyState(pEnemy)
+	IFloatingEnemyState(pEnemy)
 {
 
 }

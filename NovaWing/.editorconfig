@@ -3,11 +3,6 @@ root = true
 
 [*.{c++,cc,cpp,cppm,cxx,h,h++,hh,hpp,hxx,inl,ipp,ixx,tlh,tli}]
 charset = utf-8-bom
-# Visual Studio [ツール > オプション > テキストエディター > C/C++ > タブ] の設定に合わせる
-# タブのサイズ: 4, インデントのサイズ: 4, タブの保持(スペースへの変換なし)
-indent_style = tab
-tab_width = 4
-indent_size = 4
 
 # Visual C++ コード スタイルの設定
 
@@ -17,7 +12,7 @@ cpp_generate_documentation_comments = xml
 
 cpp_indent_braces = false
 cpp_indent_multi_line_relative_to = innermost_parenthesis
-cpp_indent_within_parentheses = indent
+cpp_indent_within_parentheses = none
 cpp_indent_preserve_within_parentheses = true
 cpp_indent_case_contents = true
 cpp_indent_case_labels = false

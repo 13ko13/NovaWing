@@ -5,7 +5,7 @@
 #include "Utility/ModelAnimator.h"
 
 class Player;
-class IEnemyState;
+class IFloatingEnemyState;
 class BulletManager;
 class CameraBase;
 class FloatingEnemy : public Charactor
@@ -22,7 +22,6 @@ public:
 	void Update() override;//更新処理
 	//描画
 	void Draw() override;
-	void DrawEnemy();
 	
 	void TakeDamage(int damage) override;//ダメージを受ける
 
@@ -45,8 +44,12 @@ public:
 	ModelAnimator& GetAnimator() { return *m_pAnimator; }
 
 private:
+	//敵の描画(シェーダ適応も含めた)
+	void DrawEnemy();
+
+private:
 	std::weak_ptr<Player> m_pPlayer;//プレイヤーを借りる
-	std::shared_ptr<IEnemyState> m_pState;//ステート
+	std::shared_ptr<IFloatingEnemyState> m_pState;//ステート
 	std::weak_ptr<BulletManager> m_pBulletManager;//弾の管理者
 
 	Sphere m_colSphere;//当たり判定(球)

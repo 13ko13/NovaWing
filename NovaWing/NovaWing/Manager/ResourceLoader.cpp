@@ -15,6 +15,7 @@ namespace
 	constexpr const wchar_t* rock2_model_path = L"Data/Model/Rock2.mv1";
 	constexpr const wchar_t* rock3_model_path = L"Data/Model/Rock3.mv1";
 	constexpr const wchar_t* stage_model_path = L"Data/Model/Stage.mv1";
+	constexpr const wchar_t* boss_model_path = L"Data/Model/Boss.mv1";
 
 	//---------- 画像のパス ----------
 	constexpr const wchar_t* player_normal_map_path = L"Data/Model/Player.fbm/StarSparrow_Normal.png";
@@ -60,6 +61,7 @@ namespace
 	constexpr const wchar_t* rock3_csv_name = L"Rock3";
 	constexpr const wchar_t* floating_enemy_csv_name = L"FloatingEnemy";
 	constexpr const wchar_t* worm_head_csv_name = L"WormHead";
+	constexpr const wchar_t* boss_csv_name = L"Boss";
 
 	//---------- エフェクトの再生スケール ----------
 	constexpr float player_bullet_effect_scale = 2.0f;
@@ -183,6 +185,7 @@ ResourceLoader::ModelID ResourceLoader::WStringToModelID(const std::wstring id)
 		{rock3_csv_name,ModelID::Rock3},
 		{floating_enemy_csv_name,ModelID::FloatingEnemy},
 		{worm_head_csv_name,ModelID::WormHead},
+		{boss_csv_name,ModelID::Boss},
 	};
 	//受け取ったidを使ってtableからそのモデルのIDを受け取る
 	auto it = table.find(id);
@@ -229,6 +232,10 @@ void ResourceLoader::KeepModel()
 	handle = MV1LoadModel(stage_model_path);//ステージ
 	assert(handle >= 0);
 	m_modelHandles[ResourceLoader::ModelID::Stage] = handle;
+
+	handle = MV1LoadModel(boss_model_path);//ボス
+	assert(handle >= 0);
+	m_modelHandles[ResourceLoader::ModelID::Boss] = handle;
 }
 
 void ResourceLoader::KeepGraph()

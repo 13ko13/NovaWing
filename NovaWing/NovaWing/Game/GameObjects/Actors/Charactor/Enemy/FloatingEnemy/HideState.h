@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "IEnemyState.h"
-class HideState : public IEnemyState
+#include "IFloatingEnemyState.h"
+class HideState : public IFloatingEnemyState
 {
 public:
 	HideState(std::weak_ptr<FloatingEnemy> pEnemy);

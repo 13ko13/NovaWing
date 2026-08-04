@@ -962,7 +962,29 @@ float4 main(PS_Input input) : SV_TARGET
 - **この仮説は否定された**: `GetForward()`の値は正しく反転することを確認できた(回転自体は効いている)が、180度回転を加えると`diffuse`は逆にさらに暗くなった。モデルの逆向き問題ではないと判明したため、この回転追加はロールバックする必要がある(**次回作業再開時、`FloatingEnemy::OnInit()`にこの180度回転のコードが残っていないか確認すること**)。
 - **次に確認すべき方向性**: `Rock::Draw()`と`FloatingEnemy::DrawEnemy()`はどちらも`Actor::DrawWithLighting()`(共通化済み)を経由しているはずだが、コードの書き方・呼び出し方に何か違いがないか比較する必要がある。`Player`/`Rock`は明るく`FloatingEnemy`だけ暗いという条件の違いを、コードレベルで洗い出すところから次回再開する。
 
+**残タスク（旧）:**
+1. ~~`FloatingEnemy::OnInit()`に残っている検証用の180度回転コードを削除(ロールバック)。~~ → 別セッションで対応済み(ユーザー確認済み)。
+2. `FloatingEnemy`だけが暗くなる原因調査は一旦保留（下記の通りボス実装を優先する流れになった）。
+3. ~~ボスに着手~~ → 下記の通り着手・骨格〜描画まで完成。
+
+### 進捗（2026-08-03続き2・Visual Studioのインデント設定問題を解決、BossEnemyの骨格〜描画成功）
+
+**背景**: 前回の暗さ問題調査から一旦離れ、コスト表で未着手だった「ボス」の実装に着手。既に`BossEnemy`/`BossEnemyDataSetter`の骨格ファイルが存在していたことが判明し、そこから再開する形になった。
+
+**Visual Studioのコード自動フォーマットが気持ち悪い問題を調査・解決:**
+- コンストラクタの初期化子リストで`m_pPlayer(`のように括弧を打つと、余計なインデントが自動で入る現象が発生。
+- 原因調査の過程で、`.editorconfig`(`NovaWing/.editorconfig`)が2026-07-02(学校のアカウントでのコミット、おそらく先生と作業した際にVisual Studioの「設定から.editorconfigファイルを生成」で作られたもの)から存在していたことが判明。ユーザー自身がこのファイルを一旦削除し、新しく生成し直した。
+- 新しい`.editorconfig`でも同じ問題が発生したため、`cpp_indent_within_parentheses`を`indent`→`none`に変更したが効果なし。
+- **真因**: Visual Studioの「ツール>オプション>テキストエディター>C/C++>コードスタイル>書式設定」に**「ClangFormat サポートを有効にします」**というチェックがあり、これが有効だと`.editorconfig`のC++書式ルールより、リポジトリ直下の`.clang-format`(2026-07-23にVS Code統一のため作成したもの、`BasedOnStyle: Microsoft`ベース)が優先される。Microsoftスタイルの初期化子リストインデントが原因だった。
+- 対策として`.clang-format`に`ConstructorInitializerIndentWidth: 0`/`BreakConstructorInitializers: BeforeColon`を追加してみたが逆効果(左にずれすぎる)で、元に戻した。最終的に**Visual Studio側の「ClangFormat サポート」のチェックを外す**ことで解決（`.editorconfig`側の設定がそのまま効くようになった）。
+- **教訓**: Visual StudioでClangFormatサポートが有効だと、`.editorconfig`のC++固有ルール(`cpp_*`)は無視され`.clang-format`が優先される。両方のファイルを併用する場合はどちらが実際に効いているかをこのチェックボックスで確認すること。
+
+**BossEnemyの骨格〜描画に成功:**
+- `BossEnemy.h/.cpp`、`BossEnemyDataSetter.h/.cpp`は既に骨格が用意されていた(コンストラクタ、`OnInit`/`Update`/`Draw`/`TakeDamage`、CSV読み込みによる生成処理)。`GameScene`側にも`#include`・メンバー変数・`BossEnemyDataSetter::CreateEnemy`の呼び出しは既に組み込み済みだった。
+- **発見したバグ**: `BossEnemyDataSetter.cpp`の`CreateEnemy`関数定義が、`BossEnemyDataSetter::CreateEnemy(...)`ではなく単なる`CreateEnemy(...)`(クラス名の`::`が抜けた、クラスに属さないフリー関数)になっていた。ヘッダー側は`static`メンバー関数として宣言されているため、これでは`GameScene.cpp`から`BossEnemyDataSetter::CreateEnemy(...)`を呼び出した際に未解決の外部シンボル(リンクエラー)になる。ユーザー自身が`::`を補って修正し解決。
+- 修正後、ビルド・実行してボスモデルの描画に成功。
+
 **残タスク:**
-1. `FloatingEnemy::OnInit()`に残っている検証用の180度回転コードを削除(ロールバック)。
-2. `FloatingEnemy`だけが暗くなる原因調査を継続。`Rock`/`Player`との描画コードの違いを比較するところから再開。
-3. ボス(移動・回転・雑魚敵出現・死亡・ビーム、コスト表でアルファ扱い・全て未着手)に着手する予定だったが、上記の暗さ問題の解決を優先することで合意。
+1. `FloatingEnemy`の暗さ問題調査は保留中、再開時期未定。
+2. ボスの本格実装（移動・回転・雑魚敵出現・死亡・ビーム）はこれから。現状は「CSVから生成されて棒立ちで表示される」段階。
+3. `BossEnemy::DrawEnemy()`の中身が全部コメントアウトされたまま(`Draw()`は`MV1DrawModel`を直接呼ぶ最小構成)。シェーダー適用(`DrawWithLighting`)を使うかどうかは今後の設計次第。

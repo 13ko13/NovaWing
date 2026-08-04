@@ -1,7 +1,7 @@
 ﻿#include <EffekseerForDXLib.h>
 
 #include "FloatingEnemy.h"
-#include "IEnemyState.h"
+#include "IFloatingEnemyState.h"
 #include "Charactor/Player/Player.h"
 #include "HideState.h"
 #include "Manager/LightingManager.h"
@@ -21,7 +21,7 @@ FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 	const ResourceLoader::ModelID Id,
 	const std::shared_ptr<BulletManager> pBulletManager,
 	std::weak_ptr<CameraBase> camera,
-		const Vector3& pos) :
+	const Vector3& pos) :
 	Charactor(Id,camera),
 	m_pPlayer(pPlayer),
 	m_colSphere(pos),
@@ -54,7 +54,7 @@ void FloatingEnemy::OnInit()
 	//定数バッファを作成
 	CreateShaderBuffers();
 
-	m_rotation = Quaternion(Vector3(0.0f, 1.0f, 0.0f), DX_PI_F);
+	//m_rotation = Quaternion(Vector3(0.0f, 1.0f, 0.0f), DX_PI_F);
 }
 
 void FloatingEnemy::Update()
@@ -65,7 +65,7 @@ void FloatingEnemy::Update()
 		//ステートの更新
 		m_pState->Update();
 		//次のステートを取得
-		std::shared_ptr<IEnemyState> pState = m_pState->GetNextState();
+		std::shared_ptr<IFloatingEnemyState> pState = m_pState->GetNextState();
 		//次のステートがあればステートを変更する
 		if (pState != nullptr)
 		{

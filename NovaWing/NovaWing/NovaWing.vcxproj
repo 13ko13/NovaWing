@@ -159,6 +159,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemyDataSetter.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemy.cpp" />
     <ClCompile Include="Game\UI\HPGaugeUI.cpp" />
     <ClCompile Include="Utility\GraphShaderDraw.cpp" />
@@ -191,7 +192,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\IShootState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\ISpecialActionState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\GaugeActionStateBase.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\IEnemyState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\IFloatingEnemyState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\HideState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\LeaveState.cpp" />
     <ClCompile Include="Manager\LightingManager.cpp" />
@@ -232,6 +233,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemyDataSetter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemyDataSetter.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemy.h" />
     <ClInclude Include="Game\UI\HPGaugeUI.h" />
     <ClInclude Include="Utility\GraphShaderDraw.h" />
@@ -264,7 +266,7 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\IShootState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\ISpecialActionState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\GaugeActionStateBase.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\IEnemyState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\IFloatingEnemyState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\HideState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\LeaveState.h" />
     <ClInclude Include="Manager\LightingManager.h" />

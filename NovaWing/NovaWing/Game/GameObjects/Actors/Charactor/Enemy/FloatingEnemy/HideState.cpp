@@ -13,7 +13,7 @@ namespace
 }
 
 HideState::HideState(std::weak_ptr<FloatingEnemy> pEnemy):
-	IEnemyState(pEnemy)
+	IFloatingEnemyState(pEnemy)
 {
 }
 

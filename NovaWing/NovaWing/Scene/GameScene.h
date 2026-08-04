@@ -16,6 +16,7 @@ class WaterManager;
 class SkyBox;
 class Rock;
 class Stage;
+class BossEnemy;
 class GameScene :public Scene
 {
 public:
@@ -60,4 +61,6 @@ private:
 	std::vector<std::shared_ptr<Rock>> m_pRocks;
 	//ステージへのポインタ
 	std::shared_ptr<Stage> m_pStage;
+	//ボスへのポインタ
+	std::shared_ptr<BossEnemy> m_pBoss;
 };

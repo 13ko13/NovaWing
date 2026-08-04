@@ -138,7 +138,7 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\BrakeState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\IEnemyState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\IFloatingEnemyState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemy.cpp">
@@ -226,6 +226,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemy.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemyDataSetter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -359,7 +362,7 @@
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\BrakeState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\IEnemyState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\IFloatingEnemyState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemy.h">
@@ -453,6 +456,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemy.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemyDataSetter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
