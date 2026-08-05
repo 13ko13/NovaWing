@@ -13,6 +13,12 @@ namespace
 	constexpr int first_left_leg_idx = 30;
 	//片側の足の本数
 	constexpr int one_side_leg_num = 3;
+	//海の高さ
+	constexpr float water_y = 0.0f;
+	//アイドルアニメーションの名前
+	constexpr const wchar_t* idle_anim_name = L"A_mechISO_Walk_L";
+	//アニメーションブレンドにかける時間
+	constexpr float anim_blend_time = 20.0f;
 }
 
 BossEnemy::BossEnemy(
@@ -23,7 +29,8 @@ BossEnemy::BossEnemy(
 	Charactor(Id,pCamera),
     m_pPlayer(pPlayer),
 	m_pBulletManager(pBulletManager),
-	m_colSphere(pos)
+	m_colSphere(pos),
+	m_animator(m_modelHandle)
 {
 	//位置を反映
 	SetPos(pos);
@@ -46,7 +53,9 @@ void BossEnemy::OnInit()
 			m_modelHandle, leg_frame_stride * i
 		);
 		//配列に格納
-		m_legPositions.push_back(rightLegPos);
+		m_prevLegPositions.push_back(rightLegPos);
+		// 配列に格納
+		m_currentLegPositions.push_back(rightLegPos);
 	}
 	//最初の左足の位置(3本)を取得
 	for (int i = 0; i < static_cast<int>(LegIndex::FrontRight); i++)
@@ -56,8 +65,13 @@ void BossEnemy::OnInit()
 			m_modelHandle, first_left_leg_idx + leg_frame_stride * i
 		);
 		//配列に格納
-		m_legPositions.push_back(leftLegPos);
+		m_prevLegPositions.push_back(leftLegPos);
+		//配列に格納
+		m_currentLegPositions.push_back(leftLegPos);
 	}
+
+	//アイドルアニメーションを再生
+	m_animator.Play(MV1GetAnimIndex(m_modelHandle, idle_anim_name), true);
 }
 
 void BossEnemy::Update()
@@ -67,6 +81,9 @@ void BossEnemy::Update()
 
 	//当たり判定の更新
 	m_colSphere.Update(m_pos, col_radius);
+
+	//今の足の位置を前の足の位置にコピーする
+	m_prevLegPositions = m_currentLegPositions;
 
 	//脚の位置を取得するが、インデックスの途中で不要なものが入っているので
 	//二回に分けて取得する
@@ -79,7 +96,7 @@ void BossEnemy::Update()
 			m_modelHandle, leg_frame_stride * i
 		);
 		//配列に格納
-		m_legPositions[i - 1] = rightLegPos;
+		m_currentLegPositions[i - 1] = rightLegPos;
 	}
 	//最初の左足の位置(3本)を取得
 	for (int i = 0; i < static_cast<int>(LegIndex::FrontRight); i++)
@@ -89,8 +106,21 @@ void BossEnemy::Update()
 			m_modelHandle, first_left_leg_idx + leg_frame_stride * i
 		);
 		//配列に格納
-		m_legPositions[i + one_side_leg_num] = leftLegPos;
+		m_currentLegPositions[i + one_side_leg_num] = leftLegPos;
 	}
+
+	//前フレーム海に浸かっていなくて、今フレーム海に浸かっている場合のみエフェクトを出す
+	//判定は同じ添え字のみを行う
+	for (size_t i = 0; i < m_prevLegPositions.size(); i++)
+	{
+		if (m_prevLegPositions[i].y > water_y &&
+			m_currentLegPositions[i].y < water_y)
+		{
+			//TODO:エフェクトを再生する
+		}
+	}
+	//アニメーターの更新
+	m_animator.Update(anim_blend_time);
 }
 
 void BossEnemy::Draw()
@@ -103,6 +133,9 @@ void BossEnemy::Draw()
 
 	//モデル描画
 	MV1DrawModel(m_modelHandle);
+
+	int frameNum = MV1GetFrameNum(m_modelHandle);
+	DrawFormatString(0, 100, 0xffffff, L"frameNum : %d", frameNum);
 }
 
 void BossEnemy::TakeDamage(int damage)

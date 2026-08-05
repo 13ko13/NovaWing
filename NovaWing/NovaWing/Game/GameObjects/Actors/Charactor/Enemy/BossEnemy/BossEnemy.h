@@ -2,6 +2,7 @@
 #include "Game/GameObjects/Actors/Charactor/Charactor.h"
 #include "Manager/ResourceLoader.h"
 #include "Utility/Sphere.h"
+#include "Utility/ModelAnimator.h"
 
 class Player;
 class BulletManager;
@@ -28,8 +29,10 @@ private:
 	std::weak_ptr<Player> m_pPlayer; // プレイヤーを借りる
 	std::weak_ptr<BulletManager> m_pBulletManager; // 弾の管理者
 	Sphere m_colSphere;	 // 当たり判定(球)
-	//モデルの足の位置(6箇所)
-	std::vector<VECTOR> m_legPositions;
+	//モデルの前フレームの足の位置(6箇所)
+	std::vector<VECTOR> m_prevLegPositions;
+	//モデルの今フレームの足の位置(6箇所)
+	std::vector<VECTOR> m_currentLegPositions;
 
 	enum class LegIndex
 	{
@@ -42,4 +45,7 @@ private:
 
 		Max,//何個あるか
 	};
+
+	//モデル用のアニメーター
+	ModelAnimator m_animator;
 };

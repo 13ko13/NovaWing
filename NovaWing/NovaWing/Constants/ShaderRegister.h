@@ -60,4 +60,8 @@ namespace ShaderRegister
 
 	//----------プレイヤーのダメージ専用------
 	constexpr int cbuffer_damage = 7;
+
+	//-------BossEnemy(スキニング)専用--------
+	//ボーン行列情報の定数バッファ(頂点シェーダ)
+	constexpr int cbuffer_bone = 8;
 }
