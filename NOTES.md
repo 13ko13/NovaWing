@@ -1011,3 +1011,30 @@ float4 main(PS_Input input) : SV_TARGET
 - **教訓**: この設定はVisual Studioのアップデートや別PC（学校/家）環境で再度有効に戻ることがありうる。同じインデント症状が出たら、まずこのチェックボックスを確認すること。
 
 **次回**: アニメーション実装の続きから。脚の海判定のTODO（エフェクト再生処理）はその後に着手。
+
+### 進捗（BossEnemyアニメーション・独自シェーダーでスキニングが反映されない問題を調査、SkinnedLightingVS.hlsl着手中）
+
+**「アニメーターを組み込んでPlay()もしているのに、ボスが完全に無表情（棒立ち）のまま」という問題が発生。原因はDxLibの独自シェーダー(`MV1SetUseOrigShader`)を使っている点にあった。**
+
+- 標準の`MV1DrawModel`はボーンのブレンド行列計算・頂点シェーダーへの供給を内部で自動的にやってくれるが、独自シェーダーを使うとこれが行われなくなる。`ModelAnimator`側(`MV1AttachAnim`/`MV1SetAttachAnimTime`)の再生処理自体は正しく機能しているが、計算結果がシェーダーに渡っていないため見た目に反映されない、と判明（Web調査、[DXライブラリ公式のオリジナルシェーダー3Dモデル描画ページ](https://dxlib.xsrv.jp/program/dxprogram_3DModelShaderBase.html)より）。
+- 対応方針として、既存の`LightingManager`のキャプチャモード分岐（透過水対応）を活かしたいため、**「2: LightingManagerにスキニング対応VSの選択肢を増やす」案**で合意（BossEnemy専用の独自描画経路を作る案は透過水対応を失うため却下）。
+
+**設計で決定した内容:**
+- `ShaderRegister.h`にボーン行列用の定数バッファレジスタを追加する必要がある: `constexpr int cbuffer_bone = 8;`（Actor共通グループでb4/b5/b6/b7が既に使用済みのため次の空き番号）。過去の教訓通りb2/b3はDxLib予約スロットのため使用不可。
+- 新規シェーダー`SkinnedLightingVS.hlsl`を`LightingVS.hlsl`をベースに作成する方針。`VS_INPUT`に`BLENDINDICES0`(uint4)・`BLENDWEIGHT0`(float4)を追加、`register(b8)`に`float4x4 boneMatrix[64]`の配列を持つ`BoneBuffer`を新設。ボーン数上限は`MV1GetFrameNum`で実際のボーン数(52)を確認した上で、将来のモデル差し替えに余裕を持たせて64に決定。
+- メイン処理の流れ: 4本のボーン行列を`blendWeight`で加重合成→`skinMatrix`を作る→`input.pos`にまず`skinMatrix`を掛けてボーン変形→その後既存の`world`(Actor全体の配置行列)を掛ける、の2段階。`VS_OUTPUT`・`CameraBuffer`・法線/タンジェント処理は`LightingVS.hlsl`と共通のまま流用可能。
+- 今後C++側で必要になる実装（未着手）: ①`BossEnemy::Draw()`で毎フレーム各ボーンの行列を取得し`BoneBuffer`用の定数バッファに詰める処理（既存の`UpdateShaderMatrixData`/`BindShaderBuffers`と同じ立ち位置）②`LightingManager::ApplyShader()`にスキニング要否の引数を追加し、スキニング時は`SkinnedLightingVS`を`SetUseVertexShader`する分岐。
+
+**ハマった点: `float4x4 * float`（行列とスカラーの掛け算）でHLSL警告「'float4x4' から 'float1x1' への暗黙的な切り捨て」**
+- `skinMatrix`の計算(`boneMatrix[...] * input.blendWeight.x`を4項足す処理)で発生。配列アクセスと掛け算を同時に書いているのが原因かと最初疑い、`mat0`〜`mat3`という一時変数に配列アクセスだけ分離してみたが、警告は解消せず（分離後もまだ`mat0 * input.blendWeight.x`の掛け算自体は残っているため）。
+- **真因（Web調査で特定、[Microsoft公式HLSLドキュメント](https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-per-component-math)より）**: HLSLの`*`演算子は行列同士では「成分ごとの掛け算」になるが、`float4x4 * float`のように片方がスカラーの場合、そのスカラーは自動的に`float1x1`(1行1列の行列)とみなされる。次元が合わないため、結果が`float1x1`(実質1個の値)に切り詰められてしまう。これは表示上軽微な警告ではなく、**`skinMatrix`の計算結果そのものが壊れる実害のある警告**と判断。
+- **解決策（Web調査で発見、まだコードには未反映）**: スカラー側を`(float4x4)`に明示キャストしてから掛け算する。`mat0 * (float4x4)input.blendWeight.x`のように書くと、スカラー値が16要素全部にコピーされた`float4x4`に変換されてから成分ごとの掛け算になり、次元が合うため警告が解消する。行ごとに手動分解する方法（`mat0[0]*weight`を4行×4本で16回書く）よりシンプルで、この方針を採用することで合意。
+- **次回、この`(float4x4)`キャストを`skinMatrix`計算の4箇所（x/y/z/w）全てに適用するところから再開すること。** まだ`SkinnedLightingVS.hlsl`のコードには反映されていない（`mat0`〜`mat3`を使った分離後の状態のまま、キャストは未追加）。
+
+**次回やること（更新）:**
+1. `SkinnedLightingVS.hlsl`の`skinMatrix`計算に`(float4x4)`キャストを適用し、警告が消えることを確認する。
+2. `ShaderRegister.h`に`cbuffer_bone = 8`を追加。
+3. C++側（`BossEnemy`または`Actor`）にボーン行列を取得して`BoneBuffer`用定数バッファに詰める処理を実装する。
+4. `LightingManager::ApplyShader()`にスキニング要否の分岐を追加し、`BossEnemy`から呼び出す。
+5. ビルド・実行してアニメーションが実際に反映されるか確認する（まだ一度も実行確認できていない段階）。
+6. その後、脚の海判定のTODO（エフェクト再生処理）に着手。
