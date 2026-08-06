@@ -87,8 +87,8 @@
       <AdditionalLibraryDirectories>$(SolutionDir)/DxLib_h</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 $(ProjectDir)WaterPS.hlsl
-C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS.hlsl</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -110,8 +110,8 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
       <AdditionalLibraryDirectories>$(SolutionDir)/DxLib_h</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 $(ProjectDir)WaterPS.hlsl
-C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS.hlsl</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -131,8 +131,8 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
       <AdditionalLibraryDirectories>$(SolutionDir)/DxLib_h</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 $(ProjectDir)WaterPS.hlsl
-C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS.hlsl</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -154,8 +154,8 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
       <AdditionalLibraryDirectories>$(SolutionDir)/DxLib_h</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tps_4_0 $(ProjectDir)WaterPS.hlsl
-C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS.hlsl</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -374,6 +374,14 @@ C:\DxLib_VC\Tool\ShaderCompiler\ShaderCompiler.exe /Tvs_4_0 $(ProjectDir)WaterVS
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)%(Filename).vso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).vso</ObjectFileOutput>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)%(Filename).vso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)%(Filename).vso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="StagePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

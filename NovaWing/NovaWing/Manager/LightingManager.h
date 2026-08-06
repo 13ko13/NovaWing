@@ -13,7 +13,7 @@ public:
 	//ライトの方向ベクトルをセットする
 	void SetLightDirection(const Vector3& lightDir);
 	//シェーダーを適用&定数バッファに値を渡す
-	void ApplyShader();
+	void ApplyShader(bool isSkinning = false);
 	//シェーダーを解除する
 	void ResetShader();
 	//光の情報を持ってる定数バッファのハンドルを返す
@@ -38,6 +38,8 @@ private:
 	//ピクセルシェーダと頂点シェーダのコンパイル済みシェーダハンドル
 	int m_lightingPSH = -1;
 	int m_lightingVSH = -1;
+	//スキニングを行う際の頂点シェーダハンドル
+	int m_skinnedLightingVSH = -1;
 
 	//光の方向ベクトル
 	Vector3 m_lightDir;

@@ -25,15 +25,24 @@ void LightingManager::SetLightDirection(const Vector3& lightDir)
 	SetLightDifColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
-void LightingManager::ApplyShader()
+void LightingManager::ApplyShader(bool isSkinning)
 {
 	MV1SetUseOrigShader(true);
 	//ライトの方向をセットする
 	m_pCBuffLightData->lightDir = m_lightDir;
 	//情報を入れたので定数バッファが変わったことをシェーダに知らせる
 	UpdateShaderConstantBuffer(m_cbufferLightInfo);
+
 	//頂点シェーダをセット
-	SetUseVertexShader(m_lightingVSH);
+	//スキニングが必要な時はスキニング用のライティングシェーダを使用する
+	if (isSkinning)
+	{
+		SetUseVertexShader(m_skinnedLightingVSH);
+	}
+	else
+	{
+		SetUseVertexShader(m_lightingVSH);
+	}
 
 	//WaterRevealManagerのインスタンスを受け取る
 	WaterRevealManager& revealManager = WaterRevealManager::GetInstance();
@@ -69,10 +78,12 @@ void LightingManager::LoadShader()
 	//頂点シェーダとピクセルシェーダのロード
 	m_lightingPSH = LoadPixelShader(L"LightingPS.pso");
 	m_lightingVSH = LoadVertexShader(L"LightingVS.vso");
+	m_skinnedLightingVSH = LoadVertexShader(L"SkinnedLightingVS.vso");
 
 	//ロードに失敗していたらクラッシュ
 	assert(m_lightingPSH >= 0);
 	assert(m_lightingVSH >= 0);
+	assert(m_skinnedLightingVSH >= 0);
 
 	//バッファを作成する
 	m_cbufferLightInfo = CreateShaderConstantBuffer(sizeof(LightBuffer));

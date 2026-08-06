@@ -72,6 +72,7 @@ protected:
 	Vector3 GetCameraPos() const;
 
 	//テクスチャをテクスチャレジスタにセットして描画する
-	void DrawWithLighting(const std::vector<std::pair<int,int>>& textures);
+	void DrawWithLighting(const std::vector<std::pair<int,int>>& textures,
+		bool isSkinned = false);
 };
 

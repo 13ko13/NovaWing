@@ -57,6 +57,9 @@ public:
 
 		HPFrame,//HPの枠
 		HPGauge,//HPゲージ
+
+		BossEmission,//ボスのエミッション
+		BossNormal,//ボスの法線マップ
 	};
 
 	//エフェクトの種類
@@ -68,6 +71,7 @@ public:
 		PlayerChargeBullet,//プレイヤーのチャージ弾エフェクト
 		Charging,//プレイヤーのチャージ中のエフェクト
 		EnemyBullet,//エネミーの弾エフェクト
+		Splash,//水しぶきエフェクト
 	};
 
 	//音の種類

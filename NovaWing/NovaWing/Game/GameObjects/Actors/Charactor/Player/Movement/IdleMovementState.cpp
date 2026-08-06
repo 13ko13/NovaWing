@@ -8,7 +8,7 @@
 
 namespace
 {
-	constexpr float move_speed = 8.0f;
+	constexpr float move_speed = 0.1f;
 
 	//アナログスティックの入力値を-1～1に正規化するための割る数
 	constexpr float stick_input_max = 1000.0f;

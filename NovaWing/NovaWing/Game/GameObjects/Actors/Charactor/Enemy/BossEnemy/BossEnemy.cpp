@@ -1,4 +1,6 @@
-﻿#include "BossEnemy.h"
+﻿#include <EffekseerForDXLib.h>
+
+#include "BossEnemy.h"
 #include "Constants/ShaderRegister.h"
 
 namespace
@@ -16,9 +18,11 @@ namespace
 	//海の高さ
 	constexpr float water_y = 0.0f;
 	//アイドルアニメーションの名前
-	constexpr const wchar_t* idle_anim_name = L"A_mechISO_Walk_L";
+	constexpr const wchar_t* idle_anim_name = L"A_MechISO_Walk_L";
 	//アニメーションブレンドにかける時間
 	constexpr float anim_blend_time = 20.0f;
+	//アイドルアニメーションの再生スピード
+	constexpr float idle_anim_speed = 0.1f;
 }
 
 BossEnemy::BossEnemy(
@@ -71,7 +75,7 @@ void BossEnemy::OnInit()
 	}
 
 	//アイドルアニメーションを再生
-	m_animator.Play(MV1GetAnimIndex(m_modelHandle, idle_anim_name), true);
+	m_animator.Play(MV1GetAnimIndex(m_modelHandle, idle_anim_name), true, idle_anim_speed);
 }
 
 void BossEnemy::Update()
@@ -87,6 +91,8 @@ void BossEnemy::Update()
 
 	//脚の位置を取得するが、インデックスの途中で不要なものが入っているので
 	//二回に分けて取得する
+	//アニメーターの更新
+	m_animator.Update(anim_blend_time);
 
 	//最初の右足の位置(3本)を取得
 	for (int i = 1; i < static_cast<int>(LegIndex::BackLeft); i++)
@@ -114,13 +120,23 @@ void BossEnemy::Update()
 	for (size_t i = 0; i < m_prevLegPositions.size(); i++)
 	{
 		if (m_prevLegPositions[i].y > water_y &&
-			m_currentLegPositions[i].y < water_y)
+			m_currentLegPositions[i].y < water_y &&
+			m_currentLegPositions[i].y > -10.0f)
 		{
-			//TODO:エフェクトを再生する
+			//水しぶきエフェクトを再生する
+			//Effekseerのエフェクト再生を呼ぶ
+			m_effectPlayHandle = PlayEffekseer3DEffect(
+				ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::Splash)
+			);
+			//エフェクトの位置の調整する
+			SetPosPlayingEffekseer3DEffect(
+				m_effectPlayHandle,
+				m_currentLegPositions[i].x,
+				m_currentLegPositions[i].y,
+				m_currentLegPositions[i].z
+			);
 		}
 	}
-	//アニメーターの更新
-	m_animator.Update(anim_blend_time);
 }
 
 void BossEnemy::Draw()
@@ -132,10 +148,18 @@ void BossEnemy::Draw()
 	UpdateShaderMatrixData();
 
 	//モデル描画
-	MV1DrawModel(m_modelHandle);
+	DrawEnemy();
 
-	int frameNum = MV1GetFrameNum(m_modelHandle);
-	DrawFormatString(0, 100, 0xffffff, L"frameNum : %d", frameNum);
+#ifdef _DEBUG
+	//DrawFormatString(0, 100, 0xffffff, L"frameNum : %d", frameNum);
+	int listNum = MV1GetTriangleListNum(m_modelHandle);
+	for (int i = 0; i < listNum; i++)
+	{
+		int type = MV1GetTriangleListVertexType(m_modelHandle, i);
+		DrawFormatString(0, 150, 0xffffff, L"type : %d", type);
+	}
+	DrawFormatString(0, 215, 0xff0000, L"legPosY : %f", m_currentLegPositions[2].y);
+#endif
 }
 
 void BossEnemy::TakeDamage(int damage)
@@ -144,27 +168,23 @@ void BossEnemy::TakeDamage(int damage)
 
 void BossEnemy::DrawEnemy()
 {
-	//ResourceLoaderから浮遊敵の法線マップを取得
+	//ResourceLoaderからボスの法線マップを取得
 	//ResourceLoaderのインスタンスを取得
-	//const ResourceLoader& resourceLoader = ResourceLoader::GetInstance();
-	////法線マップ取得
-	//const int normGraphH = resourceLoader.GetGraphic(
-	//	ResourceLoader::GraphicID::EnemyNormalMap);
-	////エミッションマップを取得
-	//const int emissionGraphH = resourceLoader.GetGraphic(
-	//	ResourceLoader::GraphicID::EnemyEmissionMap);
-	////ディゾルブ用ノイズ
-	//int noiseHandle = ResourceLoader::GetInstance().GetGraphic(
-	//	ResourceLoader::GraphicID::DissolveNoise
-	//);
+	const ResourceLoader& resourceLoader = ResourceLoader::GetInstance();
+	//法線マップ取得
+	const int normGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::BossNormal);
+	//エミッションマップを取得
+	const int emissionGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::BossEmission);
 
-	////ハンドルとレジスタ番号をセットで保持しておく
-	//std::vector<std::pair<int, int>> textures;
-	//textures.push_back({ ShaderRegister::tex_normal,normGraphH });//法線マップ
-	//textures.push_back({ ShaderRegister::tex_metalic,-1 });//メタリックマップはないので-1
-	//textures.push_back({ ShaderRegister::tex_emission,emissionGraphH });//エミッション
-	//textures.push_back({ ShaderRegister::tex_noise,noiseHandle });//ノイズテクスチャ
+	//ハンドルとレジスタ番号をセットで保持しておく
+	std::vector<std::pair<int, int>> textures;
+	textures.push_back({ ShaderRegister::tex_normal,normGraphH });//法線マップ
+	textures.push_back({ ShaderRegister::tex_metalic,-1 });//メタリックマップはないので-1
+	textures.push_back({ ShaderRegister::tex_emission,emissionGraphH });//エミッション
+	textures.push_back({ ShaderRegister::tex_noise,-1 });//ノイズテクスチャも途切れることがないのでなし
 
-	////DrawWithLightingにペアの配列を渡してモデルを描画
-	//DrawWithLighting(textures);
+	//DrawWithLightingにペアの配列を渡してモデルを描画
+	DrawWithLighting(textures,true);
 }

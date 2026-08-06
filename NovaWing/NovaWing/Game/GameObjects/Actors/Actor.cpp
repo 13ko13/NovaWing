@@ -91,7 +91,8 @@ Vector3 Actor::GetCameraPos() const
 	return m_pCamera.lock()->GetPos();
 }
 
-void Actor::DrawWithLighting(const std::vector<std::pair<int, int>>& textures)
+void Actor::DrawWithLighting(const std::vector<std::pair<int, int>>& textures,
+	bool isSkinned)
 {
 	//テクスチャの中身を1つずつ取り出し、テクスチャレジスタにセット
 	for(const std::pair<int,int>& tex : textures)
@@ -101,7 +102,7 @@ void Actor::DrawWithLighting(const std::vector<std::pair<int, int>>& textures)
 	}
 
 	//シェーダを適用
-	LightingManager::GetInstance().ApplyShader();
+	LightingManager::GetInstance().ApplyShader(isSkinned);
 	BindShaderBuffers();//シェーダをセットする
 	//モデルを描画
 	MV1DrawModel(m_modelHandle);

@@ -48,4 +48,7 @@ private:
 
 	//モデル用のアニメーター
 	ModelAnimator m_animator;
+
+	//effekseerの再生中のエフェクトのハンドル
+	int m_effectPlayHandle = -1;
 };
