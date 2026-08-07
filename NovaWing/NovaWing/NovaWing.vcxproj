@@ -159,9 +159,13 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\EnemyBase.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\EnemyFactory.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemyDataSetter.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemy.cpp" />
     <ClCompile Include="Game\UI\HPGaugeUI.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\IBossEnemyState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\SummonState.cpp" />
     <ClCompile Include="Utility\GraphShaderDraw.cpp" />
     <ClCompile Include="Scene\ClearScene.cpp" />
     <ClCompile Include="CSVData\CSVData.cpp" />
@@ -233,9 +237,13 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemyDataSetter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\EnemyBase.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\EnemyFactory.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemyDataSetter.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemy.h" />
     <ClInclude Include="Game\UI\HPGaugeUI.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\IBossEnemyState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\SummonState.h" />
     <ClInclude Include="Utility\GraphShaderDraw.h" />
     <ClInclude Include="Scene\ClearScene.h" />
     <ClInclude Include="CSVData\CSVData.h" />

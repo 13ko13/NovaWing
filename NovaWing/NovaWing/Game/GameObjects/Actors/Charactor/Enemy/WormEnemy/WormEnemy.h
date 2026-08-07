@@ -2,14 +2,14 @@
 #include <memory>
 #include <vector>
 
-#include "Charactor/Charactor.h"
 #include "Utility/Sphere.h"
 #include "Utility/Vector2.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
 
 class Player;
 class BulletManager;
 class CameraBase;
-class WormEnemy : public Charactor
+class WormEnemy : public EnemyBase
 {
 public:
 	struct WormEnemyData
@@ -43,10 +43,6 @@ public:
 	const std::vector<Sphere>& GetSegmentSpheres() const { return m_segmentSpheres; }
 
 private:
-	//プレイヤーの弱参照
-	std::weak_ptr<Player> m_pPlayer;
-	//弾管理者
-	std::weak_ptr<BulletManager> m_pBulletManager;
 	//胴体の数
 	int m_segmentCount = 0;
 	//螺旋移動用
@@ -67,8 +63,6 @@ private:
 	bool m_isCanPlayEffect = false;
 	//胴体の死亡エフェクトを何回出したか
 	int m_deathEffectNum = 0;
-	//死亡待機状態か
-	bool m_isWatingDeath = false;
 
 	//Z+方向かZ-方向かどちらに進むかの移動方向
 	float m_moveDirection = 0;//移動方向(1.0:Z+方向、-1.0:Z-方向)

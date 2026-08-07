@@ -1,14 +1,14 @@
 ﻿#pragma once
-#include "Charactor/Charactor.h"
 #include "Manager/ResourceLoader.h"
 #include "Utility/Sphere.h"
 #include "Utility/ModelAnimator.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
 
 class Player;
 class IFloatingEnemyState;
 class BulletManager;
 class CameraBase;
-class FloatingEnemy : public Charactor
+class FloatingEnemy : public EnemyBase
 {
 public:
 	FloatingEnemy(const std::weak_ptr<Player> pPlayer,
@@ -48,9 +48,7 @@ private:
 	void DrawEnemy();
 
 private:
-	std::weak_ptr<Player> m_pPlayer;//プレイヤーを借りる
 	std::shared_ptr<IFloatingEnemyState> m_pState;//ステート
-	std::weak_ptr<BulletManager> m_pBulletManager;//弾の管理者
 
 	Sphere m_colSphere;//当たり判定(球)
 
@@ -60,8 +58,6 @@ private:
 	//effekseerの再生中のエフェクトのハンドル
 	int m_effectPlayHandle = -1;
 
-	//死亡待機状態中か
-	bool m_isDying = false;
 	//死亡状態中のフレーム計測
 	int m_dyingFrame = 0;
 };

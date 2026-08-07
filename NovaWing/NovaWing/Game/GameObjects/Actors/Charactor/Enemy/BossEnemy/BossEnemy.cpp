@@ -30,9 +30,7 @@ BossEnemy::BossEnemy(
 	const ResourceLoader::ModelID Id,
 	const std::shared_ptr<BulletManager> pBulletManager,
 	std::weak_ptr<CameraBase> pCamera, const Vector3& pos): 
-	Charactor(Id,pCamera),
-    m_pPlayer(pPlayer),
-	m_pBulletManager(pBulletManager),
+	EnemyBase(Id,pCamera,pPlayer,pBulletManager),
 	m_colSphere(pos),
 	m_animator(m_modelHandle)
 {

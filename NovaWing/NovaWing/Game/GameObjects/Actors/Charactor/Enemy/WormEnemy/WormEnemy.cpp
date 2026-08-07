@@ -33,13 +33,12 @@ namespace
 	constexpr int death_effect_interval = 13;
 }
 
-WormEnemy::WormEnemy(const std::weak_ptr<Player> pPlayer,//プレイヤー
-		const std::shared_ptr<BulletManager> pBulletManager,//バレットマネージャー
-		std::weak_ptr<CameraBase> camera,//カメラ
-		const WormEnemyData& data) :
-	Charactor(data.modelID, camera),
-	m_pPlayer(pPlayer),
-	m_pBulletManager(pBulletManager),
+WormEnemy::WormEnemy(
+	const std::weak_ptr<Player> pPlayer,//プレイヤー
+	const std::shared_ptr<BulletManager> pBulletManager,//バレットマネージャー
+	std::weak_ptr<CameraBase> camera,//カメラ
+	const WormEnemyData& data) :
+	EnemyBase(data.modelID,camera,pPlayer,pBulletManager),
 	m_segmentCount(data.segmentCount),
 	m_headSphere(data.pos),
 	m_moveDirection(data.direction),
@@ -94,7 +93,7 @@ void WormEnemy::Update()
 	m_frame++;
 
 	//死亡待機状態じゃなければ更新処理を行う
-	if (!m_isWatingDeath)
+	if (!m_isDying)
 	{
 		//螺旋状に回転させる
 		m_rotationAngle += rot_speed;
@@ -338,6 +337,6 @@ void WormEnemy::TakeDamage(int damage)
 		//エフェクト再生の許可を出す
 		m_isCanPlayEffect = true;
 		//死亡待機状態にする
-		m_isWatingDeath = true;
+		m_isDying = true;
 	}
 }

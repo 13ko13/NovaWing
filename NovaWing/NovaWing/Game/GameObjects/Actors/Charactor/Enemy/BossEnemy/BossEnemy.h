@@ -1,12 +1,12 @@
 ﻿#pragma once
-#include "Game/GameObjects/Actors/Charactor/Charactor.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
 #include "Manager/ResourceLoader.h"
 #include "Utility/Sphere.h"
 #include "Utility/ModelAnimator.h"
 
 class Player;
 class BulletManager;
-class BossEnemy : public Charactor
+class BossEnemy : public EnemyBase
 {
 public:
 	BossEnemy(const std::weak_ptr<Player> pPlayer,
@@ -26,8 +26,6 @@ private:
 	void DrawEnemy();
 
 private:
-	std::weak_ptr<Player> m_pPlayer; // プレイヤーを借りる
-	std::weak_ptr<BulletManager> m_pBulletManager; // 弾の管理者
 	Sphere m_colSphere;	 // 当たり判定(球)
 	//モデルの前フレームの足の位置(6箇所)
 	std::vector<VECTOR> m_prevLegPositions;
