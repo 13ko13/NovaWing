@@ -19,7 +19,7 @@ namespace
 
 FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 	const ResourceLoader::ModelID Id,
-	const std::shared_ptr<BulletManager> pBulletManager,
+	const std::weak_ptr<BulletManager> pBulletManager,
 	std::weak_ptr<CameraBase> camera,
 	const Vector3& pos) :
 	EnemyBase(Id,camera,pPlayer,pBulletManager),

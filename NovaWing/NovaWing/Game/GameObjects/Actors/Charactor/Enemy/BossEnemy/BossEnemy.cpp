@@ -2,6 +2,7 @@
 
 #include "BossEnemy.h"
 #include "Constants/ShaderRegister.h"
+#include "BossIdleState.h"
 
 namespace
 {
@@ -17,25 +18,26 @@ namespace
 	constexpr int one_side_leg_num = 3;
 	//海の高さ
 	constexpr float water_y = 0.0f;
-	//アイドルアニメーションの名前
-	constexpr const wchar_t* idle_anim_name = L"A_MechISO_Walk_L";
+	//モデルの名前
+	const std::wstring model_name = L"DeformationSystem|";
+	//後ろ移動アニメーションの名前
+	const std::wstring idle_anim_name = model_name + L"A_MechISO_WalkBackward";
+
 	//アニメーションブレンドにかける時間
 	constexpr float anim_blend_time = 20.0f;
 	//アイドルアニメーションの再生スピード
-	constexpr float idle_anim_speed = 0.1f;
+	constexpr float idle_anim_speed = 0.5f;
 }
 
-BossEnemy::BossEnemy(
-	const std::weak_ptr<Player> pPlayer,
-	const ResourceLoader::ModelID Id,
-	const std::shared_ptr<BulletManager> pBulletManager,
-	std::weak_ptr<CameraBase> pCamera, const Vector3& pos): 
-	EnemyBase(Id,pCamera,pPlayer,pBulletManager),
-	m_colSphere(pos),
-	m_animator(m_modelHandle)
+BossEnemy::BossEnemy(BossEnemyData& data) :
+	EnemyBase(data.Id, data.pCamera, data.pPlayer, 
+	data.pBulletManager),
+	m_colSphere(data.pos),
+	m_animator(m_modelHandle),
+	m_pEnemyFactory(data.pEnemyFactory)
 {
 	//位置を反映
-	SetPos(pos);
+	SetPos(data.pos);
 }
 
 BossEnemy::~BossEnemy()
@@ -72,12 +74,33 @@ void BossEnemy::OnInit()
 		m_currentLegPositions.push_back(leftLegPos);
 	}
 
-	//アイドルアニメーションを再生
-	m_animator.Play(MV1GetAnimIndex(m_modelHandle, idle_anim_name), true, idle_anim_speed);
+	//後ろ移動アニメーションを再生
+	m_animator.Play(MV1GetAnimIndex(m_modelHandle, idle_anim_name.c_str()), true, idle_anim_speed);
+
+	//ステートを初期化
+	m_pState = std::make_shared<BossIdleState>(
+		std::static_pointer_cast<BossEnemy>(shared_from_this())
+	);
+	m_pState->Enter();
 }
 
 void BossEnemy::Update()
 {
+	//ステートの更新
+	m_pState->Update();
+	//次のステートを取得
+	std::shared_ptr<IBossEnemyState> pState = m_pState->GetNextState();
+	//次のステートがあればステートを変更する
+	if (pState != nullptr)
+	{
+		//前ステートの出るときの処理
+		m_pState->Exit();
+		//ステートを変更
+		m_pState = pState;
+		//切り替え後の入った時の処理
+		m_pState->Enter();
+	}
+
 	//キャラクタークラス共通の処理
 	Charactor::Update();
 
@@ -118,8 +141,7 @@ void BossEnemy::Update()
 	for (size_t i = 0; i < m_prevLegPositions.size(); i++)
 	{
 		if (m_prevLegPositions[i].y > water_y &&
-			m_currentLegPositions[i].y < water_y &&
-			m_currentLegPositions[i].y > -10.0f)
+			m_currentLegPositions[i].y < water_y)
 		{
 			//水しぶきエフェクトを再生する
 			//Effekseerのエフェクト再生を呼ぶ

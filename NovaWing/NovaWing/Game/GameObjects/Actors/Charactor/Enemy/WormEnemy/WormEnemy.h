@@ -23,7 +23,7 @@ public:
 
 public:
 	WormEnemy(const std::weak_ptr<Player> pPlayer,//プレイヤー
-		const std::shared_ptr<BulletManager> pBulletManager,//バレットマネージャー
+		const std::weak_ptr<BulletManager> pBulletManager,//バレットマネージャー
 		std::weak_ptr<CameraBase> camera,//カメラ
 		const WormEnemyData& data//ワームエネミーに必要なデータ
 	);

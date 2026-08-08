@@ -37,6 +37,7 @@
 #include "Game/UI/HPGaugeUI.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossEnemy.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossEnemyDataSetter.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/EnemyFactory.h"
 
 namespace
 {
@@ -98,6 +99,15 @@ void GameScene::Init()
 	//プレイヤーにターゲットマネージャーをセットする
 	m_pPlayer->SetTargetManager(m_pTargetManager);
 
+	//敵生産工場の初期化
+	m_pEnemyFactory = std::make_shared<EnemyFactory>(
+		m_pPlayer,
+		m_pBulletManager,
+		m_pCamera,
+		m_pTargetManager,
+		m_pCollisionManager
+	);
+
 	//浮遊エネミーの初期化
 	//データの数分のエネミーを作成
 	m_pFloatingEnemies = FloatingEnemyDataSetter::CreateEnemy(
@@ -134,7 +144,8 @@ void GameScene::Init()
 	m_pBoss = BossEnemyDataSetter::CreateEnemy(
 		m_pPlayer,
 		m_pCamera,
-		m_pBulletManager
+		m_pBulletManager,
+		m_pEnemyFactory
 	);
 	m_pBoss->Init();
 

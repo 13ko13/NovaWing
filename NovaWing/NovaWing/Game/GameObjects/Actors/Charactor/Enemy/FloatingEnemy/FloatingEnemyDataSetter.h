@@ -14,7 +14,7 @@ public:
     static std::vector<std::shared_ptr<FloatingEnemy>> CreateEnemy(
         std::weak_ptr<Player> pPlayer,
         std::weak_ptr<CameraBase> pCamera,
-        std::shared_ptr<BulletManager> pBulletManager
+        std::weak_ptr<BulletManager> pBulletManager
     );
 
 private:

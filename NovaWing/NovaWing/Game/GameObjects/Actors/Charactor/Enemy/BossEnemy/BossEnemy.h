@@ -6,20 +6,35 @@
 
 class Player;
 class BulletManager;
+class IBossEnemyState;
+class EnemyFactory;
 class BossEnemy : public EnemyBase
 {
 public:
-	BossEnemy(const std::weak_ptr<Player> pPlayer,
-			  const ResourceLoader::ModelID Id,
-			  const std::shared_ptr<BulletManager> pBulletManager,
-			  std::weak_ptr<CameraBase> camera,
-			  const Vector3& pos);
+	//ボス生成に必要な情報
+	struct BossEnemyData
+	{
+		std::weak_ptr<Player> pPlayer;
+		ResourceLoader::ModelID Id;
+		std::weak_ptr<BulletManager> pBulletManager;
+		std::weak_ptr<CameraBase> pCamera;
+		Vector3 pos;
+		std::weak_ptr<EnemyFactory> pEnemyFactory;
+	};
+
+	BossEnemy(BossEnemyData& data);
+
 	~BossEnemy();
 
 	void OnInit() override; // 初期化処理
 	void Update() override;//更新処理
 	void Draw() override;//描画処理
 	void TakeDamage(int damage) override;//被弾処理
+
+	//敵生産工場取得
+	std::weak_ptr<EnemyFactory> GetEnemyFactory() const {
+		return m_pEnemyFactory; 
+	}
 
 private:
 	//敵の描画(シェーダ適応も含めた)
@@ -49,4 +64,9 @@ private:
 
 	//effekseerの再生中のエフェクトのハンドル
 	int m_effectPlayHandle = -1;
+
+	//ステート
+	std::shared_ptr<IBossEnemyState> m_pState;
+	//敵生産工場
+	std::weak_ptr<EnemyFactory> m_pEnemyFactory;
 };

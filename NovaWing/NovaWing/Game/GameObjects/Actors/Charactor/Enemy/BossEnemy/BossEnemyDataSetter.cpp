@@ -14,7 +14,8 @@ namespace
 std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
         std::weak_ptr<Player> pPlayer,
         std::weak_ptr<CameraBase> pCamera,
-        std::shared_ptr<BulletManager> pBulletManager
+        std::weak_ptr<BulletManager> pBulletManager,
+        std::weak_ptr<EnemyFactory> pEnemyFactory
 )
 {
     std::shared_ptr<BossEnemy> pEnemy;
@@ -42,15 +43,17 @@ std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
         Vector3 pos = Vector3::FromWString(
             dataString[1], dataString[2], dataString[3]);
 
-        //その位置と、pCameraで敵を一つ作成する
-        pEnemy = std::make_shared<BossEnemy>(
-            pPlayer,//プレイヤー
-            modelID,//モデルID
-            pBulletManager,//バレットマネージャー
-            pCamera,//カメラ
-            pos//位置
-        );
-    }
+        BossEnemy::BossEnemyData bossData;
+        bossData.Id = modelID;
+        bossData.pBulletManager = pBulletManager;
+        bossData.pCamera = pCamera;
+        bossData.pEnemyFactory = pEnemyFactory;
+        bossData.pos = pos;
+        bossData.pPlayer = pPlayer;
 
+        //その位置と、pCameraで敵を一つ作成する
+        pEnemy = std::make_shared<BossEnemy>(bossData);
+    }
+    //出来上がったボスのポインタを返す
     return pEnemy;
 }
