@@ -72,6 +72,8 @@ public:
 		Charging,//プレイヤーのチャージ中のエフェクト
 		EnemyBullet,//エネミーの弾エフェクト
 		Splash,//水しぶきエフェクト
+		SummonFloating,//浮遊敵召喚時エフェクト
+		SummonWorm,//ワーム召喚時エフェクト
 	};
 
 	//音の種類

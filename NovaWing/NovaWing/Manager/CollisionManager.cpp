@@ -40,7 +40,7 @@ CollisionManager::~CollisionManager()
 void CollisionManager::RegisterFloatingEnemy(std::shared_ptr<FloatingEnemy> pEnemy)
 {
 	//敵の配列に渡された敵を格納
-	m_pEnemies.push_back(pEnemy);
+	m_pFloatingEnemies.push_back(pEnemy);
 }
 
 void CollisionManager::RegisterWormEnemy(std::shared_ptr<WormEnemy> pEnemy)
@@ -115,7 +115,7 @@ void CollisionManager::Update()
 
 	//敵も同様にshared_ptrに変換
 	std::vector<std::shared_ptr<FloatingEnemy>> pSharedEnemies;//浮遊敵
-	for (std::weak_ptr<FloatingEnemy> pWeakEnemy : m_pEnemies)
+	for (std::weak_ptr<FloatingEnemy> pWeakEnemy : m_pFloatingEnemies)
 	{
 		//shared_ptrに変換
 		std::shared_ptr<FloatingEnemy> pSharedEnemy = pWeakEnemy.lock();
@@ -301,5 +301,25 @@ void CollisionManager::Update()
 		//プレイヤーにダメージを食らっていないことを知らせる
 		pPlayer->OnLeaveDamaging();
 	}
+
+	//死んでいるものは配列から消す
+	m_pFloatingEnemies.erase(
+	std::remove_if(m_pFloatingEnemies.begin(), m_pFloatingEnemies.end(),
+		[](const std::weak_ptr<FloatingEnemy>& pEnemy)
+		{
+			return pEnemy.lock() == nullptr;
+		}),
+	m_pFloatingEnemies.end()
+	);
+
+	//死んでいるものは配列から消す
+	m_pWormEnemies.erase(
+	std::remove_if(m_pWormEnemies.begin(), m_pWormEnemies.end(),
+		[](const std::weak_ptr<WormEnemy>& pEnemy)
+		{
+			return pEnemy.lock() == nullptr;
+		}),
+	m_pWormEnemies.end()
+	);
 }
 

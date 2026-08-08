@@ -1,6 +1,9 @@
-﻿#include "SummonState.h"
+﻿#include <EffekseerForDXLib.h>
+
+#include "SummonState.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/EnemyFactory.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossIdleState.h"
+#include "Manager/ResourceLoader.h"
 
 SummonState::SummonState(
 	std::weak_ptr<BossEnemy> pBoss,
@@ -23,6 +26,40 @@ void SummonState::Enter()
 	int rand = GetRand(
 		static_cast<int>(EnemyFactory::EnemyType::Max) - 1
 	);
+
+	//生成した敵に応じて再生するエフェクトを変える
+	int handle = -1;
+	switch (static_cast<EnemyFactory::EnemyType>(rand))
+	{
+	case EnemyFactory::EnemyType::FloatingEnemy:
+		//ハンドルを取得
+		handle = ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::SummonFloating);
+
+		//エフェクトを再生
+		m_floatingEffPlayH = PlayEffekseer3DEffect(handle);
+		//位置を設定
+		SetPosPlayingEffekseer3DEffect(
+			m_floatingEffPlayH,
+			m_summonPos.m_x, 
+			m_summonPos.m_y,
+			m_summonPos.m_z
+		);
+		break;
+	case EnemyFactory::EnemyType::WormEnemy:
+		//ハンドルを取得
+		handle = ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::SummonWorm);
+
+		//エフェクトを再生
+		m_wormEffPlayH = PlayEffekseer3DEffect(handle);
+		//位置を設定
+		SetPosPlayingEffekseer3DEffect(
+			m_wormEffPlayH,
+			m_summonPos.m_x,
+			m_summonPos.m_y,
+			m_summonPos.m_z
+		);
+		break;
+	}
 
 	//敵生産工場に生産させる
 	if (m_pEnemyFactory.lock() != nullptr)

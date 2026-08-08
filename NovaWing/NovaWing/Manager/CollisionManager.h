@@ -31,7 +31,7 @@ private:
 	//弾のマネージャー
 	std::weak_ptr<BulletManager> m_pBulletManager;
 	//浮遊敵の配列
-	std::vector<std::weak_ptr<FloatingEnemy>> m_pEnemies;
+	std::vector<std::weak_ptr<FloatingEnemy>> m_pFloatingEnemies;
 	//ワームエネミーの配列
 	std::vector<std::weak_ptr<WormEnemy>> m_pWormEnemies;
 	//岩の配列

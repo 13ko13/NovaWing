@@ -69,6 +69,10 @@ namespace
 	constexpr const wchar_t* enemy_bullet_effect_path = L"Data/Effect/EnemyBullet/EnemyBullet.efk";
 	//水しぶき
 	constexpr const wchar_t* splash_effect_path = L"Data/Effect/Splash/Splash.efk";
+	//浮遊敵召喚
+	constexpr const wchar_t* summon_floating_eff_path = L"Data/Effect/SummonFloatingEnemy/SummonFloating.efk";
+	//ワーム召喚
+	constexpr const wchar_t* summon_worm_eff_path = L"Data/Effect/SummonWormEnemy/SummonWorm.efk";
 
 	//---------- CSV上でのモデル識別文字列 ----------
 	constexpr const wchar_t* rock1_csv_name = L"Rock1";
@@ -86,6 +90,8 @@ namespace
 	constexpr float charging_effect_scale = 1.0f;
 	constexpr float enemy_bullet_effect_scale = 1.5f;
 	constexpr float splash_effect_scale = 3.0f;
+	constexpr float summon_floating_eff_scale = 1.0f;
+	constexpr float summon_worm_eff_scale = 1.0f;
 }
 
 ResourceLoader& ResourceLoader::GetInstance()
@@ -439,4 +445,14 @@ void ResourceLoader::KeepEffect()
 	handle = LoadEffekseerEffect(splash_effect_path, splash_effect_scale);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::Splash] = handle;
+
+	//浮遊敵召喚時エフェクト
+	handle = LoadEffekseerEffect(summon_floating_eff_path, summon_floating_eff_scale);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::SummonFloating] = handle;
+
+	//ワーム召喚時エフェクト
+	handle = LoadEffekseerEffect(summon_worm_eff_path, summon_worm_eff_scale);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::SummonWorm] = handle;
 }

@@ -33,13 +33,21 @@ void TargetManager::Update()
 	//敵をすべてshared_ptrに変換
 	std::vector<std::shared_ptr<FloatingEnemy>> pFloatingEnemies;
 	std::vector<std::shared_ptr<WormEnemy>> pWormEnemies;
-	for (std::weak_ptr<FloatingEnemy>& weakEnemy : m_pFloatingEnemies)//浮遊敵
+	for (std::weak_ptr<FloatingEnemy>& weakFloatingEnemy : m_pFloatingEnemies)//浮遊敵
 	{
-		pFloatingEnemies.push_back(weakEnemy.lock());
+		std::shared_ptr<FloatingEnemy> pEnemy = weakFloatingEnemy.lock();
+		if (pEnemy != nullptr)
+		{
+			pFloatingEnemies.push_back(pEnemy);
+		}
 	}
-	for (std::weak_ptr<WormEnemy>& weakEnemy : m_pWormEnemies)
+	for (std::weak_ptr<WormEnemy>& weakWormEnemy : m_pWormEnemies)
 	{
-		pWormEnemies.push_back(weakEnemy.lock());
+		std::shared_ptr<WormEnemy> pEnemy = weakWormEnemy.lock();
+		if (pEnemy != nullptr)
+		{
+			pWormEnemies.push_back(pEnemy);
+		}
 	}
 
 	//手前のレティクルの位置を計算
@@ -111,6 +119,24 @@ void TargetManager::Update()
 	m_reticlePos.m_x, m_reticlePos.m_y, m_reticlePos.m_z);
 	DrawFormatString(0, 420, 0xffffff, L"IsFocus:%d", m_isFocus);
 #endif
+
+	m_pFloatingEnemies.erase(
+	std::remove_if(m_pFloatingEnemies.begin(), m_pFloatingEnemies.end(),
+		[](const std::weak_ptr<FloatingEnemy>& pEnemy)
+		{
+			return pEnemy.lock() == nullptr;
+		}),
+	m_pFloatingEnemies.end()
+	);
+
+	m_pWormEnemies.erase(
+	std::remove_if(m_pWormEnemies.begin(), m_pWormEnemies.end(),
+		[](const std::weak_ptr<WormEnemy>& pEnemy)
+		{
+			return pEnemy.lock() == nullptr;
+		}),
+	m_pWormEnemies.end()
+	);
 }
 
 void TargetManager::RegisterFloatingEnemy(std::shared_ptr<FloatingEnemy> pFloatingEnemy)

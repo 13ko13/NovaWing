@@ -8,7 +8,7 @@
 namespace
 {
 	//攻撃をどのぐらいの間隔で行うか
-	constexpr int attack_interval = 60 * 1;
+	constexpr int attack_interval = 60 * 3;
 }
 
 BossIdleState::BossIdleState(std::weak_ptr<BossEnemy> pBoss) :

@@ -26,7 +26,7 @@ namespace
 	//アニメーションブレンドにかける時間
 	constexpr float anim_blend_time = 20.0f;
 	//アイドルアニメーションの再生スピード
-	constexpr float idle_anim_speed = 0.5f;
+	constexpr float idle_anim_speed = 0.3f;
 }
 
 BossEnemy::BossEnemy(BossEnemyData& data) :

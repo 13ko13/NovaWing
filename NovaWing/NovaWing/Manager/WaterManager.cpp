@@ -13,9 +13,9 @@
 namespace
 {
 	//グリッドの縦の分割数
-	constexpr int vertical_grid_num = 100;
+	constexpr int vertical_grid_num = 40;
 	//グリッドの横の分割数
-	constexpr int horizontal_grid_num = 100;
+	constexpr int horizontal_grid_num = 40;
 
 	//グリッド全体の広さ
 	constexpr Size grid_size = Size(10000,30000 );
