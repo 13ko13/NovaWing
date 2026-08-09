@@ -36,6 +36,12 @@ public:
 		return m_pEnemyFactory; 
 	}
 
+	//ボスのモデルハンドル取得
+	int GetModelHandle() const { return m_modelHandle; }
+
+	//プレイヤー取得
+	std::weak_ptr<Player> GetPlayer() const { return m_pPlayer; }
+
 private:
 	//敵の描画(シェーダ適応も含めた)
 	void DrawEnemy();

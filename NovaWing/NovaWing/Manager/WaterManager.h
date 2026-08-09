@@ -96,5 +96,8 @@ private:
 
 	//カメラの弱参照
 	std::weak_ptr<CameraBase> m_pCamera;
+
+	//板ポリが今までどのぐらい押し出されたか
+	float m_meshZOffset = 0.0f;
 };
 

@@ -64,6 +64,9 @@ namespace
 
 	//ダメージシェーダのハンドル
 	constexpr const wchar_t* damage_shader_path = L"DamagePS.pso";
+
+	//ゲージの初期値
+	constexpr float first_gauge = 100.0f;
 } // namespace
 
 Player::Player(
@@ -91,13 +94,13 @@ void Player::OnInit()
 	// 初期座標
 	m_pos = first_pos;
 	// ゲージ初期化
-	m_gauge = 100.0f;
+	m_gauge = first_gauge;
 
 	// シェーダに渡す定数バッファを作成
 	CreateShaderBuffers();
 
 	// ライトの方向ベクトルをセットする
-	LightingManager::GetInstance().SetLightDirection(Vector3(0.0f, -1.0f, 0.6f));
+	LightingManager::GetInstance().SetLightDirection(Vector3(1.0f, -1.0f, 0.6f));
 
 	// MovementStateの初期化
 	// 待機状態

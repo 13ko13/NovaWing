@@ -8,7 +8,7 @@
 
 namespace
 {
-	constexpr float move_speed = 0.1f;
+	constexpr float move_speed = 8.0f;
 
 	//アナログスティックの入力値を-1～1に正規化するための割る数
 	constexpr float stick_input_max = 1000.0f;
@@ -19,6 +19,7 @@ namespace
 IdleMovementState::IdleMovementState(const std::weak_ptr<Player> pPlayer):
 	IMovementState(pPlayer)
 {
+	//入った時の処理
 	Enter();
 }
 

@@ -31,6 +31,11 @@ public:
 	//初期回転を常に保存しておく
 	Quaternion GetInitRotation() const { return m_initRotation; }
 
+	//プレイヤーのモデルが逆向きなので、GetForward/GetBackはコード上と見た目が逆になる
+	//見た目通りの前方向・後方向が欲しいときはこちらを使う
+	Vector3 GetVisualForward() const { return GetBack(); }
+	Vector3 GetVisualBack() const { return GetForward(); }
+
 	//AngleXまでLerpする
 	void LerpToAngleX(float targetAngle,float t);
 	//AngleYまでLerpする

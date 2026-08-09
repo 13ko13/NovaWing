@@ -4,6 +4,8 @@
 #include "BossIdleState.h"
 #include "SummonState.h"
 #include "BossEnemy.h"
+#include "Game/GameObjects/Actors/Charactor/Player/Player.h"
+#include "BossBeamState.h"
 
 namespace
 {
@@ -13,8 +15,11 @@ namespace
 	const Vector3 summon_pos_offset = Vector3(0.0f, 1000.0f, -1500.0f);
 }
 
-BossIdleState::BossIdleState(std::weak_ptr<BossEnemy> pBoss) :
-	IBossEnemyState(pBoss)
+BossIdleState::BossIdleState(
+	std::weak_ptr<BossEnemy> pBoss,
+	std::weak_ptr<Player> pPlayer) :
+	IBossEnemyState(pBoss),
+	m_pPlayer(pPlayer)
 {
 }
 
@@ -64,7 +69,13 @@ void BossIdleState::Update()
 		break;
 
 		case AttackType::Beam://ビーム
-			//まだステートがないので何も行わない
+
+			//ビームステートに変更
+			ChangeState(
+				std::make_shared<BossBeamState>(
+					m_pBoss, m_pPlayer)
+				);
+
 			break;
 
 		default:

@@ -1,9 +1,12 @@
 ﻿#pragma once
 #include "IBossEnemyState.h"
+
+class Player;
 class BossIdleState : public IBossEnemyState
 {
 public:
-	BossIdleState(std::weak_ptr<BossEnemy> pBoss);
+	BossIdleState(std::weak_ptr<BossEnemy> pBoss,
+		std::weak_ptr<Player> pPlayer);
 	~BossIdleState();
 
 	void Enter() override;
@@ -22,5 +25,8 @@ private:
 
 		Max,//数
 	};
+
+	//プレイヤーの弱参照
+	std::weak_ptr<Player> m_pPlayer;
 };
 

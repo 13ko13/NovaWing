@@ -3,6 +3,7 @@
 #include "BossEnemy.h"
 #include "Constants/ShaderRegister.h"
 #include "BossIdleState.h"
+#include "Game/GameObjects/Actors/Charactor/Player/Player.h"
 
 namespace
 {
@@ -79,13 +80,21 @@ void BossEnemy::OnInit()
 
 	//ステートを初期化
 	m_pState = std::make_shared<BossIdleState>(
-		std::static_pointer_cast<BossEnemy>(shared_from_this())
+		std::static_pointer_cast<BossEnemy>(shared_from_this()),
+		m_pPlayer
 	);
 	m_pState->Enter();
 }
 
 void BossEnemy::Update()
 {
+	//プレイヤーと同じ速度で移動する
+	Vector3 myVel = m_pPlayer.lock()->GetVel();
+	//zのみコピー
+	myVel.m_y = 0.0f;
+	myVel.m_x = 0.0f;
+	SetVel(myVel);
+
 	//ステートの更新
 	m_pState->Update();
 	//次のステートを取得
@@ -170,15 +179,12 @@ void BossEnemy::Draw()
 	//モデル描画
 	DrawEnemy();
 
+	//ステートごとの描画
+	m_pState->Draw();
+
 #ifdef _DEBUG
-	//DrawFormatString(0, 100, 0xffffff, L"frameNum : %d", frameNum);
-	int listNum = MV1GetTriangleListNum(m_modelHandle);
-	for (int i = 0; i < listNum; i++)
-	{
-		int type = MV1GetTriangleListVertexType(m_modelHandle, i);
-		DrawFormatString(0, 150, 0xffffff, L"type : %d", type);
-	}
-	DrawFormatString(0, 215, 0xff0000, L"legPosY : %f", m_currentLegPositions[2].y);
+	//プレイヤーの速度
+	//DrawFormatString(0, 230, 0xff0000, L"PlayerVelZ : %f", m_pPlayer.lock() ->GetVel().m_z);
 #endif
 }
 

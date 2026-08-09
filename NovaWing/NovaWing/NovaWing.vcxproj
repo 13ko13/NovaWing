@@ -159,6 +159,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossBeamState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossIdleState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\EnemyBase.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\EnemyFactory.cpp" />
@@ -238,6 +239,7 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemyDataSetter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossBeamState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossIdleState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\EnemyBase.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\EnemyFactory.h" />

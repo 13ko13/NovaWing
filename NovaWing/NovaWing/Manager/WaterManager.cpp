@@ -22,8 +22,8 @@ namespace
 
 	//波アニメーションの時間経過速度(小さいほどゆっくり動く)
 	constexpr float time_speed = 0.01f;
-	//水面の頂点ワールド座標をカメラのZ座標に追従させる際のオフセット
-	constexpr float water_z_offset = 300.0f;
+	//プレイヤーが海の終端からどのくらい前に着いたら板ポリをワープさせるか
+	constexpr float warp_threshould = 7000.0f;
 }
 
 WaterManager::WaterManager(const std::shared_ptr<CameraBase> pCamera) :
@@ -237,15 +237,21 @@ void WaterManager::CreateConstantBuffer()
 
 void WaterManager::UpdateShaderMatrixData()
 {
-	//行列情報を入れる
-	//プレイヤーが動くのに合わせて水面も一緒に動くようにするために
-	//カメラのZ座標を使用して頂点のワールド座標が平行移動するようにする
-	//カメラのZ座標
-	float cameraZ = m_pCamera.lock()->GetPos().m_z + water_z_offset;
-	Matrix4x4 trans = Matrix4x4::Translate(Vector3(0.0f, 0.0f, cameraZ));
+	//カメラの位置を取得
+	Vector3 cameraPos = m_pCamera.lock()->GetPos();
+	//メッシュの終端位置を計算
+	float meshEndPos = m_meshZOffset + grid_size.m_height;
+	//カメラのZがその終端から閾値内に近づいているかを判定
+	while(cameraPos.m_z > meshEndPos - warp_threshould)
+	{
+		m_meshZOffset += grid_size.m_height - warp_threshould;
+		meshEndPos = m_meshZOffset + grid_size.m_height;//終端も更新しないと無限ループが起きる
+	}
 
-	//m_pCbufferMatrixData->world = trans.ToDxLib();
-	m_pCbufferMatrixData->world = MGetIdent();
+	//平行移動行列を作成
+	Matrix4x4 trans = Matrix4x4::Translate(Vector3(0.0f, 0.0f, m_meshZOffset));
+	//メッシュの位置が変わったことを頂点シェーダに知らせる
+	m_pCbufferMatrixData->world = trans.ToDxLib();
 	m_pCbufferMatrixData->view = GetCameraViewMatrix();
 	m_pCbufferMatrixData->proj = GetCameraProjectionMatrix();
 

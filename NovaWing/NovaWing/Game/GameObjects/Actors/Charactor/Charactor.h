@@ -20,7 +20,6 @@ public:
 	//最大HPを取得
 	int GetMaxHealth() const;
 
-
 protected:
 	//機体情報
 	int m_health = 100;//体力

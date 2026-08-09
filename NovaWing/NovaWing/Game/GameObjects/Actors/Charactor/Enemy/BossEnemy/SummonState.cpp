@@ -2,8 +2,9 @@
 
 #include "SummonState.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/EnemyFactory.h"
-#include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossIdleState.h"
+#include "BossIdleState.h"
 #include "Manager/ResourceLoader.h"
+#include "BossEnemy.h"
 
 SummonState::SummonState(
 	std::weak_ptr<BossEnemy> pBoss,
@@ -73,9 +74,12 @@ void SummonState::Enter()
 
 void SummonState::Update()
 {
+	//ボスが死んでいるなら処理を行わない
+	if (m_pBoss.lock() == nullptr) return;
+
 	//召喚は終了しているのでidleに戻る
 	ChangeState(
-		std::make_shared<BossIdleState>(m_pBoss)
+		std::make_shared<BossIdleState>(m_pBoss, m_pBoss.lock()->GetPlayer())
 	);
 }
 
