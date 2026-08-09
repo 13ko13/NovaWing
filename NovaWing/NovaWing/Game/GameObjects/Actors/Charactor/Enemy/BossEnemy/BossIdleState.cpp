@@ -9,6 +9,8 @@ namespace
 {
 	//攻撃をどのぐらいの間隔で行うか
 	constexpr int attack_interval = 60 * 3;
+	//召喚位置オフセット
+	const Vector3 summon_pos_offset = Vector3(0.0f, 1000.0f, -1500.0f);
 }
 
 BossIdleState::BossIdleState(std::weak_ptr<BossEnemy> pBoss) :
@@ -24,9 +26,6 @@ void BossIdleState::Enter()
 {
 	//念のため攻撃フレームをリセット
 	m_attackFrame = 0;
-#ifdef _DEBUG
-	printfDx(L"BossIdleState Enterが呼ばれた\n");
-#endif
 }
 
 void BossIdleState::Update()
@@ -52,17 +51,15 @@ void BossIdleState::Update()
 		{
 			//召喚位置を決める
 			Vector3 summonPos;
-			//仮でボスの位置から召喚する
+			//ボスの位置から少し離れた位置に召喚する
 			summonPos = m_pBoss.lock()->GetPos();
-
+			summonPos += summon_pos_offset;
+			
 			ChangeState(std::make_shared<SummonState>(
 				m_pBoss,
 				summonPos,
 				m_pBoss.lock()->GetEnemyFactory()
 			));
-#ifdef _DEBUG
-			printfDx(L"召喚された！\n");
-#endif
 		}
 		break;
 
