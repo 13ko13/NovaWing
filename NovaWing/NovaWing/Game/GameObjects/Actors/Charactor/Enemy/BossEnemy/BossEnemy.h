@@ -19,7 +19,6 @@ public:
 		std::weak_ptr<BulletManager> pBulletManager;
 		std::weak_ptr<CameraBase> pCamera;
 		Vector3 pos;
-		std::weak_ptr<EnemyFactory> pEnemyFactory;
 	};
 
 	BossEnemy(BossEnemyData& data);
@@ -30,6 +29,9 @@ public:
 	void Update() override;//更新処理
 	void Draw() override;//描画処理
 	void TakeDamage(int damage) override;//被弾処理
+
+	//敵生産工場をセット
+	void SetEnemyFactory(std::weak_ptr<EnemyFactory> pEnemyFactory) { m_pEnemyFactory = pEnemyFactory; }
 
 	//敵生産工場取得
 	std::weak_ptr<EnemyFactory> GetEnemyFactory() const {
@@ -47,12 +49,12 @@ private:
 	void DrawEnemy();
 
 private:
-	Sphere m_colSphere;	 // 当たり判定(球)
 	//モデルの前フレームの足の位置(6箇所)
 	std::vector<VECTOR> m_prevLegPositions;
 	//モデルの今フレームの足の位置(6箇所)
 	std::vector<VECTOR> m_currentLegPositions;
 
+	//脚のボーン番号をこちらで決める
 	enum class LegIndex
 	{
 		BackRight = 1,//右後ろ脚
@@ -75,4 +77,7 @@ private:
 	std::shared_ptr<IBossEnemyState> m_pState;
 	//敵生産工場
 	std::weak_ptr<EnemyFactory> m_pEnemyFactory;
+
+	//プレイヤーの弾との当たり判定用球
+	Sphere m_hitCol;
 };

@@ -73,6 +73,8 @@ namespace
 	constexpr const wchar_t* summon_floating_eff_path = L"Data/Effect/SummonFloatingEnemy/SummonFloating.efk";
 	//ワーム召喚
 	constexpr const wchar_t* summon_worm_eff_path = L"Data/Effect/SummonWormEnemy/SummonWorm.efk";
+	//ボスのビーム
+	constexpr const wchar_t* boss_beam_eff_patgh = L"Data/Effect/BossBeam/BossBeam.efk";
 
 	//---------- CSV上でのモデル識別文字列 ----------
 	constexpr const wchar_t* rock1_csv_name = L"Rock1";
@@ -92,6 +94,7 @@ namespace
 	constexpr float splash_effect_scale = 3.0f;
 	constexpr float summon_floating_eff_scale = 1.0f;
 	constexpr float summon_worm_eff_scale = 1.0f;
+	constexpr float boss_beam_eff_scale = 1.0f;
 }
 
 ResourceLoader& ResourceLoader::GetInstance()
@@ -455,4 +458,9 @@ void ResourceLoader::KeepEffect()
 	handle = LoadEffekseerEffect(summon_worm_eff_path, summon_worm_eff_scale);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::SummonWorm] = handle;
+
+	//ボスのビームエフェクト
+	handle = LoadEffekseerEffect(boss_beam_eff_patgh, boss_beam_eff_scale);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::BossBeam] = handle;
 }

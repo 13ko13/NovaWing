@@ -29,10 +29,6 @@ namespace
 	// モデルのサイズ
 	const Vector3 model_scale = {0.3f, 0.3f, 0.3f};
 
-	// 移動制限範囲
-	constexpr float move_limit_x = 500.0f;
-	constexpr float move_limit_y = 300.0f;
-
 	// ゲージの毎フレームの回復量
 	constexpr float gauge_recovery_amount = 0.5f;
 	// ゲージの最大値
@@ -40,7 +36,7 @@ namespace
 
 	// アナログスティックの入力値を-1～1に正規化するための割る数
 	constexpr float stick_input_max = 1000.0f;
-	// 宙返りの入力と判定するスティック下方向のしきい値
+	// 宙返りの入力と判定するスティック上方向のしきい値
 	constexpr float somersault_stick_threshold = -0.2f;
 
 	// 当たり判定の球の半径

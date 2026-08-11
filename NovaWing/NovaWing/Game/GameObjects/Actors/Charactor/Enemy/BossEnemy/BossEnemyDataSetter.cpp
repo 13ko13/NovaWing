@@ -14,8 +14,7 @@ namespace
 std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
         std::weak_ptr<Player> pPlayer,
         std::weak_ptr<CameraBase> pCamera,
-        std::weak_ptr<BulletManager> pBulletManager,
-        std::weak_ptr<EnemyFactory> pEnemyFactory
+        std::weak_ptr<BulletManager> pBulletManager
 )
 {
     std::shared_ptr<BossEnemy> pEnemy;
@@ -47,7 +46,6 @@ std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
         bossData.Id = modelID;
         bossData.pBulletManager = pBulletManager;
         bossData.pCamera = pCamera;
-        bossData.pEnemyFactory = pEnemyFactory;
         bossData.pos = pos;
         bossData.pPlayer = pPlayer;
 

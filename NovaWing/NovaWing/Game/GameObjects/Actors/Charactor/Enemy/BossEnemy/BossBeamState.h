@@ -23,7 +23,8 @@ public:
 
 private:
 	//ビームのエフェクト再生ハンドル
-	int m_beamEffectPlayH = -1;
+	int m_rightBeamEffectPlayH = -1;
+	int m_leftBeamEffectPlayH = -1;
 
 	//ビームを続けるときの時間管理用
 	int m_beamFrame = 0;
@@ -42,6 +43,11 @@ private:
 	//ビームの判定用球
 	Sphere m_beamSphereL;
 	Sphere m_beamSphereR;
+
+	//ビームがプレイヤーを越えた後の進む方向
+	Vector3 m_beamMoveDirR;
+	Vector3 m_beamMoveDirL;
+
 #ifdef _DEBUG
 	//ビームの目標地点
 	Sphere m_targetSphereL;

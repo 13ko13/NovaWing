@@ -9,8 +9,6 @@ namespace
 {
 	//モデルのサイズ
 	const Vector3 model_scale = { 3.0f,3.0f,3.0f };
-	//敵自身の球の当たり判定の半径
-	constexpr float col_radius = 132.0f;
 	//フレームの番号がいくつ進むごとに足のフレームがあるか
 	constexpr int leg_frame_stride = 6;
 	//右脚の最初のフレーム番号
@@ -28,14 +26,17 @@ namespace
 	constexpr float anim_blend_time = 20.0f;
 	//アイドルアニメーションの再生スピード
 	constexpr float idle_anim_speed = 0.3f;
+
+	//プレイヤーの弾との当たり判定用球の半径
+	constexpr float hit_col_radius = 1500.0f;
+	//球のY座標オフセット
+	constexpr float hit_col_offset_y = 350.0f;
 }
 
 BossEnemy::BossEnemy(BossEnemyData& data) :
 	EnemyBase(data.Id, data.pCamera, data.pPlayer, 
 	data.pBulletManager),
-	m_colSphere(data.pos),
-	m_animator(m_modelHandle),
-	m_pEnemyFactory(data.pEnemyFactory)
+	m_animator(m_modelHandle)
 {
 	//位置を反映
 	SetPos(data.pos);
@@ -84,6 +85,11 @@ void BossEnemy::OnInit()
 		m_pPlayer
 	);
 	m_pState->Enter();
+
+	//当たり判定初期化
+	Vector3 hitColPos = m_pos;
+	hitColPos.m_y += hit_col_offset_y;//Y座標のみ補正する
+	m_hitCol = Sphere(hitColPos, hit_col_radius);
 }
 
 void BossEnemy::Update()
@@ -114,7 +120,9 @@ void BossEnemy::Update()
 	Charactor::Update();
 
 	//当たり判定の更新
-	m_colSphere.Update(m_pos, col_radius);
+	Vector3 hitColPos = m_pos;
+	hitColPos.m_y += hit_col_offset_y;//Y座標のみ補正する
+	m_hitCol.Update(hitColPos, hit_col_radius);
 
 	//今の足の位置を前の足の位置にコピーする
 	m_prevLegPositions = m_currentLegPositions;
@@ -185,6 +193,9 @@ void BossEnemy::Draw()
 #ifdef _DEBUG
 	//プレイヤーの速度
 	//DrawFormatString(0, 230, 0xff0000, L"PlayerVelZ : %f", m_pPlayer.lock() ->GetVel().m_z);
+
+	//当たり判定の描画
+	m_hitCol.Draw(0xff0000);
 #endif
 }
 

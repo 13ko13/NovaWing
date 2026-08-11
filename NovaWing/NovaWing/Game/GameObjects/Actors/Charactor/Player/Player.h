@@ -161,7 +161,7 @@ private:
 	std::shared_ptr<IRotationState> m_pRotationState;
 	//弾撃ち系ステート
 	std::shared_ptr<IShootState> m_pShootState;
-	//特殊行動計ステート
+	//特殊行動系ステート
 	std::shared_ptr<ISpecialActionState> m_pSpecialState;
 
 	//当たり判定用の球

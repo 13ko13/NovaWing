@@ -74,6 +74,7 @@ public:
 		Splash,//水しぶきエフェクト
 		SummonFloating,//浮遊敵召喚時エフェクト
 		SummonWorm,//ワーム召喚時エフェクト
+		BossBeam,//ボスのビームエフェクト
 	};
 
 	//音の種類

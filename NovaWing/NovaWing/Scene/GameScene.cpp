@@ -54,7 +54,8 @@ GameScene::GameScene(SceneController& controller) :
 	Scene(controller),
 	m_frame(0)
 {
-	//BulletManagerを生成
+	//BulletManagerは先に生成しておかないとプレイヤーが生成できないので
+	//コンストラクタで生成しておく
 	m_pBulletManager = std::make_shared<BulletManager>();
 }
 
@@ -77,7 +78,7 @@ void GameScene::Init()
 	//プレイヤーを生成
 	m_pPlayer = std::make_shared<Player>(
 		m_pBulletManager,ResourceLoader::ModelID::Player,
-	std::weak_ptr<CameraBase>());//カメラがまだ制せされていないので空のweak_ptrを渡す
+	std::weak_ptr<CameraBase>());//カメラがまだ生成されていないので空のweak_ptrを渡す
 	//プレイヤーの初期化処理
 	m_pPlayer->Init();
 
@@ -88,11 +89,19 @@ void GameScene::Init()
 	//カメラを生成したのでプレイヤーにカメラをセットする
 	m_pPlayer->SetCamera(m_pCamera);
 
+	//ボスエネミーの初期化
+	m_pBoss = BossEnemyDataSetter::CreateEnemy(
+		m_pPlayer,
+		m_pCamera,
+		m_pBulletManager);
+	m_pBoss->Init();
+
 	//衝突判定マネージャーの初期化
 	m_pCollisionManager = std::make_shared<CollisionManager>(
 		m_pPlayer, 
 		m_pBulletManager,
-		m_pCamera);
+		m_pCamera,
+		m_pBoss);
 
 	//ターゲットマネージャーの初期化
 	m_pTargetManager = std::make_shared<TargetManager>(m_pPlayer);
@@ -107,6 +116,8 @@ void GameScene::Init()
 		m_pTargetManager,
 		m_pCollisionManager
 	);
+	//ボスに工場をセットする
+	m_pBoss->SetEnemyFactory(m_pEnemyFactory);
 
 	//浮遊エネミーの初期化
 	//データの数分のエネミーを作成
@@ -139,15 +150,6 @@ void GameScene::Init()
 		//ターゲットマネージャーにエネミーを登録する
 		m_pTargetManager->RegisterWormEnemy(pEnemy);
 	}
-
-	//ボスエネミーの初期化
-	m_pBoss = BossEnemyDataSetter::CreateEnemy(
-		m_pPlayer,
-		m_pCamera,
-		m_pBulletManager,
-		m_pEnemyFactory
-	);
-	m_pBoss->Init();
 
 	//UIManagerの初期化
 	m_pUIManager = std::make_shared<UIManager>();

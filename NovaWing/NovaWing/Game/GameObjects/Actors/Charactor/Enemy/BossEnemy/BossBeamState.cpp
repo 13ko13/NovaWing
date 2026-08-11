@@ -1,5 +1,6 @@
 ﻿#include <DxLib.h>
 #include <algorithm>
+#include <EffekseerForDXLib.h>
 
 #include "BossBeamState.h"
 #include "Manager/ResourceLoader.h"
@@ -22,14 +23,17 @@ namespace
 	constexpr float beam_sphere_radius = 70.0f;
 
 	//ビームの目標をどのぐらいプレイヤーから離すのか
-	constexpr float target_offset = 500.0f;
+	constexpr float target_offset = 100.0f;
 
 	//何フレームビームを続けるか
 	constexpr int beam_end_frame = 60 * 7;
+
+	//ビームがターゲットまで進むときの速度
+	constexpr float beam_speed = 9.0f;
 }
 
 BossBeamState::BossBeamState(std::weak_ptr<BossEnemy> pBoss,
-	 std::weak_ptr<Player> pPlayer):
+	 std::weak_ptr<Player> pPlayer) :
 	IBossEnemyState(pBoss),
 	m_pPlayer(pPlayer)
 {
@@ -58,20 +62,76 @@ void BossBeamState::Enter()
 
 	//ビームの時間を初期化
 	m_beamFrame = 0;
+
+	int effectHandle = ResourceLoader::GetInstance().GetEffect(
+		ResourceLoader::EffectID::BossBeam);
+
+	//ビームのエフェクトを再生
+	//左
+	m_leftBeamEffectPlayH = PlayEffekseer3DEffect(effectHandle);
+	SetPosPlayingEffekseer3DEffect(
+		m_leftBeamEffectPlayH,
+		m_beamPosL.m_x,
+		m_beamPosL.m_y,
+		m_beamPosL.m_z
+	);
+	//右
+	m_rightBeamEffectPlayH = PlayEffekseer3DEffect(effectHandle);
+	SetPosPlayingEffekseer3DEffect(
+		m_rightBeamEffectPlayH,
+		m_beamPosR.m_x,
+		m_beamPosR.m_y,
+		m_beamPosR.m_z
+	);
+
+	//ビームの進む方向初期化　
+	//プレイヤーをshared_ptrに変換
+	std::shared_ptr<Player> pSharedPlayer = m_pPlayer.lock();
+
+	//プレイヤーの位置を取得
+	Vector3 playerPos = pSharedPlayer->GetPos();
+	//プレイヤーよりも後ろの方を狙わせたいのでオフセット計算
+	Vector3 targetPos = playerPos +
+		pSharedPlayer->GetVisualBack() * target_offset;
+	//ビームの先端からターゲットまでの方向を計算
+	Vector3 leftToTargetDir = Vector3(targetPos - m_beamPosL).Normalized();//左
+	Vector3 rihgtToTargetDir = Vector3(targetPos - m_beamPosR).Normalized();//右
+	//ビームの先端をターゲットに向けて一定速度で進ませる 
+	m_beamPosL += leftToTargetDir * beam_speed;
+	m_beamPosR += rihgtToTargetDir * beam_speed;
 }
 
 void BossBeamState::Update()
 {
+	//プレイヤーをshared_ptrに変換
+	std::shared_ptr<Player> pSharedPlayer = m_pPlayer.lock();
+
 	//プレイヤーの位置を取得
-	Vector3 playerPos = m_pPlayer.lock()->GetPos();
+	Vector3 playerPos = pSharedPlayer->GetPos();
 	//プレイヤーよりも後ろの方を狙わせたいのでオフセット計算
 	Vector3 targetPos = playerPos +
-		m_pPlayer.lock()->GetVisualBack() * target_offset;
+		pSharedPlayer->GetVisualBack() * target_offset;
 
-	//ビームの先端位置からプレイヤーまでを線形補完する
-	m_beamPosL = Vector3::Lerp(m_beamPosL, targetPos, beam_pos_ratio);//左
-	//ビームの先端位置からプレイヤーまでを線形補完する
-	m_beamPosR = Vector3::Lerp(m_beamPosR, targetPos, beam_pos_ratio);//右
+	//もしターゲットを越えたらそこからはプレイヤーを追いかけずにその方向に進む
+	if (pSharedPlayer->GetPos().m_z < m_beamPosL.m_z)
+	{
+		//ビームの先端からターゲットまでの方向を計算
+		Vector3 leftToTargetDir = Vector3(targetPos - m_beamPosL).Normalized();//左
+		//進む方向を保存しておく
+		m_beamMoveDirL = leftToTargetDir;
+	}
+	if (pSharedPlayer->GetPos().m_z < m_beamPosR.m_z)
+	{
+		//ビームの先端からターゲットまでの方向を計算
+		Vector3 rightToTargetDir = Vector3(targetPos - m_beamPosR).Normalized();//右
+		//進む方向を保存しておく
+		m_beamMoveDirR = rightToTargetDir;
+	}
+	//ビームの先端をターゲットに向けて一定速度で進ませる 
+	//越えている場合はターゲットまでの方向が更新されないので
+	//越える前までの方向が入る
+	m_beamPosL += m_beamMoveDirL * beam_speed;
+	m_beamPosR += m_beamMoveDirR * beam_speed;
 
 	//当たり判定はプレイヤーと同じＺライン上にある
 	//ビームの場所に出現させる
@@ -97,14 +157,25 @@ void BossBeamState::Update()
 	playerPosRatioL = std::clamp(playerPosRatioL, 0.0f, 1.0f);
 	playerPosRatioR = std::clamp(playerPosRatioR, 0.0f, 1.0f);
 
-	//当たり判定の位置を計算
-	Vector3 spherePosL = Vector3::Lerp(
-		m_muzzlePosL, m_beamPosL, playerPosRatioL);
-	Vector3 spherePosR = Vector3::Lerp(
-		m_muzzlePosR, m_beamPosR, playerPosRatioR);
 	//球の位置更新
-	m_beamSphereL.Update(spherePosL, beam_sphere_radius);
-	m_beamSphereR.Update(spherePosR, beam_sphere_radius);
+	//プレイヤーのz座標
+	float playerZ = pSharedPlayer->GetPos().m_z;
+	//m_beamSphereL.Update(spherePosL, beam_sphere_radius);
+	//m_beamSphereR.Update(spherePosR, beam_sphere_radius);
+
+	//ビームエフェクトの位置更新
+	SetPosPlayingEffekseer3DEffect(
+		m_leftBeamEffectPlayH,
+		m_beamPosL.m_x,
+		m_beamPosL.m_y,
+		m_beamPosL.m_z
+	);
+	SetPosPlayingEffekseer3DEffect(
+		m_rightBeamEffectPlayH,
+		m_beamPosR.m_x,
+		m_beamPosR.m_y,
+		m_beamPosR.m_z
+	);
 
 #ifdef _DEBUG
 	//ビームの目標地点の球の更新

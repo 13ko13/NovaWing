@@ -9,6 +9,7 @@
 #include "TargetManager.h"
 #include "Game/GameObjects/Actors/Rock/Rock.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossEnemy.h"
 
 namespace
 {
@@ -22,12 +23,15 @@ namespace
 	constexpr int shake_frame = 18;
 }
 
-CollisionManager::CollisionManager(const std::weak_ptr<Player> pPlayer,
+CollisionManager::CollisionManager(
+	const std::weak_ptr<Player> pPlayer,
 	const std::weak_ptr<BulletManager> pBulletManager,
-	const std::weak_ptr<CameraBase> pCamera) :
+	const std::weak_ptr<CameraBase> pCamera,
+	const std::weak_ptr<BossEnemy> pBoss) :
 	m_pPlayer(pPlayer),
 	m_pBulletManager(pBulletManager),
-	m_pCamera(pCamera)
+	m_pCamera(pCamera),
+	m_pBoss(pBoss)
 {
 
 }
@@ -60,6 +64,7 @@ void CollisionManager::Update()
 	//shared_ptrに変換
 	std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock();
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+	std::shared_ptr<BossEnemy> pBoss = m_pBoss.lock();
 
 	//プレイヤー弾の配列を取得
 	std::vector<std::weak_ptr<PlayerBullet>> weakPlayerBullets = pBulletManager->GetPlayerBullets();
@@ -109,9 +114,9 @@ void CollisionManager::Update()
 	}
 
 	//チャージ弾とノーマル弾を一つにまとめる
-	std::vector<std::shared_ptr<BulletBase>> sharedBullets;
-	sharedBullets.insert(sharedBullets.end(), sharedPlayerBullet.begin(), sharedPlayerBullet.end());
-	sharedBullets.insert(sharedBullets.end(), sharedChargeBullets.begin(), sharedChargeBullets.end());
+	std::vector<std::shared_ptr<BulletBase>> sharedAllBullets;
+	sharedAllBullets.insert(sharedAllBullets.end(), sharedPlayerBullet.begin(), sharedPlayerBullet.end());
+	sharedAllBullets.insert(sharedAllBullets.end(), sharedChargeBullets.begin(), sharedChargeBullets.end());
 
 	//敵も同様にshared_ptrに変換
 	std::vector<std::shared_ptr<FloatingEnemy>> pSharedEnemies;//浮遊敵
@@ -142,7 +147,7 @@ void CollisionManager::Update()
 		if (pEnemy->IsDead()) continue;
 
 		//全ての弾をループで見る
-		for (std::shared_ptr<BulletBase> pPlayerBullet : sharedBullets)
+		for (std::shared_ptr<BulletBase> pPlayerBullet : sharedAllBullets)
 		{
 			Sphere enemyCol = pEnemy->GetSphere();//敵の球
 			Sphere bulletCol = pPlayerBullet->GetSphere();
@@ -187,7 +192,7 @@ void CollisionManager::Update()
 		//もしその敵が死んでいるなら処理をせずに次の敵の処理に移る
 		if (pWormEnemy->IsDead()) continue;
 		//全ての弾をループで見る
-		for (std::shared_ptr<BulletBase> pPlayerBullet : sharedBullets)
+		for (std::shared_ptr<BulletBase> pPlayerBullet : sharedAllBullets)
 		{
 			Sphere wormHeadCol = pWormEnemy->GetHeadSphere();//ワームエネミーの頭の球
 			Sphere bulletCol = pPlayerBullet->GetSphere();
@@ -199,6 +204,17 @@ void CollisionManager::Update()
 				//敵に当たったときのプレイヤー弾の処理
 				pPlayerBullet->OnHitEnemy();
 			}
+		}
+	}
+
+	//もしボスが死んでいるなら処理を行わない
+	if (!pBoss->IsDead())
+	{
+		//ボスとプレイヤーの弾の当たり判定
+		for (std::shared_ptr<BulletBase> pPlayerBullet : sharedAllBullets)
+		{
+			//ボスの球と弾の球が当たっていたら
+
 		}
 	}
 
@@ -249,7 +265,6 @@ void CollisionManager::Update()
 			}
 		}
 	}
-
 
 	std::vector<std::shared_ptr<Rock>> sharedRocks;
 	for (std::weak_ptr<Rock> pWeakRock : m_pRocks)
