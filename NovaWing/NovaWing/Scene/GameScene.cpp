@@ -217,13 +217,13 @@ void GameScene::Update()
 			std::make_shared<GameoverScene>(
 				m_controller), frame_per_second);
 	}
-	//今は仮でプレイヤーがある程度のＺ位置まで来たらクリアにする
-	if (m_pPlayer->GetPos().m_z > clear_pos_z)
+	//TODO:ボスを倒したらクリアにする
+	/*if (m_pPlayer->GetPos().m_z > clear_pos_z)
 	{
 		m_controller.ChangeScene(
 			std::make_shared<ClearScene>(
 				m_controller), frame_per_second);
-	}
+	}*/
 
 #ifdef _DEBUG
 	//Startボタンでリスタート

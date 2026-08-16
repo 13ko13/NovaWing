@@ -36,6 +36,9 @@ private:
 	//ビーム位置
 	Vector3 m_beamPosR;//右のビームの先端位置
 	Vector3 m_beamPosL;//左のビームの先端位置
+	//前フレームのビームの位置
+	Vector3 m_prevBeamPosR;//前フレームの右のビームの先端位置
+	Vector3 m_prevBeamPosL;//前フレームの左のビームの先端位置
 
 	//プレイヤーの弱参照
 	std::weak_ptr<Player> m_pPlayer;

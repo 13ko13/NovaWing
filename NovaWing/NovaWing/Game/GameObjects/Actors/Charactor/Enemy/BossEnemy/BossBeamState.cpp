@@ -103,6 +103,10 @@ void BossBeamState::Enter()
 
 void BossBeamState::Update()
 {
+	//前フレームのビームの先端位置を保存
+	m_prevBeamPosL = m_beamPosL;
+	m_prevBeamPosR = m_beamPosR;
+
 	//プレイヤーをshared_ptrに変換
 	std::shared_ptr<Player> pSharedPlayer = m_pPlayer.lock();
 
@@ -138,20 +142,20 @@ void BossBeamState::Update()
 	//まずプレイヤーが発射口とビームの先端から見て
 	//どの位置にいるかの割合を計算する(進行度の計算)
 	//発射口とビームの先端の差を計算
-	float leftZDiff = m_beamPosL.m_z - m_muzzlePosL.m_z;
-	float rightZDiff = m_beamPosR.m_z - m_muzzlePosR.m_z;
+	float leftZDiff = m_beamPosL.m_z - m_prevBeamPosL.m_z;
+	float rightZDiff = m_beamPosR.m_z - m_prevBeamPosR.m_z;
 	float playerPosRatioL = 0.0f;//左のビームから見たプレイヤーの位置割合
 	float playerPosRatioR = 0.0f;//右のビームから見たプレイヤーの位置割合
 
 	if (std::abs(leftZDiff) > z_diff_threshould)//0除算対策
 	{
 		playerPosRatioL = 
-			(playerPos.m_z - m_muzzlePosL.m_z) / leftZDiff;//左
+			(playerPos.m_z - m_prevBeamPosL.m_z) / leftZDiff;//左
 	}
 	if (std::abs(rightZDiff) > z_diff_threshould)//0除算対策
 	{
 		playerPosRatioR = 
-			(playerPos.m_z - m_muzzlePosR.m_z) / rightZDiff;//右
+			(playerPos.m_z - m_prevBeamPosR.m_z) / rightZDiff;//右
 	}
 	//割合を0～1にクランプ
 	playerPosRatioL = std::clamp(playerPosRatioL, 0.0f, 1.0f);
@@ -159,9 +163,11 @@ void BossBeamState::Update()
 
 	//球の位置更新
 	//プレイヤーのz座標
-	float playerZ = pSharedPlayer->GetPos().m_z;
-	//m_beamSphereL.Update(spherePosL, beam_sphere_radius);
-	//m_beamSphereR.Update(spherePosR, beam_sphere_radius);
+	//float playerZ = pSharedPlayer->GetPos().m_z;
+	Vector3	spherePosL = Vector3::Lerp(m_prevBeamPosL, m_beamPosL, playerPosRatioL);
+	Vector3	spherePosR = Vector3::Lerp(m_prevBeamPosR, m_beamPosR, playerPosRatioR);
+	m_beamSphereL.Update(spherePosL, beam_sphere_radius);
+	m_beamSphereR.Update(spherePosR, beam_sphere_radius);
 
 	//ビームエフェクトの位置更新
 	SetPosPlayingEffekseer3DEffect(
