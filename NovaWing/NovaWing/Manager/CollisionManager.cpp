@@ -214,8 +214,21 @@ void CollisionManager::Update()
 		for (std::shared_ptr<BulletBase> pPlayerBullet : sharedAllBullets)
 		{
 			//ボスの球と弾の球が当たっていたら
-
+			Sphere hitCol = pBoss->GetSphere();
+			Sphere bulletCol = pPlayerBullet->GetSphere();
+			if (hitCol.HitCollision(bulletCol))
+			{
+				//ボスの被弾処理
+				pBoss->TakeDamage(pPlayerBullet->GetAttackPower());
+				//敵に当たった時のプレイヤー弾の処理
+				pPlayerBullet->OnHitEnemy();
+			}
 		}
+
+		//ボスのビームとプレイヤーの当たり判定
+		//ビームのすべての球を取得
+		//std::vector<Sphere> spheresL = pBoss->
+		//for()
 	}
 
 	//ワームの頭、胴体、どれか一つでも当たっていればtrueにする

@@ -44,6 +44,9 @@ public:
 	//プレイヤー取得
 	std::weak_ptr<Player> GetPlayer() const { return m_pPlayer; }
 
+	//自分の当たり判定を返す
+	Sphere GetSphere() const { return m_hitCol; }
+
 private:
 	//敵の描画(シェーダ適応も含めた)
 	void DrawEnemy();

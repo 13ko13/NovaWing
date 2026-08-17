@@ -18,8 +18,8 @@ public:
 	void Draw() override;
 
 	//ビームの球の位置
-	Sphere GetLeftBeamSphere() const { return m_beamSphereL; }
-	Sphere GetRightBeamSphere() const { return m_beamSphereR; }
+	std::vector<Sphere> GetLeftBeamSpheres() const { return m_beamSpheresL; }
+	std::vector<Sphere> GetRightBeamSpheres() const { return m_beamSpheresR; }
 
 private:
 	//ビームのエフェクト再生ハンドル
@@ -44,8 +44,8 @@ private:
 	std::weak_ptr<Player> m_pPlayer;
 
 	//ビームの判定用球
-	Sphere m_beamSphereL;
-	Sphere m_beamSphereR;
+	std::vector<Sphere> m_beamSpheresL;
+	std::vector<Sphere> m_beamSpheresR;
 
 	//ビームがプレイヤーを越えた後の進む方向
 	Vector3 m_beamMoveDirR;

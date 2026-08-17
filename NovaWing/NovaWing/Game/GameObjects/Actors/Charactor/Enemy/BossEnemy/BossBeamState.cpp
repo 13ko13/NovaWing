@@ -30,6 +30,9 @@ namespace
 
 	//ビームがターゲットまで進むときの速度
 	constexpr float beam_speed = 9.0f;
+
+	//何フレームに一回当たり判定を出すか
+	constexpr int beam_col_interval = 10;
 }
 
 BossBeamState::BossBeamState(std::weak_ptr<BossEnemy> pBoss,
@@ -96,9 +99,18 @@ void BossBeamState::Enter()
 	//ビームの先端からターゲットまでの方向を計算
 	Vector3 leftToTargetDir = Vector3(targetPos - m_beamPosL).Normalized();//左
 	Vector3 rihgtToTargetDir = Vector3(targetPos - m_beamPosR).Normalized();//右
+
+	//進む方向をメンバ変数にも保存しておく(Update()の追い越し判定で使うため)
+	m_beamMoveDirL = leftToTargetDir;
+	m_beamMoveDirR = rihgtToTargetDir;
+
 	//ビームの先端をターゲットに向けて一定速度で進ませる 
 	m_beamPosL += leftToTargetDir * beam_speed;
 	m_beamPosR += rihgtToTargetDir * beam_speed;
+
+	//配列をクリアする
+	m_beamSpheresL.clear();
+	m_beamSpheresR.clear();
 }
 
 void BossBeamState::Update()
@@ -137,37 +149,27 @@ void BossBeamState::Update()
 	m_beamPosL += m_beamMoveDirL * beam_speed;
 	m_beamPosR += m_beamMoveDirR * beam_speed;
 
-	//当たり判定はプレイヤーと同じＺライン上にある
-	//ビームの場所に出現させる
-	//まずプレイヤーが発射口とビームの先端から見て
-	//どの位置にいるかの割合を計算する(進行度の計算)
-	//発射口とビームの先端の差を計算
-	float leftZDiff = m_beamPosL.m_z - m_prevBeamPosL.m_z;
-	float rightZDiff = m_beamPosR.m_z - m_prevBeamPosR.m_z;
-	float playerPosRatioL = 0.0f;//左のビームから見たプレイヤーの位置割合
-	float playerPosRatioR = 0.0f;//右のビームから見たプレイヤーの位置割合
-
-	if (std::abs(leftZDiff) > z_diff_threshould)//0除算対策
+	//プレイヤーに追いつくまでは球を数フレームに一回出し続ける
+	if (m_beamPosL.m_z > playerPos.m_z)
 	{
-		playerPosRatioL = 
-			(playerPos.m_z - m_prevBeamPosL.m_z) / leftZDiff;//左
+		if (m_beamFrame % beam_col_interval == 0)
+		{
+			//球生成
+			Sphere col = Sphere(m_beamPosL, beam_sphere_radius);
+			//配列にいれる
+			m_beamSpheresL.push_back(col);
+		}
 	}
-	if (std::abs(rightZDiff) > z_diff_threshould)//0除算対策
+	if (m_beamPosR.m_z >= playerPos.m_z)
 	{
-		playerPosRatioR = 
-			(playerPos.m_z - m_prevBeamPosR.m_z) / rightZDiff;//右
+		if (m_beamFrame % beam_col_interval == 0)
+		{
+			//球生成
+			Sphere col = Sphere(m_beamPosR, beam_sphere_radius);
+			//配列にいれる
+			m_beamSpheresR.push_back(col);
+		}
 	}
-	//割合を0～1にクランプ
-	playerPosRatioL = std::clamp(playerPosRatioL, 0.0f, 1.0f);
-	playerPosRatioR = std::clamp(playerPosRatioR, 0.0f, 1.0f);
-
-	//球の位置更新
-	//プレイヤーのz座標
-	//float playerZ = pSharedPlayer->GetPos().m_z;
-	Vector3	spherePosL = Vector3::Lerp(m_prevBeamPosL, m_beamPosL, playerPosRatioL);
-	Vector3	spherePosR = Vector3::Lerp(m_prevBeamPosR, m_beamPosR, playerPosRatioR);
-	m_beamSphereL.Update(spherePosL, beam_sphere_radius);
-	m_beamSphereR.Update(spherePosR, beam_sphere_radius);
 
 	//ビームエフェクトの位置更新
 	SetPosPlayingEffekseer3DEffect(
@@ -187,8 +189,8 @@ void BossBeamState::Update()
 	//ビームの目標地点の球の更新
 	m_targetSphereL.Update(targetPos, beam_sphere_radius);
 	m_targetSphereR.Update(targetPos, beam_sphere_radius);
-	m_beamTipSphereL.Update(m_beamPosL, beam_sphere_radius);
-	m_beamTipSphereR.Update(m_beamPosR, beam_sphere_radius);
+	/*m_beamTipSphereL.Update(m_beamPosL, beam_sphere_radius);
+	m_beamTipSphereR.Update(m_beamPosR, beam_sphere_radius);*/
 #endif
 
 	//ビームは時間で終了させる
@@ -202,17 +204,24 @@ void BossBeamState::Update()
 
 void BossBeamState::Exit()
 {
+	
 }
 
 void BossBeamState::Draw()
 {
 #ifdef _DEBUG
 	//球のデバッグ描画
-	m_beamSphereL.Draw(0x00ff00);
-	m_beamSphereR.Draw(0x00ff00);
+	for (Sphere& col : m_beamSpheresL)
+	{
+		col.Draw(0x00ff00);
+	}
+	for (Sphere& col : m_beamSpheresR)
+	{
+		col.Draw(0x00ff00);
+	}
 	m_targetSphereL.Draw(0x00ff00);
 	m_targetSphereR.Draw(0x00ff00);
-	m_beamTipSphereL.Draw(0x00ff00);
-	m_beamTipSphereR.Draw(0x00ff00);
+	/*m_beamTipSphereL.Draw(0x00ff00);
+	m_beamTipSphereR.Draw(0x00ff00);*/
 #endif
 }
