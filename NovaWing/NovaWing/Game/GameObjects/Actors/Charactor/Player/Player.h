@@ -191,6 +191,7 @@ private:
 	//setは中身は配列になっているが、pushしようとすると
 	//中に同じ値があればpushされないようになっている
 	std::set<DamageSource> m_takingDamageSources;
+	std::set<DamageSource> m_prevTakingDamageSources;
 
 	//ダメージエフェクトを出すか
 	bool m_isDamageEffect = false;
