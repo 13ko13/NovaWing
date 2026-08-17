@@ -20,6 +20,9 @@ public:
 	//ビームの球の位置
 	std::vector<Sphere> GetLeftBeamSpheres() const { return m_beamSpheresL; }
 	std::vector<Sphere> GetRightBeamSpheres() const { return m_beamSpheresR; }
+	
+	//ビームを受けたときのダメージ取得
+	int GetBeamDamage() const;
 
 private:
 	//ビームのエフェクト再生ハンドル

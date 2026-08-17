@@ -4,6 +4,7 @@
 #include "Constants/ShaderRegister.h"
 #include "BossIdleState.h"
 #include "Game/GameObjects/Actors/Charactor/Player/Player.h"
+#include "BossBeamState.h"
 
 namespace
 {
@@ -34,7 +35,7 @@ namespace
 }
 
 BossEnemy::BossEnemy(BossEnemyData& data) :
-	EnemyBase(data.Id, data.pCamera, data.pPlayer, 
+	EnemyBase(data.Id, data.pCamera, data.pPlayer,
 	data.pBulletManager),
 	m_animator(m_modelHandle)
 {
@@ -203,6 +204,18 @@ void BossEnemy::TakeDamage(int damage)
 {
 }
 
+std::vector<Sphere> BossEnemy::GetBeamSphereL() const
+{
+	//左のビームの球を返す
+	return std::dynamic_pointer_cast<BossBeamState>(m_pState)->GetLeftBeamSpheres();
+}
+
+std::vector<Sphere> BossEnemy::GetBeamSphereR() const
+{
+	//右のビームの球を返す
+	return std::dynamic_pointer_cast<BossBeamState>(m_pState)->GetRightBeamSpheres();
+}
+
 void BossEnemy::DrawEnemy()
 {
 	//ResourceLoaderからボスの法線マップを取得
@@ -223,5 +236,5 @@ void BossEnemy::DrawEnemy()
 	textures.push_back({ ShaderRegister::tex_noise,-1 });//ノイズテクスチャも途切れることがないのでなし
 
 	//DrawWithLightingにペアの配列を渡してモデルを描画
-	DrawWithLighting(textures,true);
+	DrawWithLighting(textures, true);
 }

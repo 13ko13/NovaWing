@@ -413,8 +413,6 @@ void Player::TakeDamage(int damage)
 	// HPを減らす
 	m_health -= damage;
 
-	// ダメージを食らっているフラグを立てる
-	m_isTakingDamage = true;
 	//ダメージエフェクトを出すフラグ
 	m_isDamageEffect = true;
 
@@ -497,6 +495,20 @@ bool Player::IsSomersault() const
 	// あてはめてnullなら宙返り中ではないことを表す
 	// nullではないということは当てはまるので、宙返り中ということを表す
 	return std::dynamic_pointer_cast<SomersaultState>(m_pSpecialState) != nullptr;
+}
+
+bool Player::IsTakingDamage(DamageSource source) const
+{
+	//指定した種類のダメージを食らっているかを返す
+	//エラー値が入っている場合はfalse
+	return m_takingDamageSources.find(source) != m_takingDamageSources.end();
+}
+
+void Player::StartTakingDamage(DamageSource source)
+{
+	//受けたダメージの種類を記憶(追加)する
+	//既にその種類のダメージを受けていれば追加しない
+	m_takingDamageSources.insert(source);
 }
 
 void Player::UpdateRotation()

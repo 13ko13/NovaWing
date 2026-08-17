@@ -33,6 +33,9 @@ namespace
 
 	//何フレームに一回当たり判定を出すか
 	constexpr int beam_col_interval = 10;
+
+	//ボスのビームのダメージ
+	constexpr int beam_damage = 1;
 }
 
 BossBeamState::BossBeamState(std::weak_ptr<BossEnemy> pBoss,
@@ -150,7 +153,7 @@ void BossBeamState::Update()
 	m_beamPosR += m_beamMoveDirR * beam_speed;
 
 	//プレイヤーに追いつくまでは球を数フレームに一回出し続ける
-	if (m_beamPosL.m_z > playerPos.m_z)
+	if (m_beamPosL.m_z >= playerPos.m_z)
 	{
 		if (m_beamFrame % beam_col_interval == 0)
 		{
@@ -224,4 +227,9 @@ void BossBeamState::Draw()
 	/*m_beamTipSphereL.Draw(0x00ff00);
 	m_beamTipSphereR.Draw(0x00ff00);*/
 #endif
+}
+
+int BossBeamState::GetBeamDamage() const
+{
+	return beam_damage;
 }

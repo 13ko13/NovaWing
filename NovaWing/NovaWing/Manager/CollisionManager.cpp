@@ -10,6 +10,7 @@
 #include "Game/GameObjects/Actors/Rock/Rock.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossEnemy.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossBeamState.h"
 
 namespace
 {
@@ -140,6 +141,9 @@ void CollisionManager::Update()
 		pSharedWormEnemies.push_back(pSharedWormEnemy);
 	}
 
+	//プレイヤーのダメージを受けた種類を全てリセット
+	pPlayer->ClearTakingDamage();
+
 	//全ての浮遊敵とプレイヤーの弾が当たっているか
 	for (std::shared_ptr<FloatingEnemy> pEnemy : pSharedEnemies)
 	{
@@ -181,7 +185,7 @@ void CollisionManager::Update()
 			//敵弾の当たったときの処理
 			pEnemyBullet->OnHitEnemy();
 			//カメラを揺らす
-			sharedCamera->OnShake(shake_power,shake_frame);
+			sharedCamera->OnShake(shake_power, shake_frame);
 		}
 	}
 
@@ -225,14 +229,54 @@ void CollisionManager::Update()
 			}
 		}
 
+		//ビーム状態じゃないなら処理を行わない
+		std::shared_ptr<BossBeamState> beamState =
+			std::dynamic_pointer_cast<BossBeamState>(
+			pBoss->GetCurrentState());
+		if (beamState == nullptr) return;
+
 		//ボスのビームとプレイヤーの当たり判定
 		//ビームのすべての球を取得
-		//std::vector<Sphere> spheresL = pBoss->
-		//for()
-	}
+		std::vector<Sphere> spheresL = pBoss->GetBeamSphereL();
+		std::vector<Sphere> spheresR = pBoss->GetBeamSphereR();
+		//プレイヤーの球
+		Sphere playerCol = pPlayer->GetSphere();
+		//左のビームとプレイヤー
+		for (Sphere& sphereL : spheresL)
+		{
+			if (playerCol.HitCollision(sphereL))
+			{
+				//もしビームを受けているなら処理を行わない
+				if (!pPlayer->IsTakingDamage(Player::DamageSource::Beam))
+				{
+					//プレイヤー被弾
+					pPlayer->TakeDamage(beamState->GetBeamDamage());
+					//カメラを揺らす
+					sharedCamera->OnShake(shake_power, shake_frame);
+				}
 
-	//ワームの頭、胴体、どれか一つでも当たっていればtrueにする
-	bool isHitWorm = false;
+				//ビームと接触したことをプレイヤーに知らせる
+				pPlayer->StartTakingDamage(Player::DamageSource::Beam);
+			}
+		}
+		//右のビームとプレイヤー
+		for (Sphere& sphereR : spheresR)
+		{
+			if (playerCol.HitCollision(sphereR))
+			{
+				//もし既にビームを受けているなら処理を行わない
+				if (!pPlayer->IsTakingDamage(Player::DamageSource::Beam))
+				{
+					//プレイヤー被弾
+					pPlayer->TakeDamage(beamState->GetBeamDamage());
+					//カメラを揺らす
+					sharedCamera->OnShake(shake_power, shake_frame);
+				}
+				//ビームと接触したことをプレイヤーに知らせる
+				pPlayer->StartTakingDamage(Player::DamageSource::Beam);
+			}
+		}
+	}
 
 	//プレイヤーとワームの頭、胴体の当たり判定が当たっているかを一つずつ調べる
 	//多重ヒットを起こさないために
@@ -248,33 +292,36 @@ void CollisionManager::Update()
 		Sphere wormHeadCol = pWormEnemy->GetHeadSphere();
 		if (playerCol.HitCollision(wormHeadCol))
 		{
-			//当たったことを記録する
-			isHitWorm = true;
-
-			if (!pPlayer->IsTakingDamage())
+			//もし既にワームと接触しているなら処理を行わない
+			if (!pPlayer->IsTakingDamage(Player::DamageSource::Worm))
 			{
 				//食らっていなければプレイヤーのHPを減らす
 				pPlayer->TakeDamage(worm_contact_damage);
 				//カメラを揺らす
-				sharedCamera->OnShake(shake_power,shake_frame);
+				sharedCamera->OnShake(shake_power, shake_frame);
 			}
+
+			//ワームと接触したことをプレイヤーに知らせる
+			pPlayer->StartTakingDamage(Player::DamageSource::Worm);
 		}
+
 		//胴体の当たり判定を取得
 		const std::vector<Sphere>& segmentSpheres = pWormEnemy->GetSegmentSpheres();
 		for (const Sphere& segmentSphere : segmentSpheres)
 		{
 			if (playerCol.HitCollision(segmentSphere))
 			{
-				//当たったことを記録する
-				isHitWorm = true;
-
-				if (!pPlayer->IsTakingDamage())
+				//もし既にワームと接触しているなら処理を行わない
+				if (!pPlayer->IsTakingDamage(Player::DamageSource::Worm))
 				{
 					//食らっていなければプレイヤーのHPを減らす
 					pPlayer->TakeDamage(worm_contact_damage);
 					//カメラを揺らす
-					sharedCamera->OnShake(shake_power,shake_frame);
+					sharedCamera->OnShake(shake_power, shake_frame);
 				}
+
+				//ワームと接触したことをプレイヤーに知らせる
+				pPlayer->StartTakingDamage(Player::DamageSource::Worm);
 			}
 		}
 	}
@@ -290,9 +337,6 @@ void CollisionManager::Update()
 		sharedRocks.push_back(pSharedRock);
 	}
 
-	//どれか一つでも岩が持っている球に当たっていれば記録する
-	bool isHit = false;
-
 	//岩とプレイヤーが当たっているかを1つずつ調べる
 	for (std::shared_ptr<Rock> pRock : sharedRocks)
 	{
@@ -307,27 +351,19 @@ void CollisionManager::Update()
 			//当たっていて、ダメージを食らっていないときのみダメージを食らうようにする
 			if (playerCol.HitCollision(rockColl))
 			{
-				//球と当たったことを記録
-				isHit = true;
-
-				if (!pPlayer->IsTakingDamage())
+				//もし既に岩と接触しているなら処理を行わない
+				if (!pPlayer->IsTakingDamage(Player::DamageSource::Rock))
 				{
 					//一度当たったら離れるまで当たらないようにする
 					//プレイヤーのHPを減らす
 					pPlayer->TakeDamage(hit_rock_damage);
 					//カメラを揺らす
-					sharedCamera->OnShake(shake_power,shake_frame);
+					sharedCamera->OnShake(shake_power, shake_frame);
 				}
+				//岩と接触したことをプレイヤーに知らせる
+				pPlayer->StartTakingDamage(Player::DamageSource::Rock);
 			}
 		}
-	}
-
-	//ワームの球と岩の球で
-	//どの球にもあたっていない場合は
-	if (!isHit && !isHitWorm)
-	{
-		//プレイヤーにダメージを食らっていないことを知らせる
-		pPlayer->OnLeaveDamaging();
 	}
 
 	//死んでいるものは配列から消す

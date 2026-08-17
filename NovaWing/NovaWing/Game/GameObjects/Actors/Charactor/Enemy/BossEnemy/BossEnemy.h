@@ -47,6 +47,13 @@ public:
 	//自分の当たり判定を返す
 	Sphere GetSphere() const { return m_hitCol; }
 
+	//ビームを出しているときにビームの当たり判定を返す
+	std::vector<Sphere> GetBeamSphereL() const;//左のビーム
+	std::vector<Sphere> GetBeamSphereR() const;//右のビーム
+
+	//現在のステートを返す
+	std::shared_ptr<IBossEnemyState> GetCurrentState() const { return m_pState; }
+
 private:
 	//敵の描画(シェーダ適応も含めた)
 	void DrawEnemy();

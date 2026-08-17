@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <memory>
+#include <set>
 
 #include "../Charactor.h"
 #include "Utility/Sphere.h"
@@ -24,7 +25,7 @@ public:
 	void Update() override;
 
 	void Draw() override;
-	
+
 	void TakeDamage(int damage) override;
 
 	//プレイヤーのモデルが逆向きなので
@@ -37,7 +38,7 @@ public:
 	Vector3 GetVisualBack() const { return GetForward(); }
 
 	//AngleXまでLerpする
-	void LerpToAngleX(float targetAngle,float t);
+	void LerpToAngleX(float targetAngle, float t);
 	//AngleYまでLerpする
 	void LerpToAngleY(float targetAngle, float t);
 
@@ -57,7 +58,7 @@ public:
 	//ゲージの使用をやめたとき
 	void EndUseGauge();
 	//ゲージを使用してるかを取得
-	bool IsUseGauge() const; 
+	bool IsUseGauge() const;
 	//当たり判定用の球を取得
 	Sphere GetSphere() const { return m_collSphere; }
 
@@ -73,14 +74,25 @@ public:
 	//チャージ中エフェクトの再生ハンドルを設定
 	void SetChargingEffectHandle(int handle) { m_chargingEffectH = handle; }
 
-	//今ダメージを食らっているかを返す
-	bool IsTakingDamage() const { return m_isTakingDamage; }
-
-	//ダメージ状態を終了するときに呼ぶ関数
-	void OnLeaveDamaging() { m_isTakingDamage = false; }
-
 	//今宙返り中かどうかを返す
 	bool IsSomersault() const;
+
+	//多段ヒットする可能性のあるダメージの種類
+	enum class DamageSource
+	{
+		Rock,//岩
+		Worm,//ワーム
+		Beam,//ビーム
+	};
+
+	//今指定の種類のダメージを食らっているかを返す
+	bool IsTakingDamage(DamageSource source) const;
+
+	//受けているダメージの種類をリセットする
+	void ClearTakingDamage() { m_takingDamageSources.clear(); }
+
+	//どのダメージを受け始めたかをセットする関数
+	void StartTakingDamage(DamageSource source);
 
 private:
 	//回転の更新
@@ -101,7 +113,7 @@ private:
 	void ChangeRotationState(std::shared_ptr<IRotationState>(newState));
 	//特殊行動系ステートを変更する
 	void ChangeSpecialState(std::shared_ptr<ISpecialActionState>(newState));
-	
+
 	//ステートの更新
 	//テンプレート関数なのでヘッダに実装をかく
 	template <typename T>
@@ -137,7 +149,7 @@ private:
 	};
 	int m_cbufferDamage = -1;
 	DamageBuffer* m_pCBufferDamageData = nullptr;
-	
+
 
 	//外部クラス参照
 	//借りてくるだけなのでweak_ptrにする
@@ -176,8 +188,10 @@ private:
 	//ダメージシェーダのハンドル
 	int m_damageShaderPSH = -1;
 
-	//今ダメージを食らっているか
-	bool m_isTakingDamage = false;
+	//setは中身は配列になっているが、pushしようとすると
+	//中に同じ値があればpushされないようになっている
+	std::set<DamageSource> m_takingDamageSources;
+
 	//ダメージエフェクトを出すか
 	bool m_isDamageEffect = false;
 };
