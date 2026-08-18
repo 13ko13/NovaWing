@@ -3,14 +3,16 @@
 
 namespace
 {
-	constexpr int max_health = 100;//最大体力
+	
 }
 
 Charactor::Charactor(ResourceLoader::ModelID modelID,
-		std::weak_ptr<CameraBase> camera):
+		std::weak_ptr<CameraBase> camera,
+		int maxHealth):
 	Actor(modelID,camera),
-	m_health(max_health),
-	m_attackPower(1.0f)
+	m_health(maxHealth),
+	m_attackPower(1.0f),
+	m_maxHealth(maxHealth)
 	
 {
 }
@@ -28,7 +30,7 @@ void Charactor::Update()
 
 int Charactor::GetMaxHealth() const
 {
-	return max_health;
+	return m_maxHealth;
 }
 
 

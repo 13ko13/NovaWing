@@ -15,7 +15,8 @@ public:
 		const ResourceLoader::ModelID Id,
 		const std::weak_ptr<BulletManager> pBulletManager,
 		std::weak_ptr<CameraBase> camera,
-		const Vector3& pos);
+		const Vector3& pos,
+		int health);
 	~FloatingEnemy();
 
 	void OnInit() override;//初期化処理

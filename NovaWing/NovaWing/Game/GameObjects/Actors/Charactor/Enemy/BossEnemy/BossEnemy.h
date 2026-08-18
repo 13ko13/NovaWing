@@ -15,10 +15,11 @@ public:
 	struct BossEnemyData
 	{
 		std::weak_ptr<Player> pPlayer;
-		ResourceLoader::ModelID Id;
+		ResourceLoader::ModelID Id = ResourceLoader::ModelID::None;
 		std::weak_ptr<BulletManager> pBulletManager;
 		std::weak_ptr<CameraBase> pCamera;
 		Vector3 pos;
+		int health = 0;
 	};
 
 	BossEnemy(BossEnemyData& data);
@@ -44,8 +45,10 @@ public:
 	//プレイヤー取得
 	std::weak_ptr<Player> GetPlayer() const { return m_pPlayer; }
 
-	//自分の当たり判定を返す
-	Sphere GetSphere() const { return m_hitCol; }
+	//自分の無敵当たり判定を返す
+	Sphere GetInvinsibleSphere() const { return m_invincibleHitCol; }
+	//自分のダメージ当たり判定を返す
+	Sphere GetDamageSphere() const { return m_damageCol; }
 
 	//ビームを出しているときにビームの当たり判定を返す
 	std::vector<Sphere> GetBeamSphereL() const;//左のビーム
@@ -53,6 +56,9 @@ public:
 
 	//現在のステートを返す
 	std::shared_ptr<IBossEnemyState> GetCurrentState() const { return m_pState; }
+
+	//無敵部分に当たった時の処理
+	void HitInvincibleCol();
 
 private:
 	//敵の描画(シェーダ適応も含めた)
@@ -88,6 +94,8 @@ private:
 	//敵生産工場
 	std::weak_ptr<EnemyFactory> m_pEnemyFactory;
 
-	//プレイヤーの弾との当たり判定用球
-	Sphere m_hitCol;
+	//プレイヤーの弾が当たった時に、無敵判定する部分
+	Sphere m_invincibleHitCol;
+	//プレイヤーの弾が当たった時のダメージ判定する部分
+	Sphere m_damageCol;
 };

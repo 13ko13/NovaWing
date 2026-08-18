@@ -10,7 +10,7 @@ public:
 	~Sphere();
 
 	void Update(const Vector3& pos, const float radius);
-	void Draw(unsigned int color);
+	void Draw(unsigned int color,bool isFill = false);
 
 	/// <summary>
 	/// 位置を返す

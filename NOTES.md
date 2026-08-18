@@ -64,10 +64,13 @@
 2. **`near_clip`/`far_clip`が`CapturePS.hlsl`/`WaterPS.hlsl`の2ファイルに重複定義**されている（`LightingPS.hlsl`は既に対象外と確認）。共通`.hlsli`への切り出しが未着手。
 
 3. **DataSetter群（Rock/FloatingEnemy/WormEnemy/BossEnemy）のCSV読み込み〜生成の骨格が重複**。テンプレート基底クラスかフリー関数での共通化が候補、未着手。
+   - **`CSVData`基底クラス（`CSVData/CSVData.h`、`virtual void Conversion()`を持つ）が、どのDataSetterからも継承されず活用されていないことが判明（2026-08-18）。** `CSVDataLoader::LoadCSV`は常に`CSVData`そのもの（生の`std::wstring`配列の入れ物）を作って返すだけで、各`XxxDataSetter`（`RockDataSetter`等）はそこから`GetData()`で生配列を取り出し、列番号を直接指定して自前でパースしている。
+   - **参考プロジェクト`C:\Users\SakamotoKou\Documents\GitHub\ProjectNeaR`で本来の使い方を確認済み。** `CSVDataLoader::LoadCSV`自体は同じ実装（常に`CSVData`を生成）だが、呼び出し側で`ActorData(std::shared_ptr<CSVData> data)`のように**`CSVData`を受け取るサブクラスのコンストラクタ**を用意し、そこで`Conversion()`相当の変換処理（列番号パース→意味のあるメンバへの変換）を行うパターンだった。`CSVDataLoader`自体の変更は不要で、サブクラス（例:`RockCSVData : public CSVData`）を新設し、今`RockDataSetter::CreateRock`に直書きされている列番号パースをそちらに移す形が本家に忠実な直し方。
+   - **保留中のタスクとして記録のみ。着手はまだ先。**
 
 4. **`LightingPS.hlsl`(共通化済み)と`WaterPS.hlsl`間で視線ベクトル・反射ベクトル・specular計算式が重複**。`WaterPS.hlsl`側だけまだ独自実装のまま、`.hlsli`共通化が候補、未着手。
 
-5. **ボスの本格実装、進行中（2026-08-18時点）。** 詳細は下記「進捗（2026-08-11〜18）」を参照。雑魚召喚・ビーム攻撃(発射・移動・当たり判定球の生成)までは動くが、**ダメージの多段ヒット防止(`DamageSource`まわり)の実装が未完成**で、次回はここから再開。死亡演出はまだ未着手。
+5. **ボスの本格実装、進行中（2026-08-18時点）。** 詳細は下記「進捗（2026-08-11〜18）」を参照。雑魚召喚・ビーム攻撃(発射・移動・当たり判定球の生成)までは動く。**ダメージの多段ヒット防止(`DamageSource`まわり)は見送りに決定**（受けるダメージを1に固定して多段ヒットを許容する方針、2026-08-18）。死亡演出はまだ未着手。
 
 6. **VS CodeのIntelliSenseで`DxLib::VECTOR`等の型が「不完全な型」表示になる問題、原因未特定のまま保留。** ビルド自体は正常なため実害なし。深追いは費用対効果が低いと判断済み。
 

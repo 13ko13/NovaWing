@@ -8,14 +8,14 @@ struct LightingResult
 };
 
 //環境光
-static const float ambient_light = 0.2f;//環境光の強さ
+static const float ambient_light = 0.35f;//環境光の強さ
 
 //法線マップの強調度
 static const float normal_map_strength = 1.5f;
 
 //滑らかさ
 static const float smoothness_min = 1.0f;//滑らかさの最小値
-static const float smoothness_range = 29.0f;//滑らかさの変化させる幅
+static const float smoothness_range = 34.0f;//滑らかさの変化させる幅
 
 LightingResult CalcLighting(
 	float4 normMapCol,//法線マップの色

@@ -10,6 +10,8 @@ namespace
 {
 	//ワームの胴体の数
 	constexpr int worm_segment_num = 5;
+	//浮遊敵のHP
+	constexpr int floating_enemy_hp = 5;
 }
 
 EnemyFactory::EnemyFactory(
@@ -44,7 +46,8 @@ std::shared_ptr<EnemyBase> EnemyFactory::Create(
 			ResourceLoader::ModelID::FloatingEnemy,
 			m_pBulletManager,
 			m_pCamera,
-			pos
+			pos,
+			floating_enemy_hp
 		);
 		pFloating->Init();//初期化
 		//ターゲットマネージャーと当たり判定マネージャーに登録

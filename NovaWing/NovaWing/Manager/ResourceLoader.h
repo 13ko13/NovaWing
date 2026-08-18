@@ -8,6 +8,7 @@ public:
 	//モデルの種類
 	enum class ModelID : int
 	{
+		None,
 		Player, //プレイヤー
 		FloatingEnemy,//浮遊する敵
 		WormHead,//ワームの頭

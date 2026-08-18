@@ -12,7 +12,8 @@ public:
 		ResourceLoader::ModelID modelID,
 		std::weak_ptr<CameraBase> pCamera,
 		std::weak_ptr<Player> pPlayer,
-		std::weak_ptr<BulletManager> pBulletManager
+		std::weak_ptr<BulletManager> pBulletManager,
+		int maxHealth = 100
 	);
 	virtual ~EnemyBase();
 

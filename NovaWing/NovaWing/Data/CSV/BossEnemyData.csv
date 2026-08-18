@@ -1,2 +1,2 @@
-modelID,x,y,z
-Boss,0,-100,3000
+modelID,x,y,z,hp
+Boss,0,-100,3000,1000

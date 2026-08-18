@@ -9,7 +9,8 @@ class Charactor : public Actor
 {
 public:
 	Charactor(ResourceLoader::ModelID modelID,
-		std::weak_ptr<CameraBase> camera);
+		std::weak_ptr<CameraBase> camera,
+		int maxHealth = 100);
 	virtual ~Charactor();
 	virtual void Update() override;
 	virtual void Draw() = 0;
@@ -24,6 +25,8 @@ protected:
 	//機体情報
 	int m_health = 100;//体力
 	float m_attackPower = 1.0f;//攻撃力
+	//最大体力
+	int m_maxHealth = 100;
 
 protected:
 	

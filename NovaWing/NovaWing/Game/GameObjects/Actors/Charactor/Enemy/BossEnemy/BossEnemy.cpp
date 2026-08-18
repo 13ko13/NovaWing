@@ -28,15 +28,20 @@ namespace
 	//アイドルアニメーションの再生スピード
 	constexpr float idle_anim_speed = 0.3f;
 
-	//プレイヤーの弾との当たり判定用球の半径
-	constexpr float hit_col_radius = 1500.0f;
-	//球のY座標オフセット
-	constexpr float hit_col_offset_y = 350.0f;
+	//無敵判定用球の半径
+	constexpr float invincible_col_radius = 1500.0f;
+	//無敵判定球のY座標オフセット
+	constexpr float invincible_col_offset_y = 350.0f;
+
+	//ダメージ判定球のオフセット位置
+	const Vector3 damage_col_offset = Vector3(0.0f, 1050.0f, -1200.0f);
+	//ダメージ判定用球の半径
+	constexpr float damage_col_radius = 280.0f;
 }
 
 BossEnemy::BossEnemy(BossEnemyData& data) :
 	EnemyBase(data.Id, data.pCamera, data.pPlayer,
-	data.pBulletManager),
+	data.pBulletManager,data.health),
 	m_animator(m_modelHandle)
 {
 	//位置を反映
@@ -87,10 +92,15 @@ void BossEnemy::OnInit()
 	);
 	m_pState->Enter();
 
-	//当たり判定初期化
-	Vector3 hitColPos = m_pos;
-	hitColPos.m_y += hit_col_offset_y;//Y座標のみ補正する
-	m_hitCol = Sphere(hitColPos, hit_col_radius);
+	//無敵判定球初期化
+	Vector3 invincibleColPos = m_pos;
+	invincibleColPos.m_y += invincible_col_offset_y;//Y座標のみ補正する
+	m_invincibleHitCol = Sphere(invincibleColPos, invincible_col_radius);
+
+	
+	//ダメージ判定球初期化
+	Vector3 damageColPos = m_pos + damage_col_offset;
+	m_damageCol = Sphere(damageColPos, damage_col_radius);
 }
 
 void BossEnemy::Update()
@@ -122,8 +132,12 @@ void BossEnemy::Update()
 
 	//当たり判定の更新
 	Vector3 hitColPos = m_pos;
-	hitColPos.m_y += hit_col_offset_y;//Y座標のみ補正する
-	m_hitCol.Update(hitColPos, hit_col_radius);
+	hitColPos.m_y += invincible_col_offset_y;//Y座標のみ補正する
+	m_invincibleHitCol.Update(hitColPos, invincible_col_radius);
+
+	//ダメージ判定球初期化
+	Vector3 damageColPos = m_pos + damage_col_offset;
+	m_damageCol = Sphere(damageColPos, damage_col_radius);
 
 	//今の足の位置を前の足の位置にコピーする
 	m_prevLegPositions = m_currentLegPositions;
@@ -192,16 +206,26 @@ void BossEnemy::Draw()
 	m_pState->Draw();
 
 #ifdef _DEBUG
-	//プレイヤーの速度
-	//DrawFormatString(0, 230, 0xff0000, L"PlayerVelZ : %f", m_pPlayer.lock() ->GetVel().m_z);
+	//HP
+	DrawFormatString(800, 15, 0xff0000, L"BossHP : %d",m_health);
 
-	//当たり判定の描画
-	m_hitCol.Draw(0xff0000);
+	//無敵判定球の描画
+	m_invincibleHitCol.Draw(0xff0000);
+	//ダメージ判定球の描画
+	m_damageCol.Draw(0xff00ff,true);
 #endif
 }
 
 void BossEnemy::TakeDamage(int damage)
 {
+	// HPを減らす
+	m_health -= damage;
+
+	// HP0以下になったら死亡処理を行う
+	if (m_health <= 0)
+	{
+		OnDead();
+	}
 }
 
 std::vector<Sphere> BossEnemy::GetBeamSphereL() const
@@ -214,6 +238,11 @@ std::vector<Sphere> BossEnemy::GetBeamSphereR() const
 {
 	//右のビームの球を返す
 	return std::dynamic_pointer_cast<BossBeamState>(m_pState)->GetRightBeamSpheres();
+}
+
+void BossEnemy::HitInvincibleCol()
+{
+	//TODO:無敵判定エフェクトを出す
 }
 
 void BossEnemy::DrawEnemy()

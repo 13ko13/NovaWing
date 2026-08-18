@@ -77,23 +77,6 @@ public:
 	//今宙返り中かどうかを返す
 	bool IsSomersault() const;
 
-	//多段ヒットする可能性のあるダメージの種類
-	enum class DamageSource
-	{
-		Rock,//岩
-		Worm,//ワーム
-		Beam,//ビーム
-	};
-
-	//今指定の種類のダメージを食らっているかを返す
-	bool IsTakingDamage(DamageSource source) const;
-
-	//受けているダメージの種類をリセットする
-	void ClearTakingDamage() { m_takingDamageSources.clear(); }
-
-	//どのダメージを受け始めたかをセットする関数
-	void StartTakingDamage(DamageSource source);
-
 private:
 	//回転の更新
 	void UpdateRotation();
@@ -187,11 +170,6 @@ private:
 
 	//ダメージシェーダのハンドル
 	int m_damageShaderPSH = -1;
-
-	//setは中身は配列になっているが、pushしようとすると
-	//中に同じ値があればpushされないようになっている
-	std::set<DamageSource> m_takingDamageSources;
-	std::set<DamageSource> m_prevTakingDamageSources;
 
 	//ダメージエフェクトを出すか
 	bool m_isDamageEffect = false;

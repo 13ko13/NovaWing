@@ -21,8 +21,9 @@ FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 	const ResourceLoader::ModelID Id,
 	const std::weak_ptr<BulletManager> pBulletManager,
 	std::weak_ptr<CameraBase> camera,
-	const Vector3& pos) :
-	EnemyBase(Id,camera,pPlayer,pBulletManager),
+	const Vector3& pos,
+	int health) :
+	EnemyBase(Id,camera,pPlayer,pBulletManager,health),
 	m_colSphere(pos)
 {
 	//位置を反映

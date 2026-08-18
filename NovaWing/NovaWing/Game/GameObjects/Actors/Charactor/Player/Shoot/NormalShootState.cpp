@@ -6,16 +6,16 @@
 
 namespace
 {
-// 弾の速度
-constexpr float move_speed = 60.0f;
-// 攻撃力
-constexpr int attack_power = 100;
-// クールタイム
-constexpr int cool_time = 10;
+	// 弾の速度
+	constexpr float move_speed = 60.0f;
+	// 攻撃力
+	constexpr int attack_power = 5;
+	// クールタイム
+	constexpr int cool_time = 10;
 
-// チャージ開始とみなすときの長押しフレーム数
-constexpr int charge_start_frame = 10;
-} // namespace
+	// チャージ開始とみなすときの長押しフレーム数
+	constexpr int charge_start_frame = 10;
+}
 
 NormalShootState::NormalShootState(const std::weak_ptr<Player> pPlayer,
 								   std::weak_ptr<BulletManager> pBulletManager) : IShootState(pPlayer, pBulletManager)
