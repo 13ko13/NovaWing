@@ -38,6 +38,9 @@ private:
 	//フレームカウンター
 	int m_frame;
 
+	//ボスが出現したか
+	bool m_isApearBoss = false;
+
 	//プレイヤーへのポインタ
 	std::shared_ptr<Player> m_pPlayer;
 	//カメラへのポインタ

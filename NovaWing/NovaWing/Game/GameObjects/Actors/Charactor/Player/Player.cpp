@@ -23,6 +23,7 @@
 #include "SpecialAction/NoneState.h"
 #include "SpecialAction/SomersaultState.h"
 #include "Utility/Quaternion.h"
+#include "Shoot/DisabledShootState.h"
 
 namespace
 {
@@ -322,6 +323,15 @@ void Player::ChangeMovementState(std::shared_ptr<IMovementState>(newState))
 	newState->Enter();
 }
 
+void Player::ChangeShootState(std::shared_ptr<IShootState>(newState))
+{
+	//前のステートの出るときの処理
+	//新しいステートの代入と入るときの処理
+	m_pShootState->Exit();
+	m_pShootState = newState;
+	newState->Enter();
+}
+
 void Player::ChangeRotationState(std::shared_ptr<IRotationState>(newState))
 {
 	// 前のステートの出るときの処理
@@ -495,6 +505,28 @@ bool Player::IsSomersault() const
 	// あてはめてnullなら宙返り中ではないことを表す
 	// nullではないということは当てはまるので、宙返り中ということを表す
 	return std::dynamic_pointer_cast<SomersaultState>(m_pSpecialState) != nullptr;
+}
+
+void Player::DisabledAllState()
+{
+	// 全ての入った時の処理も呼ぶ
+	// 何もしないステート
+	std::shared_ptr<IMovementState> newMoveState =
+		std::make_shared<DisabledMovementState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+	ChangeMovementState(newMoveState);
+
+	// 何もしないステート
+	std::shared_ptr<IRotationState> newRotState =
+		std::make_shared<DisabledRotState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+	ChangeRotationState(newRotState);
+
+	//何もしないステート
+	std::shared_ptr<IShootState> newShootState =
+		std::make_shared<DisabledShootState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+	ChangeShootState(newShootState);
 }
 
 void Player::UpdateRotation()

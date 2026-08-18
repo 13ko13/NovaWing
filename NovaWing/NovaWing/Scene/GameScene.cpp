@@ -48,6 +48,9 @@ namespace
 	constexpr int frame_per_second = 60;
 	//プレイヤーの位置がどのあたりに行ったらクリアにするか(仮)
 	constexpr float clear_pos_z = 30000.0f;
+
+	//ボスを登場タイミングz座標(プレイヤー位置)
+	constexpr float boss_appear_z = 20000.0f;
 }
 
 GameScene::GameScene(SceneController& controller) :
@@ -210,6 +213,27 @@ void GameScene::Update()
 	//水マネージャーの更新
 	m_pWaterManager->Update();
 
+	//プレイヤーが特定のz座標まで到達したら
+	//カメラを揺らしてボスを登場させる
+	if (m_pPlayer->GetPos().m_z > boss_appear_z)
+	{
+		//ボスが出現していない場合のみ行う
+		if (!m_isApearBoss)
+		{
+			//プレイヤーが何も行わないようにする
+			m_pPlayer->DisabledAllState();
+			//TODO:カメラを揺らしてから(地震のように)ボスを登場させる
+			
+			//TODO:カメラを揺らす(衝撃)
+
+			//TODO:カメラをズームさせる
+
+			//TODO:カメラ戻す
+
+			//TODO:プレイヤーのステートを通常に戻す
+		}
+	}
+
 	//プレイヤーが死んだらゲームオーバーシーンに遷移する
 	if (m_pPlayer->IsDead())
 	{
@@ -217,6 +241,7 @@ void GameScene::Update()
 			std::make_shared<GameoverScene>(
 				m_controller), frame_per_second);
 	}
+
 	//TODO:ボスを倒したらクリアにする
 	/*if (m_pPlayer->GetPos().m_z > clear_pos_z)
 	{

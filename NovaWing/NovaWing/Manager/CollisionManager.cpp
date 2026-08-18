@@ -360,4 +360,3 @@ void CollisionManager::Update()
 	m_pWormEnemies.end()
 	);
 }
-

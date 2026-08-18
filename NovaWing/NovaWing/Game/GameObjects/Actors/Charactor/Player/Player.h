@@ -77,6 +77,9 @@ public:
 	//今宙返り中かどうかを返す
 	bool IsSomersault() const;
 
+	//全てのステートを何もしないステートに変更する
+	void DisabledAllState();
+
 private:
 	//回転の更新
 	void UpdateRotation();
@@ -92,6 +95,8 @@ private:
 	void Brake(const InputManager& input);
 	//移動系ステートを変更する
 	void ChangeMovementState(std::shared_ptr<IMovementState>(newState));
+	//発射系ステートを変更する
+	void ChangeShootState(std::shared_ptr<IShootState>(newState));
 	//回転系ステートを変更する
 	void ChangeRotationState(std::shared_ptr<IRotationState>(newState));
 	//特殊行動系ステートを変更する
