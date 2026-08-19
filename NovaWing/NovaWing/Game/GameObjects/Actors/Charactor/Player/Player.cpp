@@ -179,23 +179,7 @@ void Player::Update()
 	if (m_pSpecialState != beforeSpecialState)
 	{
 		// 切り替わっていたら通常のステートに戻す
-		// 通常のステート
-		std::shared_ptr<IMovementState> newMoveState =
-			std::make_shared<IdleMovementState>(
-				std::static_pointer_cast<Player>(shared_from_this()));
-		ChangeMovementState(newMoveState);
-
-		// 通常のステート
-		std::shared_ptr<IRotationState> newRotState =
-			std::make_shared<DefaultRotationState>(
-				std::static_pointer_cast<Player>(shared_from_this()));
-		ChangeRotationState(newRotState);
-
-		// 通常のステート
-		std::shared_ptr<ISpecialActionState> newSpecialState =
-			std::make_shared<NoneState>(
-				std::static_pointer_cast<Player>(shared_from_this()));
-		ChangeSpecialState(newSpecialState);
+		ChangeAllStateToNormal();
 	}
 
 	// キャラクターの更新処理
@@ -513,7 +497,7 @@ bool Player::IsSomersault() const
 	return std::dynamic_pointer_cast<SomersaultState>(m_pSpecialState) != nullptr;
 }
 
-void Player::DisabledAllState()
+void Player::ChangeAllStateToDisabled()
 {
 	// 全ての入った時の処理も呼ぶ
 	// 何もしないステート
@@ -531,7 +515,29 @@ void Player::DisabledAllState()
 	//何もしないステート
 	std::shared_ptr<IShootState> newShootState =
 		std::make_shared<DisabledShootState>(
-			std::static_pointer_cast<Player>(shared_from_this()),m_pBulletManager);
+			std::static_pointer_cast<Player>(shared_from_this()), m_pBulletManager);
+	ChangeShootState(newShootState);
+}
+
+void Player::ChangeAllStateToNormal()
+{
+	// 全ての入った時の処理も呼ぶ
+	// 通常ステート
+	std::shared_ptr<IMovementState> newMoveState =
+		std::make_shared<IdleMovementState>(
+			std::static_pointer_cast<Player>(shared_from_this()));
+	ChangeMovementState(newMoveState);
+
+	// 通常ステート
+	std::shared_ptr<IRotationState> newRotState =
+		std::make_shared < DefaultRotationState > (
+			std::static_pointer_cast<Player>(shared_from_this()));
+	ChangeRotationState(newRotState);
+
+	// 通常ステート
+	std::shared_ptr<IShootState> newShootState =
+		std::make_shared<NormalShootState>(
+			std::static_pointer_cast<Player>(shared_from_this()), m_pBulletManager);
 	ChangeShootState(newShootState);
 }
 

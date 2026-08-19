@@ -78,7 +78,9 @@ public:
 	bool IsSomersault() const;
 
 	//全てのステートを何もしないステートに変更する
-	void DisabledAllState();
+	void ChangeAllStateToDisabled();
+	//全てのステートを通常のステートに変更
+	void ChangeAllStateToNormal();
 
 private:
 	//回転の更新

@@ -241,7 +241,7 @@ void GameScene::Update()
 		if (!m_isApearBoss)
 		{
 			//プレイヤーが何も行わないようにする
-			m_pPlayer->DisabledAllState();
+			m_pPlayer->ChangeAllStateToDisabled();
 
 			switch (m_bossApearState)
 			{
@@ -295,6 +295,8 @@ void GameScene::Update()
 					m_isApearBoss = true;
 					//ボスの行動を許可する
 					m_pBoss->SetIsBossAppear(true);
+					//プレイヤーも普通のステートに戻す
+					m_pPlayer->ChangeAllStateToNormal();
 				}
 				
 				break;
