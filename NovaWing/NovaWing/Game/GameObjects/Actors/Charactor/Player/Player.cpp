@@ -217,6 +217,12 @@ void Player::Update()
 	{
 		m_health--;
 	}
+	//Wキーでボスまでワープ
+	if (input.IsPressed(InputEvent::bossWarp))
+	{
+		m_pos.m_z = 19000.0f;
+	}
+
 #endif
 	// HPのクランプを行う
 	m_health = std::clamp(m_health, 0, max_health);
@@ -525,7 +531,7 @@ void Player::DisabledAllState()
 	//何もしないステート
 	std::shared_ptr<IShootState> newShootState =
 		std::make_shared<DisabledShootState>(
-			std::static_pointer_cast<Player>(shared_from_this()));
+			std::static_pointer_cast<Player>(shared_from_this()),m_pBulletManager);
 	ChangeShootState(newShootState);
 }
 

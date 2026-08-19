@@ -41,6 +41,17 @@ private:
 	//ボスが出現したか
 	bool m_isApearBoss = false;
 
+	//ボス登場時の演出ステート
+	enum class BossApearState
+	{
+		None,//通常
+		Start,//開始時
+		Apear,//出現
+		Landing,//着地
+		CameraZoom,//カメラをズームアップ
+	};
+	BossApearState m_bossApearState = BossApearState::None;
+
 	//プレイヤーへのポインタ
 	std::shared_ptr<Player> m_pPlayer;
 	//カメラへのポインタ

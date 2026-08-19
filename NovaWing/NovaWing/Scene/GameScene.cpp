@@ -51,6 +51,26 @@ namespace
 
 	//ボスを登場タイミングz座標(プレイヤー位置)
 	constexpr float boss_appear_z = 20000.0f;
+
+	//地震のような強く長い揺れ
+	//ボス登場時のカメラを揺らす力
+	constexpr float boss_appear_shake_power = 7.0f;
+	//ボス登場時のカメラを揺らす時間
+	constexpr int boss_appear_shake_frame = 60 * 2;
+
+	//衝撃のような短く少し強い揺れ
+	//ボスが着地した時の揺らす力
+	constexpr float boss_landing_shake_power = 55.0f;
+	//ボスが着地した時の揺らすフレーム
+	constexpr float boss_landing_shake_frame = 20;
+
+	//ボスを落下させるときの速度
+	constexpr float boss_fall_speed = 4.0f;
+
+	//ボスへのズームの速度
+	constexpr float boss_zoom_speed = 0.04f;
+	//ボスへのターゲットオフセットY
+	constexpr float boss_target_offset_y = 1500.0f;
 }
 
 GameScene::GameScene(SceneController& controller) :
@@ -74,13 +94,13 @@ void GameScene::Init()
 
 	//カリングの設定
 	SetUseBackCulling(true);
-	
+
 	//リソースローダーのインスタンス
 	ResourceLoader& resourceL = ResourceLoader::GetInstance();
 
 	//プレイヤーを生成
 	m_pPlayer = std::make_shared<Player>(
-		m_pBulletManager,ResourceLoader::ModelID::Player,
+		m_pBulletManager, ResourceLoader::ModelID::Player,
 	std::weak_ptr<CameraBase>());//カメラがまだ生成されていないので空のweak_ptrを渡す
 	//プレイヤーの初期化処理
 	m_pPlayer->Init();
@@ -101,7 +121,7 @@ void GameScene::Init()
 
 	//衝突判定マネージャーの初期化
 	m_pCollisionManager = std::make_shared<CollisionManager>(
-		m_pPlayer, 
+		m_pPlayer,
 		m_pBulletManager,
 		m_pCamera,
 		m_pBoss);
@@ -130,7 +150,7 @@ void GameScene::Init()
 		m_pBulletManager
 	);
 	//それぞれの初期化
-	for(std::shared_ptr<FloatingEnemy> pEnemy : m_pFloatingEnemies)
+	for (std::shared_ptr<FloatingEnemy> pEnemy : m_pFloatingEnemies)
 	{
 		pEnemy->Init();
 		//衝突判定マネージャーに敵を登録する
@@ -138,14 +158,14 @@ void GameScene::Init()
 		//ターゲットマネージャーにエネミーを登録する
 		m_pTargetManager->RegisterFloatingEnemy(pEnemy);
 	}
-	
+
 	//ワームエネミーの初期化
 	m_pWormEnemies = WormEnemyDataSetter::CreateEnemy(
 		m_pPlayer,
 		m_pCamera,
 		m_pBulletManager
-		);
-	for(std::shared_ptr<WormEnemy> pEnemy : m_pWormEnemies)
+	);
+	for (std::shared_ptr<WormEnemy> pEnemy : m_pWormEnemies)
 	{
 		pEnemy->Init();
 		//衝突判定マネージャーに敵を登録する
@@ -176,7 +196,7 @@ void GameScene::Init()
 	//岩の生成&初期化
 	m_pRocks = RockDataSetter::CreateRock(m_pCamera);
 	//それぞれの岩の初期化
-	for(std::shared_ptr<Rock> pRock : m_pRocks)
+	for (std::shared_ptr<Rock> pRock : m_pRocks)
 	{
 		pRock->Init();
 		//当たり判定のマネージャーに登録する
@@ -222,15 +242,63 @@ void GameScene::Update()
 		{
 			//プレイヤーが何も行わないようにする
 			m_pPlayer->DisabledAllState();
-			//TODO:カメラを揺らしてから(地震のように)ボスを登場させる
-			
-			//TODO:カメラを揺らす(衝撃)
 
-			//TODO:カメラをズームさせる
+			switch (m_bossApearState)
+			{
+			case BossApearState::None:
+				//スタート時ステートに遷移
+				m_bossApearState = BossApearState::Start;
+				break;
+			case BossApearState::Start:
+				//カメラを揺らす(地震のように)
+				m_pCamera->OnShake(boss_appear_shake_power, boss_appear_shake_frame);
+				//出現ステートに遷移
+				m_bossApearState = BossApearState::Apear;
+				break;
 
-			//TODO:カメラ戻す
+			case BossApearState::Apear:
+			{
+				//揺れが止まっていれば出現させる
+				if (!m_pCamera->IsShake())
+				{
+					//ボスを登場させる
+					//重力を加える
+					Vector3 currentVec = m_pBoss->GetVel();
+					currentVec.m_y -= boss_fall_speed;
 
-			//TODO:プレイヤーのステートを通常に戻す
+					m_pBoss->SetVel(currentVec);
+
+					//ボスの最初の着地が完了していたら
+					if (m_pBoss->IsFirstLanding())
+					{
+						m_bossApearState = BossApearState::Landing;
+					}
+				}
+			}
+
+			break;
+
+			case BossApearState::Landing:
+				//カメラを揺らす(衝撃)
+				m_pCamera->OnShake(boss_landing_shake_power, boss_landing_shake_frame);
+				//ステートをカメラズームに遷移
+				m_bossApearState = BossApearState::CameraZoom;
+				break;
+
+			case BossApearState::CameraZoom:
+				//カメラが揺れていないのを確認してから
+				//カメラをズームさせる
+				if (!m_pCamera->IsShake())
+				{
+					m_pCamera->OnZoomUp(boss_zoom_speed, m_pBoss, boss_target_offset_y);
+					//ボス出現フラグを立てる
+					m_isApearBoss = true;
+					//ボスの行動を許可する
+					m_pBoss->SetIsBossAppear(true);
+				}
+				
+				break;
+			}
 		}
 	}
 
@@ -270,26 +338,26 @@ void GameScene::Draw()
 	//キャプチャのほうに全オブジェクトの描画を行う
 	//これはキャプチャの方に描画しただけなので、のちにまたすべてを描画する必要がある
 	GameObjectManager::GetInstance().DrawAll();
-	
+
 	//キャプチャを終了
 	revealManager.EndCapture();
 	//視野角とNearFarを再設定
 	m_pCamera->SetUpCamera();
-	
+
 	//スカイボックスの描画
 	m_pSkyBox->Draw(m_pCamera->GetPos());
-	
+
 	//グリッドの描画
 	DrawGrid();
 
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	DrawString(0, 0, L"GameScene", 0xffffff);
 	DrawFormatString(0, 16, 0xffffff, L"FRAME:%d", m_frame);
-	#endif //DEBUG
+#endif //DEBUG
 
 	//全GameObjectのDrawを呼ぶ
 	GameObjectManager::GetInstance().DrawAll();
-	
+
 	//水マネージャーの描画
 	m_pWaterManager->Draw();
 

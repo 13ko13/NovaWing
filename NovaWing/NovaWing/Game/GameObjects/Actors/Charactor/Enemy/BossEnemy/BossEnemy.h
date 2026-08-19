@@ -36,7 +36,7 @@ public:
 
 	//敵生産工場取得
 	std::weak_ptr<EnemyFactory> GetEnemyFactory() const {
-		return m_pEnemyFactory; 
+		return m_pEnemyFactory;
 	}
 
 	//ボスのモデルハンドル取得
@@ -59,6 +59,12 @@ public:
 
 	//無敵部分に当たった時の処理
 	void HitInvincibleCol();
+
+	//ボス出現が終了しているかをセットする
+	void SetIsBossAppear(bool isAppear) { m_isAppear = isAppear; }
+
+	//最初の着地が完了しているか
+	bool IsFirstLanding() const { return m_isFirstLanding; }
 
 private:
 	//敵の描画(シェーダ適応も含めた)
@@ -98,4 +104,10 @@ private:
 	Sphere m_invincibleHitCol;
 	//プレイヤーの弾が当たった時のダメージ判定する部分
 	Sphere m_damageCol;
+
+	//ボスが出現完了しているか
+	//ゲームシーン側からセットさせる
+	bool m_isAppear = false;
+	//一番最初の着地時のみに使用するフラグ
+	bool m_isFirstLanding = false;
 };

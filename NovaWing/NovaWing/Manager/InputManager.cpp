@@ -3,43 +3,45 @@
 
 namespace
 {
-constexpr int min_dedzone_r = 3000;	 // 右スティックの最小デッドゾーン
-constexpr int max_dedzone_r = 28000; // 右スティックの最大デッドゾーン
+	constexpr int min_dedzone_r = 3000;	 // 右スティックの最小デッドゾーン
+	constexpr int max_dedzone_r = 28000; // 右スティックの最大デッドゾーン
 } // namespace
 
-InputManager::InputManager() : m_inputData{},
-							   m_lastInputData{},
-							   m_inputTable{},
-							   m_bufX(0),
-							   m_bufY(0),
-							   m_rightStickDir({0.0f, 0.0f})
+InputManager::InputManager() :
+	m_inputData{},
+	m_lastInputData{},
+	m_inputTable{},
+	m_bufX(0),
+	m_bufY(0),
+	m_rightStickDir({ 0.0f, 0.0f })
 {
 	// イベント名を添え時にして、右辺値に実際の入力種別と押されたボタンの配列を置く
-	m_inputTable[InputEvent::ok] = {{PeripheralType::keyboard, KEY_INPUT_A}, // キーボード:エンターキー
-									{PeripheralType::pad1, PAD_INPUT_A}};	 // パッド:A
+	m_inputTable[InputEvent::ok] = { {PeripheralType::keyboard, KEY_INPUT_A}, // キーボード:エンターキー
+									{PeripheralType::pad1, PAD_INPUT_A} };	 // パッド:A
 
-	m_inputTable[InputEvent::shoot] = {{PeripheralType::keyboard, KEY_INPUT_Z}, // キーボード:Z
-									   {PeripheralType::pad1, PAD_INPUT_B}};	// パッド:Bボタン
+	m_inputTable[InputEvent::shoot] = { {PeripheralType::keyboard, KEY_INPUT_Z}, // キーボード:Z
+									   {PeripheralType::pad1, PAD_INPUT_B} };	// パッド:Bボタン
 
-	m_inputTable[InputEvent::somersault] = {{PeripheralType::keyboard, KEY_INPUT_Z}, // キーボード:Z
-											{PeripheralType::pad1, PAD_INPUT_X}};	 // パッド:Yボタン
+	m_inputTable[InputEvent::somersault] = { {PeripheralType::keyboard, KEY_INPUT_Z}, // キーボード:Z
+											{PeripheralType::pad1, PAD_INPUT_X} };	 // パッド:Yボタン
 
-	m_inputTable[InputEvent::boost] = {{PeripheralType::keyboard, KEY_INPUT_Z}, // キーボード:Z
-									   {PeripheralType::pad1, PAD_INPUT_C}};	// パッド:?ボタン
+	m_inputTable[InputEvent::boost] = { {PeripheralType::keyboard, KEY_INPUT_Z}, // キーボード:Z
+									   {PeripheralType::pad1, PAD_INPUT_C} };	// パッド:?ボタン
 
-	m_inputTable[InputEvent::brake] = {{PeripheralType::keyboard, KEY_INPUT_Z}, // キーボード:Z
-									   {PeripheralType::pad1, PAD_INPUT_A}};	// パッド:Aボタン
+	m_inputTable[InputEvent::brake] = { {PeripheralType::keyboard, KEY_INPUT_Z}, // キーボード:Z
+									   {PeripheralType::pad1, PAD_INPUT_A} };	// パッド:Aボタン
 
-	m_inputTable[InputEvent::up] = {{PeripheralType::keyboard, KEY_INPUT_UP}, // キーボード:上矢印
-									{PeripheralType::pad1, PAD_INPUT_UP}};	  // パッド:スティック上又は十字上
+	m_inputTable[InputEvent::up] = { {PeripheralType::keyboard, KEY_INPUT_UP}, // キーボード:上矢印
+									{PeripheralType::pad1, PAD_INPUT_UP} };	  // パッド:スティック上又は十字上
 
-	m_inputTable[InputEvent::down] = {{PeripheralType::keyboard, KEY_INPUT_DOWN}, // キーボード:下矢印
-									  {PeripheralType::pad1, PAD_INPUT_DOWN}};	  // パッド:スティック下又は十字下
+	m_inputTable[InputEvent::down] = { {PeripheralType::keyboard, KEY_INPUT_DOWN}, // キーボード:下矢印
+									  {PeripheralType::pad1, PAD_INPUT_DOWN} };	  // パッド:スティック下又は十字下
 
 #ifdef _DEBUG
-	m_inputTable[InputEvent::restart] = {{PeripheralType::pad1, PAD_INPUT_R}};			// パッド:スティック右又は十字右
-	m_inputTable[InputEvent::gaugeUp] = {{PeripheralType::keyboard, KEY_INPUT_UP}};		// キーボード:上
-	m_inputTable[InputEvent::gaugeDown] = {{PeripheralType::keyboard, KEY_INPUT_DOWN}}; // キーボード:下
+	m_inputTable[InputEvent::restart] = { {PeripheralType::pad1, PAD_INPUT_R} };			// パッド:スティック右又は十字右
+	m_inputTable[InputEvent::gaugeUp] = { {PeripheralType::keyboard, KEY_INPUT_UP} };		// キーボード:上
+	m_inputTable[InputEvent::gaugeDown] = { {PeripheralType::keyboard, KEY_INPUT_DOWN} }; // キーボード:下
+	m_inputTable[InputEvent::bossWarp] = { {PeripheralType::keyboard, KEY_INPUT_W} }; // キーボード:W
 #endif
 
 	// あらかじめ入力データのための枠を開けておく
@@ -105,7 +107,7 @@ void InputManager::Update()
 	// 右スティックの値をfloatに変換する
 	Vector2 result = {
 		static_cast<float>(input.ThumbRX),
-		static_cast<float>(input.ThumbRY)};
+		static_cast<float>(input.ThumbRY) };
 
 	// 入力ベクトルの長さを求める
 	float len = result.Length();

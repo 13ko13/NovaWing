@@ -6,6 +6,7 @@
 #include "../Utility/Vector2.h"
 
 //入力イベント名(InputManagerの対応表・IsTriggered等の呼び出しで共通して使う定数)
+//注意:ヘッダに書かないと別のクラスから使用することができない
 namespace InputEvent
 {
 	constexpr const char* ok = "ok";
@@ -22,6 +23,7 @@ namespace InputEvent
 	constexpr const char* restart = "restart";
 	constexpr const char* gaugeUp = "gaugeUp";
 	constexpr const char* gaugeDown = "gaugeDown";
+	constexpr const char* bossWarp = "bossWarp";
 #endif
 }
 

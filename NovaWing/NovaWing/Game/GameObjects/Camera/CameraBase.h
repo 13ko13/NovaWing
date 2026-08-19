@@ -46,10 +46,24 @@ public:
 	//カメラの視野角とNear、Farを再設定する(シェーダー用)
 	void SetUpCamera();
 
+	//現在揺れているかを返す
+	bool IsShake() const { return m_isShake; }
+
+	//カメラをズームさせる
+	void OnZoomUp(
+		float zoomSpeed,
+		std::weak_ptr<GameObject> pTargetObject,
+		float offsetY = 0.0f
+	);
+
 private:
 	//揺れ
 	float m_shakePower = 0.0f;//揺れるときの力
 	int m_shakeFrame = 0;//揺れの持続フレーム数
+	bool m_isShake = false;//現在揺れているか
+
+	//ズーム速度
+	float m_zoomSpeed = 0.0f;
 
 	//ターゲットの位置
 	Position3 m_targetPos;

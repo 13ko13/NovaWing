@@ -105,27 +105,48 @@ void BossEnemy::OnInit()
 
 void BossEnemy::Update()
 {
-	//プレイヤーと同じ速度で移動する
-	Vector3 myVel = m_pPlayer.lock()->GetVel();
-	//zのみコピー
-	myVel.m_y = 0.0f;
-	myVel.m_x = 0.0f;
-	SetVel(myVel);
-
-	//ステートの更新
-	m_pState->Update();
-	//次のステートを取得
-	std::shared_ptr<IBossEnemyState> pState = m_pState->GetNextState();
-	//次のステートがあればステートを変更する
-	if (pState != nullptr)
+	
+	//着地が終了していない間に着地したら
+	if(m_velocity.m_y < 0.0f)
 	{
-		//前ステートの出るときの処理
-		m_pState->Exit();
-		//ステートを変更
-		m_pState = pState;
-		//切り替え後の入った時の処理
-		m_pState->Enter();
+		if (m_pos.m_y < water_y)
+		{
+			//着地完了とする
+			m_isFirstLanding = true;
+		}
 	}
+
+	//海より下に行かないようにする
+	if (m_pos.m_y < water_y)
+	{
+		m_pos.m_y = water_y;
+	}
+
+	if (m_isAppear)
+	{
+		//プレイヤーと同じ速度で移動する
+		Vector3 myVel = m_pPlayer.lock()->GetVel();
+		//zのみコピー
+		myVel.m_y = 0.0f;
+		myVel.m_x = 0.0f;
+		SetVel(myVel);
+
+		//ステートの更新
+		m_pState->Update();
+		//次のステートを取得
+		std::shared_ptr<IBossEnemyState> pState = m_pState->GetNextState();
+		//次のステートがあればステートを変更する
+		if (pState != nullptr)
+		{
+			//前ステートの出るときの処理
+			m_pState->Exit();
+			//ステートを変更
+			m_pState = pState;
+			//切り替え後の入った時の処理
+			m_pState->Enter();
+		}
+	}
+	
 
 	//キャラクタークラス共通の処理
 	Charactor::Update();

@@ -28,6 +28,13 @@ namespace
 
 	// カメラからターゲットまでの距離
 	constexpr float camera_to_target = 38000.0f;
+
+	//ズーム時の最高限距離
+	const Vector3 zoom_limit = Vector3(0.0f, 0.0f, 1000.0f);
+
+	//ズーム時の距離判定閾値
+	constexpr float zoom_dist_thresould = 100.0f;
+
 } // namespace
 
 CameraBase::CameraBase(const std::shared_ptr<Player> pPlayer)
@@ -67,32 +74,52 @@ void CameraBase::Update()
 	// 前のターゲットの位置を保存
 	m_prevTargetPos = m_targetPos;
 
-	// ターゲットの位置を更新
-	UpdateTargetPos();
-
-	// ターゲットの位置も補間する
-	m_targetPos = Vector3::Lerp(m_prevTargetPos, m_targetPos, lerp_t);
 
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	// プレイヤーの位置
 	Vector3 playerPos = pPlayer->GetPos();
 
-	//前フレームのカメラの位置を保存
-	m_prevPos = m_pos;
 
-	// プレイヤーが動くと、カメラもプレイヤーよりも小さい量で移動する
-	m_pos.m_x = playerPos.m_x * camera_move_strength_x;
-	// yはxよりも小さく動いて、海面より下にはならないようにする
-	m_pos.m_y = playerPos.m_y * camera_move_strength_y  + camera_offset_y;
-	m_pos.m_y = std::max(m_pos.m_y, Game::sea_camera_margin);
-	// zはプレイヤーよりも少し手前
-	m_pos.m_z = playerPos.m_z - camera_offset_z;
 
-	//前フレームのカメラの位置から今のフレームの位置まで補間する
-	m_pos = Vector3::Lerp(m_prevPos,m_pos,lerp_t);
+	//もしズームスピードに値が入っていればズームを行う
+	if (m_zoomSpeed > 0.0f)
+	{
+		//ターゲットオブジェクト
+		//自分の位置からズーム対象の位置まで
+		Vector3 zoomTargetPos = m_targetPos - zoom_limit;
+		float cameraToTargetDist = (zoomTargetPos - m_pos).Length();
 
-	// カメラの揺れを更新して、カメラの位置に加算する
-	m_pos += UpdateShake();
+		m_pos = Vector3::Lerp(m_pos, zoomTargetPos, m_zoomSpeed);
+
+		if (cameraToTargetDist < zoom_dist_thresould)
+		{
+			m_zoomSpeed = 0.0f;
+		}
+	}
+	//ズーム中はプレイヤー追従をやめる
+	else
+	{
+		// ターゲットの位置を更新
+		UpdateTargetPos();
+
+		// ターゲットの位置も補間する
+		m_targetPos = Vector3::Lerp(m_prevTargetPos, m_targetPos, lerp_t);
+		//前フレームのカメラの位置を保存
+		m_prevPos = m_pos;
+		// プレイヤーが動くと、カメラもプレイヤーよりも小さい量で移動する
+		m_pos.m_x = playerPos.m_x * camera_move_strength_x;
+		// yはxよりも小さく動いて、海面より下にはならないようにする
+		m_pos.m_y = playerPos.m_y * camera_move_strength_y + camera_offset_y;
+		m_pos.m_y = std::max(m_pos.m_y, Game::sea_camera_margin);
+		// zはプレイヤーよりも少し手前
+		m_pos.m_z = playerPos.m_z - camera_offset_z;
+
+		//前フレームのカメラの位置から今のフレームの位置まで補間する
+		m_pos = Vector3::Lerp(m_prevPos, m_pos, lerp_t);
+
+		// カメラの揺れを更新して、カメラの位置に加算する
+		m_pos += UpdateShake();
+	}
 
 	// カメラの位置とターゲットの位置をセットする
 	SetCameraPositionAndTarget_UpVecY(m_pos.ToDxLib(), m_targetPos.ToDxLib());
@@ -139,6 +166,9 @@ void CameraBase::OnShake(float power, int frame)
 {
 	m_shakePower = power;
 	m_shakeFrame = frame;
+
+	//フラグを立てる
+	m_isShake = true;
 }
 
 void CameraBase::SetUpCamera()
@@ -151,10 +181,26 @@ void CameraBase::SetUpCamera()
 	SetCameraPositionAndTarget_UpVecY(m_pos.ToDxLib(), m_targetPos.ToDxLib());
 }
 
+void CameraBase::OnZoomUp(
+	float zoomSpeed,
+	std::weak_ptr<GameObject> pTargetObject,
+	float offsetY)
+{
+	//ズームさせる速度を保持
+	m_zoomSpeed = zoomSpeed;
+
+	//ターゲットオブジェクトの位置も保持
+	//オフセット計算
+	Vector3 offset = Vector3(0.0f, offsetY, 0.0f);
+	m_targetPos = pTargetObject.lock()->GetPos() + offset;
+}
+
 Vector3 CameraBase::UpdateShake()
 {
 	if (m_shakeFrame < 0)
 	{
+		//フラグを降ろす
+		m_isShake = false;
 		return Vector3(0.0f, 0.0f, 0.0f);
 	}
 
