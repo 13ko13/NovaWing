@@ -20,7 +20,7 @@ public:
 	const int GetAttackPower() const { return m_attackPower; }
 
 	//相手に弾が当たった時の処理
-	virtual void OnHitEnemy() = 0;
+	virtual void OnHitEnemy();
 
 protected:
 	//当たり判定用の球
@@ -32,5 +32,8 @@ protected:
 	int m_lifeTime = 0;
 	//球の半径
 	float m_radius = 0.0f;
+
+	//ヒットエフェクト再生ハンドル
+	int m_hitEffectPlayH = -1;
 };
 

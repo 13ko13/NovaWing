@@ -47,6 +47,9 @@ void EnemyBullet::Draw()
 
 void EnemyBullet::OnHitEnemy()
 {
+	//弾共通処理
+	BulletBase::OnHitEnemy();
+
 	//エフェクトを止める
 	StopEffekseer3DEffect(m_effectPlayHandle);
 

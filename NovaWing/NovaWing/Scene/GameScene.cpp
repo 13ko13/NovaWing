@@ -297,8 +297,7 @@ void GameScene::Update()
 					m_pBoss->SetIsBossAppear(true);
 					//プレイヤーも普通のステートに戻す
 					m_pPlayer->ChangeAllStateToNormal();
-				}
-				
+				}				
 				break;
 			}
 		}
@@ -313,12 +312,12 @@ void GameScene::Update()
 	}
 
 	//TODO:ボスを倒したらクリアにする
-	/*if (m_pPlayer->GetPos().m_z > clear_pos_z)
+	if (m_pBoss->IsDead())
 	{
 		m_controller.ChangeScene(
 			std::make_shared<ClearScene>(
 				m_controller), frame_per_second);
-	}*/
+	}
 
 #ifdef _DEBUG
 	//Startボタンでリスタート

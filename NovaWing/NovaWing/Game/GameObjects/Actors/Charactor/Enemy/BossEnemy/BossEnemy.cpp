@@ -5,6 +5,7 @@
 #include "BossIdleState.h"
 #include "Game/GameObjects/Actors/Charactor/Player/Player.h"
 #include "BossBeamState.h"
+#include "Manager/InputManager.h"
 
 namespace
 {
@@ -210,6 +211,14 @@ void BossEnemy::Update()
 			);
 		}
 	}
+
+#ifdef _DEBUG
+	//ボスをワンボタンキル
+	if (InputManager::GetInstance().IsTriggered("killBoss"))
+	{
+		m_health -= m_maxHealth;
+	}
+#endif
 }
 
 void BossEnemy::Draw()
@@ -233,7 +242,7 @@ void BossEnemy::Draw()
 	//無敵判定球の描画
 	m_invincibleHitCol.Draw(0xff0000);
 	//ダメージ判定球の描画
-	m_damageCol.Draw(0xff00ff,true);
+	m_damageCol.Draw(0xff00ff);
 #endif
 }
 
@@ -245,6 +254,15 @@ void BossEnemy::TakeDamage(int damage)
 	// HP0以下になったら死亡処理を行う
 	if (m_health <= 0)
 	{
+		////死亡エフェクトを出現させる
+		//int effectH = ResourceLoader::GetInstance().GetEffect(
+		//	ResourceLoader::EffectID::BossDeath
+		//);
+		//m_deathEffectPlayH = PlayEffekseer3DEffect(effectH);
+
+		////位置をセット
+		//SetPosPlayingEffekseer3DEffect(m_deathEffectPlayH, m_pos.m_x, m_pos.m_y, m_pos.m_z);
+
 		OnDead();
 	}
 }
@@ -261,9 +279,21 @@ std::vector<Sphere> BossEnemy::GetBeamSphereR() const
 	return std::dynamic_pointer_cast<BossBeamState>(m_pState)->GetRightBeamSpheres();
 }
 
-void BossEnemy::HitInvincibleCol()
+void BossEnemy::OnHitInvincibleCol(const Position3& effectPos)
 {
-	//TODO:無敵判定エフェクトを出す
+	//シールドのエフェクト生成
+	int effectHandle = ResourceLoader::GetInstance().GetEffect(
+		ResourceLoader::EffectID::BossShield
+	);
+	m_shieldEffectPlayH = PlayEffekseer3DEffect(effectHandle);
+
+	//エフェクトの位置をセット
+	SetPosPlayingEffekseer3DEffect(
+		m_shieldEffectPlayH,
+		effectPos.m_x,
+		effectPos.m_y,
+		effectPos.m_z
+	);
 }
 
 void BossEnemy::DrawEnemy()

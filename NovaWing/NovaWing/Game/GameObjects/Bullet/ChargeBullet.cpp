@@ -73,6 +73,9 @@ void ChargeBullet::Draw()
 
 void ChargeBullet::OnHitEnemy()
 {
+	//弾の共通処理
+	BulletBase::OnHitEnemy();
+
 	//エフェクトを止める
 	StopEffekseer3DEffect(m_effectPlayHandle);
 

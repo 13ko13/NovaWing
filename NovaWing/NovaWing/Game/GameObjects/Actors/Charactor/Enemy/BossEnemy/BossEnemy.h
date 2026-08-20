@@ -57,14 +57,14 @@ public:
 	//現在のステートを返す
 	std::shared_ptr<IBossEnemyState> GetCurrentState() const { return m_pState; }
 
-	//無敵部分に当たった時の処理
-	void HitInvincibleCol();
-
 	//ボス出現が終了しているかをセットする
 	void SetIsBossAppear(bool isAppear) { m_isAppear = isAppear; }
 
 	//最初の着地が完了しているか
 	bool IsFirstLanding() const { return m_isFirstLanding; }
+
+	//ボスの無敵部分に当たった時の処理
+	void OnHitInvincibleCol(const Position3& effectPos);
 
 private:
 	//敵の描画(シェーダ適応も含めた)
@@ -110,4 +110,10 @@ private:
 	bool m_isAppear = false;
 	//一番最初の着地時のみに使用するフラグ
 	bool m_isFirstLanding = false;
+
+	//シールドエフェクトの再生ハンドル
+	int m_shieldEffectPlayH = -1;
+
+	//死亡エフェクト再生ハンドル
+	int m_deathEffectPlayH = -1;
 };

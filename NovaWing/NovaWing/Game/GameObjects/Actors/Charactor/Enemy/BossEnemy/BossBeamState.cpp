@@ -29,10 +29,13 @@ namespace
 	constexpr int beam_end_frame = 60 * 7;
 
 	//ビームがターゲットまで進むときの速度
-	constexpr float beam_speed = 9.0f;
+	constexpr float beam_speed = 20.0f;
 
 	//何フレームに一回当たり判定を出すか
 	constexpr int beam_col_interval = 10;
+
+	//ビームの当たり判定の終わりをプレイヤーのどれだけ後ろに出すか
+	const Vector3 beam_hit_end_offset = Vector3(0.0f, 0.0f, -120.0f);
 
 	//ボスのビームのダメージ
 	constexpr int beam_damage = 1;
@@ -153,7 +156,11 @@ void BossBeamState::Update()
 	m_beamPosR += m_beamMoveDirR * beam_speed;
 
 	//プレイヤーに追いつくまでは球を数フレームに一回出し続ける
-	if (m_beamPosL.m_z >= playerPos.m_z)
+	//プレイヤーより少し後ろまで当たり判定は出しておきたいので
+	//オフセットを足しておく
+	Vector3 hitEndPos = playerPos + beam_hit_end_offset;
+
+	if (m_beamPosL.m_z >= hitEndPos.m_z)
 	{
 		if (m_beamFrame % beam_col_interval == 0)
 		{
@@ -163,7 +170,7 @@ void BossBeamState::Update()
 			m_beamSpheresL.push_back(col);
 		}
 	}
-	if (m_beamPosR.m_z >= playerPos.m_z)
+	if (m_beamPosR.m_z >= hitEndPos.m_z)
 	{
 		if (m_beamFrame % beam_col_interval == 0)
 		{
@@ -173,6 +180,28 @@ void BossBeamState::Update()
 			m_beamSpheresR.push_back(col);
 		}
 	}
+
+	//hitEndPosより後ろにある球は削除する
+	m_beamSpheresL.erase(
+		std::remove_if(
+			m_beamSpheresL.begin(),
+			m_beamSpheresL.end(),
+			[hitEndPos](const Sphere sphere)
+			{
+				return sphere.GetPos().m_z < hitEndPos.m_z;
+			}),
+		m_beamSpheresL.end()
+	);
+	m_beamSpheresR.erase(
+		std::remove_if(
+			m_beamSpheresR.begin(),
+			m_beamSpheresR.end(),
+			[hitEndPos](const Sphere sphere)
+			{
+				return sphere.GetPos().m_z < hitEndPos.m_z;
+			}),
+		m_beamSpheresR.end()
+	);
 
 	//ビームエフェクトの位置更新
 	SetPosPlayingEffekseer3DEffect(

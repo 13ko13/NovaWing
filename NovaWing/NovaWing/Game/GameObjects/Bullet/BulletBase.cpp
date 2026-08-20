@@ -1,4 +1,6 @@
-﻿#include "BulletBase.h"
+﻿#include <EffekseerForDXLib.h>
+
+#include "BulletBase.h"
 #include "Manager/LightingManager.h"
 
 namespace
@@ -49,4 +51,16 @@ void BulletBase::Draw()
 	//球を描画
 	m_sphere.Draw(0xffffff);
 #endif
+}
+
+void BulletBase::OnHitEnemy()
+{
+	//ヒットエフェクトは共通なのでここで行う
+	int hitEffectHandle = ResourceLoader::GetInstance().GetEffect(
+		ResourceLoader::EffectID::HitEffect
+	);
+	m_hitEffectPlayH = PlayEffekseer3DEffect(hitEffectHandle);
+	
+	//位置をセット
+	SetPosPlayingEffekseer3DEffect(m_hitEffectPlayH, m_pos.m_x, m_pos.m_y, m_pos.m_z);
 }

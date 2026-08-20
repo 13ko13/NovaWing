@@ -75,6 +75,12 @@ namespace
 	constexpr const wchar_t* summon_worm_eff_path = L"Data/Effect/SummonWormEnemy/SummonWorm.efk";
 	//ボスのビーム
 	constexpr const wchar_t* boss_beam_eff_patgh = L"Data/Effect/BossBeam/BossBeam.efk";
+	//ボスの無敵エフェクト
+	constexpr const wchar_t* boss_shield_effect_path = L"Data/Effect/BossShield/BossShield.efk";
+	//ヒットエフェクト(敵味方共通)
+	constexpr const wchar_t* hit_effect_path = L"Data/Effect/HitEffect/HitEffect.efk";
+	//ボスの死亡エフェクト
+	constexpr const wchar_t* boss_death_eff_path = L"Data/Effect/BossDeath/BossDeath.efk";
 
 	//---------- CSV上でのモデル識別文字列 ----------
 	constexpr const wchar_t* rock1_csv_name = L"Rock1";
@@ -95,6 +101,9 @@ namespace
 	constexpr float summon_floating_eff_scale = 1.0f;
 	constexpr float summon_worm_eff_scale = 1.0f;
 	constexpr float boss_beam_eff_scale = 1.0f;
+	constexpr float boss_shield_eff_scale = 4.0f;
+	constexpr float hit_effect_scale = 2.0f;
+	constexpr float boss_death_eff_scale = 1.0f;
 }
 
 ResourceLoader& ResourceLoader::GetInstance()
@@ -463,4 +472,19 @@ void ResourceLoader::KeepEffect()
 	handle = LoadEffekseerEffect(boss_beam_eff_patgh, boss_beam_eff_scale);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::BossBeam] = handle;
+
+	//ボスの無敵エフェクト
+	handle = LoadEffekseerEffect(boss_shield_effect_path, boss_shield_eff_scale);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::BossShield] = handle;
+
+	//ヒットエフェクト
+	handle = LoadEffekseerEffect(hit_effect_path, hit_effect_scale);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::HitEffect] = handle;
+
+	//ボス死亡エフェクト
+	handle = LoadEffekseerEffect(boss_death_eff_path, boss_death_eff_scale);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::BossDeath] = handle;
 }

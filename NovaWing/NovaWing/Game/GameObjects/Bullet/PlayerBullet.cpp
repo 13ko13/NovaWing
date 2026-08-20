@@ -48,6 +48,9 @@ void PlayerBullet::Draw()
 
 void PlayerBullet::OnHitEnemy()
 {
+	//弾の共通処理
+	BulletBase::OnHitEnemy();
+
 	//エフェクトを止める
 	StopEffekseer3DEffect(m_effectPlayHandle);
 	//消す処理

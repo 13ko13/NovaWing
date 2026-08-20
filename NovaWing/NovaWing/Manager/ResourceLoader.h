@@ -76,6 +76,9 @@ public:
 		SummonFloating,//浮遊敵召喚時エフェクト
 		SummonWorm,//ワーム召喚時エフェクト
 		BossBeam,//ボスのビームエフェクト
+		BossShield,//ボスのシールドエフェクト
+		HitEffect,//被弾時エフェクト(敵味方共通)
+		BossDeath,//ボスの死亡エフェクト
 	};
 
 	//音の種類
