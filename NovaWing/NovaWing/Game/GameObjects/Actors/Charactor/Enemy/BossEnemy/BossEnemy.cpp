@@ -35,9 +35,9 @@ namespace
 	constexpr float invincible_col_offset_y = 350.0f;
 
 	//ダメージ判定球のオフセット位置
-	const Vector3 damage_col_offset = Vector3(0.0f, 1050.0f, -1200.0f);
+	const Vector3 damage_col_offset = Vector3(0.0f, 950.0f, -1300.0f);
 	//ダメージ判定用球の半径
-	constexpr float damage_col_radius = 280.0f;
+	constexpr float damage_col_radius = 310.0f;
 }
 
 BossEnemy::BossEnemy(BossEnemyData& data) :
