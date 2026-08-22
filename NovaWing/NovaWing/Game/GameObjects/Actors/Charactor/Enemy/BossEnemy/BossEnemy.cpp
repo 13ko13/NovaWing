@@ -23,6 +23,8 @@ namespace
 	const std::wstring model_name = L"DeformationSystem|";
 	//後ろ移動アニメーションの名前
 	const std::wstring idle_anim_name = model_name + L"A_MechISO_WalkBackward";
+	//死亡アニメーションの名前
+	const std::wstring death_anim_name = model_name + L"A_MechISO_Death|BaseLayer";
 
 	//アニメーションブレンドにかける時間
 	constexpr float anim_blend_time = 20.0f;
@@ -38,6 +40,15 @@ namespace
 	const Vector3 damage_col_offset = Vector3(0.0f, 950.0f, -1300.0f);
 	//ダメージ判定用球の半径
 	constexpr float damage_col_radius = 310.0f;
+
+	//死亡待機状態から完全死亡になるまでの時間
+	constexpr int true_dead_frame = 60 * 5 + 30;
+
+	//死亡エフェクトのオフセット
+	const Vector3 death_effect_offset = Vector3(0.0f, 1000.0f, 0.0f);
+
+	//死亡アニメーションの再生速度
+	constexpr float death_anim_speed = 0.5f;
 }
 
 BossEnemy::BossEnemy(BossEnemyData& data) :
@@ -123,43 +134,57 @@ void BossEnemy::Update()
 		m_pos.m_y = water_y;
 	}
 
-	if (m_isAppear)
+	//死亡待機状態じゃない場合の処理
+	if (!m_isDying)
 	{
-		//プレイヤーと同じ速度で移動する
-		Vector3 myVel = m_pPlayer.lock()->GetVel();
-		//zのみコピー
-		myVel.m_y = 0.0f;
-		myVel.m_x = 0.0f;
-		SetVel(myVel);
-
-		//ステートの更新
-		m_pState->Update();
-		//次のステートを取得
-		std::shared_ptr<IBossEnemyState> pState = m_pState->GetNextState();
-		//次のステートがあればステートを変更する
-		if (pState != nullptr)
+		if (m_isAppear)
 		{
-			//前ステートの出るときの処理
-			m_pState->Exit();
-			//ステートを変更
-			m_pState = pState;
-			//切り替え後の入った時の処理
-			m_pState->Enter();
+			//プレイヤーと同じ速度で移動する
+			Vector3 myVel = m_pPlayer.lock()->GetVel();
+			//zのみコピー
+			myVel.m_y = 0.0f;
+			myVel.m_x = 0.0f;
+			SetVel(myVel);
+
+			//ステートの更新
+			m_pState->Update();
+			//次のステートを取得
+			std::shared_ptr<IBossEnemyState> pState = m_pState->GetNextState();
+			//次のステートがあればステートを変更する
+			if (pState != nullptr)
+			{
+				//前ステートの出るときの処理
+				m_pState->Exit();
+				//ステートを変更
+				m_pState = pState;
+				//切り替え後の入った時の処理
+				m_pState->Enter();
+			}
 		}
-	}
 	
 
-	//キャラクタークラス共通の処理
-	Charactor::Update();
+		//キャラクタークラス共通の処理
+		Charactor::Update();
 
-	//当たり判定の更新
-	Vector3 hitColPos = m_pos;
-	hitColPos.m_y += invincible_col_offset_y;//Y座標のみ補正する
-	m_invincibleHitCol.Update(hitColPos, invincible_col_radius);
+		//当たり判定の更新
+		Vector3 hitColPos = m_pos;
+		hitColPos.m_y += invincible_col_offset_y;//Y座標のみ補正する
+		m_invincibleHitCol.Update(hitColPos, invincible_col_radius);
 
-	//ダメージ判定球初期化
-	Vector3 damageColPos = m_pos + damage_col_offset;
-	m_damageCol = Sphere(damageColPos, damage_col_radius);
+		//ダメージ判定更新
+		Vector3 damageColPos = m_pos + damage_col_offset;
+		m_damageCol.Update(damageColPos, damage_col_radius);
+	}
+	//死亡待機状態になった場合
+	else
+	{
+		m_dyingFrame++;
+		if (m_dyingFrame > true_dead_frame)
+		{
+			//完全死亡
+			OnDead();
+		}
+	}
 
 	//今の足の位置を前の足の位置にコピーする
 	m_prevLegPositions = m_currentLegPositions;
@@ -254,16 +279,26 @@ void BossEnemy::TakeDamage(int damage)
 	// HP0以下になったら死亡処理を行う
 	if (m_health <= 0)
 	{
-		////死亡エフェクトを出現させる
-		//int effectH = ResourceLoader::GetInstance().GetEffect(
-		//	ResourceLoader::EffectID::BossDeath
-		//);
-		//m_deathEffectPlayH = PlayEffekseer3DEffect(effectH);
+		//死亡待機状態をtrueにする
+		m_isDying = true;
 
-		////位置をセット
-		//SetPosPlayingEffekseer3DEffect(m_deathEffectPlayH, m_pos.m_x, m_pos.m_y, m_pos.m_z);
+		//死亡アニメーション再生
+		m_animator.Play(death_anim_name.c_str(), false, death_anim_speed);
 
-		OnDead();
+		//死亡エフェクトを出現させる
+		int effectH = ResourceLoader::GetInstance().GetEffect(
+			ResourceLoader::EffectID::BossDeath
+		);
+		m_deathEffectPlayH = PlayEffekseer3DEffect(effectH);
+
+		//位置をセット
+		Vector3 effectPos = m_pos + death_effect_offset;
+		SetPosPlayingEffekseer3DEffect(
+			m_deathEffectPlayH,
+			effectPos.m_x,
+			effectPos.m_y,
+			effectPos.m_z
+		);
 	}
 }
 

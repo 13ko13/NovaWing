@@ -70,11 +70,67 @@
 
 4. **`LightingPS.hlsl`(共通化済み)と`WaterPS.hlsl`間で視線ベクトル・反射ベクトル・specular計算式が重複**。`WaterPS.hlsl`側だけまだ独自実装のまま、`.hlsli`共通化が候補、未着手。
 
-5. **ボスの本格実装、進行中（2026-08-21時点）。** 雑魚召喚・ビーム攻撃・登場演出（落下→着地→カメラズーム→操作復帰）まで実装・動作確認済み。多段ヒット防止は見送り、ダメージ値を1に固定する方針で確定。ビームの当たり判定球配列(`m_beamSpheresL/R`)は、プレイヤーより後ろの判定終端(`hitEndPos`)を通り過ぎた球を`std::remove_if`+`erase`で削除するよう対応済み（2026-08-21）。**残りはボスの死亡演出のみ未着手。**
+5. **ボスの本格実装（2026-08-21完了）。** 雑魚召喚・ビーム攻撃・登場演出・死亡エフェクトまで実装・動作確認済み。多段ヒット防止は見送り、ダメージ値を1に固定。ビームの当たり判定球配列は判定終端を通り過ぎたものを削除する対応済み。
 
 6. **VS CodeのIntelliSenseで`DxLib::VECTOR`等の型が「不完全な型」表示になる問題、原因未特定のまま保留。** ビルド自体は正常なため実害なし。深追いは費用対効果が低いと判断済み。
 
-7. **リプレイ等で2回目のGameSceneに入ったとき、前回のEffekseerエフェクトが残っていることがある。** シーン終了時にエフェクトを明示的に停止・クリアする処理が必要（未着手）。
+7. **`CameraBase`のGameCamera/TitleCamera分割、GameCamera側は完了（2026-08-21）。** 詳細は下記「進捗（2026-08-21・タイトルシーン着手）」参照。`TitleCamera`はまだ空の骨格のみ、これから中身を実装する。
+
+8. **リプレイ等で2回目のGameSceneに入ったとき、前回のEffekseerエフェクトが残っていることがある。** シーン終了時にエフェクトを明示的に停止・クリアする処理が必要（未着手）。
+
+## 進捗（2026-08-21・タイトルシーン着手：CameraBase分割、TitlePlayer/TitleCamera新設）
+
+**タイトルシーンの演出（プレイヤー前進→宙返り→ブースト消失→ロゴ/選択肢フェードイン、カメラはプレイヤー追従→途中で固定に切り替え）に向けて設計・実装を開始。**
+
+**合意した設計方針:**
+- 演出はタイトル専用の軽量クラス`TitlePlayer`(`Actor`継承)・`TitleCamera`で実装する。既存`Player`のステートマシンは流用せず、宙返り等の動きも一から書き直す方針（`Player`には演出用の余計な穴を開けない）。
+- 宙返りの**動き自体**はゲームシーンの宙返り(`SomersaultState`)と同じでよい。
+- カメラ揺れ・ズームは`TitleCamera`には不要。
+
+**`CameraBase`のGameCamera/TitleCamera分割、完了（GameCamera側）:**
+- `TitlePlayer`が`Actor`を継承する設計にしたところ、`Actor`のコンストラクタが`std::weak_ptr<CameraBase>`(具体クラス)を要求しており、`CameraBase`とは無関係な新規`TitleCamera`を渡せない問題が発覚。これをきっかけに、以前から気になっていた「`CameraBase`を継承前提の名前にしたのに全部直書きしてしまっている」問題に着手することに。
+- **新しい構成**: `CameraBase`(共通基底、抽象クラス) → `GameCamera`(揺れ・ズーム・プレイヤー追従などゲームプレイ専用機能) / `TitleCamera`(未実装、タイトル演出専用)。
+  - `CameraBase`に残したもの: `m_targetPos`/`m_prevTargetPos`/`m_prevPos`、`GetForward()`/`GetFov()`/`GetFrustumHalfSize()`/`SetUpCamera()`、`Update()`の骨組み（前フレーム位置を保存→仮想関数`UpdatePosition()`を呼ぶ→`SetCameraPositionAndTarget_UpVecY`でセット、の3段階）。
+  - `GameCamera`に移したもの: 揺れ(`OnShake`/`IsShake`/`UpdateShake`)、ズーム(`OnZoomUp`)、プレイヤー追従の具体的な計算(`UpdateTargetPos`/`UpdatePosition`本体)、`m_pPlayer`。
+  - `UpdatePosition()`を純粋仮想関数にし、`if(ズーム中){...} else {プレイヤー追従...}`という分岐ごと`GameCamera::UpdatePosition()`に丸ごと移した（`TitleCamera`にはズーム自体が無いので、この分岐構造も不要と判断）。
+- **ハマった点（複数、いずれも解決済み）**:
+  1. `GameScene.cpp`が旧`std::make_shared<CameraBase>(m_pPlayer)`のままだった（新`CameraBase()`は引数無しコンストラクタ、`Player`を受け取るのは`GameCamera`側）。`std::make_shared<GameCamera>(m_pPlayer)`に修正、`#include`も`CameraBase.h`→`GameCamera.h`に変更。
+  2. `GameScene.h`の`m_pCamera`を`std::shared_ptr<GameCamera>`型に変更（`OnShake`/`OnZoomUp`等GameCamera固有の関数を呼ぶ必要があるため）。
+  3. `GameScene.cpp`内、プレイヤー生成時に渡す「まだ生成されていない空カメラ」の型を一時`std::weak_ptr<GameCamera>()`に書き換えてしまったが、`Player`(`Actor`)のコンストラクタは共通の`std::weak_ptr<CameraBase>`を要求するため誤りと判明、`std::weak_ptr<CameraBase>()`に戻して解決。**設計判断: `Player`のコンストラクタ引数は`GameCamera`専用にせず`CameraBase`型のまま維持**（`Actor`との一貫性を優先、`Player`が将来`GameCamera`以外と組み合わさる可能性も残す）。
+  4. `GameCamera`のデストラクタ実装(`.cpp`側)が抜けており`LNK2019`(未解決の外部シンボル)でリンクエラー。宣言(`.h`)はあったが実装が無い状態だった。
+  5. `CameraBase.cpp`に不要な`#include "GameCamera.h"`(何も使っていない)が残っていたため削除。同様に`#include "Player.h"`も未使用の可能性があり要確認。
+- **教訓**: 派生クラスへの分割作業では、①コンストラクタのシグネチャ変更が全呼び出し元に波及する ②`.h`の宣言と`.cpp`の実装が両方揃っているか(特にデストラクタは書き忘れやすい) ③型の派生関係(`shared_ptr<派生>`と`shared_ptr<基底>`は別の型)を意識して、どの型を要求するインターフェースなのか確認する、の3点を都度チェックする必要がある。
+
+**現状（2026-08-21時点）**: `TitlePlayer.h`(`Actor`継承の空クラス)、`TitleCamera.h`(`CameraBase`未継承のTODO付き空クラス)は新規作成済みだが中身は未実装。`GameCamera`側は完成、既存のゲームプレイの動作確認済み。
+
+**次回やること（旧、下記の続き参照）:**
+1. ~~`TitleCamera`を`CameraBase`から継承させ、`UpdatePosition()`等を実装する。~~ → 完了（下記参照）。
+2. ~~`TitlePlayer`の中身を実装する。~~ → 前進フェーズ＋描画のみ完了、宙返り・ブーストはまだ（下記参照）。
+3. `TitleScene`にこれらを組み込み、演出のステート管理を実装する。
+4. タイトルロゴのスタンプ演出（拡大→通常サイズ）、選択肢のフェードインを実装する。
+
+## 進捗（2026-08-21続き2・TitleCamera/TitlePlayerの基礎実装）
+
+**`TitleCamera`と`TitlePlayer`の骨組み〜前進フェーズまで実装、ビルド確認済み。**
+
+**設計の合意事項:**
+- 演出のフェーズ切り替え（前進→宙返り→ブースト、カメラの追従→固定）は、`TitlePlayer`/`TitleCamera`が自律的に判断するのではなく、**`TitleScene`側から明示的に指示する**方式に統一（`TitleCamera::StopFollowing()`、`TitlePlayer::StartSomersault()`/`StartBoost()`のような外部公開メソッドで切り替える）。
+- 宙返りの**動き自体**はゲームシーンの宙返り(`SomersaultState`)と同じ内容でよいが、実装はコピーせず一から書く（`Player`の複雑なステートマシンには依存しない）。
+
+**`TitleCamera`（完了）:**
+- `CameraBase`を継承。`m_pPlayer`は`std::shared_ptr<TitlePlayer>`で保持（`GameCamera`が`weak_ptr`だったのとは意図的に方針を変えた、`TitleCamera`が`TitlePlayer`を強参照で持つ設計）。
+- `m_isFollowing`(初期値`true`)で追従状態を管理。`UpdatePosition()`は追従中のみ`m_targetPos`をプレイヤー位置に更新、`StopFollowing()`が呼ばれた後は`m_pos`/`m_targetPos`とも一切更新しない（＝最後に追従していた向きで固定される）方針。カメラ位置(`m_pos`)自体は追従中も固定のまま動かさない設計（合意済み）。
+
+**`TitlePlayer`（前進フェーズ・描画のみ完了、宙返り・ブーストは未実装）:**
+- `Actor`を直接継承（`Charactor`は継承しない）。フェーズ管理は`enum class Phase { Forward, Somersault, Boost }`。
+- **ハマった点: `SetVel`で速度をセットしても、`Actor`には速度を位置に反映する処理が無く、何も動かなかった。** `m_pos += m_velocity`は`Charactor::Update()`に実装されている処理だが、`TitlePlayer`は`Charactor`を継承していないため自動的には効かない。`TitlePlayer::Update()`内に同じ処理を自前で追加して解決。
+- **ハマった点2: 位置反映(`m_pos += m_velocity`)と速度計算(`SetVel`)の順序を最初逆にしてしまい、1フレーム遅れの状態になっていた。** `BossEnemy::Update()`を参考に「先に`SetVel`で今フレームの速度を決めてから、後で`Charactor::Update()`相当の位置反映をする」正しい順序に修正。
+- 描画(`Draw()`)は`Rock::Draw()`のパターン（`ApplyMatrix`→`UpdateShaderMatrixData`→テクスチャ取得→`DrawWithLighting`）をそのまま踏襲、プレイヤーの法線マップ等（`GraphicID::PlayerNormalMap`等）とスケール(`{0.3f,0.3f,0.3f}`、`Player`と同じ値)を使用。
+
+**次回やること:**
+1. `TitlePlayer`の宙返り・ブーストフェーズの中身を実装する。
+2. `TitleScene`に`TitlePlayer`/`TitleCamera`を組み込み、演出全体のステート管理（`GameScene`の`BossApearState`と同様のパターン）を実装する。
+3. タイトルロゴのスタンプ演出（拡大→通常サイズ）、選択肢のフェードインを実装する。
 
 ## 進捗（2026-08-11〜18・ボスの雑魚召喚/ビーム実装、多段ヒットガードの設計を試行錯誤中）
 
@@ -152,21 +208,13 @@
 **次回やること:**
 1. ~~ボスの死亡演出~~ → 下記「進捗（2026-08-21続き）」の通り着手・作業中。
 
-## 進捗（2026-08-21続き・ボスの死亡エフェクト実装中、未コミットの作業途中）
+## 進捗（2026-08-21続き・ボスの死亡エフェクト完成、HPGaugeUIも分割、タイトルシーンに着手）
 
-**ボスの死亡演出・関連エフェクトに着手。現時点で未コミット、作業途中（`git status`でBossDeath/BossShield/HitEffectの3つの新規エフェクトフォルダが未追跡のまま存在）。**
+**ボスの死亡エフェクトが完成した。** 作業の過程でHPゲージUIも`PlayerHPGaugeUI`/`BossHPGaugeUI`/共通基底`HPGaugeUIBase`に分割されている（旧`HPGaugeUI.h/.cpp`は削除済み、`BossHPGaugeUI`は新規）。詳細な実装内容は未記録だが、ボス関連の機能（雑魚召喚・ビーム・登場演出・死亡演出・専用HPゲージ）が一通り揃った状態。
 
-- `ResourceLoader`に`EffectID::BossDeath`用の読み込みを追加済みと思われる（`BossEnemy::TakeDamage()`内に死亡エフェクト再生コードが用意されているが、**現在コメントアウトされたまま**）。
-- 併せて`BossEnemy::HitInvincibleCol()`を`OnHitInvincibleCol(const Position3& effectPos)`にリネーム・引数追加し、TODOだった「無敵判定エフェクトを出す」を`EffectID::BossShield`の再生処理として実装済み。
-- デバッグ用に`InputManager`へ`"killBoss"`イベントを追加し、`BossEnemy::Update()`で`_DEBUG`限定のワンボタンキル（HPを`m_maxHealth`分減らす）を実装。死亡演出のテストをしやすくする目的と思われる。
-- `HitEffect`という新規エフェクトフォルダも作成されているが、`BossEnemy.cpp`側にはまだ組み込まれていない（用途未確認、被弾エフェクト用と推測）。
-- `BulletBase`/`ChargeBullet`/`EnemyBullet`/`PlayerBullet`にも変更が入っている（詳細未確認、弾関連の何らかの調整と思われる）。
+**まだ未コミットの変更が多数残っている状態**（`BossDeath`エフェクト調整、`CameraBase`、`ResourceLoader`、`GlitchPS.hlsl`、`GraphShaderDraw`、新規`ResourceConstants.h`など）。次にコミットするタイミングで内容を整理すること。
 
-**次回、作業再開時に確認・着手すること:**
-1. `BossEnemy::TakeDamage()`内のコメントアウトされた死亡エフェクト再生コードを有効化する（`OnDead()`より前に呼ぶか、演出時間を考慮して`OnDead()`のタイミング自体を見直すか要検討）。
-2. `HitEffect`エフェクトの用途を確認し、必要なら被弾時の演出として組み込む。
-3. `BulletBase`まわりの変更内容を確認する（今回の死亡エフェクト作業との関連性は未確認）。
-4. 一連の変更がまとまったらコミットする。
+**次のタスク: タイトルシーンの完成に着手。** `TitleScene.cpp`にも既に変更が入っている状態からのスタート。詳細はこれから設計・実装。
 
 ## 完成済み機能の一覧（詳細はGit履歴・コード参照）
 

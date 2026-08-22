@@ -56,11 +56,14 @@ public:
 		Caustics,//コースティクス効果用のテクスチャ
 		DissolveNoise,//ニアクリップフェード対処用のノイズテクスチャ
 
-		HPFrame,//HPの枠
-		HPGauge,//HPゲージ
+		PlayerHPFrame,//プレイヤーのHPの枠
+		PlayerHPGauge,//プレイヤーのHPゲージ
 
 		BossEmission,//ボスのエミッション
 		BossNormal,//ボスの法線マップ
+
+		BossHPFrame,//ボスのHPの枠
+		BossHPGauge,//ボスのHPゲージ
 	};
 
 	//エフェクトの種類

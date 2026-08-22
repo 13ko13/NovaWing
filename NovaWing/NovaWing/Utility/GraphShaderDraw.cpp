@@ -22,7 +22,10 @@ namespace
     constexpr int polygon_num = 2;
 }
 
-void DrawGraphToShader(float left, float top, const SizeF& size, float uvMaxU, int texH)
+void DrawRectHorizontalGraphToShader(
+    float left, float top,
+    const SizeF& size,
+    float uvMaxU, int texH)
 {
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
@@ -81,6 +84,69 @@ void DrawGraphToShader(float left, float top, const SizeF& size, float uvMaxU, i
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
+void DrawRectVerticalGraphToShader(
+    float left, float top,
+    const SizeF& size, float uvMaxV, int texH)
+{
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+
+    //4頂点分の頂点データ
+    VERTEX2DSHADER vertexDatas[vertex_num];
+    //1つ目の頂点のデータ
+    //位置
+    vertexDatas[vertex_left_top].pos = Vector2(left, top + 
+         size.m_height * (1.0f - uvMaxV)).ToDxLib();//左上
+    vertexDatas[vertex_right_top].pos = Vector2(left + size.m_width, top +
+         size.m_height * (1.0f - uvMaxV)).ToDxLib();//右上
+    vertexDatas[vertex_left_bottom].pos = Vector2(left, top + size.m_height).ToDxLib();//左下
+    vertexDatas[vertex_right_bottom].pos = Vector2(left + size.m_width, top + size.m_height).ToDxLib();//右下
+
+    //UV
+    //左上と右上はHPが減るので割合位置をかける
+    //左上
+    vertexDatas[vertex_left_top].u = 0.0f;
+    vertexDatas[vertex_left_top].v = 1.0f - uvMaxV;
+    //右上
+    vertexDatas[vertex_right_top].u = 1.0f;
+    vertexDatas[vertex_right_top].v = 1.0f - uvMaxV;
+    //左下
+    vertexDatas[vertex_left_bottom].u = 0.0f;
+    vertexDatas[vertex_left_bottom].v = 1.0f;
+    //右下
+    vertexDatas[vertex_right_bottom].u = 1.0f;
+    vertexDatas[vertex_right_bottom].v = 1.0f;
+
+    //スペキュラとディフューズとrhwとsuvを設定
+    for (int i = 0; i < vertex_num; i++)
+    {
+        vertexDatas[i].spc = GetColorU8(0, 0, 0, 0);
+        vertexDatas[i].dif = GetColorU8(255, 255, 255, 255);
+        vertexDatas[i].rhw = 1.0f;
+        vertexDatas[i].su = vertexDatas[i].u;
+        vertexDatas[i].sv = vertexDatas[i].v;
+    }
+
+    //頂点インデックスの配列
+    unsigned short indices[indices_num];
+    //1つ目の三角形
+    indices[0] = vertex_left_top;//左上
+    indices[1] = vertex_right_top;//右上
+    indices[2] = vertex_left_bottom;//左下
+
+    //2つ目の三角形
+    indices[3] = vertex_left_bottom;//左下
+    indices[4] = vertex_right_top;//右上
+    indices[5] = vertex_right_bottom;//右下
+    //テクスチャを渡す
+    SetUseTextureToShader(ShaderRegister::ui_tex_diffuse, texH);
+    //画像を描画する
+    DrawPolygonIndexed2DToShader(vertexDatas, vertex_num, indices, polygon_num);
+    //テクスチャを解除
+    SetUseTextureToShader(ShaderRegister::ui_tex_diffuse, -1);
+
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+}
+
 void DrawGraphToShaderByCenter(
     float centerX, float centerY,
      double scale, int texH, float uvMaxU)
@@ -106,7 +172,7 @@ void DrawGraphToShaderByCenter(
 	);
 
 	//画像をシェーダーを通して描画
-	DrawGraphToShader(
+	DrawRectHorizontalGraphToShader(
 		leftTopPos.m_x,
 		leftTopPos.m_y,
 		texSizeSizeF,uvMaxU,texH

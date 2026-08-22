@@ -1,9 +1,12 @@
 ﻿#pragma once
 #include <array>
+#include <memory>
 
 #include "Scene.h"
 #include "Manager/ResourceLoader.h"
 
+class TitlePlayer;
+class TitleCamera;
 class TitleScene : public Scene
 {
 public:
@@ -57,4 +60,9 @@ private:
 	};
 	int m_cbufferGlitch = -1;
 	GlitchBuffer* m_pCBuffGlitchData = nullptr;
+
+	//タイトル用のプレイヤー
+	std::shared_ptr<TitlePlayer> m_pPlayer;
+	//タイトル用のカメラ
+	std::shared_ptr<TitleCamera> m_pTitleCamera;
 };

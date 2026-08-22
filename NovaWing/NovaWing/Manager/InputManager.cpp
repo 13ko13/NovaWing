@@ -43,6 +43,10 @@ InputManager::InputManager() :
 	m_inputTable[InputEvent::gaugeDown] = { {PeripheralType::keyboard, KEY_INPUT_DOWN} }; // キーボード:下
 	m_inputTable[InputEvent::bossWarp] = { {PeripheralType::keyboard, KEY_INPUT_W} }; // キーボード:W
 	m_inputTable[InputEvent::killBoss] = { {PeripheralType::keyboard, KEY_INPUT_K} }; // キーボード:K
+	m_inputTable[InputEvent::upScanlineFrequency] =
+		{ {PeripheralType::keyboard, KEY_INPUT_Q} }; // キーボード:Q
+	m_inputTable[InputEvent::downScanlineFrequency] =
+		{ {PeripheralType::keyboard, KEY_INPUT_E} }; // キーボード:E
 #endif
 
 	// あらかじめ入力データのための枠を開けておく

@@ -8,7 +8,7 @@
 #include "Charactor/Enemy/WormEnemy/WormEnemy.h"
 #include "TargetManager.h"
 #include "Game/GameObjects/Actors/Rock/Rock.h"
-#include "Game/GameObjects/Camera/CameraBase.h"
+#include "Game/GameObjects/Camera/GameCamera.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossEnemy.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossBeamState.h"
 
@@ -27,7 +27,7 @@ namespace
 CollisionManager::CollisionManager(
 	const std::weak_ptr<Player> pPlayer,
 	const std::weak_ptr<BulletManager> pBulletManager,
-	const std::weak_ptr<CameraBase> pCamera,
+	const std::weak_ptr<GameCamera> pCamera,
 	const std::weak_ptr<BossEnemy> pBoss) :
 	m_pPlayer(pPlayer),
 	m_pBulletManager(pBulletManager),
@@ -80,7 +80,7 @@ void CollisionManager::Update()
 	std::vector<std::shared_ptr<ChargeBullet>> sharedChargeBullets;
 
 	//カメラのshared_ptr化
-	std::shared_ptr<CameraBase> sharedCamera = m_pCamera.lock();
+	std::shared_ptr<GameCamera> sharedCamera = m_pCamera.lock();
 
 	//弾のすべてのweak_ptrをshared_ptrに変換
 	for (std::weak_ptr<PlayerBullet>& weakBullet : weakPlayerBullets)//プレイヤー弾

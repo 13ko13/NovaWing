@@ -5,7 +5,7 @@
 
 //前方宣言
 class Player;
-class CameraBase;
+class GameCamera;
 class BulletManager;
 class FloatingEnemy;
 class CollisionManager;
@@ -55,7 +55,7 @@ private:
 	//プレイヤーへのポインタ
 	std::shared_ptr<Player> m_pPlayer;
 	//カメラへのポインタ
-	std::shared_ptr<CameraBase> m_pCamera;
+	std::shared_ptr<GameCamera> m_pCamera;
 	//浮遊エネミーへのポインタの配列
 	std::vector<std::shared_ptr<FloatingEnemy>> m_pFloatingEnemies;
 	//バレットマネージャーへのポインタ

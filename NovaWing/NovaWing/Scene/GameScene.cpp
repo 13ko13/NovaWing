@@ -15,7 +15,7 @@
 #include "SceneController.h"
 #include "../Main/Application.h"
 #include "../Manager/BulletManager.h"
-#include "../Game/GameObjects/Camera/CameraBase.h"
+#include "../Game/GameObjects/Camera/GameCamera.h"
 #include "../Manager/GameObjectManager.h"
 #include "../Manager/ResourceLoader.h"
 #include "Charactor/Enemy/FloatingEnemy/FloatingEnemy.h"
@@ -34,10 +34,11 @@
 #include "Stage/Stage.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/WormEnemy/WormEnemyDataSetter.h"
 #include "Scene/ClearScene.h"
-#include "Game/UI/HPGaugeUI.h"
+#include "Game/UI/PlayerHPGaugeUI.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossEnemy.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossEnemyDataSetter.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/EnemyFactory.h"
+#include "Game/UI/BossHPGaugeUI.h"
 
 namespace
 {
@@ -71,6 +72,11 @@ namespace
 	constexpr float boss_zoom_speed = 0.04f;
 	//ボスへのターゲットオフセットY
 	constexpr float boss_target_offset_y = 1500.0f;
+
+	//ボス登場のズーム時に保たせる最低限の距離
+	const float boss_appear_zoom_limit = 1000.0f;
+	//ボス死亡のズーム時に保たせる最低限の距離
+	const float boss_death_zoom_limit = 2500.0f;
 }
 
 GameScene::GameScene(SceneController& controller) :
@@ -106,7 +112,7 @@ void GameScene::Init()
 	m_pPlayer->Init();
 
 	//カメラへのポインタを確保
-	m_pCamera = std::make_shared<CameraBase>(m_pPlayer);
+	m_pCamera = std::make_shared<GameCamera>(m_pPlayer);
 	//カメラの初期化処理
 	m_pCamera->Init();
 	//カメラを生成したのでプレイヤーにカメラをセットする
@@ -177,7 +183,8 @@ void GameScene::Init()
 	//UIManagerの初期化
 	m_pUIManager = std::make_shared<UIManager>();
 	m_pUIManager->Register(std::make_shared<ReticleUI>(m_pTargetManager, m_pPlayer));
-	m_pUIManager->Register(std::make_shared<HPGaugeUI>(m_pPlayer));
+	m_pUIManager->Register(std::make_shared<PlayerHPGaugeUI>(m_pPlayer));
+	m_pUIManager->Register(std::make_shared<BossHPGaugeUI>(m_pBoss));
 
 	//水マネージャーの初期化
 	m_pWaterManager = std::make_shared<WaterManager>(m_pCamera);
@@ -232,6 +239,9 @@ void GameScene::Update()
 
 	//水マネージャーの更新
 	m_pWaterManager->Update();
+
+	//UIマネージャーの更新
+	m_pUIManager->Update();
 
 	//プレイヤーが特定のz座標まで到達したら
 	//カメラを揺らしてボスを登場させる
@@ -290,14 +300,18 @@ void GameScene::Update()
 				//カメラをズームさせる
 				if (!m_pCamera->IsShake())
 				{
-					m_pCamera->OnZoomUp(boss_zoom_speed, m_pBoss, boss_target_offset_y);
+					m_pCamera->OnZoomUp(
+						boss_zoom_speed, 
+						m_pBoss,
+						boss_appear_zoom_limit,
+						boss_target_offset_y);
 					//ボス出現フラグを立てる
 					m_isApearBoss = true;
 					//ボスの行動を許可する
 					m_pBoss->SetIsBossAppear(true);
 					//プレイヤーも普通のステートに戻す
 					m_pPlayer->ChangeAllStateToNormal();
-				}				
+				}
 				break;
 			}
 		}
@@ -311,12 +325,27 @@ void GameScene::Update()
 				m_controller), frame_per_second);
 	}
 
-	//TODO:ボスを倒したらクリアにする
+	//ボスを倒したらクリアにする
 	if (m_pBoss->IsDead())
 	{
 		m_controller.ChangeScene(
 			std::make_shared<ClearScene>(
 				m_controller), frame_per_second);
+	}
+
+	//ボスが死亡待機状態になったら
+	if (m_pBoss->IsDying())
+	{
+		//プレイヤーの進行を止める
+		m_pPlayer->ChangeAllStateToDisabled();
+
+		//カメラをズームする
+		m_pCamera->OnZoomUp(
+			boss_zoom_speed,
+			m_pBoss,
+			boss_death_zoom_limit,
+			boss_target_offset_y
+		);
 	}
 
 #ifdef _DEBUG

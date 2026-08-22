@@ -116,4 +116,7 @@ private:
 
 	//死亡エフェクト再生ハンドル
 	int m_deathEffectPlayH = -1;
+
+	//死亡待機状態をどのぐらい続けるかを計測
+	int m_dyingFrame = 0;
 };

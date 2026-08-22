@@ -17,6 +17,9 @@ public:
 	);
 	virtual ~EnemyBase();
 
+	//死亡待機状態かを返す
+	bool IsDying() const { return m_isDying; }
+
 private:
 
 protected:
@@ -24,7 +27,7 @@ protected:
 	std::weak_ptr<Player> m_pPlayer;
 	//バレットマネージャーの弱参照
 	std::weak_ptr<BulletManager> m_pBulletManager;
-	//死んでるか
+	//死亡待機状態か
 	bool m_isDying = false;
 };
 

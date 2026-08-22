@@ -159,6 +159,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\GameObjects\Camera\GameCamera.cpp" />
+    <ClCompile Include="Game\UI\BossHPGaugeUI.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\DisabledShootState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossBeamState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossIdleState.cpp" />
@@ -166,9 +168,12 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\EnemyFactory.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemyDataSetter.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemy.cpp" />
-    <ClCompile Include="Game\UI\HPGaugeUI.cpp" />
+    <ClCompile Include="Game\UI\PlayerHPGaugeUI.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\IBossEnemyState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\SummonState.cpp" />
+    <ClCompile Include="Game\UI\HPGaugeUIBase.cpp" />
+    <ClCompile Include="Game\GameObjects\Camera\TitleCamera.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\TitlePlayer.cpp" />
     <ClCompile Include="Utility\GraphShaderDraw.cpp" />
     <ClCompile Include="Scene\ClearScene.cpp" />
     <ClCompile Include="CSVData\CSVData.cpp" />
@@ -240,6 +245,9 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemyDataSetter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\GameObjects\Camera\GameCamera.h" />
+    <ClInclude Include="Game\UI\BossHPGaugeUI.h" />
+    <ClInclude Include="Constants\ResourceConstants.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\DisabledShootState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossBeamState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossIdleState.h" />
@@ -247,9 +255,12 @@
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\EnemyFactory.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemyDataSetter.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemy.h" />
-    <ClInclude Include="Game\UI\HPGaugeUI.h" />
+    <ClInclude Include="Game\UI\PlayerHPGaugeUI.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\IBossEnemyState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\SummonState.h" />
+    <ClInclude Include="Game\UI\HPGaugeUIBase.h" />
+    <ClInclude Include="Game\GameObjects\Camera\TitleCamera.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\TitlePlayer.h" />
     <ClInclude Include="Utility\GraphShaderDraw.h" />
     <ClInclude Include="Scene\ClearScene.h" />
     <ClInclude Include="CSVData\CSVData.h" />

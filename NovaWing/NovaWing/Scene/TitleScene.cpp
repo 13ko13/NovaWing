@@ -10,6 +10,10 @@
 #include "Utility/SizeF.h"
 #include "Utility/GraphShaderDraw.h"
 #include "Constants/ShaderRegister.h"
+#include "Game/GameObjects/Actors/Charactor/Player/TitlePlayer.h"
+#include "Manager/GameObjectManager.h"
+#include "Game/GameObjects/Camera/TitleCamera.h"
+#include "Game/GameObjects/Camera/CameraBase.h"
 
 namespace
 {
@@ -37,6 +41,9 @@ namespace
 
 	//シェーダにフレームを渡すときに値が大きすぎるので小さくするための値
 	constexpr float time_speed = 0.1f;
+
+	//ゲームシーンに遷移するときのフェードの長さ
+	constexpr float to_gamescene_fade_time = 60.0f;
 }
 
 TitleScene::TitleScene(SceneController& controller):
@@ -78,6 +85,23 @@ void TitleScene::Init()
 	//シェーダバッファを作成
 	m_cbufferGlitch = CreateShaderConstantBuffer(sizeof(GlitchBuffer));
 	m_pCBuffGlitchData = static_cast<GlitchBuffer*>(GetBufferShaderConstantBuffer(m_cbufferGlitch));
+
+	//ゲームオブジェクトマネージャーの初期化
+	GameObjectManager::GetInstance().ClearAll();
+
+	//タイトル用のプレイヤーを生成
+	m_pPlayer = std::make_shared<TitlePlayer>(
+		ResourceLoader::ModelID::Player,
+		std::weak_ptr<CameraBase>());//まだカメラは生成されていないので空のカメラを渡す
+	//ゲームオブジェクトマネージャーに登録
+	m_pPlayer->Init();
+
+	//タイトル用のカメラを生成
+	m_pTitleCamera = std::make_shared<TitleCamera>(m_pPlayer);
+	//ゲームオブジェクトマネージャーに登録
+	m_pTitleCamera->Init();
+	//プレイヤーにカメラをセット
+	m_pPlayer->SetCamera(m_pTitleCamera);
 }
 
 void TitleScene::Update()
@@ -90,6 +114,9 @@ void TitleScene::Update()
 
 	//InputManagerのインスタンスを取得
 	InputManager& input = InputManager::GetInstance();
+
+	//ゲームオブジェクト全ての更新
+	GameObjectManager::GetInstance().UpdateAll();
 
 	//下入力で選択肢を下に移動(indexを増やす) 
 	if (input.IsTriggered(InputEvent::down))
@@ -123,7 +150,7 @@ void TitleScene::Update()
 			//ゲームシーンに遷移する
 			m_controller.ChangeScene(
 				std::make_shared<GameScene>(
-					m_controller), 60.0f);
+					m_controller), to_gamescene_fade_time);
 			break;
 		}
 		case TitleSelect::ExitGame:
@@ -166,82 +193,86 @@ void TitleScene::Update()
 
 void TitleScene::Draw()
 {
+	//なによりも背面にゲームオブジェクトを描画させる
+	GameObjectManager::GetInstance().DrawAll();
+
 	//ウィンドウサイズ
 	Size wsize = Application::GetInstance().GetWindowSize();
 
-	//ロゴを描画
-	DrawRotaGraph(
-		wsize.m_width * logo_ratio_x,
-		wsize.m_height * logo_ratio_y,
-		logo_scale, 0.0, m_titleLogoH, true);
+	////ロゴを描画
+	//DrawRotaGraph(
+	//	wsize.m_width * logo_ratio_x,
+	//	wsize.m_height * logo_ratio_y,
+	//	logo_scale, 0.0, m_titleLogoH, true);
 
-	//シェーダを適用
-	SetUsePixelShader(m_glitchPSH);
-	SetShaderConstantBuffer(m_cbufferGlitch, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
+	////シェーダを適用
+	//SetUsePixelShader(m_glitchPSH);
+	//SetShaderConstantBuffer(m_cbufferGlitch, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
 
-	//選択肢の背景をシェーダを通して描画
-	DrawGraphToShaderByCenter(
-		wsize.m_width * back_ground_ratio_x,
-		wsize.m_height * back_ground_ratio_y,
-		back_ground_graph_scale,
-		m_selectBackGroundH
-	);
+	////選択肢の背景をシェーダを通して描画
+	//DrawGraphToShaderByCenter(
+	//	wsize.m_width * back_ground_ratio_x,
+	//	wsize.m_height * back_ground_ratio_y,
+	//	back_ground_graph_scale,
+	//	m_selectBackGroundH
+	//);
 
-	//選択肢の描画
-	switch (m_selectIndex)
-	{
-	case TitleSelect::StartGame:
-	{
-		//ゲーム開始選択肢描画
-		//もしゲームスタートのワイプ進行度が0より大きければ
-		//カーソルが乗っている画像を左から進行度の範囲だけ切り取って描画
-		if (m_wipeProgress[static_cast<int>(TitleSelect::StartGame)] > 0.0f)
-		{
-			DrawGraphToShaderByCenter(
-				wsize.m_width * start_ratio_x,
-				wsize.m_height * start_ratio_y,
-				start_graph_scale,
-				m_gameStartOnCursorGraphH,
-				m_wipeProgress[static_cast<int>(TitleSelect::StartGame)]
-			);
-		}
+	////選択肢の描画
+	//switch (m_selectIndex)
+	//{
+	//case TitleSelect::StartGame:
+	//{
+	//	//ゲーム開始選択肢描画
+	//	//もしゲームスタートのワイプ進行度が0より大きければ
+	//	//カーソルが乗っている画像を左から進行度の範囲だけ切り取って描画
+	//	if (m_wipeProgress[static_cast<int>(TitleSelect::StartGame)] > 0.0f)
+	//	{
+	//		DrawGraphToShaderByCenter(
+	//			wsize.m_width * start_ratio_x,
+	//			wsize.m_height * start_ratio_y,
+	//			start_graph_scale,
+	//			m_gameStartOnCursorGraphH,
+	//			m_wipeProgress[static_cast<int>(TitleSelect::StartGame)]
+	//		);
+	//	}
 
-		//ゲーム終了選択肢描画
-		DrawGraphToShaderByCenter(
-			wsize.m_width * end_ratio_x,
-			wsize.m_height * end_ratio_y,
-			end_graph_scale,
-			m_gameEndGraphH
-		);
-		break;
-	}
-	case TitleSelect::ExitGame:
-	{
-		//ゲーム開始選択肢描画
-		DrawGraphToShaderByCenter(
-			wsize.m_width * start_ratio_x,
-			wsize.m_height * start_ratio_y,
-			start_graph_scale,
-			m_gameStartGraphH
-		);
+	//	//ゲーム終了選択肢描画
+	//	DrawGraphToShaderByCenter(
+	//		wsize.m_width * end_ratio_x,
+	//		wsize.m_height * end_ratio_y,
+	//		end_graph_scale,
+	//		m_gameEndGraphH
+	//	);
+	//	break;
+	//}
+	//case TitleSelect::ExitGame:
+	//{
+	//	//ゲーム開始選択肢描画
+	//	DrawGraphToShaderByCenter(
+	//		wsize.m_width * start_ratio_x,
+	//		wsize.m_height * start_ratio_y,
+	//		start_graph_scale,
+	//		m_gameStartGraphH
+	//	);
 
-		//ゲーム終了選択肢描画
-		//もしゲームスタートのワイプ進行度が0より大きければ
-		//カーソルが乗っている画像を左から進行度の範囲だけ切り取って重ね描きする
-		if (m_wipeProgress[static_cast<int>(TitleSelect::ExitGame)] > 0.0f)
-		{
-			//ゲーム終了選択肢描画
-			DrawGraphToShaderByCenter(
-				wsize.m_width * end_ratio_x,
-				wsize.m_height * end_ratio_y,
-				end_graph_scale,
-				m_gameEndOnCursorGraphH,
-				m_wipeProgress[static_cast<int>(TitleSelect::ExitGame)]
-			);
-		}
-		break;
-	}
-	}
+	//	//ゲーム終了選択肢描画
+	//	//もしゲームスタートのワイプ進行度が0より大きければ
+	//	//カーソルが乗っている画像を左から進行度の範囲だけ切り取って重ね描きする
+	//	if (m_wipeProgress[static_cast<int>(TitleSelect::ExitGame)] > 0.0f)
+	//	{
+	//		//ゲーム終了選択肢描画
+	//		DrawGraphToShaderByCenter(
+	//			wsize.m_width * end_ratio_x,
+	//			wsize.m_height * end_ratio_y,
+	//			end_graph_scale,
+	//			m_gameEndOnCursorGraphH,
+	//			m_wipeProgress[static_cast<int>(TitleSelect::ExitGame)]
+	//		);
+	//	}
+	//	break;
+	//}
+	//}
+
 	SetUsePixelShader(-1);
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
 }
