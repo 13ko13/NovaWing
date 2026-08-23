@@ -18,8 +18,9 @@ namespace
 	constexpr const wchar_t* exit_game_text = L"ゲーム終了";
 }
 
-ClearScene::ClearScene(SceneController& controller):
-    Scene(controller)
+ClearScene::ClearScene(SceneController& controller, const ClearResultData& data) :
+    Scene(controller),
+	m_resultData(data)
 {
 }
 
@@ -87,6 +88,11 @@ void ClearScene::Draw()
 	int x = wsize.m_width / 2;
 	int y = wsize.m_height / 2;
     DrawFormatString(x, y, 0xffff00, game_clear_text);
+
+	//一旦リザルト情報を描画
+	DrawFormatString(x, 300, 0xffffff, L"敵を倒した数 : %d", m_resultData.defeatedEnemyCount);
+	DrawFormatString(x, 315, 0xffffff, L"クリアタイム : %d", m_resultData.clearTime / 60);
+	DrawFormatString(x, 330, 0xffffff, L"被弾回数 : %d", m_resultData.hitCount);
 
 	//とりあえず左上に選択肢を表示する
 	//選択中の選択肢に矢印を表示する

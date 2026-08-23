@@ -212,7 +212,7 @@ void WormEnemy::Update()
 		//頭+胴体の数分死亡エフェクトを出し終わっていればワームの存在を消す
 		else
 		{
-			OnDead();
+			OnEnemyDead();
 		}
 	}
 }

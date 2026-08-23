@@ -4,7 +4,7 @@
 namespace
 {
 	//カメラの位置
-	const Vector3 camera_pos = Vector3(-700.0f, 0.0f, 0.0f);
+	const Vector3 camera_pos = Vector3(-700.0f, 300.0f, 4000.0f);
 }
 
 TitleCamera::TitleCamera(std::shared_ptr<TitlePlayer> pPlayer):

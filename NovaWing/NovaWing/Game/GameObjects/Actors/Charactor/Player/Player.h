@@ -82,6 +82,15 @@ public:
 	//全てのステートを通常のステートに変更
 	void ChangeAllStateToNormal();
 
+	//被弾回数を取得
+	int GetHitCount() const { return m_hitCount; }
+
+	//倒した敵の数をインクリメントさせる
+	void AddDefeatedEnemyCount() { m_defeatedEnemyCount++; }
+
+	//倒した敵の数を取得
+	int GetDefeatedEnemyCount() const { return m_defeatedEnemyCount; }
+
 private:
 	//回転の更新
 	void UpdateRotation();
@@ -180,4 +189,10 @@ private:
 
 	//ダメージエフェクトを出すか
 	bool m_isDamageEffect = false;
+	
+	//被弾回数
+	int m_hitCount = 0;
+
+	//倒した敵の数
+	int m_defeatedEnemyCount = 0;
 };

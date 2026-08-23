@@ -46,7 +46,7 @@ namespace
 	const Vector3 coll_sphere_offset = {0.0f, 0.0f, -90.0f};
 
 	// 初期座標
-	const Vector3 first_pos = {0.0f, 500.0f, 0.0f};
+	const Vector3 first_pos = {0.0f, 500.0f, 1200.0f};
 
 	// HPの最大値
 	constexpr int max_health = 100;
@@ -95,9 +95,6 @@ void Player::OnInit()
 
 	// シェーダに渡す定数バッファを作成
 	CreateShaderBuffers();
-
-	// ライトの方向ベクトルをセットする
-	LightingManager::GetInstance().SetLightDirection(Vector3(1.0f, -1.0f, 0.6f));
 
 	// MovementStateの初期化
 	// 待機状態
@@ -415,6 +412,9 @@ void Player::TakeDamage(int damage)
 
 	//ダメージエフェクトを出すフラグ
 	m_isDamageEffect = true;
+
+	//被弾回数をインクリメント
+	m_hitCount++;
 
 	// HP0以下になったら死亡処理を行う
 	if (m_health <= 0)

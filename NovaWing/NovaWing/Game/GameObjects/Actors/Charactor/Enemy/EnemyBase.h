@@ -20,6 +20,9 @@ public:
 	//死亡待機状態かを返す
 	bool IsDying() const { return m_isDying; }
 
+	//死んだときに呼ぶ関数
+	void OnEnemyDead();
+
 private:
 
 protected:

@@ -1,4 +1,6 @@
-﻿#include "TitlePlayer.h"
+﻿#include <DxLib.h>
+
+#include "TitlePlayer.h"
 #include "Constants/ShaderRegister.h"
 #include "Manager/LightingManager.h"
 
@@ -6,15 +8,20 @@ namespace
 {
 	//前進フェーズで進む速度
 	constexpr float move_speed = 8.0f;
+	//ブーストフェーズで進む速度
+	constexpr float boost_speed = 20.0f;
 
 	// モデルのサイズ
 	const Vector3 model_scale = { 0.3f, 0.3f, 0.3f };
 
 	//宙返りを終了とするフレーム
-	constexpr int somersault_max_frame = 100;
+	constexpr int somersault_max_frame = 150;
 
 	//宙返り中の移動速度
 	constexpr float somersault_move_speed = 20.0f;
+
+	//プレイヤーの初期位置
+	const Vector3 first_pos = Vector3(0.0f, 300.0f, 3100.0f);
 }
 
 TitlePlayer::TitlePlayer(
@@ -30,10 +37,12 @@ TitlePlayer::~TitlePlayer()
 
 void TitlePlayer::OnInit()
 {
-	// Y軸に180度回転する(モデルが反対を向いているので)
-	Vector3 axis = Vector3(0.0f, 1.0f, 0.0f);
-	m_rotationY = DX_PI_F;
-	UpdateRotation();
+	//モデルが逆向きなのでY軸180度回転させておく
+	m_rotation = Quaternion(Vector3(0.0f, 1.0f, 0.0f), DX_PI_F);
+
+	//プレイヤーの初期位置はz以外0で、zは0より少し後ろ
+	m_pos = first_pos;
+
 	//シェーダに渡す定数バッファを作成
 	CreateShaderBuffers();
 }
@@ -44,7 +53,7 @@ void TitlePlayer::Update()
 	{
 	case Phase::Forward:
 		//前に進む
-		SetVel(GetForward() * move_speed);
+		SetVel(Vector3(0.0f,0.0f,move_speed));
 		break;
 	case Phase::Somersault:
 	{
@@ -57,7 +66,10 @@ void TitlePlayer::Update()
 		float targetAngleX = progress * DX_TWO_PI_F;
 
 		//X軸周りに回転させる
-		m_rotation = Quaternion(Vector3(1.0f, 0.0f, 0.0f), -targetAngleX);
+		//モデルの回転補正を消してしまわないようにX軸とY軸の回転を合成させる
+		Quaternion initRotation = Quaternion(Vector3(0.0f, 1.0f, 0.0f), DX_PI_F);
+		Quaternion somersaultRotation = Quaternion(Vector3(1.0f, 0.0f, 0.0f), -targetAngleX);
+		m_rotation = somersaultRotation * initRotation;
 
 		//回転角に応じた速度を作る(縦に一回転する軌道)
 		Vector3 vel;
@@ -68,6 +80,8 @@ void TitlePlayer::Update()
 		break;
 	}
 	case Phase::Boost:
+		//前に進む
+		SetVel(Vector3(0.0f, 0.0f, boost_speed));
 		break;
 	}
 
@@ -101,6 +115,11 @@ void TitlePlayer::Draw()
 
 	//DrawWithLightingに渡してモデルを描画
 	DrawWithLighting(textures);
+
+#ifdef _DEBUG
+	//プレイヤーの位置表示
+	DrawFormatString(0, 15, 0xffffff, L"playerPosZ : %f", m_pos.m_z);
+#endif
 }
 
 void TitlePlayer::StartSomersault()

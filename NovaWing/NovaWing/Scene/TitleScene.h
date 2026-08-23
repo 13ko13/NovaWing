@@ -7,6 +7,8 @@
 
 class TitlePlayer;
 class TitleCamera;
+class WaterManager;
+class SkyBox;
 class TitleScene : public Scene
 {
 public:
@@ -56,7 +58,8 @@ private:
 	struct GlitchBuffer
 	{
 		float time;
-		float dummy[3];//16バイトアライメント
+		float scanlineFrequency;
+		float dummy[2];//16バイトアライメント
 	};
 	int m_cbufferGlitch = -1;
 	GlitchBuffer* m_pCBuffGlitchData = nullptr;
@@ -65,4 +68,29 @@ private:
 	std::shared_ptr<TitlePlayer> m_pPlayer;
 	//タイトル用のカメラ
 	std::shared_ptr<TitleCamera> m_pTitleCamera;
+
+	//海用の水マネージャーへのポインタ
+	std::shared_ptr<WaterManager> m_pWaterManager;
+	//スカイボックスへのポインタ
+	std::shared_ptr<SkyBox> m_pSkyBox;
+
+	//タイトル演出用の列挙体
+	enum class Phase
+	{
+		Forward,//前進
+		Somersault,//宙返り
+		Boost,//ブースト
+		LogoAndSelect,//タイトルロゴと選択肢出現中
+	};
+	Phase m_phase = Phase::Forward;
+
+	//ブースト中にフレーム数える用
+	int m_playerBoostFrame = 0;
+
+	//タイトルロゴのスケール
+	float m_titleLogoScale = 0.0f;
+	//タイトルロゴ演出時のフレーム管理用
+	int m_titleLogoFrame = 0;
+	//選択肢のフェードのフレーム管理用
+	int m_selectFadeFrame = 0;
 };

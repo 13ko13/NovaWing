@@ -4,7 +4,15 @@
 class ClearScene : public Scene
 {
 public:
-    ClearScene(SceneController& controller);
+	//クリア時のリザルトとして必要な情報
+	struct ClearResultData
+	{
+		int defeatedEnemyCount;
+		int clearTime;
+		int hitCount;
+	};
+
+    ClearScene(SceneController& controller,const ClearResultData& data);
 	~ClearScene();
 
     void Init() override;
@@ -22,5 +30,7 @@ private:
 	};
 	//現在プレイヤーが選んでいる選択肢
 	ClearSelect m_selectIndex = ClearSelect::BackTitle;
-};
 
+	//リザルトとして表示する情報
+	ClearResultData m_resultData;
+};

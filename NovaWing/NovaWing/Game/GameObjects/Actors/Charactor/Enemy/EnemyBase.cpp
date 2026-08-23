@@ -1,4 +1,5 @@
 ﻿#include "EnemyBase.h"
+#include "Game/GameObjects/Actors/Charactor/Player/Player.h"
 
 EnemyBase::EnemyBase(
 	ResourceLoader::ModelID modelID,
@@ -14,4 +15,15 @@ EnemyBase::EnemyBase(
 
 EnemyBase::~EnemyBase()
 {
+}
+
+void EnemyBase::OnEnemyDead()
+{
+	//プレイヤーに敵が死んだことを伝える
+	if (m_pPlayer.lock() != nullptr)
+	{
+		m_pPlayer.lock()->AddDefeatedEnemyCount();	
+	}
+
+	OnDead();
 }

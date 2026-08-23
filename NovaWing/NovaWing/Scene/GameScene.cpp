@@ -39,6 +39,7 @@
 #include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossEnemyDataSetter.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/EnemyFactory.h"
 #include "Game/UI/BossHPGaugeUI.h"
+#include "Manager/LightingManager.h"
 
 namespace
 {
@@ -77,6 +78,9 @@ namespace
 	const float boss_appear_zoom_limit = 1000.0f;
 	//ボス死亡のズーム時に保たせる最低限の距離
 	const float boss_death_zoom_limit = 2500.0f;
+
+	//ライトの方向
+	const Vector3 light_direction = Vector3(1.0f, -1.0f, 0.6f);
 }
 
 GameScene::GameScene(SceneController& controller) :
@@ -214,6 +218,9 @@ void GameScene::Init()
 	m_pStage = std::make_shared<Stage>(ResourceLoader::ModelID::Stage,
 	m_pCamera);
 	m_pStage->Init();
+
+	// ライトの方向ベクトルをセットする
+	LightingManager::GetInstance().SetLightDirection(light_direction);
 }
 
 void GameScene::Update()
@@ -328,9 +335,16 @@ void GameScene::Update()
 	//ボスを倒したらクリアにする
 	if (m_pBoss->IsDead())
 	{
+		//リザルトに渡す情報を組み立てる
+		ClearScene::ClearResultData resultData;
+		resultData.clearTime = m_frame;
+		resultData.defeatedEnemyCount = m_pPlayer->GetDefeatedEnemyCount();
+		resultData.hitCount = m_pPlayer->GetHitCount();
+
 		m_controller.ChangeScene(
 			std::make_shared<ClearScene>(
-				m_controller), frame_per_second);
+				m_controller, resultData),
+			frame_per_second);
 	}
 
 	//ボスが死亡待機状態になったら

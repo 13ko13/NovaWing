@@ -15,5 +15,6 @@ public:
     void Update() override;
 
 private:
+    std::weak_ptr<BossEnemy> m_pBoss;
 };
 

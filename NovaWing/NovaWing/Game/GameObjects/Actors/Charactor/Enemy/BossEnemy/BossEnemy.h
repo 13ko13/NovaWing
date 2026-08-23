@@ -59,6 +59,8 @@ public:
 
 	//ボス出現が終了しているかをセットする
 	void SetIsBossAppear(bool isAppear) { m_isAppear = isAppear; }
+	//ボス出現が終了しているかを返す
+	bool IsBossAppear() const { return m_isAppear; }
 
 	//最初の着地が完了しているか
 	bool IsFirstLanding() const { return m_isFirstLanding; }

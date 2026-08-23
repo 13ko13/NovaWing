@@ -91,7 +91,7 @@ void FloatingEnemy::Update()
 		if(m_dyingFrame > true_dead_frame)
 		{
 			//完全死亡
-			OnDead();
+			OnEnemyDead();
 		}
 	}
 
