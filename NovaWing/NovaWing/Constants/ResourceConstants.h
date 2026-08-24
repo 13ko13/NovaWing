@@ -57,6 +57,8 @@ namespace
 	//ボスHPゲージ
 	constexpr const wchar_t* boss_hp_frame_path = L"Data/Image/HPGauge/BossHPGauge/Boss_HP_Frame.png";
 	constexpr const wchar_t* boss_hp_gauge_path = L"Data/Image/HPGauge/BossHPGauge/Boss_HP_Ber.png";
+	//リザルトのテンプレート
+	constexpr const wchar_t* result_templete_path = L"Data/Image/Result_Templete.png";
 
 	//---------- エフェクトのパス ----------
 	constexpr const wchar_t* player_bullet_effect_path = L"Data/Effect/PlayerBullet/PlayerBullet.efk";

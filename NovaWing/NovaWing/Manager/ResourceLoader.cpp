@@ -330,6 +330,11 @@ void ResourceLoader::KeepGraph()
 	handle = LoadGraph(boss_hp_gauge_path);
 	assert(handle >= 0);
 	m_graphicHandles[ResourceLoader::GraphicID::BossHPGauge] = handle;
+
+	//リザルトテンプレート画像
+	handle = LoadGraph(result_templete_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::ResultTemplete] = handle;
 }
 
 void ResourceLoader::KeepEffect()

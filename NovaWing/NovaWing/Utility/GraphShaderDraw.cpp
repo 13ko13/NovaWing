@@ -25,7 +25,7 @@ namespace
 void DrawRectHorizontalGraphToShader(
 	float left, float top,
 	const SizeF& size,
-	float uvMaxU, int texH, float alpha)
+	float uvMaxU, int texH, float alpha, float uvMinU)
 {
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
@@ -33,21 +33,21 @@ void DrawRectHorizontalGraphToShader(
 	VERTEX2DSHADER vertexDatas[vertex_num];
 	//1つ目の頂点のデータ
 	//位置
-	vertexDatas[vertex_left_top].pos = Vector2(left, top).ToDxLib();//左上
+	vertexDatas[vertex_left_top].pos = Vector2(left + size.m_width * uvMinU, top).ToDxLib();//左上
 	vertexDatas[vertex_right_top].pos = Vector2(left + size.m_width * uvMaxU, top).ToDxLib();//右上
-	vertexDatas[vertex_left_bottom].pos = Vector2(left, top + size.m_height).ToDxLib();//左下
+	vertexDatas[vertex_left_bottom].pos = Vector2(left + size.m_width * uvMinU, top + size.m_height).ToDxLib();//左下
 	vertexDatas[vertex_right_bottom].pos = Vector2(left + size.m_width * uvMaxU, top + size.m_height).ToDxLib();//右下
 
 	//UV
 	//左上
 	//右上と右下はHPが減るので割合位置をかける
-	vertexDatas[vertex_left_top].u = 0.0f;
+	vertexDatas[vertex_left_top].u = uvMinU;
 	vertexDatas[vertex_left_top].v = 0.0f;
 	//右上
 	vertexDatas[vertex_right_top].u = 1.0f * uvMaxU;
 	vertexDatas[vertex_right_top].v = 0.0f;
 	//左下
-	vertexDatas[vertex_left_bottom].u = 0.0f;
+	vertexDatas[vertex_left_bottom].u = uvMinU;
 	vertexDatas[vertex_left_bottom].v = 1.0f;
 	//右下
 	vertexDatas[vertex_right_bottom].u = 1.0f * uvMaxU;
@@ -149,7 +149,7 @@ void DrawRectVerticalGraphToShader(
 
 void DrawGraphToShaderByCenter(
 	float centerX, float centerY,
-	 double scale, int texH, float alpha, float uvMaxU)
+	 double scale, int texH, float alpha, float uvMaxU, float uvMinU)
 {
 	//画像の幅と高さを取得
 	Size texSize;
@@ -166,8 +166,9 @@ void DrawGraphToShaderByCenter(
 	};
 
 	//左上座標を計算
+	//表示幅を計算
 	Vector2 leftTopPos = Vector2(
-		centerX - texSizeSizeF.m_width / 2,
+		centerX - texSizeSizeF.m_width * (uvMinU + uvMaxU) / 2,
 		centerY - texSizeSizeF.m_height / 2
 	);
 
@@ -176,6 +177,7 @@ void DrawGraphToShaderByCenter(
 		leftTopPos.m_x,
 		leftTopPos.m_y,
 		texSizeSizeF, uvMaxU, texH,
-		alpha
+		alpha,
+		uvMinU
 	);
 }

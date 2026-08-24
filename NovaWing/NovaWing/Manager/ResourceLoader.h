@@ -64,6 +64,8 @@ public:
 
 		BossHPFrame,//ボスのHPの枠
 		BossHPGauge,//ボスのHPゲージ
+
+		ResultTemplete,//リザルトのテンプレート画像
 	};
 
 	//エフェクトの種類

@@ -44,6 +44,8 @@ namespace
 
 	//シェーダにフレームを渡すときに値が大きすぎるので小さくするための値
 	constexpr float time_speed = 0.1f;
+	//スキャンラインを入れる周期
+	constexpr float scanline_frequency = 280.0f;
 
 	//ゲームシーンに遷移するときのフェードの長さ
 	constexpr float to_gamescene_fade_time = 60.0f;
@@ -63,9 +65,6 @@ namespace
 
 	//選択肢出現にかけるフレーム
 	constexpr int select_max_frame = 50;
-
-	//スキャンラインを入れる周期
-	constexpr float scanline_frequency = 280.0f;
 
 	//ライトの方向
 	const Vector3 light_direction = Vector3(1.0f, -1.0f, 0.6f);
