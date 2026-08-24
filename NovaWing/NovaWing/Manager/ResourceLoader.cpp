@@ -1,5 +1,4 @@
-﻿#include <DxLib.h>
-#include <cassert>
+﻿#include <cassert>
 #include <EffekseerForDXLib.h>
 #include <unordered_map>
 
@@ -24,6 +23,9 @@ void ResourceLoader::LoadAll()
 
 	//エフェクトを読み込んでハンドルを保存する
 	KeepEffect();
+
+	//フォントを読み込んでハンドルを保存
+	KeepFont();
 }
 
 void ResourceLoader::ReleaseAll()
@@ -43,6 +45,12 @@ void ResourceLoader::ReleaseAll()
 	for (auto& effectH : m_effectHandles)
 	{
 		DeleteEffekseerEffect(effectH.second);
+	}
+	//フォント
+	for (auto& fontH : m_fontHandles)
+	{
+		DeleteFontToHandle(fontH.second.handle);
+		RemoveFontResourceEx(fontH.second.path, FR_PRIVATE, NULL);
 	}
 }
 
@@ -106,6 +114,21 @@ int ResourceLoader::GetSound(SoundID id) const
 	else
 	{
 		assert(false && "サウンドIDが見つかりません");
+		return -1;
+	}
+}
+
+int ResourceLoader::GetFont(FontID id) const
+{
+	auto it = m_fontHandles.find(id);
+
+	if (it != m_fontHandles.end())
+	{
+		return it->second.handle;
+	}
+	else
+	{
+		assert(false && "フォントIDが見つかりません");
 		return -1;
 	}
 }
@@ -404,4 +427,22 @@ void ResourceLoader::KeepEffect()
 	handle = LoadEffekseerEffect(boss_death_eff_path, boss_death_eff_scale);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::BossDeath] = handle;
+}
+
+void ResourceLoader::KeepFont()
+{
+	//リザルト時のフォント
+	//フォントをPC内に一時的に追加
+	AddFontResourceEx(result_font_path, FR_PRIVATE, NULL);
+	int handle = CreateFontToHandle(
+		result_font_name,
+		result_font_size,
+		result_font_thick,
+		result_font_type
+	);
+	assert(handle >= 0);
+	SetFontSpaceToHandle(font_space, handle);
+	//ttfのパスとハンドルを同時に保存
+	m_fontHandles[ResourceLoader::FontID::Result].handle = handle;
+	m_fontHandles[ResourceLoader::FontID::Result].path = result_font_path;
 }

@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <DxLib.h>
 
 namespace
 {
@@ -104,4 +105,18 @@ namespace
 	constexpr float boss_shield_eff_scale = 4.0f;
 	constexpr float hit_effect_scale = 2.0f;
 	constexpr float boss_death_eff_scale = 1.0f;
+
+	//----------フォント系-----------------
+	//ファイル場所
+	constexpr const wchar_t* result_font_path = L"Data/Fonts/Orbitron-Black.ttf";
+	//フォント名
+	constexpr const wchar_t* result_font_name = L"Orbitron Black";
+	//サイズ
+	constexpr int result_font_size = 70;
+	//太さ
+	constexpr int result_font_thick = 5;
+	//フォントタイプ
+	constexpr int result_font_type = DX_FONTTYPE_ANTIALIASING_4X4;
+	//間隔
+	constexpr int font_space = 4;
 }

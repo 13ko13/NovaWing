@@ -30,16 +30,35 @@ namespace
 
 	//テンプレート画像のサイズ
 	constexpr float templete_size = 0.75f;
+
+	//敵を倒した数を表示する座標
+	const Vector2 kill_count_pos = Vector2(800.0f, 200.0f);
+	//クリアタイムを表示する座標
+	const Vector2 clear_time_pos = Vector2(800.0f, 300.0f);
+	//被弾回数を表示する座標
+	const Vector2 hit_count_pos = Vector2(800.0f, 410.0f);
+
+	//文字をぼかす範囲
+	constexpr int blur_range = 16;
+	//ぼかしの強さ
+	constexpr int blur_strength = 1400;
+
+	//ぼかしの透明度
+	constexpr int blur_alpha = 255;
 }
 
 ClearScene::ClearScene(SceneController& controller, const ClearResultData& data) :
-    Scene(controller),
+	Scene(controller),
 	m_resultData(data)
 {
 }
 
 ClearScene::~ClearScene()
 {
+	//オフスクリーン画像を開放
+	DeleteGraph(m_textRenderTargetH);
+	//オフスクリーン画像を開放
+	DeleteGraph(m_textGlowH);
 }
 
 void ClearScene::Init()
@@ -53,11 +72,77 @@ void ClearScene::Init()
 	//スキャンラインを入れる周期をシェーダに渡す
 	m_pCBuffGlitchData->scanlineFrequency = scanline_frequency; //適切な値を決める必要あり
 	UpdateShaderConstantBuffer(m_cbufferGlitch);
+
+	//リザルト情報を描画
+	int fontHandle = ResourceLoader::GetInstance().GetFont(
+		ResourceLoader::FontID::Result);
+
+	//ウィンドウサイズ
+	Size wsize = Application::GetInstance().GetWindowSize();
+
+	//文字にもシェーダをかけるために1枚の画像として
+	//文字のみ描画された画像を作る
+	m_textRenderTargetH = MakeScreen(wsize.m_width, wsize.m_height,true);
+	SetDrawScreen(m_textRenderTargetH);
+
+	//敵を倒した数
+	DrawFormatStringToHandle(
+		kill_count_pos.m_x, kill_count_pos.m_y,
+		0x00ffaa, fontHandle,
+		L"%d", m_resultData.defeatedEnemyCount);
+	//クリアタイム
+	DrawFormatStringToHandle(
+		clear_time_pos.m_x, clear_time_pos.m_y,
+		0x00ffaa, fontHandle,
+		L"%d", m_resultData.clearTime / 60);
+	//被弾回数
+	DrawFormatStringToHandle(
+		hit_count_pos.m_x, hit_count_pos.m_y,
+		0xe13c3c, fontHandle,
+		L"%d", -m_resultData.hitCount);
+	//通常描画に戻す
+	SetDrawScreen(DX_SCREEN_BACK);
+
+	//------ぼかし---------
+
+	//発光用のぼかし画像を作る
+	m_textGlowH = MakeScreen(wsize.m_width, wsize.m_height, true);
+	SetDrawScreen(m_textGlowH);
+	//敵を倒した数
+	DrawFormatStringToHandle(
+		kill_count_pos.m_x, kill_count_pos.m_y,
+		0x00ffaa, fontHandle,
+		L"%d", m_resultData.defeatedEnemyCount);
+	//クリアタイム
+	DrawFormatStringToHandle(
+		clear_time_pos.m_x, clear_time_pos.m_y,
+		0x00ffaa, fontHandle,
+		L"%d", m_resultData.clearTime / 60);
+	//被弾回数
+	DrawFormatStringToHandle(
+		hit_count_pos.m_x, hit_count_pos.m_y,
+		0xe13c3c, fontHandle,
+		L"%d", -m_resultData.hitCount);
+
+	//通常描画に戻す
+	SetDrawScreen(DX_SCREEN_BACK);
+	//ぼかしをかける
+	GraphFilter(
+		m_textGlowH,
+		DX_GRAPH_FILTER_GAUSS,
+		blur_range, blur_strength
+	);
+	//ぼかしをかける
+	GraphFilter(
+		m_textGlowH,
+		DX_GRAPH_FILTER_GAUSS,
+		blur_range, blur_strength
+	);
 }
 
 void ClearScene::Update()
 {
-    //InputManagerのインスタンスを取得
+	//InputManagerのインスタンスを取得
 	InputManager& input = InputManager::GetInstance();
 	//フレーム更新
 	m_frame++;
@@ -65,10 +150,13 @@ void ClearScene::Update()
 	UpdateShaderConstantBuffer(m_cbufferGlitch);
 
 	//テンプレートの開く演出用のフレーム更新
-	m_templeteOpenFrame++;
-	if (m_templeteOpenFrame > templete_opne_max_frame)
+	if (!m_controller.GetFade().IsFading())
 	{
-		m_templeteOpenFrame = templete_opne_max_frame;
+		m_templeteOpenFrame++;
+		if (m_templeteOpenFrame > templete_opne_max_frame)
+		{
+			m_templeteOpenFrame = templete_opne_max_frame;
+		}
 	}
 
 	//下入力で選択肢を下に移動(indexを増やす) 
@@ -116,19 +204,19 @@ void ClearScene::Update()
 
 void ClearScene::Draw()
 {
-    //ウィンドウサイズ
+	//ウィンドウサイズ
 	Size wsize = Application::GetInstance().GetWindowSize();
 	//画面の真ん中
 	int x = wsize.m_width / 2;
 	int y = wsize.m_height / 2;
-    DrawFormatString(x, y, 0xffff00, game_clear_text);
+	DrawFormatString(x, y, 0xffff00, game_clear_text);
 
 	SetUsePixelShader(m_glitchPSH);
 	SetShaderConstantBuffer(m_cbufferGlitch, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
 
 	//画像をカーテンのように開く感じで表示するために
 	//進行度計算
-	float openProgress = static_cast<float>(m_templeteOpenFrame) / 
+	float openProgress = static_cast<float>(m_templeteOpenFrame) /
 		static_cast<float>(templete_opne_max_frame);
 
 	//中心を基準に左右対称の範囲を計算
@@ -147,13 +235,28 @@ void ClearScene::Draw()
 		uvMaxU,
 		uvMinU
 	);
-	SetUsePixelShader(-1);
-	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
 
-	//一旦リザルト情報を描画
-	/*DrawFormatString(x, 300, 0xffffff, L"敵を倒した数 : %d", m_resultData.defeatedEnemyCount);
-	DrawFormatString(x, 315, 0xffffff, L"クリアタイム : %d", m_resultData.clearTime / 60);
-	DrawFormatString(x, 330, 0xffffff, L"被弾回数 : %d", m_resultData.hitCount);*/
+	//ぼかし画像を先に加算合成で描画する
+	SetDrawBlendMode(DX_BLENDMODE_ADD, blur_alpha);
+	//オフスクリーン画像を描画する
+	DrawGraphToShaderByCenter(
+		wsize.m_width * 0.5f,
+		wsize.m_height * 0.5f,
+		1.0,
+		m_textGlowH
+	); 
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+
+	//オフスクリーン画像を描画する
+	DrawGraphToShaderByCenter(
+		wsize.m_width * 0.5f,
+		wsize.m_height * 0.5f,
+		1.0,
+		m_textRenderTargetH
+	);
+
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
+	SetUsePixelShader(-1);
 
 	//とりあえず左上に選択肢を表示する
 	//選択中の選択肢に矢印を表示する

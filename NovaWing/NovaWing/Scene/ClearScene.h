@@ -52,4 +52,10 @@ private:
 
 	//テンプレート画像のカーテン演出のためのフレーム
 	int m_templeteOpenFrame = 0;
+
+	//文字にシェーダをかけるためのレンダーターゲットハンドル
+	int m_textRenderTargetH = -1;
+
+	//GraphFilterでぼかした発光用画像
+	int m_textGlowH = -1;
 };

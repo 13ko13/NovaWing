@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <unordered_map>
 #include <string>
+#include <Windows.h>
 
 class ResourceLoader
 {
@@ -92,6 +93,12 @@ public:
 		
 	};
 
+	//フォントの種類
+	enum class FontID : int
+	{
+		Result,//リザルト用のフォント
+	};
+
 public:
 	static ResourceLoader& GetInstance();
 
@@ -105,6 +112,7 @@ public:
 	int GetGraphic(GraphicID id) const;
 	int GetEffect(EffectID id) const;
 	int GetSound(SoundID id) const;
+	int GetFont(FontID id) const;
 
 	//wstringをModelIDに変換する
     static ResourceLoader::ModelID WStringToModelID(const std::wstring id);
@@ -125,6 +133,8 @@ private:
 	void KeepGraph();
 	//エフェクトのハンドルをすべて保存する
 	void KeepEffect();
+	//フォントのハンドルをすべて保存する
+	void KeepFont();
 
 private:
 	//IDをいれて直感的にアクセスできるようにするためのマップ
@@ -132,4 +142,13 @@ private:
 	std::unordered_map<GraphicID, int> m_graphicHandles;//グラフィックのハンドルを保存するマップ
 	std::unordered_map<EffectID, int> m_effectHandles;//エフェクトのハンドルを保存するマップ
 	std::unordered_map<SoundID, int> m_soundHandles;//サウンドのハンドルを保存するマップ
+
+	//フォントの情報
+	struct FontData
+	{
+		int handle;
+		LPCWSTR path;//RemoveFontResourceEXで必要
+	};
+
+	std::unordered_map<FontID, FontData> m_fontHandles;//フォントのハンドルを保存するマップ
 };
