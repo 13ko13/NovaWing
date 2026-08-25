@@ -56,6 +56,8 @@ private:
 
 	//テンプレート画像のカーテン演出のためのフレーム
 	int m_templeteOpenFrame = 0;
+	//背景のカーテン演出のためのフレーム
+	int m_backGroundOpenFrame = 0;
 
 	//文字にシェーダをかけるためのレンダーターゲットハンドル
 	int m_textRenderTargetH = -1;
@@ -67,4 +69,13 @@ private:
 	float m_currentKillCount = 0.0f;
 	float m_currentClearTime = 0.0f;
 	float m_currentHitCount = 0.0f;
+	float m_currentScore = 0.0f;
+	//lerpが終了したか
+	bool m_isLerpFinished = false;
+
+	//スコア
+	int m_score = 0;
+
+	//次へボタンが押されたか
+	bool m_isPushNextButton = false;
 };

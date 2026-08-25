@@ -10,6 +10,7 @@
 namespace InputEvent
 {
 	constexpr const char* ok = "ok";
+	constexpr const char* next = "next";
 	constexpr const char* shoot = "shoot";
 	constexpr const char* somersault = "somersault";
 	constexpr const char* boost = "boost";

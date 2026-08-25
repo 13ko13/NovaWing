@@ -51,7 +51,7 @@ public:
 		GameStart,//ゲーム開始選択肢画像
 		GameEnd,//ゲーム終了選択肢画像
 		GameStartOnCursor,//カーソルが乗っているときのゲーム開始選択肢画像
-		GameEndOnCursor,////カーソルが乗っているときのゲーム終了選択肢画像
+		GameEndOnCursor,//カーソルが乗っているときのゲーム終了選択肢画像
 		SelectBackGround,//選択肢の背景画像
 
 		Caustics,//コースティクス効果用のテクスチャ
@@ -67,6 +67,11 @@ public:
 		BossHPGauge,//ボスのHPゲージ
 
 		ResultTemplete,//リザルトのテンプレート画像
+		ButtonA,//Aボタンの画像
+		DecideText,//決定のテキスト画像
+		NextText,//次へ のテキスト画像
+		ReTry,//リトライ選択肢画像
+		ReTryOnCursor,//カーソルが乗っているときのリトライ選択肢画像
 	};
 
 	//エフェクトの種類

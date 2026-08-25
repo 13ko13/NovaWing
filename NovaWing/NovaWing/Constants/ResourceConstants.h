@@ -60,6 +60,16 @@ namespace
 	constexpr const wchar_t* boss_hp_gauge_path = L"Data/Image/HPGauge/BossHPGauge/Boss_HP_Ber.png";
 	//リザルトのテンプレート
 	constexpr const wchar_t* result_templete_path = L"Data/Image/Result_Templete.png";
+	//Aボタンの画像
+	constexpr const wchar_t* a_button_path = L"Data/Image/Button/Button_A.png";
+	//決定のテキスト画像
+	constexpr const wchar_t* decide_text_path = L"Data/Image/Text/Decide.png";
+	//次へのテキスト画像
+	constexpr const wchar_t* next_text_path = L"Data/Image/Text/Next.png";
+	//リトライ選択肢画像
+	constexpr const wchar_t* retry_path = L"Data/Image/SelectFrame/Retry.png";
+	//カーソルが乗っているときのリトライ選択肢画像
+	constexpr const wchar_t* retry_on_cursor_path = L"Data/Image/SelectFrame/Retry_OnCursor.png";
 
 	//---------- エフェクトのパス ----------
 	constexpr const wchar_t* player_bullet_effect_path = L"Data/Effect/PlayerBullet/PlayerBullet.efk";

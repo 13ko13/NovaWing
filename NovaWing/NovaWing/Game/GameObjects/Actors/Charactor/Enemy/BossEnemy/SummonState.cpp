@@ -18,6 +18,9 @@ SummonState::SummonState(
 
 SummonState::~SummonState()
 {
+	//エフェクトを止める
+	StopEffekseer3DEffect(m_floatingEffPlayH);
+	StopEffekseer3DEffect(m_wormEffPlayH);
 }
 
 void SummonState::Enter()

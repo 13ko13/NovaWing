@@ -50,6 +50,9 @@ BossBeamState::BossBeamState(std::weak_ptr<BossEnemy> pBoss,
 
 BossBeamState::~BossBeamState()
 {
+	//エフェクトを止める
+	StopEffekseer3DEffect(m_leftBeamEffectPlayH);
+	StopEffekseer3DEffect(m_rightBeamEffectPlayH);
 }
 
 void BossBeamState::Enter()

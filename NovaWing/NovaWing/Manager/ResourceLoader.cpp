@@ -358,6 +358,31 @@ void ResourceLoader::KeepGraph()
 	handle = LoadGraph(result_templete_path);
 	assert(handle >= 0);
 	m_graphicHandles[ResourceLoader::GraphicID::ResultTemplete] = handle;
+
+	//Aボタンの画像
+	handle = LoadGraph(a_button_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::ButtonA] = handle;
+
+	//決定のテキスト画像
+	handle = LoadGraph(decide_text_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::DecideText] = handle;
+
+	//決定のテキスト画像
+	handle = LoadGraph(next_text_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::NextText] = handle;
+
+	//リトライ選択肢画像
+	handle = LoadGraph(retry_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::ReTry] = handle;
+
+	//カーソルが乗っているときのリトライ選択肢画像
+	handle = LoadGraph(retry_on_cursor_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::ReTryOnCursor] = handle;
 }
 
 void ResourceLoader::KeepEffect()

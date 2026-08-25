@@ -62,6 +62,10 @@ BossEnemy::BossEnemy(BossEnemyData& data) :
 
 BossEnemy::~BossEnemy()
 {
+	//エフェクトを止める
+	StopEffekseer3DEffect(m_effectPlayHandle);
+	StopEffekseer3DEffect(m_shieldEffectPlayH);
+	StopEffekseer3DEffect(m_deathEffectPlayH);
 }
 
 void BossEnemy::OnInit()

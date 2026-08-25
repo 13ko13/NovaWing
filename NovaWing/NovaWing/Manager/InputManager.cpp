@@ -37,6 +37,9 @@ InputManager::InputManager() :
 	m_inputTable[InputEvent::down] = { {PeripheralType::keyboard, KEY_INPUT_DOWN}, // キーボード:下矢印
 									  {PeripheralType::pad1, PAD_INPUT_DOWN} };	  // パッド:スティック下又は十字下
 
+	m_inputTable[InputEvent::next] = { {PeripheralType::keyboard, KEY_INPUT_A}, // キーボード:下矢印
+									  {PeripheralType::pad1, PAD_INPUT_A} };	  // パッド:スティック下又は十字下
+
 #ifdef _DEBUG
 	m_inputTable[InputEvent::restart] = { {PeripheralType::pad1, PAD_INPUT_R} };			// パッド:スティック右又は十字右
 	m_inputTable[InputEvent::gaugeUp] = { {PeripheralType::keyboard, KEY_INPUT_UP} };		// キーボード:上
