@@ -1,4 +1,6 @@
-﻿#include "ClearScene.h"
+﻿#include <string>
+
+#include "ClearScene.h"
 #include "Manager/InputManager.h"
 #include "Scene/TitleScene.h"
 #include "SceneController.h"
@@ -32,11 +34,11 @@ namespace
 	constexpr float templete_size = 0.75f;
 
 	//敵を倒した数を表示する座標
-	const Vector2 kill_count_pos = Vector2(800.0f, 200.0f);
+	const Vector2 kill_count_pos = Vector2(900.0f, 200.0f);
 	//クリアタイムを表示する座標
-	const Vector2 clear_time_pos = Vector2(800.0f, 300.0f);
+	const Vector2 clear_time_pos = Vector2(900.0f, 300.0f);
 	//被弾回数を表示する座標
-	const Vector2 hit_count_pos = Vector2(800.0f, 410.0f);
+	const Vector2 hit_count_pos = Vector2(900.0f, 410.0f);
 
 	//文字をぼかす範囲
 	constexpr int blur_range = 16;
@@ -45,6 +47,12 @@ namespace
 
 	//ぼかしの透明度
 	constexpr int blur_alpha = 255;
+
+	//数字をLerpするときの速度
+	constexpr float count_lerp_speed = 0.1f;
+
+	//lerpされた数字を押し戻して丸めるときの閾値
+	constexpr float lerp_guard_threshould = 0.5f;
 }
 
 ClearScene::ClearScene(SceneController& controller, const ClearResultData& data) :
@@ -76,68 +84,16 @@ void ClearScene::Init()
 	//リザルト情報を描画
 	int fontHandle = ResourceLoader::GetInstance().GetFont(
 		ResourceLoader::FontID::Result);
-
 	//ウィンドウサイズ
 	Size wsize = Application::GetInstance().GetWindowSize();
 
 	//文字にもシェーダをかけるために1枚の画像として
-	//文字のみ描画された画像を作る
-	m_textRenderTargetH = MakeScreen(wsize.m_width, wsize.m_height,true);
-	SetDrawScreen(m_textRenderTargetH);
-
-	//敵を倒した数
-	DrawFormatStringToHandle(
-		kill_count_pos.m_x, kill_count_pos.m_y,
-		0x00ffaa, fontHandle,
-		L"%d", m_resultData.defeatedEnemyCount);
-	//クリアタイム
-	DrawFormatStringToHandle(
-		clear_time_pos.m_x, clear_time_pos.m_y,
-		0x00ffaa, fontHandle,
-		L"%d", m_resultData.clearTime / 60);
-	//被弾回数
-	DrawFormatStringToHandle(
-		hit_count_pos.m_x, hit_count_pos.m_y,
-		0xe13c3c, fontHandle,
-		L"%d", -m_resultData.hitCount);
-	//通常描画に戻す
-	SetDrawScreen(DX_SCREEN_BACK);
-
-	//------ぼかし---------
-
-	//発光用のぼかし画像を作る
+	//文字のみ描画された画像を作るためにオフスクリーンを用意
+	m_textRenderTargetH = MakeScreen(wsize.m_width, wsize.m_height, true);
+	//発光用のぼかし画像を作るためにオフスクリーンを用意
 	m_textGlowH = MakeScreen(wsize.m_width, wsize.m_height, true);
-	SetDrawScreen(m_textGlowH);
-	//敵を倒した数
-	DrawFormatStringToHandle(
-		kill_count_pos.m_x, kill_count_pos.m_y,
-		0x00ffaa, fontHandle,
-		L"%d", m_resultData.defeatedEnemyCount);
-	//クリアタイム
-	DrawFormatStringToHandle(
-		clear_time_pos.m_x, clear_time_pos.m_y,
-		0x00ffaa, fontHandle,
-		L"%d", m_resultData.clearTime / 60);
-	//被弾回数
-	DrawFormatStringToHandle(
-		hit_count_pos.m_x, hit_count_pos.m_y,
-		0xe13c3c, fontHandle,
-		L"%d", -m_resultData.hitCount);
-
-	//通常描画に戻す
-	SetDrawScreen(DX_SCREEN_BACK);
-	//ぼかしをかける
-	GraphFilter(
-		m_textGlowH,
-		DX_GRAPH_FILTER_GAUSS,
-		blur_range, blur_strength
-	);
-	//ぼかしをかける
-	GraphFilter(
-		m_textGlowH,
-		DX_GRAPH_FILTER_GAUSS,
-		blur_range, blur_strength
-	);
+	//リザルト情報をオフスクリーンに描画描画(シェーダ適用済み+ぼかし適用済み)
+	DrawResultText(fontHandle);
 }
 
 void ClearScene::Update()
@@ -157,6 +113,55 @@ void ClearScene::Update()
 		{
 			m_templeteOpenFrame = templete_opne_max_frame;
 		}
+	}
+
+	//テンプレートの開く演出が終わったら数字をLerpで近づける
+	if (m_templeteOpenFrame >= templete_opne_max_frame)
+	{
+		//キル数
+		m_currentKillCount = std::lerp(
+			m_currentKillCount,
+			static_cast<float>(m_resultData.defeatedEnemyCount),
+			count_lerp_speed
+		);
+		//クリアタイム
+		m_currentClearTime = std::lerp(
+			m_currentClearTime,
+			static_cast<float>(m_resultData.clearTime / 60),
+			count_lerp_speed
+		);
+		//ダメージ数
+		m_currentHitCount = std::lerp(
+			m_currentHitCount,
+			static_cast<float>(-m_resultData.hitCount),
+			count_lerp_speed
+		);
+
+		//lerpはぴったり止まらない可能性があるので、
+		//目標値との差が近くなったら目標値に丸める
+		//キル数
+		if (std::abs(m_currentKillCount - 
+			static_cast<float>(m_resultData.defeatedEnemyCount)) < lerp_guard_threshould)
+		{
+			m_currentKillCount = static_cast<float>(m_resultData.defeatedEnemyCount);
+		}
+		//クリアタイム
+		if (std::abs(m_currentClearTime - 
+			static_cast<float>(m_resultData.clearTime)) < lerp_guard_threshould)
+		{
+			m_currentClearTime = static_cast<float>(m_resultData.clearTime);
+		}
+		//被弾回数
+		if (std::abs(m_currentHitCount - 
+			static_cast<float>(m_resultData.hitCount)) < lerp_guard_threshould)
+		{
+			m_currentHitCount = static_cast<float>(m_resultData.hitCount);
+		}
+		//新しくlerpによって完成した値をもとにオフスクリーンに描画しておく
+		//リザルト情報を描画
+		int fontHandle = ResourceLoader::GetInstance().GetFont(
+			ResourceLoader::FontID::Result);
+		DrawResultText(fontHandle);
 	}
 
 	//下入力で選択肢を下に移動(indexを増やす) 
@@ -236,23 +241,20 @@ void ClearScene::Draw()
 		uvMinU
 	);
 
+	//オフスクリーンに描画しておいた、ぼかし画像を描画
 	//ぼかし画像を先に加算合成で描画する
 	SetDrawBlendMode(DX_BLENDMODE_ADD, blur_alpha);
-	//オフスクリーン画像を描画する
 	DrawGraphToShaderByCenter(
-		wsize.m_width * 0.5f,
-		wsize.m_height * 0.5f,
-		1.0,
-		m_textGlowH
-	); 
+		wsize.m_width * 0.5f, wsize.m_height * 0.5f,
+		1.0, m_textGlowH,
+		1.0f, uvMaxU, uvMinU
+	);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 
-	//オフスクリーン画像を描画する
 	DrawGraphToShaderByCenter(
-		wsize.m_width * 0.5f,
-		wsize.m_height * 0.5f,
-		1.0,
-		m_textRenderTargetH
+		wsize.m_width * 0.5f, wsize.m_height * 0.5f,
+		1.0, m_textRenderTargetH,
+		1.0f, uvMaxU, uvMinU
 	);
 
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
@@ -277,4 +279,72 @@ void ClearScene::Draw()
 		break;
 	}
 	}
+}
+
+void ClearScene::DrawResultText(int fontHandle)
+{
+	SetDrawScreen(m_textRenderTargetH);
+	//前フレームの文字をクリア
+	ClearDrawScreen();
+
+	//ウィンドウサイズ
+	Size wsize = Application::GetInstance().GetWindowSize();
+
+	//敵を倒した数
+	std::wstring killCountWString = std::to_wstring(static_cast<int>(m_currentKillCount));
+	int killCountWidth = GetDrawStringWidthToHandle(killCountWString.c_str(), killCountWString.size(), fontHandle);
+	DrawStringToHandle(
+		kill_count_pos.m_x - killCountWidth, kill_count_pos.m_y,
+		killCountWString.c_str(), 0x00ffaa,fontHandle
+	);
+	//クリアタイム
+	std::wstring clearTimeWString = std::to_wstring(static_cast<int>(m_currentClearTime));
+	int clearTimeWidth = GetDrawStringWidthToHandle(clearTimeWString.c_str(), clearTimeWString.size(), fontHandle);
+	DrawStringToHandle(
+		clear_time_pos.m_x - clearTimeWidth, clear_time_pos.m_y,
+		clearTimeWString.c_str(), 0x00ffaa, fontHandle
+	);
+	//被弾回数
+	std::wstring hitCountWString = std::to_wstring(static_cast<int>(m_currentHitCount));
+	int hitCountWidth = GetDrawStringWidthToHandle(hitCountWString.c_str(), hitCountWString.size(), fontHandle);
+	DrawStringToHandle(
+		hit_count_pos.m_x - hitCountWidth, hit_count_pos.m_y,
+		hitCountWString.c_str(), 0xe13c3c, fontHandle
+	);
+	//通常描画に戻す
+	SetDrawScreen(DX_SCREEN_BACK);
+
+	//------ぼかし---------
+	SetDrawScreen(m_textGlowH);
+	ClearDrawScreen();
+	//敵を倒した数
+	DrawStringToHandle(
+		kill_count_pos.m_x - killCountWidth, kill_count_pos.m_y,
+		killCountWString.c_str(), 0x00ffaa, fontHandle
+	);
+	//クリアタイム
+	DrawStringToHandle(
+		clear_time_pos.m_x - clearTimeWidth, clear_time_pos.m_y,
+		clearTimeWString.c_str(), 0x00ffaa, fontHandle
+	);
+	//被弾回数
+	DrawStringToHandle(
+		hit_count_pos.m_x - hitCountWidth, hit_count_pos.m_y,
+		hitCountWString.c_str(), 0xe13c3c, fontHandle
+	);
+
+	//通常描画に戻す
+	SetDrawScreen(DX_SCREEN_BACK);
+	//ぼかしをかける
+	GraphFilter(
+		m_textGlowH,
+		DX_GRAPH_FILTER_GAUSS,
+		blur_range, blur_strength
+	);
+	//ぼかしをかける
+	GraphFilter(
+		m_textGlowH,
+		DX_GRAPH_FILTER_GAUSS,
+		blur_range, blur_strength
+	);
 }

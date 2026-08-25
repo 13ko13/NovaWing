@@ -20,6 +20,10 @@ public:
 	void Draw() override;
 
 private:
+	//現在のLerp値でテキストオフスクリーンを書き直す
+	void DrawResultText(int fontHandle);
+
+private:
 	//クリアシーンの選択肢
 	enum class ClearSelect
 	{
@@ -58,4 +62,9 @@ private:
 
 	//GraphFilterでぼかした発光用画像
 	int m_textGlowH = -1;
+
+	//数字をLerpで表示するための、現在の表示値
+	float m_currentKillCount = 0.0f;
+	float m_currentClearTime = 0.0f;
+	float m_currentHitCount = 0.0f;
 };
