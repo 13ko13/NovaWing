@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include <array>
+
 #include "Scene.h"
 
 class ClearScene : public Scene
@@ -27,13 +29,17 @@ private:
 	//クリアシーンの選択肢
 	enum class ClearSelect
 	{
+		ReTry,//リトライ
 		BackTitle,//タイトルに戻る
-		ExitGame,//ゲーム終了
 
 		SelectMax,//選択肢の最大数
 	};
 	//現在プレイヤーが選んでいる選択肢
-	ClearSelect m_selectIndex = ClearSelect::BackTitle;
+	ClearSelect m_selectIndex = ClearSelect::ReTry;
+	ClearSelect m_prevSelectIdx = ClearSelect::ReTry;//前のフレーム
+
+	//各選択に対応するワイプの進行度
+	std::array<float, static_cast<size_t>(ClearSelect::SelectMax)> m_wipeProgress = {};
 
 	//リザルトとして表示する情報
 	ClearResultData m_resultData;

@@ -72,6 +72,8 @@ public:
 		NextText,//次へ のテキスト画像
 		ReTry,//リトライ選択肢画像
 		ReTryOnCursor,//カーソルが乗っているときのリトライ選択肢画像
+		BackTitle,//タイトルへ戻る選択肢画像
+		BackTitleOnCursor,//カーソルが乗っているときのタイトルへ戻る選択肢画像
 	};
 
 	//エフェクトの種類
@@ -95,7 +97,7 @@ public:
 	//音の種類
 	enum class SoundID :int
 	{
-		
+		TitleBoost,//タイトルでのブースト音
 	};
 
 	//フォントの種類
@@ -138,6 +140,8 @@ private:
 	void KeepGraph();
 	//エフェクトのハンドルをすべて保存する
 	void KeepEffect();
+	//サウンドのハンドルをすべて保存する
+	void KeepSound();
 	//フォントのハンドルをすべて保存する
 	void KeepFont();
 

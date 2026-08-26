@@ -1,6 +1,8 @@
 ﻿#include <string>
+#include <algorithm>
 
 #include "ClearScene.h"
+#include "GameScene.h"
 #include "Manager/InputManager.h"
 #include "Scene/TitleScene.h"
 #include "SceneController.h"
@@ -82,6 +84,19 @@ namespace
 	constexpr double next_graph_scale = 0.3;
 	//決定のテキスト画像のサイズ
 	constexpr double decide_graph_scale = 0.3;
+
+	//選択肢画像のサイズ
+	constexpr double select_graph_scale = 0.8;
+	//選択肢の背景画像のサイズ
+	constexpr double background_graph_scale = 1.5;
+
+	//リトライ選択肢の位置
+	const Vector2 retry_ratio = Vector2(0.5f, 0.43f);//画面に対してどのあたりにしたいか
+	//タイトルに戻る選択肢の位置
+	const Vector2 back_title_ratio = Vector2(0.5f, 0.63f);//画面に対してどのあたりにしたいか
+
+	//カーソルが乗った時に何秒で画像を切り替えるか
+	constexpr int wipe_max = 15;
 }
 
 ClearScene::ClearScene(SceneController& controller, const ClearResultData& data) :
@@ -203,7 +218,7 @@ void ClearScene::Update()
 		{
 			m_currentScore = static_cast<float>(m_score);
 		}
-		
+
 		//4つの項目が全てlerp終了しているかを判定
 		if (m_currentKillCount == m_resultData.defeatedEnemyCount &&
 			m_currentClearTime == m_resultData.clearTime / 60 &&
@@ -240,56 +255,88 @@ void ClearScene::Update()
 				//閉じる演出が終ってから開くようにする
 				m_backGroundOpenFrame++;
 			}
-			
+
 			//クランプ
 			if (m_backGroundOpenFrame > background_opne_max_frame)
 			{
 				m_backGroundOpenFrame = background_opne_max_frame;
 			}
+
+			//下入力で選択肢を下に移動(indexを増やす) 
+			if (input.IsTriggered(InputEvent::down))
+			{
+				//選択肢の最大数で割った余りを取ることで、
+				//選択肢の範囲内に収める
+				m_selectIndex =
+					static_cast<ClearSelect>(
+						(static_cast<int>(m_selectIndex) + 1) %
+						static_cast<int>(ClearSelect::SelectMax));
+			}
+			//上入力で選択肢を上に移動(indexを減らす)
+			if (input.IsTriggered(InputEvent::up))
+			{
+				//選択肢の最大数で割った余りを取ることで、
+				//選択肢の範囲内に収める
+				m_selectIndex =
+					static_cast<ClearSelect>(
+						(static_cast<int>(m_selectIndex) - 1 + static_cast<int>(ClearSelect::SelectMax)) %
+						static_cast<int>(ClearSelect::SelectMax));
+			}
+			//決定入力で選択肢を決定する
+			//背景が開ききっているときだけ決定入力を受け付ける
+			if (m_backGroundOpenFrame >= background_opne_max_frame &&
+				input.IsTriggered(InputEvent::ok))
+			{
+				switch (m_selectIndex)
+				{
+				case ClearSelect::ReTry:
+				{
+					//ゲームシーンに遷移する
+					m_controller.ChangeScene(
+						std::make_shared<GameScene>(
+							m_controller), scene_change_frame);
+					break;
+				}
+				case ClearSelect::BackTitle:
+				{
+					//タイトルシーンに遷移する
+					m_controller.ChangeScene(
+						std::make_shared<TitleScene>(
+							m_controller), scene_change_frame);
+					break;
+				}
+				}
+			}
+
+			//現在の選択肢と前のフレームの選択肢を比較して
+			//変わっていたらワイプの進行度をリセット
+			if (m_selectIndex != m_prevSelectIdx)
+			{
+				m_wipeProgress[static_cast<int>(m_selectIndex)] = 0.0f;
+			}
+			//選択肢が一致しているワイプ進行度を増やす
+			//一致しないもののワイプ進行度を減らす
+			for (int i = 0; i < static_cast<int>(ClearSelect::SelectMax); i++)
+			{
+				//今回見たい選択肢
+				ClearSelect current = static_cast<ClearSelect>(i);//iをTitleSelectの番号としてみる
+				//選択肢が一致している場合
+				if (current == m_selectIndex)
+				{
+					m_wipeProgress[i] += 1.0f / wipe_max;
+
+				}
+				else//一致しない場合
+				{
+					m_wipeProgress[i] -= 1.0f / wipe_max;
+				}
+				m_wipeProgress[i] = std::clamp(m_wipeProgress[i], 0.0f, 1.0f);//0~1にクランプ
+			}
+
+			//前フレームの選択肢を保存
+			m_prevSelectIdx = m_selectIndex;
 		}
 	}
-
-	////下入力で選択肢を下に移動(indexを増やす) 
-	//if (input.IsTriggered(InputEvent::down))
-	//{
-	//	//選択肢の最大数で割った余りを取ることで、
-	//	//選択肢の範囲内に収める
-	//	m_selectIndex =
-	//		static_cast<ClearSelect>(
-	//			(static_cast<int>(m_selectIndex) + 1) %
-	//			static_cast<int>(ClearSelect::SelectMax));
-	//}
-	////上入力で選択肢を上に移動(indexを減らす)
-	//if (input.IsTriggered(InputEvent::up))
-	//{
-	//	//選択肢の最大数で割った余りを取ることで、
-	//	//選択肢の範囲内に収める
-	//	m_selectIndex =
-	//		static_cast<ClearSelect>(
-	//			(static_cast<int>(m_selectIndex) - 1 + static_cast<int>(ClearSelect::SelectMax)) %
-	//			static_cast<int>(ClearSelect::SelectMax));
-	//}
-	////決定入力で選択肢を決定する
-	//if (input.IsTriggered(InputEvent::ok))
-	//{
-	//	switch (m_selectIndex)
-	//	{
-	//	case ClearSelect::BackTitle:
-	//	{
-	//		//タイトルシーンに遷移する
-	//		m_controller.ChangeScene(
-	//			std::make_shared<TitleScene>(
-	//				m_controller), scene_change_frame);
-	//		break;
-	//	}
-	//	case ClearSelect::ExitGame:
-	//	{
-	//		//ゲームを終了する
-	//		Application::GetInstance().RequestExit();
-	//		break;
-	//	}
-	//	}
-	//}
 }
 
 void ClearScene::Draw()
@@ -357,7 +404,7 @@ void ClearScene::Draw()
 		int backgroundH = loader.GetGraphic(ResourceLoader::GraphicID::SelectBackGround);
 		DrawGraphToShaderByCenter(
 			wsize.m_width * 0.5f, wsize.m_height * 0.5f,
-			1.0, backgroundH,
+			background_graph_scale, backgroundH,
 			1.0f,
 			uvMaxU,
 			uvMinU
@@ -365,15 +412,93 @@ void ClearScene::Draw()
 
 		//リトライ選択肢画像
 		int retryHandle = loader.GetGraphic(ResourceLoader::GraphicID::ReTry);
+		//タイトルに戻る選択肢画像
+		int backTitleHandle = loader.GetGraphic(ResourceLoader::GraphicID::BackTitle);
+		//カーソルが乗っているときのリトライ選択肢画像
+		int retryOnCursorHandle = loader.GetGraphic(ResourceLoader::GraphicID::ReTryOnCursor);
+		//カーソルが乗っているときのタイトルに戻る選択肢画像
+		int backTitleOnCursorHandle = loader.GetGraphic(ResourceLoader::GraphicID::BackTitleOnCursor);
 
-		//リトライ選択肢を描画
-		DrawGraphToShaderByCenter(
-			wsize.m_width * 0.5f, wsize.m_height * 0.5f,
-			0.5, retryHandle,
-			1.0f,
-			uvMaxU,
-			uvMinU
-		);
+		//選択肢の描画
+		//開く演出中(openProgressが1未満)は、まだワイプを考慮せず
+		//通常画像2つを開く演出の範囲(uvMaxU/uvMinU)で描画する
+		if (openProgress != 1.0f)
+		{
+			//リトライ選択肢を描画
+			DrawGraphToShaderByCenter(
+				wsize.m_width * retry_ratio.m_x,
+				wsize.m_height * retry_ratio.m_y,
+				select_graph_scale, retryHandle,
+				1.0f,
+				uvMaxU,
+				uvMinU
+			);
+			//タイトルに戻る選択肢を描画
+			DrawGraphToShaderByCenter(
+				wsize.m_width * back_title_ratio.m_x,
+				wsize.m_height * back_title_ratio.m_y,
+				select_graph_scale, backTitleHandle,
+				1.0f,
+				uvMaxU,
+				uvMinU
+			);
+		}
+		//開く演出が終わっていたら、選ばれている方だけカーソルオン画像を
+		//ワイプ進行度で重ね描きし、選ばれていない方は常にフル表示する
+		else
+		{
+			switch (m_selectIndex)
+			{
+			case ClearSelect::ReTry:
+			{
+				//リトライ選択肢描画
+				//もしゲームスタートのワイプ進行度が0より大きければ
+				//カーソルが乗っている画像を左から進行度の範囲だけ切り取って描画
+				if (m_wipeProgress[static_cast<int>(ClearSelect::ReTry)] > 0.0f)
+				{
+					//リトライ選択肢を描画
+					DrawGraphToShaderByCenter(
+						wsize.m_width * retry_ratio.m_x,
+						wsize.m_height * retry_ratio.m_y,
+						select_graph_scale, retryOnCursorHandle,
+						1.0f,
+						m_wipeProgress[static_cast<int>(ClearSelect::ReTry)]
+					);
+				}
+				//タイトルに戻る選択肢を描画
+				DrawGraphToShaderByCenter(
+					wsize.m_width * back_title_ratio.m_x,
+					wsize.m_height * back_title_ratio.m_y,
+					select_graph_scale, backTitleHandle,
+					1.0f
+				);
+				break;
+			}
+			case ClearSelect::BackTitle:
+			{
+				//タイトルに戻るのほうのワイプ進行度が0より大きければ
+				//タイトルに戻るの方に進行度を適用する
+				if (m_wipeProgress[static_cast<int>(ClearSelect::BackTitle)] > 0.0f)
+				{
+					//タイトルに戻る選択肢を描画
+					DrawGraphToShaderByCenter(
+						wsize.m_width * back_title_ratio.m_x,
+						wsize.m_height * back_title_ratio.m_y,
+						select_graph_scale, backTitleOnCursorHandle,
+						1.0f, m_wipeProgress[static_cast<int>(ClearSelect::BackTitle)]
+					);
+				}
+				//リトライ選択肢を描画
+				DrawGraphToShaderByCenter(
+					wsize.m_width * retry_ratio.m_x,
+					wsize.m_height * retry_ratio.m_y,
+					select_graph_scale, retryHandle,
+					1.0f
+				);
+				break;
+			}
+			}
+		}
 	}
 
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
@@ -385,8 +510,6 @@ void ClearScene::Draw()
 	int decideHandle = loader.GetGraphic(ResourceLoader::GraphicID::DecideText);
 	//次へ のテキスト画像
 	int nextHandle = loader.GetGraphic(ResourceLoader::GraphicID::NextText);
-	//カーソルが乗っているときのリトライ選択肢画像
-	int retryOnCursorHandle = loader.GetGraphic(ResourceLoader::GraphicID::ReTryOnCursor);
 
 	//二つの画像を描画
 	//Aボタン画像
@@ -414,27 +537,6 @@ void ClearScene::Draw()
 			next_graph_pos.m_y,
 			next_graph_scale, 0.0, nextHandle, true
 		);
-	}
-
-
-	//とりあえず左上に選択肢を表示する
-	//選択中の選択肢に矢印を表示する
-	switch (m_selectIndex)
-	{
-	case ClearSelect::BackTitle:
-	{
-		DrawFormatString(0, 15, 0xffffff, cursor_text);
-		DrawFormatString(15, 15, 0xff0000, back_title_text);
-		DrawFormatString(15, 30, 0xffffff, exit_game_text);
-		break;
-	}
-	case ClearSelect::ExitGame:
-	{
-		DrawFormatString(0, 30, 0xffffff, cursor_text);
-		DrawFormatString(15, 15, 0xffffff, back_title_text);
-		DrawFormatString(15, 30, 0xff0000, exit_game_text);
-		break;
-	}
 	}
 }
 

@@ -383,6 +383,16 @@ void ResourceLoader::KeepGraph()
 	handle = LoadGraph(retry_on_cursor_path);
 	assert(handle >= 0);
 	m_graphicHandles[ResourceLoader::GraphicID::ReTryOnCursor] = handle;
+
+	//タイトルに戻る選択肢画像
+	handle = LoadGraph(back_title_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::BackTitle] = handle;
+
+	//カーソルが乗っているときのタイトルに戻る選択肢画像
+	handle = LoadGraph(back_title_on_cursor_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::BackTitleOnCursor] = handle;
 }
 
 void ResourceLoader::KeepEffect()
@@ -452,6 +462,14 @@ void ResourceLoader::KeepEffect()
 	handle = LoadEffekseerEffect(boss_death_eff_path, boss_death_eff_scale);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::BossDeath] = handle;
+}
+
+void ResourceLoader::KeepSound()
+{
+	//タイトルのブースト音
+	int handle = LoadSoundMem(title_boost_sound_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::TitleBoost] = handle;
 }
 
 void ResourceLoader::KeepFont()

@@ -40,7 +40,7 @@ namespace
 	constexpr float back_ground_ratio_y = 0.77f;//画面に対して縦位置をどのあたりにしたいか
 	constexpr double back_ground_graph_scale = 1.0;//背景画像のサイズ
 
-	constexpr int wipe_max = 10;//カーソルが乗った時に何秒で画像を切り替えるか
+	constexpr int wipe_max = 15;//カーソルが乗った時に何秒で画像を切り替えるか
 
 	//シェーダにフレームを渡すときに値が大きすぎるので小さくするための値
 	constexpr float time_speed = 0.1f;

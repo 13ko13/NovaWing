@@ -166,9 +166,12 @@ void DrawGraphToShaderByCenter(
 	};
 
 	//左上座標を計算
-	//表示幅を計算
+	//フル表示(uvMinU=0,uvMaxU=1)時の中心がcenterXに来るように固定する
+	//これにより、uvMinU/uvMaxUを変化させても左端(全体表示時の左端)は動かず
+	//uvMinUを0のままuvMaxUだけ動かせば左端固定で右に伸びるワイプに、
+	//中心対称に動かせば中心から左右に開く演出になる
 	Vector2 leftTopPos = Vector2(
-		centerX - texSizeSizeF.m_width * (uvMinU + uvMaxU) / 2,
+		centerX - texSizeSizeF.m_width / 2,
 		centerY - texSizeSizeF.m_height / 2
 	);
 

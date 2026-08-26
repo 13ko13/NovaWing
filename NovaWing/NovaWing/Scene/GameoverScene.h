@@ -1,5 +1,8 @@
 ﻿#pragma once
+#include <array>
+
 #include "Scene.h"
+
 class GameoverScene : public Scene
 {
 public:
@@ -21,4 +24,27 @@ private:
 	};
 	//現在プレイヤーが選んでいる選択肢
 	GameoverSelect m_selectIndex = GameoverSelect::Retry;
+	GameoverSelect m_prevSelectIdx = GameoverSelect::Retry;//前のフレーム
+
+	//各選択に対応するワイプの進行度
+	std::array<float, static_cast<size_t>(GameoverSelect::SelectMax)> m_wipeProgress = {};
+
+	//グリッチシェーダのハンドル
+	int m_glitchPSH = -1;
+
+	//グリッチシェーダに渡すためのシェーダバッファ
+	struct GlitchBuffer
+	{
+		float time;
+		float scanlineFrequency;
+		float dummy[2];//16バイトアライメント
+	};
+	int m_cbufferGlitch = -1;
+	GlitchBuffer* m_pCBuffGlitchData = nullptr;
+
+	//フレーム計測（時間をシェーダに渡すために必要）
+	int m_frame = 0;
+
+	//選択肢背景のカーテン演出のためのフレーム
+	int m_backGroundOpenFrame = 0;
 };

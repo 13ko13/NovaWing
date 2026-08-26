@@ -70,6 +70,10 @@ namespace
 	constexpr const wchar_t* retry_path = L"Data/Image/SelectFrame/Retry.png";
 	//カーソルが乗っているときのリトライ選択肢画像
 	constexpr const wchar_t* retry_on_cursor_path = L"Data/Image/SelectFrame/Retry_OnCursor.png";
+	//タイトルに戻る選択肢画像
+	constexpr const wchar_t* back_title_path = L"Data/Image/SelectFrame/Back_Title.png";
+	//カーソルが乗っているときのタイトルに戻る選択肢画像
+	constexpr const wchar_t* back_title_on_cursor_path = L"Data/Image/SelectFrame/Back_Title_OnCursor.png";
 
 	//---------- エフェクトのパス ----------
 	constexpr const wchar_t* player_bullet_effect_path = L"Data/Effect/PlayerBullet/PlayerBullet.efk";
@@ -129,4 +133,7 @@ namespace
 	constexpr int result_font_type = DX_FONTTYPE_ANTIALIASING_4X4;
 	//間隔
 	constexpr int font_space = 4;
+
+	//----------サウンドのパス--------------
+	constexpr const wchar_t* title_boost_sound_path = L"Data/Sounds/Title_Boost.mp3";
 }
