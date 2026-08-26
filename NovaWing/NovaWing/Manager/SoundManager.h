@@ -9,16 +9,14 @@ public:
 	enum class SoundType
 	{
 		TitleBoost,//タイトルでのブースト音
+		Decision,//決定音
+		OnCursor,//カーソルが乗った時の音
+		TitleLogoImpact,//タイトルロゴ出現時の衝撃音
+		TitleBGM,//タイトルBGM
 	};
 
 public:
-	/// <summary>
-	/// SoundManagerのシングルトンインスタンスを取得する
-	/// </summary>
-	/// <returns>SoundManagerのインスタンス</returns>
-	/// <note>SoundManagerの実体はこの関数内部で生成され、ずっととどまり続ける
-	static SoundManager& GetInstance();
-
+	SoundManager();
 	~SoundManager();
 
 	/// <summary>
@@ -99,10 +97,5 @@ private:
 
 	//SoundTypeをキー、SoundDataを値とするマップ
 	std::map<SoundType, SoundData> m_sounds;
-
-private:
-	SoundManager();//newも変数宣言もできないようにする
-	SoundManager(const SoundManager& sm) = delete;//コピーコンストラクタを削除
-	void operator=(const SoundManager& sm) = delete;//代入を削除
 };
 

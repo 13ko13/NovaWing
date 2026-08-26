@@ -6,56 +6,21 @@
 
 namespace
 {
-	//タイトルBGMの音量
-	constexpr int title_bgm_volume = 180;
-
+	//タイトルでのブーストの音量
+	constexpr int title_boost_volume = 125;
 	//決定音の音量
-	constexpr int desition_volume = 255;
-
-	//ゲームシーンのBGMの音量
-	constexpr int game_bgm_volume = 200;
-
-	//リザルトシーンのBGMの音量
-	constexpr int result_bgm_volume = 200;
-
-	//カウントダウンの音の音量
-	constexpr int count_down_volume = 255;
-
-	//スタートの音の音量
-	constexpr int start_volume = 255;
-
-	//攻撃開始の音の音量
-	constexpr int attack_start_volume = 255;
-
-	//着地の音の音量
-	constexpr int on_ground_volume = 255;
-
-	//敵が死んだときの音の音量
-	constexpr int dead_enemy_volume = 190;
-
-	//プレイヤーが攻撃を受けたときの音の音量
-	constexpr int hit_player_volume = 255;
-
-	//雷の音の音量
-	constexpr int thunder_volume = 255;
-
-	//スコアポップの音の音量
-	constexpr int score_pop_volume = 255;
-
-	//プレイヤーの足音の音量
-	constexpr int run_player_volume = 255;
+	constexpr int decision_volume = 80;
+	//カーソルが乗った時の音の音量
+	constexpr int on_cursor_volume = 80;
+	//タイトルロゴ出現時の衝撃音の音量
+	constexpr int title_impact_volume = 125;
+	//タイトルBGMの音量
+	constexpr int title_bgm_volume = 30;
 }
 
 SoundManager::SoundManager()
 {
 
-}
-
-SoundManager& SoundManager::GetInstance()
-{
-	//staticで宣言してそれを返す
-	static SoundManager instance;
-	return instance;
 }
 
 SoundManager::~SoundManager()
@@ -70,12 +35,41 @@ void SoundManager::Init()
 	auto& loader = ResourceLoader::GetInstance();
 
 	//それぞれのハンドルを取得して設定する
-	auto& decisionData = m_sounds[SoundType::TitleBoost];//決定音のデータを取得
-	decisionData.handle = loader.GetSound(ResourceLoader::SoundID::Decision);//リソースローダーから決定音のハンドルを取得して設定
+	//タイトルでのプレイヤーのブースト音
+	auto& titleBoostData = m_sounds[SoundType::TitleBoost];
+	titleBoostData.handle = loader.GetSound(ResourceLoader::SoundID::TitleBoost);
+	titleBoostData.loaded = true;//ロード済みフラグを立てる
+	titleBoostData.volume = title_boost_volume;
+	titleBoostData.isLoop = false;//ループしない
+	ChangeVolumeSoundMem(titleBoostData.volume, titleBoostData.handle);//音量を変更する
+	//カーソルが乗った時の音
+	auto& onCursorData = m_sounds[SoundType::OnCursor];
+	onCursorData.handle = loader.GetSound(ResourceLoader::SoundID::OnCursor);
+	onCursorData.loaded = true;//ロード済みフラグを立てる
+	onCursorData.volume = decision_volume;
+	onCursorData.isLoop = false;//ループしない
+	ChangeVolumeSoundMem(onCursorData.volume, onCursorData.handle);//音量を変更する
+	//決定音
+	auto& decisionData = m_sounds[SoundType::Decision];
+	decisionData.handle = loader.GetSound(ResourceLoader::SoundID::Decision);
 	decisionData.loaded = true;//ロード済みフラグを立てる
-	decisionData.volume = desition_volume;//音量を最大にする
+	decisionData.volume = on_cursor_volume;
 	decisionData.isLoop = false;//ループしない
 	ChangeVolumeSoundMem(decisionData.volume, decisionData.handle);//音量を変更する
+	//タイトルロゴ出現時の衝撃音
+	auto& titleImpactData = m_sounds[SoundType::TitleLogoImpact];
+	titleImpactData.handle = loader.GetSound(ResourceLoader::SoundID::TitleLogoImpact);
+	titleImpactData.loaded = true;//ロード済みフラグを立てる
+	titleImpactData.volume = title_impact_volume;
+	titleImpactData.isLoop = false;//ループしない
+	ChangeVolumeSoundMem(titleImpactData.volume, titleImpactData.handle);//音量を変更する
+	//タイトルBGM
+	auto& titleBGMData = m_sounds[SoundType::TitleBGM];
+	titleBGMData.handle = loader.GetSound(ResourceLoader::SoundID::TitleBGM);
+	titleBGMData.loaded = true;//ロード済みフラグを立てる
+	titleBGMData.volume = title_bgm_volume;
+	titleBGMData.isLoop = true;//ループしない
+	ChangeVolumeSoundMem(titleBGMData.volume, titleBGMData.handle);//音量を変更する
 }
 
 void SoundManager::Update()

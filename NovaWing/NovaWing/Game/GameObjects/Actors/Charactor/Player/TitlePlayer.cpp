@@ -7,15 +7,15 @@
 namespace
 {
 	//前進フェーズで進む速度
-	constexpr float move_speed = 8.0f;
+	constexpr float move_speed = 10.0f;
 	//ブーストフェーズで進む速度
-	constexpr float boost_speed = 20.0f;
+	constexpr float boost_speed = 30.0f;
 
 	// モデルのサイズ
 	const Vector3 model_scale = { 0.3f, 0.3f, 0.3f };
 
 	//宙返りを終了とするフレーム
-	constexpr int somersault_max_frame = 150;
+	constexpr int somersault_max_frame = 110;
 
 	//宙返り中の移動速度
 	constexpr float somersault_move_speed = 20.0f;

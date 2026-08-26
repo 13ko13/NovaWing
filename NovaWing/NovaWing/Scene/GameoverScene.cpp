@@ -34,6 +34,15 @@ namespace
 
 	//カーソルが乗った時に何フレームで画像を切り替えるか
 	constexpr int wipe_max = 10;
+
+	//Aボタン画像の描画座標
+	const Vector2 a_button_pos = Vector2(1150.0f, 690.0f);
+	//決定のテキスト画像の描画座標
+	const Vector2 decide_graph_pos = Vector2(1190.0f, 690.0f);
+	//Aボタン画像のサイズ
+	constexpr double a_button_scale = 0.3;
+	//決定のテキスト画像のサイズ
+	constexpr double decide_graph_scale = 0.3;
 }
 
 GameoverScene::GameoverScene(SceneController& controller):
@@ -268,4 +277,23 @@ void GameoverScene::Draw()
 
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
 	SetUsePixelShader(-1);
+
+	//Aボタン画像
+	int aButtonHandle = loader.GetGraphic(ResourceLoader::GraphicID::ButtonA);
+	//決定のテキスト画像
+	int decideHandle = loader.GetGraphic(ResourceLoader::GraphicID::DecideText);
+
+	//二つの画像を描画
+	//Aボタン画像
+	DrawRotaGraph(
+		a_button_pos.m_x,
+		a_button_pos.m_y,
+		a_button_scale, 0.0, aButtonHandle, true
+	);
+	//決定のテキスト画像
+	DrawRotaGraph(
+		decide_graph_pos.m_x,
+		decide_graph_pos.m_y,
+		decide_graph_scale, 0.0, decideHandle, true
+	);
 }

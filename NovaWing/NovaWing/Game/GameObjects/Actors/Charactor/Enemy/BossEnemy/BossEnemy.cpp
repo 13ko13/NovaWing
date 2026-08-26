@@ -49,6 +49,9 @@ namespace
 
 	//死亡アニメーションの再生速度
 	constexpr float death_anim_speed = 0.5f;
+
+	//回復するときに、食らったダメージの何割を回復するか
+	constexpr float recovery_rate = 0.4f;
 }
 
 BossEnemy::BossEnemy(BossEnemyData& data) :
@@ -318,7 +321,7 @@ std::vector<Sphere> BossEnemy::GetBeamSphereR() const
 	return std::dynamic_pointer_cast<BossBeamState>(m_pState)->GetRightBeamSpheres();
 }
 
-void BossEnemy::OnHitInvincibleCol(const Position3& effectPos)
+void BossEnemy::OnHitInvincibleCol(const Position3& effectPos,const int attackPower)
 {
 	//シールドのエフェクト生成
 	int effectHandle = ResourceLoader::GetInstance().GetEffect(
@@ -333,6 +336,10 @@ void BossEnemy::OnHitInvincibleCol(const Position3& effectPos)
 		effectPos.m_y,
 		effectPos.m_z
 	);
+
+	//ボスを回復させる
+	//食らったダメージの5分の1回復する
+	m_health += static_cast<float>(attackPower) * recovery_rate;
 }
 
 void BossEnemy::DrawEnemy()

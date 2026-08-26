@@ -135,5 +135,32 @@ namespace
 	constexpr int font_space = 4;
 
 	//----------サウンドのパス--------------
-	constexpr const wchar_t* title_boost_sound_path = L"Data/Sounds/Title_Boost.mp3";
+	//タイトルでの飛行音
+	constexpr const wchar_t* title_boost_sound_path = L"Data/Sounds/Title/TitleBoost.mp3";
+	//決定音
+	constexpr const wchar_t* decision_sound_path = L"Data/Sounds/Decision.mp3";
+	//カーソルが乗った時の音
+	constexpr const wchar_t* on_cursor_sound_path = L"Data/Sounds/OnCursor.mp3";
+	//タイトルロゴ出現時の衝撃音
+	constexpr const wchar_t* title_logo_impact_sound_path = L"Data/Sounds/Title/TitleLogoImpact.mp3";
+	//タイトルBGM
+	constexpr const wchar_t* title_bgm_sound_path = L"Data/Sounds/Title/TitleBGM.mp3";
+	//プレイヤー通常ショット
+	constexpr const wchar_t* player_normal_shoot_se_path = L"Data/Sounds/Game/Player/NormalBullet.mp3";
+	//プレイヤー死亡
+	constexpr const wchar_t* player_death_se_path = L"Data/Sounds/Game/Player/PlayerDeath.mp3";
+	//プレイヤーダメージ
+	constexpr const wchar_t* player_damage_se_path = L"Data/Sounds/Game/Player/PlayerDamage.mp3";
+	//プレイヤーチャージショット
+	constexpr const wchar_t* player_charge_shoot_se_path = L"Data/Sounds/Game/Player/ChargeBullet.mp3";
+	//ブレーキ
+	constexpr const wchar_t* brake_se_path = L"Data/Sounds/Game/Player/Brake.mp3";
+	//ブースト
+	constexpr const wchar_t* boost_se_path = L"Data/Sounds/Game/Player/Boost.mp3";
+	//チャージ中
+	constexpr const wchar_t* charging_se_path = L"Data/Sounds/Game/Player/Charging.mp3";
+	//チャージ完了
+	constexpr const wchar_t* charge_complete_se_path = L"Data/Sounds/Game/Player/ChargeComplete.mp3";
+	//宙返り
+	constexpr const wchar_t* somersoult = L"Data/Sounds/Game/Player/Somersoult2.mp3";
 }

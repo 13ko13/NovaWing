@@ -97,7 +97,23 @@ public:
 	//音の種類
 	enum class SoundID :int
 	{
+		//タイトル
 		TitleBoost,//タイトルでのブースト音
+		Decision,//決定音
+		OnCursor,//カーソルが選択肢に乗った時の音
+		TitleLogoImpact,//タイトルロゴが出現するときの衝撃音
+		TitleBGM,//タイトルBGM
+
+		//プレイヤー
+		NormalShoot,//ノーマルショット
+		PlayerDeath,//プレイヤー死亡
+		PlayerDamage,//プレイヤーダメージ
+		ChargeShoot,//チャージショット
+		Brake,//ブレーキ
+		Boost,//ブースト
+		ChargeComplete,//チャージ完了
+		Charging,//チャージ中
+		Somersoult,//宙返り
 	};
 
 	//フォントの種類

@@ -26,6 +26,9 @@ void ResourceLoader::LoadAll()
 
 	//フォントを読み込んでハンドルを保存
 	KeepFont();
+
+	//サウンドを読み込んでハンドルを保存
+	KeepSound();
 }
 
 void ResourceLoader::ReleaseAll()
@@ -51,6 +54,11 @@ void ResourceLoader::ReleaseAll()
 	{
 		DeleteFontToHandle(fontH.second.handle);
 		RemoveFontResourceEx(fontH.second.path, FR_PRIVATE, NULL);
+	}
+	//サウンド
+	for (auto& soundH : m_soundHandles)
+	{
+		DeleteSoundMem(soundH.second);
 	}
 }
 
@@ -470,6 +478,22 @@ void ResourceLoader::KeepSound()
 	int handle = LoadSoundMem(title_boost_sound_path);
 	assert(handle >= 0);
 	m_soundHandles[ResourceLoader::SoundID::TitleBoost] = handle;
+	//決定音
+	handle = LoadSoundMem(decision_sound_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::Decision] = handle;
+	//選択音
+	handle = LoadSoundMem(on_cursor_sound_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::OnCursor] = handle;
+	//タイトルロゴ出現時の衝撃音
+	handle = LoadSoundMem(title_logo_impact_sound_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::TitleLogoImpact] = handle;
+	//タイトルBGM
+	handle = LoadSoundMem(title_bgm_sound_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::TitleBGM] = handle;
 }
 
 void ResourceLoader::KeepFont()

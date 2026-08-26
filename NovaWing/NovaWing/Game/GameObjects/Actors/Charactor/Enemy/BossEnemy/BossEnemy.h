@@ -66,7 +66,7 @@ public:
 	bool IsFirstLanding() const { return m_isFirstLanding; }
 
 	//ボスの無敵部分に当たった時の処理
-	void OnHitInvincibleCol(const Position3& effectPos);
+	void OnHitInvincibleCol(const Position3& effectPos, const int attackPower);
 
 private:
 	//敵の描画(シェーダ適応も含めた)

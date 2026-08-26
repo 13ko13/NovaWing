@@ -9,6 +9,7 @@ class TitlePlayer;
 class TitleCamera;
 class WaterManager;
 class SkyBox;
+class SoundManager;
 class TitleScene : public Scene
 {
 public:
@@ -93,4 +94,7 @@ private:
 	int m_titleLogoFrame = 0;
 	//選択肢のフェードのフレーム管理用
 	int m_selectFadeFrame = 0;
+
+	//サウンドマネージャー
+	std::shared_ptr<SoundManager> m_pSoundManager;
 };

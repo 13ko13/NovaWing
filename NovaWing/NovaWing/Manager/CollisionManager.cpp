@@ -229,7 +229,7 @@ void CollisionManager::Update()
 			else if (invinsibleCol.HitCollision(bulletCol))
 			{
 				//ボスの無敵判定処理
-				pBoss->OnHitInvincibleCol(bulletCol.GetPos());
+				pBoss->OnHitInvincibleCol(bulletCol.GetPos(),pPlayerBullet->GetAttackPower());
 				//敵に当たった時のプレイヤー弾の処理
 				pPlayerBullet->OnHitEnemy();
 			}

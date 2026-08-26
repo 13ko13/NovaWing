@@ -18,6 +18,7 @@
 #include "Manager/WaterManager.h"
 #include "Game/BackGround/SkyBox.h"
 #include "Manager/LightingManager.h"
+#include "Manager/SoundManager.h"
 
 namespace
 {
@@ -68,6 +69,9 @@ namespace
 
 	//ライトの方向
 	const Vector3 light_direction = Vector3(1.0f, -1.0f, 0.6f);
+
+	//タイトルロゴ出現時の衝撃音を鳴らすフレーム
+	constexpr int frame_of_title_impact = 5;
 }
 
 TitleScene::TitleScene(SceneController& controller):
@@ -146,6 +150,13 @@ void TitleScene::Init()
 
 	// ライトの方向ベクトルをセットする
 	LightingManager::GetInstance().SetLightDirection(light_direction);
+
+	//サウンドマネージャー初期化
+	m_pSoundManager = std::make_shared<SoundManager>();
+	m_pSoundManager->Init();
+
+	//ブースト音を鳴らす
+	m_pSoundManager->Play(SoundManager::SoundType::TitleBoost);
 }
 
 void TitleScene::Update()
@@ -162,7 +173,8 @@ void TitleScene::Update()
 	//水マネージャーの更新
 	m_pWaterManager->Update();
 
-	
+	//サウンドマネージャーの更新
+	m_pSoundManager->Update();
 	
 	switch (m_phase)
 	{
@@ -202,7 +214,16 @@ void TitleScene::Update()
 		if (logo_max_frame > m_titleLogoFrame)
 		{
 			m_titleLogoFrame++;
-			
+			//演出終了前から音を鳴らしておく
+			if (m_titleLogoFrame == frame_of_title_impact)
+			{
+				m_pSoundManager->Play(SoundManager::SoundType::TitleLogoImpact);
+			}
+			//演出が終ってからBGMを鳴らし始める
+			if (m_titleLogoFrame == logo_max_frame)
+			{
+				m_pSoundManager->PlayFadeIn(SoundManager::SoundType::TitleBGM,60.0f,true);
+			}
 		}
 		if (select_max_frame > m_selectFadeFrame)
 		{
@@ -214,6 +235,9 @@ void TitleScene::Update()
 		//下入力で選択肢を下に移動(indexを増やす) 
 		if (input.IsTriggered(InputEvent::down))
 		{
+			//カーソルが乗った時の音を鳴らす
+			m_pSoundManager->Play(SoundManager::SoundType::OnCursor);
+
 			//選択肢の最大数で割った余りを取ることで、
 			//選択肢の範囲内に収める
 			m_selectIndex =
@@ -225,6 +249,9 @@ void TitleScene::Update()
 		//上入力で選択肢を上に移動(indexを減らす)
 		if (input.IsTriggered(InputEvent::up))
 		{
+			//カーソルが乗った時の音を鳴らす
+			m_pSoundManager->Play(SoundManager::SoundType::OnCursor);
+
 			//選択肢の最大数で割った余りを取ることで、
 			//選択肢の範囲内に収める
 			m_selectIndex =
@@ -236,6 +263,9 @@ void TitleScene::Update()
 		//決定入力で選択肢を決定する
 		if (input.IsTriggered(InputEvent::ok))
 		{
+			//決定音
+			m_pSoundManager->Play(SoundManager::SoundType::Decision);
+
 			switch (m_selectIndex)
 			{
 			case TitleSelect::StartGame:
