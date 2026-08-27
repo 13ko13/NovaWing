@@ -6,7 +6,11 @@ GameObject::GameObject() :
 	m_rotation(),
 	m_isDead(false)
 {
-
+	//一回生成されてからはずっと存在する
+	static int s_nextId = 0;
+	//それ以降はインクリメントされた番号が入る
+	m_id = s_nextId;
+	s_nextId++;
 }
 
 GameObject::~GameObject()

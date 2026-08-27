@@ -40,6 +40,7 @@
 #include "Game/GameObjects/Actors/Charactor/Enemy/EnemyFactory.h"
 #include "Game/UI/BossHPGaugeUI.h"
 #include "Manager/LightingManager.h"
+#include "Manager/SoundManager.h"
 
 namespace
 {
@@ -90,6 +91,9 @@ GameScene::GameScene(SceneController& controller) :
 	//BulletManagerは先に生成しておかないとプレイヤーが生成できないので
 	//コンストラクタで生成しておく
 	m_pBulletManager = std::make_shared<BulletManager>();
+
+	//SoundManagerも同様にプレイヤーより先に生成しておく
+	m_pSoundManager = std::make_shared<SoundManager>();
 }
 
 GameScene::~GameScene()
@@ -108,10 +112,14 @@ void GameScene::Init()
 	//リソースローダーのインスタンス
 	ResourceLoader& resourceL = ResourceLoader::GetInstance();
 
+	//サウンドマネージャーの初期化
+	m_pSoundManager->Init();
+
 	//プレイヤーを生成
 	m_pPlayer = std::make_shared<Player>(
 		m_pBulletManager, ResourceLoader::ModelID::Player,
-	std::weak_ptr<CameraBase>());//カメラがまだ生成されていないので空のweak_ptrを渡す
+	std::weak_ptr<CameraBase>(),//カメラがまだ生成されていないので空のweak_ptrを渡す
+	m_pSoundManager);
 	//プレイヤーの初期化処理
 	m_pPlayer->Init();
 
@@ -166,7 +174,7 @@ void GameScene::Init()
 		//衝突判定マネージャーに敵を登録する
 		m_pCollisionManager->RegisterFloatingEnemy(pEnemy);
 		//ターゲットマネージャーにエネミーを登録する
-		m_pTargetManager->RegisterFloatingEnemy(pEnemy);
+		m_pTargetManager->Register(pEnemy);
 	}
 
 	//ワームエネミーの初期化
@@ -181,7 +189,7 @@ void GameScene::Init()
 		//衝突判定マネージャーに敵を登録する
 		m_pCollisionManager->RegisterWormEnemy(pEnemy);
 		//ターゲットマネージャーにエネミーを登録する
-		m_pTargetManager->RegisterWormEnemy(pEnemy);
+		m_pTargetManager->Register(pEnemy);
 	}
 
 	//UIManagerの初期化
@@ -249,6 +257,9 @@ void GameScene::Update()
 
 	//UIマネージャーの更新
 	m_pUIManager->Update();
+
+	//サウンドマネージャーの更新
+	m_pSoundManager->Update();
 
 	//プレイヤーが特定のz座標まで到達したら
 	//カメラを揺らしてボスを登場させる

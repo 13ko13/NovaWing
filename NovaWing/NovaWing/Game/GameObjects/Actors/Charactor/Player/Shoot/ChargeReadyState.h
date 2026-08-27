@@ -4,11 +4,13 @@
 
 class Player;
 class BulletManager;
+class SoundManager;
 class ChargeReadyState : public IShootState
 {
 public:
 	ChargeReadyState(const std::weak_ptr<Player> pPlayer,
-		std::weak_ptr<BulletManager> pBulletManager);
+		std::weak_ptr<BulletManager> pBulletManager,
+		std::weak_ptr<SoundManager> pSoundManager);
 	~ChargeReadyState();
 
 	void Exit() override;

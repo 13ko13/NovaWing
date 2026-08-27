@@ -19,8 +19,10 @@ namespace
 }
 
 GaugeActionStateBase::GaugeActionStateBase(
-	const std::weak_ptr<Player> pPlayer):
-	IMovementState(pPlayer)
+	const std::weak_ptr<Player> pPlayer,
+	std::weak_ptr<SoundManager> pSoundManager):
+	IMovementState(pPlayer),
+	m_pSoundManager(pSoundManager)
 {
 
 }

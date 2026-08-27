@@ -43,11 +43,17 @@ public:
 	Vector3 GetLeft() const;//左方向
 	Vector3 GetBack() const;//後ろ方向
 
+	//IDの取得
+	int GetID() const { return m_id; }
+
 protected:
 	bool m_isDead = false;//死んでいるか
 
 	Position3 m_pos;//位置
 	Quaternion m_rotation;//回転
 	Vector3 m_velocity;//速度
+
+	//ID
+	int m_id = 0;
 };
 

@@ -6,6 +6,7 @@
 #include "Manager/BulletManager.h"
 #include "Manager/InputManager.h"
 #include "Manager/ResourceLoader.h"
+#include "Manager/SoundManager.h"
 #include "NormalShootState.h"
 
 namespace
@@ -24,7 +25,8 @@ namespace
 } // namespace
 
 ChargeReadyState::ChargeReadyState(const std::weak_ptr<Player> pPlayer,
-								   std::weak_ptr<BulletManager> pBulletManager) : IShootState(pPlayer, pBulletManager),
+								   std::weak_ptr<BulletManager> pBulletManager,
+								   std::weak_ptr<SoundManager> pSoundManager) : IShootState(pPlayer, pBulletManager, pSoundManager),
 																				  m_effectScale(first_effect_scale)
 {
 }
@@ -82,10 +84,13 @@ void ChargeReadyState::Update()
 			const Vector3 vel = -pPlayer->GetForward() * move_speed;				 // 速度
 
 			// プレイヤーからターゲットを受け取る
-			std::weak_ptr<GameObject> pTarget = m_pPlayer.lock()->GetFocusTarget();
+			std::weak_ptr<EnemyBase> pTarget = m_pPlayer.lock()->GetForcusTarget();
 
 			pBulletManager->CreateBullet(BulletManager::BulletType::ChargeBullet,
 										 pos, vel, attack_power, pTarget);
+
+			// チャージショット発射音を鳴らす
+			m_pSoundManager.lock()->Play(SoundManager::SoundType::ChargeShoot);
 		}
 	}
 
@@ -113,7 +118,7 @@ void ChargeReadyState::Update()
 		if (m_effectScale.m_x == 0.0f)
 		{
 			// ノーマルステートに戻す
-			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager));
+			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager));
 		}
 	}
 }

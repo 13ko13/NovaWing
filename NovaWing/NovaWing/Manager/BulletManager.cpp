@@ -3,6 +3,7 @@
 #include "Game/GameObjects/Bullet/EnemyBullet.h"
 #include "Game/GameObjects/Bullet/ChargeBullet.h"
 #include "Game/GameObjects/GameObject.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
 
 
 BulletManager::BulletManager()
@@ -34,7 +35,7 @@ void BulletManager::Update()
 
 void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos,
 	const Vector3& vel, const int attackPower,
-		std::weak_ptr<GameObject> pTarget)
+		std::weak_ptr<EnemyBase> pTarget)
 {
 	switch (bulletType)
 	{

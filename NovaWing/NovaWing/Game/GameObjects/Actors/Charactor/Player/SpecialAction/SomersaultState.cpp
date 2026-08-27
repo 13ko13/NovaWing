@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "Charactor/Player/Player.h"
+#include "Manager/SoundManager.h"
 #include "NoneState.h"
 #include "SomersaultState.h"
 
@@ -18,7 +19,10 @@ namespace
 	constexpr float enter_rot_lerp_t = 0.9f;
 } // namespace
 
-SomersaultState::SomersaultState(const std::weak_ptr<Player> pPlayer) : ISpecialActionState(pPlayer)
+SomersaultState::SomersaultState(const std::weak_ptr<Player> pPlayer,
+	std::weak_ptr<SoundManager> pSoundManager) :
+	ISpecialActionState(pPlayer),
+	m_pSoundManager(pSoundManager)
 {
 }
 
@@ -35,6 +39,9 @@ void SomersaultState::Enter()
 	m_frame = 0;
 	// プレイヤーの左右回転をリセット
 	pPlayer->LerpToAngleY(DX_PI_F, enter_rot_lerp_t);
+
+	// 宙返り音を鳴らす
+	m_pSoundManager.lock()->Play(SoundManager::SoundType::Somersoult);
 }
 
 void SomersaultState::Update()

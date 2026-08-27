@@ -1,18 +1,31 @@
 ﻿#pragma once
-#pragma once
 #include <string>
 #include <map>
+
+#include "Manager/ResourceLoader.h"
 
 class SoundManager
 {
 public:
 	enum class SoundType
 	{
+		//タイトル
 		TitleBoost,//タイトルでのブースト音
 		Decision,//決定音
 		OnCursor,//カーソルが乗った時の音
 		TitleLogoImpact,//タイトルロゴ出現時の衝撃音
 		TitleBGM,//タイトルBGM
+
+		//プレイヤー
+		NormalShoot,//ノーマルショット
+		PlayerDeath,//プレイヤー死亡
+		PlayerDamage,//プレイヤーダメージ
+		ChargeShoot,//チャージショット
+		Brake,//ブレーキ
+		Boost,//ブースト
+		ChargeComplete,//チャージ完了
+		Charging,//チャージ中
+		Somersoult,//宙返り
 	};
 
 public:
@@ -49,7 +62,8 @@ public:
 	/// </summary>
 	/// <param name="soundType">種類</param>
 	/// <param name="loop">ループするかどうか(指定しないとループしない)</param>
-	void Play(SoundType soundType, bool loop = false);
+	/// <param name="isOnce">既に再生中なら重ねて鳴らさないようにするか</param>
+	void Play(SoundType soundType, bool loop = false, bool isOnce = false);
 
 	/// <summary>
 	/// 指定の音を停止する
@@ -68,6 +82,14 @@ public:
 	/// <param name="type">音の種類</param>
 	/// <param name="volume">音量</param>
 	void SetVolume(SoundType type, int volume);
+
+private:
+	//データの初期化
+	void InitData(
+		SoundType type, 
+		ResourceLoader::SoundID soundID,
+		bool isLoaded, 
+		int volume, bool isLoop);
 
 private:
 	//フェードの状態

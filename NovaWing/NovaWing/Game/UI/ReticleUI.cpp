@@ -5,6 +5,7 @@
 #include "Game/GameObjects/GameObject.h"
 #include "Manager/ResourceLoader.h"
 #include "Manager/TargetManager.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
 
 namespace
 {
@@ -79,8 +80,8 @@ void ReticleUI::Draw()
 		m_focusAlpha = std::fmin(m_focusAlpha, 255.0f);
 
 		// フォーカスしているオブジェクトの位置
-		std::weak_ptr<GameObject> target = pTargetManager->GetFocusTarget();
-		std::shared_ptr<GameObject> sharedTarget = target.lock();
+		std::weak_ptr<EnemyBase> target = pTargetManager->GetFocusTarget();
+		std::shared_ptr<EnemyBase> sharedTarget = target.lock();
 		// ターゲットが死んでいたら処理を行わない
 		if (sharedTarget && !sharedTarget->IsDead())
 		{

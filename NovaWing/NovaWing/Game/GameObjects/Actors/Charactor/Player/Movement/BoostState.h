@@ -1,9 +1,11 @@
 ﻿#pragma once
 #include "GaugeActionStateBase.h"
+class SoundManager;
 class BoostState :public GaugeActionStateBase
 {
 public:
-	BoostState(const std::weak_ptr<Player> pPlayer);
+	BoostState(const std::weak_ptr<Player> pPlayer,
+		std::weak_ptr<SoundManager> pSoundManager);
 	~BoostState();
 
 	void Enter()override;//ステートに入った時

@@ -69,9 +69,11 @@ namespace
 Player::Player(
 	std::shared_ptr<BulletManager> bulletManager,
 	ResourceLoader::ModelID modelID,
-	std::weak_ptr<CameraBase> camera) :
+	std::weak_ptr<CameraBase> camera,
+	std::weak_ptr<SoundManager> soundManager) :
 	Charactor(modelID, camera),
 	m_pBulletManager(bulletManager),
+	m_pSoundManager(soundManager),
 	m_collSphere(m_pos)
 {
 }
@@ -113,7 +115,8 @@ void Player::OnInit()
 	m_pShootState =
 		std::make_shared<NormalShootState>(
 			std::static_pointer_cast<Player>(shared_from_this()),
-			m_pBulletManager);
+			m_pBulletManager,
+			m_pSoundManager);
 
 	// SpecialActionの初期化
 	m_pSpecialState =
@@ -266,7 +269,8 @@ void Player::Somersault(InputManager& input)
 		// 宙返りステートに変更
 		std::shared_ptr<ISpecialActionState> newSpecialState =
 			std::make_shared<SomersaultState>(
-				std::static_pointer_cast<Player>(shared_from_this()));
+				std::static_pointer_cast<Player>(shared_from_this()),
+				m_pSoundManager);
 		ChangeSpecialState(newSpecialState);
 	}
 }
@@ -280,7 +284,8 @@ void Player::Boost(const InputManager& input)
 		// 移動ステートをブースト状態に変更
 		std::shared_ptr<IMovementState> newState =
 			std::make_shared<BoostState>(
-				std::static_pointer_cast<Player>(shared_from_this()));
+				std::static_pointer_cast<Player>(shared_from_this()),
+				m_pSoundManager);
 		// 初期化
 		ChangeMovementState(newState);
 	}
@@ -295,7 +300,8 @@ void Player::Brake(const InputManager& input)
 		// 移動ステートをブレーキ状態に変更
 		std::shared_ptr<IMovementState> newState =
 			std::make_shared<BrakeState>(
-				std::static_pointer_cast<Player>(shared_from_this()));
+				std::static_pointer_cast<Player>(shared_from_this()),
+				m_pSoundManager);
 		// 初期化
 		ChangeMovementState(newState);
 	}
@@ -416,9 +422,15 @@ void Player::TakeDamage(int damage)
 	//被弾回数をインクリメント
 	m_hitCount++;
 
+	//ダメージ音を鳴らす
+	std::shared_ptr<SoundManager> pSoundManager = m_pSoundManager.lock();
+	pSoundManager->Play(SoundManager::SoundType::PlayerDamage, false, true);
+
 	// HP0以下になったら死亡処理を行う
 	if (m_health <= 0)
 	{
+		//死亡音を鳴らす
+		pSoundManager->Play(SoundManager::SoundType::PlayerDeath,false,true);
 		OnDead();
 	}
 }
@@ -464,7 +476,7 @@ bool Player::IsUseGauge() const
 	return m_isUseGauge;
 }
 
-std::weak_ptr<GameObject> Player::GetFocusTarget() const
+std::weak_ptr<EnemyBase> Player::GetForcusTarget() const
 {
 	// ターゲットマネージャーのターゲットを取得してそれを返す
 	return m_pTargetManager.lock()->GetFocusTarget();
@@ -515,7 +527,7 @@ void Player::ChangeAllStateToDisabled()
 	//何もしないステート
 	std::shared_ptr<IShootState> newShootState =
 		std::make_shared<DisabledShootState>(
-			std::static_pointer_cast<Player>(shared_from_this()), m_pBulletManager);
+			std::static_pointer_cast<Player>(shared_from_this()), m_pBulletManager, m_pSoundManager);
 	ChangeShootState(newShootState);
 }
 
@@ -537,7 +549,7 @@ void Player::ChangeAllStateToNormal()
 	// 通常ステート
 	std::shared_ptr<IShootState> newShootState =
 		std::make_shared<NormalShootState>(
-			std::static_pointer_cast<Player>(shared_from_this()), m_pBulletManager);
+			std::static_pointer_cast<Player>(shared_from_this()), m_pBulletManager, m_pSoundManager);
 	ChangeShootState(newShootState);
 }
 

@@ -162,5 +162,5 @@ namespace
 	//チャージ完了
 	constexpr const wchar_t* charge_complete_se_path = L"Data/Sounds/Game/Player/ChargeComplete.mp3";
 	//宙返り
-	constexpr const wchar_t* somersoult = L"Data/Sounds/Game/Player/Somersoult2.mp3";
+	constexpr const wchar_t* somersoult_se_path = L"Data/Sounds/Game/Player/Somersoult2.mp3";
 }

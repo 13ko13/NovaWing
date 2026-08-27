@@ -4,6 +4,7 @@
 
 #include "../Charactor.h"
 #include "Utility/Sphere.h"
+#include "Manager/SoundManager.h"
 
 class InputManager;
 class BulletManager;
@@ -13,12 +14,14 @@ class IRotationState;
 class IShootState;
 class ISpecialActionState;
 class TargetManager;
+class EnemyBase;
 class Player : public Charactor
 {
 public:
 	Player(std::shared_ptr<BulletManager> bulletManager,
 		ResourceLoader::ModelID modelID,
-		std::weak_ptr<CameraBase> camera);
+		std::weak_ptr<CameraBase> camera,
+		std::weak_ptr<SoundManager> soundManager);
 	~Player();
 
 	void OnInit() override;
@@ -63,7 +66,7 @@ public:
 	Sphere GetSphere() const { return m_collSphere; }
 
 	//フォーカスターゲットを取得
-	std::weak_ptr<GameObject> GetFocusTarget() const;
+	std::weak_ptr<EnemyBase> GetForcusTarget() const;
 	//フォーカス中か
 	bool IsFocus() const;
 	//チャージ完了しているか
@@ -153,6 +156,7 @@ private:
 	//外部クラス参照
 	//借りてくるだけなのでweak_ptrにする
 	std::weak_ptr<BulletManager> m_pBulletManager;//弾の管理
+	std::weak_ptr<SoundManager> m_pSoundManager;//音の管理
 
 	//プレイヤーの向きが逆向きなので
 	//プレイヤーの初期回転を保存する

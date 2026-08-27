@@ -9,6 +9,7 @@ class ChargeBullet;
 class GameObject;
 struct Vector3;
 class BulletBase;
+class EnemyBase;
 class BulletManager
 {
 public:
@@ -30,7 +31,7 @@ public:
 	//ターゲットはデフォルトではNull,チャージショットの時のみターゲットを設定する
 	void CreateBullet(const BulletType bulletType, const Vector3& pos,
 		const Vector3& vel, const int attackPower,
-		std::weak_ptr<GameObject> pTarget = std::weak_ptr<GameObject>());
+		std::weak_ptr<EnemyBase> pTarget = std::weak_ptr<EnemyBase>());
 
 	//プレイヤー弾の配列のゲッター
 	const std::vector<std::weak_ptr<PlayerBullet>>& GetPlayerBullets() const { return m_pPlayerBullets; }

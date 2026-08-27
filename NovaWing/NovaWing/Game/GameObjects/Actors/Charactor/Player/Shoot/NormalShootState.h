@@ -3,11 +3,14 @@
 
 class Player;
 class BulletManager;
+class SoundManager;
 class NormalShootState : public IShootState
 {
   public:
-	NormalShootState(const std::weak_ptr<Player> pPlayer,
-					 std::weak_ptr<BulletManager> pBulletManager);
+	NormalShootState(
+		const std::weak_ptr<Player> pPlayer,
+		std::weak_ptr<BulletManager> pBulletManager,
+		std::weak_ptr<SoundManager> pSoundManager);
 	~NormalShootState();
 
 	void Exit() override;

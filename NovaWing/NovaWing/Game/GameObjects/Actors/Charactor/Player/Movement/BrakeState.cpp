@@ -1,13 +1,15 @@
 ﻿#include "BrakeState.h"
 #include "Charactor/Player/Player.h"
+#include "Manager/SoundManager.h"
 
 namespace
 {
 	constexpr float brake_speed = 2.0f;
 }
 
-BrakeState::BrakeState(const std::weak_ptr<Player> pPlayer) :
-	GaugeActionStateBase(pPlayer)
+BrakeState::BrakeState(const std::weak_ptr<Player> pPlayer,
+	std::weak_ptr<SoundManager> pSoundManager) :
+	GaugeActionStateBase(pPlayer, pSoundManager)
 {
 
 }
@@ -22,6 +24,9 @@ void BrakeState::Enter()
 	//ゲージ使用を開始したことをプレイヤーに伝える
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	pPlayer->StartUseGauge();
+
+	//ブレーキ音を鳴らす
+	m_pSoundManager.lock()->Play(SoundManager::SoundType::Brake);
 }
 
 void BrakeState::Exit()

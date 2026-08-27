@@ -6,6 +6,7 @@
 #include "ChargeShootState.h"
 #include "Manager/BulletManager.h"
 #include "Manager/InputManager.h"
+#include "Manager/SoundManager.h"
 #include "NormalShootState.h"
 
 namespace
@@ -27,7 +28,8 @@ const Vector3 first_effect_scale = Vector3(1.0f, 1.0f, 1.0f);
 } // namespace
 
 ChargeShootState::ChargeShootState(const std::weak_ptr<Player> pPlayer,
-								   std::weak_ptr<BulletManager> pBulletManager) : IShootState(pPlayer, pBulletManager),
+								   std::weak_ptr<BulletManager> pBulletManager,
+								   std::weak_ptr<SoundManager> pSoundManager) : IShootState(pPlayer, pBulletManager, pSoundManager),
 																				  m_effectScale(first_effect_scale)
 {
 }
@@ -43,6 +45,11 @@ void ChargeShootState::Exit()
 	{
 		StopEffekseer3DEffect(m_chargingPlayEffectH);
 	}
+
+	// チャージ中の音を止める
+	m_pSoundManager.lock()->Stop(SoundManager::SoundType::Charging);
+	// チャージ完了音も止める
+	m_pSoundManager.lock()->Stop(SoundManager::SoundType::ChargeComplete);
 }
 
 void ChargeShootState::Update()
@@ -70,6 +77,12 @@ void ChargeShootState::Update()
 	if (input.IsPressed(InputEvent::shoot))
 	{
 		m_chargeFrame++;
+
+		// ちょうどチャージ完了フレームに到達した瞬間だけ完了音を鳴らす
+		if (m_chargeFrame == charge_comp_frame)
+		{
+			m_pSoundManager.lock()->Play(SoundManager::SoundType::ChargeComplete);
+		}
 	}
 	else
 	{
@@ -93,7 +106,7 @@ void ChargeShootState::Update()
 		if (m_effectScale.m_x == 0.0f)
 		{
 			// ノーマルステートに戻す
-			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager));
+			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager));
 		}
 	}
 
@@ -113,14 +126,17 @@ void ChargeShootState::Update()
 				BulletManager::BulletType::PlayerBullet,
 				pos, vel, attack_power);
 
+			// 発射音を鳴らす
+			m_pSoundManager.lock()->Play(SoundManager::SoundType::NormalShoot);
+
 			// ノーマルステートに戻す
-			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager));
+			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager));
 		}
 		// 完了していたら
 		else
 		{
 			// チャージショット待機ステートに遷移する
-			ChangeState(std::make_shared<ChargeReadyState>(m_pPlayer, m_pBulletManager));
+			ChangeState(std::make_shared<ChargeReadyState>(m_pPlayer, m_pBulletManager, m_pSoundManager));
 		}
 	}
 }
@@ -138,6 +154,9 @@ void ChargeShootState::Enter()
 			ResourceLoader::EffectID::Charging));
 
 	pPlayer->SetChargingEffectHandle(m_chargingPlayEffectH);
+
+	// チャージ中の音をループ再生する
+	m_pSoundManager.lock()->Play(SoundManager::SoundType::Charging, true);
 
 	// 位置を設定(プレイヤーの位置)
 	Vector3 playerPos = pPlayer->GetPos();

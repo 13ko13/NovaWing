@@ -53,7 +53,7 @@ std::shared_ptr<EnemyBase> EnemyFactory::Create(
 		//ターゲットマネージャーと当たり判定マネージャーに登録
 		if (m_pTargetManager.lock() != nullptr)
 		{
-			m_pTargetManager.lock()->RegisterFloatingEnemy(pFloating);
+			m_pTargetManager.lock()->Register(pFloating);
 		}
 		if (m_pCollisionManager.lock() != nullptr)
 		{
@@ -91,7 +91,7 @@ std::shared_ptr<EnemyBase> EnemyFactory::Create(
 		//ターゲットマネージャーと当たり判定マネージャーに登録
 		if (m_pTargetManager.lock() != nullptr)
 		{
-			m_pTargetManager.lock()->RegisterWormEnemy(pWorm);
+			m_pTargetManager.lock()->Register(pWorm);
 		}
 		if (m_pCollisionManager.lock() != nullptr)
 		{

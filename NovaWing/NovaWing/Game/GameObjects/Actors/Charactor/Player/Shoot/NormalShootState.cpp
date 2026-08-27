@@ -3,6 +3,7 @@
 #include "ChargeShootState.h"
 #include "Manager/BulletManager.h"
 #include "Manager/InputManager.h"
+#include "Manager/SoundManager.h"
 
 namespace
 {
@@ -17,8 +18,10 @@ namespace
 	constexpr int charge_start_frame = 10;
 }
 
-NormalShootState::NormalShootState(const std::weak_ptr<Player> pPlayer,
-								   std::weak_ptr<BulletManager> pBulletManager) : IShootState(pPlayer, pBulletManager)
+NormalShootState::NormalShootState(
+	const std::weak_ptr<Player> pPlayer,
+	std::weak_ptr<BulletManager> pBulletManager,
+	std::weak_ptr<SoundManager> pSoundManager) : IShootState(pPlayer, pBulletManager, pSoundManager)
 {
 }
 
@@ -51,6 +54,9 @@ void NormalShootState::Update()
 		pBulletManager->CreateBullet(BulletManager::BulletType::PlayerBullet,
 									 pos, vel, attack_power);
 
+		// 発射音を鳴らす
+		m_pSoundManager.lock()->Play(SoundManager::SoundType::NormalShoot);
+
 		// クールタイムをリセット
 		m_shootCT = 0;
 	}
@@ -63,7 +69,7 @@ void NormalShootState::Update()
 		if (m_pressingShootButton > charge_start_frame)
 		{
 			// ChargeShootStateに遷移する
-			ChangeState(std::make_shared<ChargeShootState>(m_pPlayer, m_pBulletManager));
+			ChangeState(std::make_shared<ChargeShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager));
 		}
 	}
 	// ボタンが離されたら長押しされている時間をリセット

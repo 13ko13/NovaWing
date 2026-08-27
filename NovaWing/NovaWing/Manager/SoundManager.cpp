@@ -2,7 +2,6 @@
 #include "SoundManager.h"
 #include <DxLib.h>
 #include <algorithm>
-#include "Manager/ResourceLoader.h"
 
 namespace
 {
@@ -16,6 +15,24 @@ namespace
 	constexpr int title_impact_volume = 125;
 	//タイトルBGMの音量
 	constexpr int title_bgm_volume = 30;
+	//プレイヤー通常弾
+	constexpr int normal_shoot_volume = 125;
+	//プレイヤー死亡
+	constexpr int player_death_volume = 125;
+	//プレイヤーダメージ
+	constexpr int player_damage_volume = 125;
+	//プレイヤーチャージショット
+	constexpr int player_charge_shoot_volume = 125;
+	//ブレーキ
+	constexpr int brake_volume = 125;
+	//ブースト
+	constexpr int boost_volume = 125;
+	//チャージ完了
+	constexpr int charge_complete_volume = 125;
+	//チャージ中
+	constexpr int charging_volume = 125;
+	//宙返り
+	constexpr int somersoult_volume = 125;
 }
 
 SoundManager::SoundManager()
@@ -36,40 +53,62 @@ void SoundManager::Init()
 
 	//それぞれのハンドルを取得して設定する
 	//タイトルでのプレイヤーのブースト音
-	auto& titleBoostData = m_sounds[SoundType::TitleBoost];
-	titleBoostData.handle = loader.GetSound(ResourceLoader::SoundID::TitleBoost);
-	titleBoostData.loaded = true;//ロード済みフラグを立てる
-	titleBoostData.volume = title_boost_volume;
-	titleBoostData.isLoop = false;//ループしない
-	ChangeVolumeSoundMem(titleBoostData.volume, titleBoostData.handle);//音量を変更する
+	InitData(SoundType::TitleBoost,
+		ResourceLoader::SoundID::TitleBoost,
+		true, title_boost_volume, false);
 	//カーソルが乗った時の音
-	auto& onCursorData = m_sounds[SoundType::OnCursor];
-	onCursorData.handle = loader.GetSound(ResourceLoader::SoundID::OnCursor);
-	onCursorData.loaded = true;//ロード済みフラグを立てる
-	onCursorData.volume = decision_volume;
-	onCursorData.isLoop = false;//ループしない
-	ChangeVolumeSoundMem(onCursorData.volume, onCursorData.handle);//音量を変更する
+	InitData(SoundType::OnCursor,
+		ResourceLoader::SoundID::OnCursor,
+		true, decision_volume, false);
 	//決定音
-	auto& decisionData = m_sounds[SoundType::Decision];
-	decisionData.handle = loader.GetSound(ResourceLoader::SoundID::Decision);
-	decisionData.loaded = true;//ロード済みフラグを立てる
-	decisionData.volume = on_cursor_volume;
-	decisionData.isLoop = false;//ループしない
-	ChangeVolumeSoundMem(decisionData.volume, decisionData.handle);//音量を変更する
+	InitData(SoundType::Decision,
+		ResourceLoader::SoundID::Decision,
+		true, on_cursor_volume, false);
 	//タイトルロゴ出現時の衝撃音
-	auto& titleImpactData = m_sounds[SoundType::TitleLogoImpact];
-	titleImpactData.handle = loader.GetSound(ResourceLoader::SoundID::TitleLogoImpact);
-	titleImpactData.loaded = true;//ロード済みフラグを立てる
-	titleImpactData.volume = title_impact_volume;
-	titleImpactData.isLoop = false;//ループしない
-	ChangeVolumeSoundMem(titleImpactData.volume, titleImpactData.handle);//音量を変更する
+	InitData(SoundType::TitleLogoImpact,
+	ResourceLoader::SoundID::TitleLogoImpact,
+	true, title_impact_volume, false);
 	//タイトルBGM
-	auto& titleBGMData = m_sounds[SoundType::TitleBGM];
-	titleBGMData.handle = loader.GetSound(ResourceLoader::SoundID::TitleBGM);
-	titleBGMData.loaded = true;//ロード済みフラグを立てる
-	titleBGMData.volume = title_bgm_volume;
-	titleBGMData.isLoop = true;//ループしない
-	ChangeVolumeSoundMem(titleBGMData.volume, titleBGMData.handle);//音量を変更する
+	InitData(SoundType::TitleBGM,
+	ResourceLoader::SoundID::TitleBGM,
+	true, title_bgm_volume, true);
+
+	//プレイヤー通常弾
+	InitData(SoundType::NormalShoot,
+	ResourceLoader::SoundID::NormalShoot,
+	true, normal_shoot_volume, false);
+	//プレイヤー死亡
+	InitData(SoundType::PlayerDeath,
+	ResourceLoader::SoundID::PlayerDeath,
+	true, player_death_volume, false);
+	//プレイヤーダメージ
+	InitData(SoundType::PlayerDamage,
+	ResourceLoader::SoundID::PlayerDamage,
+	true, player_damage_volume, false);
+	//チャージショット
+	InitData(SoundType::ChargeShoot,
+	ResourceLoader::SoundID::ChargeShoot,
+	true, player_charge_shoot_volume, false);
+	//ブレーキ
+	InitData(SoundType::Brake,
+	ResourceLoader::SoundID::Brake,
+	true, brake_volume, false);
+	//ブースト
+	InitData(SoundType::Boost,
+		ResourceLoader::SoundID::Boost,
+		true, boost_volume, false);
+	//チャージ完了
+	InitData(SoundType::ChargeComplete,
+		ResourceLoader::SoundID::ChargeComplete,
+		true, charge_complete_volume, false);
+	//チャージ中
+	InitData(SoundType::Charging,
+		ResourceLoader::SoundID::Charging,
+		true, charging_volume, true);
+	//宙返り
+	InitData(SoundType::Somersoult,
+		ResourceLoader::SoundID::Somersoult,
+		true, somersoult_volume, false);
 }
 
 void SoundManager::Update()
@@ -157,7 +196,7 @@ void SoundManager::FadeOut(SoundType soundType, float duration)
 	data.fadeDuration = duration;//フェードにかける時間を設定する
 }
 
-void SoundManager::Play(SoundType soundType, bool loop)
+void SoundManager::Play(SoundType soundType, bool loop, bool isOnce)
 {
 	//ロードされていなかったら以降の処理をスキップ
 	auto it = m_sounds.find(soundType);
@@ -167,6 +206,9 @@ void SoundManager::Play(SoundType soundType, bool loop)
 
 	//既に再生中なら再生しない
 	if (data.isLoop && CheckSoundMem(data.handle) == 1) return;
+
+	//isOnce指定時は、既に再生中なら重ねて鳴らさない
+	if (isOnce && CheckSoundMem(data.handle) == 1) return;
 
 	PlaySoundMem(
 		data.handle,
@@ -206,4 +248,22 @@ void SoundManager::SetVolume(SoundType type, int volume)
 	{
 		ChangeVolumeSoundMem(data.volume, data.handle);
 	}
+}
+
+void SoundManager::InitData(
+	SoundType type, 
+	ResourceLoader::SoundID soundID,
+	bool isLoaded, int volume, bool isLoop)
+{
+	//リソースローダーのインスタンスを取得
+	auto& loader = ResourceLoader::GetInstance();
+
+	//それぞれのハンドルを取得して設定する
+	//タイトルでのプレイヤーのブースト音
+	auto& soundData = m_sounds[type];
+	soundData.handle = loader.GetSound(soundID);
+	soundData.loaded = isLoaded;//ロード済みフラグを立てる
+	soundData.volume = volume;
+	soundData.isLoop = isLoop;//ループしない
+	ChangeVolumeSoundMem(soundData.volume, soundData.handle);//音量を変更する
 }

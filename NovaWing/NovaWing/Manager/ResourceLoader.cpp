@@ -494,6 +494,43 @@ void ResourceLoader::KeepSound()
 	handle = LoadSoundMem(title_bgm_sound_path);
 	assert(handle >= 0);
 	m_soundHandles[ResourceLoader::SoundID::TitleBGM] = handle;
+
+	//プレイヤーの通常ショット
+	handle = LoadSoundMem(player_normal_shoot_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::NormalShoot] = handle;
+	//プレイヤーの死亡
+	handle = LoadSoundMem(player_death_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::PlayerDeath] = handle;
+	//プレイヤーのダメージ
+	handle = LoadSoundMem(player_damage_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::PlayerDamage] = handle;
+	//プレイヤーのチャージショット
+	handle = LoadSoundMem(player_charge_shoot_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::ChargeShoot] = handle;
+	//ブレーキ
+	handle = LoadSoundMem(brake_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::Brake] = handle;
+	//ブースト
+	handle = LoadSoundMem(boost_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::Boost] = handle;
+	//チャージ完了
+	handle = LoadSoundMem(charge_complete_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::ChargeComplete] = handle;
+	//チャージ中
+	handle = LoadSoundMem(charging_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::Charging] = handle;
+	//宙返り
+	handle = LoadSoundMem(somersoult_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::Somersoult] = handle;
 }
 
 void ResourceLoader::KeepFont()

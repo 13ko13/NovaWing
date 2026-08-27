@@ -246,6 +246,7 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemyDataSetter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\DamageSource.h" />
     <ClInclude Include="Game\GameObjects\Camera\GameCamera.h" />
     <ClInclude Include="Game\UI\BossHPGaugeUI.h" />
     <ClInclude Include="Constants\ResourceConstants.h" />
