@@ -96,9 +96,9 @@ void FloatingEnemy::Update()
 	}
 
 	//エフェクトの位置の調整する
-		SetPosPlayingEffekseer3DEffect(
-			m_effectPlayHandle, GetPos().m_x, GetPos().m_y, GetPos().m_z
-		);
+	SetPosPlayingEffekseer3DEffect(
+		m_effectPlayHandle, GetPos().m_x, GetPos().m_y, GetPos().m_z
+	);
 }
 
 void FloatingEnemy::Draw()
