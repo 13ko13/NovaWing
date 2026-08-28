@@ -24,10 +24,13 @@ namespace
 	const Vector3 first_effect_scale = Vector3(1.0f, 1.0f, 1.0f);
 } // namespace
 
-ChargeReadyState::ChargeReadyState(const std::weak_ptr<Player> pPlayer,
-								   std::weak_ptr<BulletManager> pBulletManager,
-								   std::weak_ptr<SoundManager> pSoundManager) : IShootState(pPlayer, pBulletManager, pSoundManager),
-																				  m_effectScale(first_effect_scale)
+ChargeReadyState::ChargeReadyState(
+	const std::weak_ptr<Player> pPlayer,
+	std::weak_ptr<BulletManager> pBulletManager,
+	std::weak_ptr<SoundManager> pSoundManager,
+	std::weak_ptr<TargetManager> pTargetManager) : 
+	IShootState(pPlayer, pBulletManager, pSoundManager,pTargetManager),
+	m_effectScale(first_effect_scale)
 {
 }
 
@@ -118,7 +121,7 @@ void ChargeReadyState::Update()
 		if (m_effectScale.m_x == 0.0f)
 		{
 			// ノーマルステートに戻す
-			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager));
+			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager,m_pTargetManager));
 		}
 	}
 }

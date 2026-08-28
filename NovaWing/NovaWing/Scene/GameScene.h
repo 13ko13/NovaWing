@@ -7,9 +7,8 @@
 class Player;
 class GameCamera;
 class BulletManager;
-class FloatingEnemy;
+class EnemyBase;
 class CollisionManager;
-class WormEnemy;
 class TargetManager;
 class UIManager;
 class WaterManager;
@@ -57,14 +56,12 @@ private:
 	std::shared_ptr<Player> m_pPlayer;
 	//カメラへのポインタ
 	std::shared_ptr<GameCamera> m_pCamera;
-	//浮遊エネミーへのポインタの配列
-	std::vector<std::shared_ptr<FloatingEnemy>> m_pFloatingEnemies;
+	//敵へのポインタの配列
+	std::vector<std::shared_ptr<EnemyBase>> m_pEnemies;
 	//バレットマネージャーへのポインタ
 	std::shared_ptr<BulletManager> m_pBulletManager;
 	//衝突判定マネージャーへのポインタの配列
 	std::shared_ptr<CollisionManager> m_pCollisionManager;
-	//ワームエネミーへのポインタの配列
-	std::vector<std::shared_ptr<WormEnemy>> m_pWormEnemies;
 	//ターゲットマネージャーへのポインタ
 	std::shared_ptr<TargetManager> m_pTargetManager;
 	//UIマネージャーへのポインタ

@@ -34,15 +34,15 @@ public:
 	//弾の管理者を取得する
 	std::shared_ptr<BulletManager> GetBulletManager() const;
 
-	//当たり判定(球)を取得
-	const Sphere& GetSphere() const { return m_colSphere; }
-
 	//アニメーターを取得
 	//返り値の型をshared_ptrにすると
 	//他のクラス(State)が呼び出すたびに
 	//参照カウントが増えてModelAnimatorの
 	//所有者の1人になってしまうため参照でポインタを返す
 	ModelAnimator& GetAnimator() { return *m_pAnimator; }
+
+	//当たり判定を返す
+	std::vector<Sphere> GetCollisionSpheres() const override;
 
 private:
 	//敵の描画(シェーダ適応も含めた)

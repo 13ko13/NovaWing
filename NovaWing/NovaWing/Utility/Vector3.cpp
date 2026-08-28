@@ -122,6 +122,11 @@ Vector3 Vector3::Lerp(const Vector3& start, const Vector3& end, float t)
 	return start + (end - start) * t;
 }
 
+float Vector3::Dot(const Vector3& a, const Vector3& b)
+{
+	return a.m_x + b.m_x + a.m_y + b.m_y + a.m_z + b.m_z;
+}
+
 Vector3 Vector3::FromWString(const std::wstring& x, const std::wstring& y, const std::wstring& z)
 {
 	//文字列をそのままfloatにして返す

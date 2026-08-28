@@ -116,7 +116,8 @@ void Player::OnInit()
 		std::make_shared<NormalShootState>(
 			std::static_pointer_cast<Player>(shared_from_this()),
 			m_pBulletManager,
-			m_pSoundManager);
+			m_pSoundManager,
+			m_pTargetManager);
 
 	// SpecialActionの初期化
 	m_pSpecialState =
@@ -527,7 +528,7 @@ void Player::ChangeAllStateToDisabled()
 	//何もしないステート
 	std::shared_ptr<IShootState> newShootState =
 		std::make_shared<DisabledShootState>(
-			std::static_pointer_cast<Player>(shared_from_this()), m_pBulletManager, m_pSoundManager);
+			std::static_pointer_cast<Player>(shared_from_this()), m_pBulletManager, m_pSoundManager,m_pTargetManager);
 	ChangeShootState(newShootState);
 }
 
@@ -549,7 +550,7 @@ void Player::ChangeAllStateToNormal()
 	// 通常ステート
 	std::shared_ptr<IShootState> newShootState =
 		std::make_shared<NormalShootState>(
-			std::static_pointer_cast<Player>(shared_from_this()), m_pBulletManager, m_pSoundManager);
+			std::static_pointer_cast<Player>(shared_from_this()), m_pBulletManager, m_pSoundManager,m_pTargetManager);
 	ChangeShootState(newShootState);
 }
 

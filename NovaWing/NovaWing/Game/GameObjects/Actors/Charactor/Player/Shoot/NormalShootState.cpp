@@ -4,6 +4,7 @@
 #include "Manager/BulletManager.h"
 #include "Manager/InputManager.h"
 #include "Manager/SoundManager.h"
+#include "Manager/TargetManager.h"
 
 namespace
 {
@@ -21,7 +22,9 @@ namespace
 NormalShootState::NormalShootState(
 	const std::weak_ptr<Player> pPlayer,
 	std::weak_ptr<BulletManager> pBulletManager,
-	std::weak_ptr<SoundManager> pSoundManager) : IShootState(pPlayer, pBulletManager, pSoundManager)
+	std::weak_ptr<SoundManager> pSoundManager,
+	std::weak_ptr<TargetManager> pTargetManager) :
+	IShootState(pPlayer, pBulletManager, pSoundManager,pTargetManager)
 {
 }
 
@@ -69,7 +72,7 @@ void NormalShootState::Update()
 		if (m_pressingShootButton > charge_start_frame)
 		{
 			// ChargeShootStateに遷移する
-			ChangeState(std::make_shared<ChargeShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager));
+			ChangeState(std::make_shared<ChargeShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager,m_pTargetManager));
 		}
 	}
 	// ボタンが離されたら長押しされている時間をリセット
@@ -81,4 +84,9 @@ void NormalShootState::Update()
 
 void NormalShootState::Enter()
 {
+	// ロック機能を終了する
+	if (m_pTargetManager.lock() != nullptr)
+	{
+		m_pTargetManager.lock()->EndLock();
+	}
 }

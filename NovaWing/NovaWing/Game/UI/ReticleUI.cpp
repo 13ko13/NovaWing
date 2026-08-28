@@ -62,9 +62,8 @@ void ReticleUI::Draw()
 	DrawRotaGraph(frontScreenPos.x, frontScreenPos.y, front_reticle_size, 0.0, normalH, true);	   // 手前のレティクル
 	DrawRotaGraph(reticleScreenPos.x, reticleScreenPos.y, depth_reticle_size, 0.0, normalH, true); // 奥のレティクル
 
-	// フォーカス中で、チャージ完了状態なら
-	if (pTargetManager->IsFocus() &&
-		m_pPlayer.lock()->IsChargeReady())
+	// フォーカス中なら
+	if (pTargetManager->IsFocus())
 	{
 		// アニメーションを進める
 		m_animProgress += anim_speed;

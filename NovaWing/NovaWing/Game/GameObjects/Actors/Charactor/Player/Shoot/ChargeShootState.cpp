@@ -8,29 +8,33 @@
 #include "Manager/InputManager.h"
 #include "Manager/SoundManager.h"
 #include "NormalShootState.h"
+#include "Manager/TargetManager.h"
 
 namespace
 {
-// チャージ完了と判定する秒数
-constexpr int charge_comp_frame = 20;
-// 弾の速度
-constexpr float move_speed = 60.0f;
-// 攻撃力
-constexpr int attack_power = 10;
-// チャージ完了エフェクトを出す前後位置のオフセット
-constexpr float effect_offset_z = 200.0f;
+	// チャージ完了と判定する秒数
+	constexpr int charge_comp_frame = 20;
+	// 弾の速度
+	constexpr float move_speed = 60.0f;
+	// 攻撃力
+	constexpr int attack_power = 10;
+	// チャージ完了エフェクトを出す前後位置のオフセット
+	constexpr float effect_offset_z = 200.0f;
 
-// エフェクトの大きさを何フレームかけて小さくするか
-constexpr int change_eff_size_frame = 30;
+	// エフェクトの大きさを何フレームかけて小さくするか
+	constexpr int change_eff_size_frame = 30;
 
-// エフェクトの最初の大きさ
-const Vector3 first_effect_scale = Vector3(1.0f, 1.0f, 1.0f);
+	// エフェクトの最初の大きさ
+	const Vector3 first_effect_scale = Vector3(1.0f, 1.0f, 1.0f);
 } // namespace
 
-ChargeShootState::ChargeShootState(const std::weak_ptr<Player> pPlayer,
-								   std::weak_ptr<BulletManager> pBulletManager,
-								   std::weak_ptr<SoundManager> pSoundManager) : IShootState(pPlayer, pBulletManager, pSoundManager),
-																				  m_effectScale(first_effect_scale)
+ChargeShootState::ChargeShootState(
+	const std::weak_ptr<Player> pPlayer,
+	std::weak_ptr<BulletManager> pBulletManager,
+	std::weak_ptr<SoundManager> pSoundManager,
+	std::weak_ptr<TargetManager> pTargetManager) :
+	IShootState(pPlayer, pBulletManager, pSoundManager,pTargetManager),
+	m_effectScale(first_effect_scale)
 {
 }
 
@@ -106,7 +110,7 @@ void ChargeShootState::Update()
 		if (m_effectScale.m_x == 0.0f)
 		{
 			// ノーマルステートに戻す
-			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager));
+			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager,m_pTargetManager));
 		}
 	}
 
@@ -130,13 +134,13 @@ void ChargeShootState::Update()
 			m_pSoundManager.lock()->Play(SoundManager::SoundType::NormalShoot);
 
 			// ノーマルステートに戻す
-			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager));
+			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager,m_pTargetManager));
 		}
 		// 完了していたら
 		else
 		{
 			// チャージショット待機ステートに遷移する
-			ChangeState(std::make_shared<ChargeReadyState>(m_pPlayer, m_pBulletManager, m_pSoundManager));
+			ChangeState(std::make_shared<ChargeReadyState>(m_pPlayer, m_pBulletManager, m_pSoundManager,m_pTargetManager));
 		}
 	}
 }
@@ -145,6 +149,12 @@ void ChargeShootState::Enter()
 {
 	// チャージフレームをリセットする
 	m_chargeFrame = 0;
+
+	//ロック機能を開始
+	if (m_pTargetManager.lock() != nullptr)
+	{
+		m_pTargetManager.lock()->BeginLock();
+	}
 
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 

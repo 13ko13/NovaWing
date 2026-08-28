@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include <memory>
+#include <vector>
+
 #include "Game/GameObjects/Actors/Charactor/Charactor.h"
+#include "Utility/Sphere.h"
 
 class Player;
 class BulletManager;
@@ -22,6 +25,10 @@ public:
 
 	//死んだときに呼ぶ関数
 	void OnEnemyDead();
+
+	//当たり判定に使う球の配列を返す
+	//当たり判定を持つ敵がoverrideする
+	virtual std::vector<Sphere> GetCollisionSpheres() const { return {}; }
 
 private:
 

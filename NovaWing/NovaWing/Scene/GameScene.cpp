@@ -20,6 +20,7 @@
 #include "../Manager/ResourceLoader.h"
 #include "Charactor/Enemy/FloatingEnemy/FloatingEnemy.h"
 #include "Charactor/Enemy/WormEnemy/WormEnemy.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
 #include "Manager/CollisionManager.h"
 #include "Scene/GameoverScene.h"
 #include "Manager/TargetManager.h"
@@ -162,34 +163,38 @@ void GameScene::Init()
 
 	//浮遊エネミーの初期化
 	//データの数分のエネミーを作成
-	m_pFloatingEnemies = FloatingEnemyDataSetter::CreateEnemy(
+	std::vector<std::shared_ptr<EnemyBase>> floatingEnemies = FloatingEnemyDataSetter::CreateEnemy(
 		m_pPlayer,
 		m_pCamera,
 		m_pBulletManager
 	);
 	//それぞれの初期化
-	for (std::shared_ptr<FloatingEnemy> pEnemy : m_pFloatingEnemies)
+	for (std::shared_ptr<EnemyBase> pEnemy : floatingEnemies)
 	{
 		pEnemy->Init();
 		//衝突判定マネージャーに敵を登録する
-		m_pCollisionManager->RegisterFloatingEnemy(pEnemy);
+		m_pCollisionManager->Register(pEnemy);
 		//ターゲットマネージャーにエネミーを登録する
 		m_pTargetManager->Register(pEnemy);
+		//生存を保持するための配列に格納
+		m_pEnemies.push_back(pEnemy);
 	}
 
 	//ワームエネミーの初期化
-	m_pWormEnemies = WormEnemyDataSetter::CreateEnemy(
+	std::vector<std::shared_ptr<EnemyBase>> wormEnemies = WormEnemyDataSetter::CreateEnemy(
 		m_pPlayer,
 		m_pCamera,
 		m_pBulletManager
 	);
-	for (std::shared_ptr<WormEnemy> pEnemy : m_pWormEnemies)
+	for (std::shared_ptr<EnemyBase> pEnemy : wormEnemies)
 	{
 		pEnemy->Init();
 		//衝突判定マネージャーに敵を登録する
-		m_pCollisionManager->RegisterWormEnemy(pEnemy);
+		m_pCollisionManager->Register(pEnemy);
 		//ターゲットマネージャーにエネミーを登録する
 		m_pTargetManager->Register(pEnemy);
+		//生存を保持するための配列に格納
+		m_pEnemies.push_back(pEnemy);
 	}
 
 	//UIManagerの初期化

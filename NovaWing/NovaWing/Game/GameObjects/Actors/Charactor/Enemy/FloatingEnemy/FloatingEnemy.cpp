@@ -195,3 +195,8 @@ std::shared_ptr<BulletManager> FloatingEnemy::GetBulletManager() const
 	std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock();
 	return pBulletManager;
 }
+
+std::vector<Sphere> FloatingEnemy::GetCollisionSpheres() const
+{
+	return { m_colSphere };
+}

@@ -340,3 +340,12 @@ void WormEnemy::TakeDamage(int damage)
 		m_isDying = true;
 	}
 }
+
+std::vector<Sphere> WormEnemy::GetCollisionSpheres() const
+{
+	//頭と胴体の当たり判定を全部詰めて返す
+	std::vector<Sphere> spheres;
+	spheres.push_back(m_headSphere);
+	spheres.insert(spheres.end(), m_segmentSpheres.begin(), m_segmentSpheres.end());
+	return spheres;
+}

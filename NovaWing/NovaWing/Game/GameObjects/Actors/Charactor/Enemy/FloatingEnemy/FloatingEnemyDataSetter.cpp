@@ -8,6 +8,7 @@
 #include "CSVData/CSVData.h"
 #include "Utility/Vector3.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/FloatingEnemy/FloatingEnemy.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
 
 namespace
 {
@@ -15,13 +16,13 @@ namespace
     const wchar_t* const floating_csv_name = L"FloatingEnemyData";
 }
 
-std::vector<std::shared_ptr<FloatingEnemy>> FloatingEnemyDataSetter::CreateEnemy(
+std::vector<std::shared_ptr<EnemyBase>> FloatingEnemyDataSetter::CreateEnemy(
     std::weak_ptr<Player> pPlayer,
      std::weak_ptr<CameraBase> pCamera,
       std::weak_ptr<BulletManager> pBulletManager)
 {
     //最終的な返り値
-    std::vector<std::shared_ptr<FloatingEnemy>> pEnemies;
+    std::vector<std::shared_ptr<EnemyBase>> pEnemies;
 
     //CSVLoaderにCSVをロードさせる
     CSVDataLoader& loader = CSVDataLoader::GetInstance();

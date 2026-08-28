@@ -37,10 +37,8 @@ public:
 	void DrawWormBody();
 	
 	void TakeDamage(int damage) override;//ダメージを受ける
-	//頭の当たり判定(球)を取得
-	const Sphere& GetHeadSphere() const { return m_headSphere; }
-	//胴体の当たり判定(球)を取得
-	const std::vector<Sphere>& GetSegmentSpheres() const { return m_segmentSpheres; }
+	//当たり判定を返す
+	std::vector<Sphere> GetCollisionSpheres() const override;
 
 private:
 	//胴体の数

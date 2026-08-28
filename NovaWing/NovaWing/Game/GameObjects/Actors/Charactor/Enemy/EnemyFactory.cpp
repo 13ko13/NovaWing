@@ -57,7 +57,7 @@ std::shared_ptr<EnemyBase> EnemyFactory::Create(
 		}
 		if (m_pCollisionManager.lock() != nullptr)
 		{
-			m_pCollisionManager.lock()->RegisterFloatingEnemy(pFloating);
+			m_pCollisionManager.lock()->Register(pFloating);
 		}
 
 		return pFloating;
@@ -95,7 +95,7 @@ std::shared_ptr<EnemyBase> EnemyFactory::Create(
 		}
 		if (m_pCollisionManager.lock() != nullptr)
 		{
-			m_pCollisionManager.lock()->RegisterWormEnemy(pWorm);
+			m_pCollisionManager.lock()->Register(pWorm);
 		}
 
 		return pWorm;

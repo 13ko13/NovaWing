@@ -42,16 +42,9 @@ CollisionManager::~CollisionManager()
 
 }
 
-void CollisionManager::RegisterFloatingEnemy(std::shared_ptr<FloatingEnemy> pEnemy)
+void CollisionManager::Register(std::shared_ptr<EnemyBase> pEnemy)
 {
-	//敵の配列に渡された敵を格納
-	m_pFloatingEnemies.push_back(pEnemy);
-}
-
-void CollisionManager::RegisterWormEnemy(std::shared_ptr<WormEnemy> pEnemy)
-{
-	//敵の配列に渡された敵を格納
-	m_pWormEnemies.push_back(pEnemy);
+	m_pEnemies.push_back(pEnemy);
 }
 
 void CollisionManager::RegisterRock(std::shared_ptr<Rock> pRock)
@@ -120,46 +113,32 @@ void CollisionManager::Update()
 	sharedAllBullets.insert(sharedAllBullets.end(), sharedChargeBullets.begin(), sharedChargeBullets.end());
 
 	//敵も同様にshared_ptrに変換
-	std::vector<std::shared_ptr<FloatingEnemy>> pSharedEnemies;//浮遊敵
-	for (std::weak_ptr<FloatingEnemy> pWeakEnemy : m_pFloatingEnemies)
+	//敵をすべてshared_ptrに変換
+	std::vector<std::shared_ptr<EnemyBase>> pSharedEnemies;
+	for (std::weak_ptr<EnemyBase> pWeakEnemy : m_pEnemies)
 	{
-		//shared_ptrに変換
-		std::shared_ptr<FloatingEnemy> pSharedEnemy = pWeakEnemy.lock();
-		//nullチェック
+		std::shared_ptr<EnemyBase> pSharedEnemy = pWeakEnemy.lock();
 		if (!pSharedEnemy) continue;
-		//変換したものを格納
 		pSharedEnemies.push_back(pSharedEnemy);
 	}
-	std::vector<std::shared_ptr<WormEnemy>> pSharedWormEnemies;//ワームエネミー
-	for (std::weak_ptr<WormEnemy> pWeakWormEnemy : m_pWormEnemies)
-	{
-		//shared_ptrに変換
-		std::shared_ptr<WormEnemy> pSharedWormEnemy = pWeakWormEnemy.lock();
-		//nullチェック
-		if (!pSharedWormEnemy) continue;
-		//変換したものを格納
-		pSharedWormEnemies.push_back(pSharedWormEnemy);
-	}
 
-	//全ての浮遊敵とプレイヤーの弾が当たっているか
-	for (std::shared_ptr<FloatingEnemy> pEnemy : pSharedEnemies)
+	//全ての敵とプレイヤーの弾が当たっているか
+	for (std::shared_ptr<EnemyBase> pEnemy : pSharedEnemies)
 	{
-		//もしその敵が死んでいるなら処理をせずに次の敵の処理に移る
 		if (pEnemy->IsDead()) continue;
 
-		//全ての弾をループで見る
-		for (std::shared_ptr<BulletBase> pPlayerBullet : sharedAllBullets)
+		//その敵が持つ当たり判定球すべてをチェック
+		std::vector<Sphere> enemyCols = pEnemy->GetCollisionSpheres();
+		for (Sphere& enemyCol : enemyCols)
 		{
-			Sphere enemyCol = pEnemy->GetSphere();//敵の球
-			Sphere bulletCol = pPlayerBullet->GetSphere();
-
-			//当たっていたら
-			if (enemyCol.HitCollision(bulletCol))
+			for (std::shared_ptr<BulletBase> pPlayerBullet : sharedAllBullets)
 			{
-				//弾の攻撃力分、敵のHPを減らす
-				pEnemy->TakeDamage(pPlayerBullet->GetAttackPower());
-				//敵に当たったときのプレイヤー弾の処理
-				pPlayerBullet->OnHitEnemy();
+				Sphere bulletCol = pPlayerBullet->GetSphere();
+				if (enemyCol.HitCollision(bulletCol))
+				{
+					pEnemy->TakeDamage(pPlayerBullet->GetAttackPower());
+					pPlayerBullet->OnHitEnemy();
+				}
 			}
 		}
 	}
@@ -183,28 +162,6 @@ void CollisionManager::Update()
 			pEnemyBullet->OnHitEnemy();
 			//カメラを揺らす
 			sharedCamera->OnShake(shake_power, shake_frame);
-		}
-	}
-
-	//プレイヤーの弾とワームエネミーの頭の
-	//当たり判定が当たっているかを一つずつ調べる
-	for (std::shared_ptr<WormEnemy> pWormEnemy : pSharedWormEnemies)
-	{
-		//もしその敵が死んでいるなら処理をせずに次の敵の処理に移る
-		if (pWormEnemy->IsDead()) continue;
-		//全ての弾をループで見る
-		for (std::shared_ptr<BulletBase> pPlayerBullet : sharedAllBullets)
-		{
-			Sphere wormHeadCol = pWormEnemy->GetHeadSphere();//ワームエネミーの頭の球
-			Sphere bulletCol = pPlayerBullet->GetSphere();
-			//当たっていたら
-			if (wormHeadCol.HitCollision(bulletCol))
-			{
-				//弾の攻撃力分、敵のHPを減らす
-				pWormEnemy->TakeDamage(pPlayerBullet->GetAttackPower());
-				//敵に当たったときのプレイヤー弾の処理
-				pPlayerBullet->OnHitEnemy();
-			}
 		}
 	}
 
@@ -276,27 +233,18 @@ void CollisionManager::Update()
 	//多重ヒットを起こさないために
 	//プレイヤーがダメージをすでに食らっていれば処理を行わない
 
-	for (std::shared_ptr<WormEnemy> pWormEnemy : pSharedWormEnemies)
+	for (std::shared_ptr<EnemyBase> pEnemy : pSharedEnemies)
 	{
-		//もしその敵が死んでいるなら処理をせずに次の敵の処理に移る
+		std::shared_ptr<WormEnemy> pWormEnemy = std::dynamic_pointer_cast<WormEnemy>(pEnemy);
+		if (pWormEnemy == nullptr) continue;  //ワーム以外はスキップ
 		if (pWormEnemy->IsDead()) continue;
 		//プレイヤーの当たり判定を取得
 		Sphere playerCol = pPlayer->GetSphere();
 		//ワームエネミーの頭の当たり判定を取得
-		Sphere wormHeadCol = pWormEnemy->GetHeadSphere();
-		if (playerCol.HitCollision(wormHeadCol))
+		std::vector<Sphere> wormColliders = pWormEnemy->GetCollisionSpheres();
+		for (auto& wormCollider : wormColliders)
 		{
-			//食らっていなければプレイヤーのHPを減らす
-			pPlayer->TakeDamage(worm_contact_damage);
-			//カメラを揺らす
-			sharedCamera->OnShake(shake_power, shake_frame);
-		}
-
-		//胴体の当たり判定を取得
-		const std::vector<Sphere>& segmentSpheres = pWormEnemy->GetSegmentSpheres();
-		for (const Sphere& segmentSphere : segmentSpheres)
-		{
-			if (playerCol.HitCollision(segmentSphere))
+			if (playerCol.HitCollision(wormCollider))
 			{
 				//食らっていなければプレイヤーのHPを減らす
 				pPlayer->TakeDamage(worm_contact_damage);
@@ -340,23 +288,13 @@ void CollisionManager::Update()
 		}
 	}
 
-	//死んでいるものは配列から消す
-	m_pFloatingEnemies.erase(
-	std::remove_if(m_pFloatingEnemies.begin(), m_pFloatingEnemies.end(),
-		[](const std::weak_ptr<FloatingEnemy>& pEnemy)
+	//死んでいる敵は配列から消す
+	m_pEnemies.erase(
+	std::remove_if(m_pEnemies.begin(), m_pEnemies.end(),
+		[](const std::weak_ptr<EnemyBase>& pEnemy)
 		{
 			return pEnemy.lock() == nullptr;
 		}),
-	m_pFloatingEnemies.end()
-	);
-
-	//死んでいるものは配列から消す
-	m_pWormEnemies.erase(
-	std::remove_if(m_pWormEnemies.begin(), m_pWormEnemies.end(),
-		[](const std::weak_ptr<WormEnemy>& pEnemy)
-		{
-			return pEnemy.lock() == nullptr;
-		}),
-	m_pWormEnemies.end()
+	m_pEnemies.end()
 	);
 }
