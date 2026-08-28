@@ -9,6 +9,7 @@
 #include "Main/Application.h"
 #include "Utility/GraphShaderDraw.h"
 #include "Constants/ShaderRegister.h"
+#include "Manager/SoundManager.h"
 
 namespace
 {
@@ -97,6 +98,9 @@ namespace
 
 	//カーソルが乗った時に何秒で画像を切り替えるか
 	constexpr int wipe_max = 15;
+
+	//スコア加算音を鳴らせる間隔
+	constexpr int score_count_sound_interval = 5;
 }
 
 ClearScene::ClearScene(SceneController& controller, const ClearResultData& data) :
@@ -115,6 +119,13 @@ ClearScene::~ClearScene()
 
 void ClearScene::Init()
 {
+	//サウンドマネージャーの初期化
+	m_pSoundManager = std::make_shared<SoundManager>();
+	m_pSoundManager->Init();
+
+	//リザルトBGMを鳴らす
+	m_pSoundManager->Play(SoundManager::SoundType::ResultBGM, true);
+
 	//グリッチシェーダのロード
 	m_glitchPSH = LoadPixelShader(L"GlitchPS.pso");
 
@@ -153,10 +164,19 @@ void ClearScene::Update()
 	m_pCBuffGlitchData->time = m_frame * time_speed;//シェーダ用のフレームに変換して渡す
 	UpdateShaderConstantBuffer(m_cbufferGlitch);
 
+	//サウンドマネージャーの更新
+	m_pSoundManager->Update();
+
 	//テンプレートの開く演出用のフレーム更新
 	if (!m_controller.GetFade().IsFading() &&
 		!m_isPushNextButton)
 	{
+		//開き始めた瞬間にカーテン演出音を鳴らす
+		if (m_templeteOpenFrame == 0)
+		{
+			m_pSoundManager->Play(SoundManager::SoundType::DataAppear);
+		}
+
 		m_templeteOpenFrame++;
 		if (m_templeteOpenFrame > templete_opne_max_frame)
 		{
@@ -229,6 +249,17 @@ void ClearScene::Update()
 			m_isLerpFinished = true;
 		}
 
+		//lerpがまだ終わっていない間、クールタイムを設けてスコア加算音を鳴らす
+		if (!m_isLerpFinished)
+		{
+			m_scoreCountSoundCT++;
+			if (m_scoreCountSoundCT >= score_count_sound_interval)
+			{
+				m_pSoundManager->Play(SoundManager::SoundType::ScoreCount);
+				m_scoreCountSoundCT = 0;
+			}
+		}
+
 		//新しくlerpによって完成した値をもとにオフスクリーンに描画しておく
 		//リザルト情報を描画
 		int fontHandle = ResourceLoader::GetInstance().GetFont(
@@ -244,6 +275,9 @@ void ClearScene::Update()
 		{
 			//次へボタンが押されたという情報を持つ
 			m_isPushNextButton = true;
+
+			//次へボタンの音を鳴らす
+			m_pSoundManager->Play(SoundManager::SoundType::Decision);
 		}
 		//次へボタンが押されていたら
 		if (m_isPushNextButton)
@@ -262,7 +296,7 @@ void ClearScene::Update()
 				m_backGroundOpenFrame = background_opne_max_frame;
 			}
 
-			//下入力で選択肢を下に移動(indexを増やす) 
+			//下入力で選択肢を下に移動(indexを増やす)
 			if (input.IsTriggered(InputEvent::down))
 			{
 				//選択肢の最大数で割った余りを取ることで、
@@ -271,6 +305,8 @@ void ClearScene::Update()
 					static_cast<ClearSelect>(
 						(static_cast<int>(m_selectIndex) + 1) %
 						static_cast<int>(ClearSelect::SelectMax));
+				//選択音を鳴らす
+				m_pSoundManager->Play(SoundManager::SoundType::OnCursor);
 			}
 			//上入力で選択肢を上に移動(indexを減らす)
 			if (input.IsTriggered(InputEvent::up))
@@ -281,12 +317,17 @@ void ClearScene::Update()
 					static_cast<ClearSelect>(
 						(static_cast<int>(m_selectIndex) - 1 + static_cast<int>(ClearSelect::SelectMax)) %
 						static_cast<int>(ClearSelect::SelectMax));
+				//選択音を鳴らす
+				m_pSoundManager->Play(SoundManager::SoundType::OnCursor);
 			}
 			//決定入力で選択肢を決定する
 			//背景が開ききっているときだけ決定入力を受け付ける
 			if (m_backGroundOpenFrame >= background_opne_max_frame &&
 				input.IsTriggered(InputEvent::ok))
 			{
+				//決定音を鳴らす
+				m_pSoundManager->Play(SoundManager::SoundType::Decision);
+
 				switch (m_selectIndex)
 				{
 				case ClearSelect::ReTry:

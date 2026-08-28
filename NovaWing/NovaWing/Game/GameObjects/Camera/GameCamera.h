@@ -31,6 +31,9 @@ public:
 	//現在揺れているかを返す
 	bool IsShake() const { return m_isShake; }
 
+	//現在ズーム中かを返す
+	bool IsZoom() const { return m_zoomSpeed > 0.0f; }
+
 private:
 	/// <summary>
 	/// 揺れの更新

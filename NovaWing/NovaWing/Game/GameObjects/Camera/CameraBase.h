@@ -37,6 +37,9 @@ public:
 	//カメラの視野角とNear、Farを再設定する(シェーダー用)
 	void SetUpCamera();
 
+	//カメラのFar距離を取得
+	float GetFarClip() const;
+
 private:
 
 protected:

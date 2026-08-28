@@ -19,12 +19,14 @@ EnemyFactory::EnemyFactory(
 		std::weak_ptr<BulletManager> pBulletManager,
 		std::weak_ptr<CameraBase> pCamera,
 		std::weak_ptr<TargetManager> pTargetManager,
-		std::weak_ptr<CollisionManager> pCollisionManager) :
+		std::weak_ptr<CollisionManager> pCollisionManager,
+		std::weak_ptr<SoundManager> pSoundManager) :
 	m_pPlayer(pPlayer),
 	m_pBulletManager(pBulletManager),
 	m_pCamera(pCamera),
 	m_pTargetManager(pTargetManager),
-	m_pCollisionManager(pCollisionManager)
+	m_pCollisionManager(pCollisionManager),
+	m_pSoundManager(pSoundManager)
 {
 }
 
@@ -47,7 +49,8 @@ std::shared_ptr<EnemyBase> EnemyFactory::Create(
 			m_pBulletManager,
 			m_pCamera,
 			pos,
-			floating_enemy_hp
+			floating_enemy_hp,
+			m_pSoundManager
 		);
 		pFloating->Init();//初期化
 		//ターゲットマネージャーと当たり判定マネージャーに登録
@@ -85,7 +88,8 @@ std::shared_ptr<EnemyBase> EnemyFactory::Create(
 			m_pPlayer,
 			m_pBulletManager,
 			m_pCamera,
-			data
+			data,
+			m_pSoundManager
 		);
 		pWorm->Init();//初期化
 		//ターゲットマネージャーと当たり判定マネージャーに登録

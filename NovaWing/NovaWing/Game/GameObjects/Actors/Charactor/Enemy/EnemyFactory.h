@@ -9,6 +9,7 @@ struct Vector3;
 class EnemyBase;
 class TargetManager;
 class CollisionManager;
+class SoundManager;
 class EnemyFactory
 {
 public:
@@ -16,7 +17,8 @@ public:
 		std::weak_ptr<BulletManager> pBulletManager,
 		std::weak_ptr<CameraBase> pCamera,
 		std::weak_ptr<TargetManager> pTargetManager,
-		std::weak_ptr<CollisionManager> pCollisionManager
+		std::weak_ptr<CollisionManager> pCollisionManager,
+		std::weak_ptr<SoundManager> pSoundManager
 	);
 
 	~EnemyFactory();
@@ -41,4 +43,5 @@ private:
 	std::weak_ptr<CameraBase> m_pCamera;
 	std::weak_ptr<TargetManager> m_pTargetManager;
 	std::weak_ptr<CollisionManager> m_pCollisionManager;
+	std::weak_ptr<SoundManager> m_pSoundManager;
 };

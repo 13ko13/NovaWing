@@ -165,8 +165,8 @@ void ChargeShootState::Enter()
 
 	pPlayer->SetChargingEffectHandle(m_chargingPlayEffectH);
 
-	// チャージ中の音をループ再生する
-	m_pSoundManager.lock()->Play(SoundManager::SoundType::Charging, true);
+	// チャージ中の音を鳴らす
+	m_pSoundManager.lock()->Play(SoundManager::SoundType::Charging, false);
 
 	// 位置を設定(プレイヤーの位置)
 	Vector3 playerPos = pPlayer->GetPos();

@@ -14,7 +14,8 @@ namespace
 std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
         std::weak_ptr<Player> pPlayer,
         std::weak_ptr<CameraBase> pCamera,
-        std::weak_ptr<BulletManager> pBulletManager
+        std::weak_ptr<BulletManager> pBulletManager,
+        std::weak_ptr<SoundManager> pSoundManager
 )
 {
     std::shared_ptr<BossEnemy> pEnemy;
@@ -52,6 +53,7 @@ std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
         bossData.pos = pos;
         bossData.pPlayer = pPlayer;
         bossData.health = hp;
+        bossData.pSoundManager = pSoundManager;
 
         //その位置と、pCameraで敵を一つ作成する
         pEnemy = std::make_shared<BossEnemy>(bossData);

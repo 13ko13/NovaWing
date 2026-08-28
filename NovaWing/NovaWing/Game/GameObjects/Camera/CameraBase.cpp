@@ -81,3 +81,8 @@ void CameraBase::SetUpCamera()
 	// 位置も設定
 	SetCameraPositionAndTarget_UpVecY(m_pos.ToDxLib(), m_targetPos.ToDxLib());
 }
+
+float CameraBase::GetFarClip() const
+{
+	return camera_far;
+}

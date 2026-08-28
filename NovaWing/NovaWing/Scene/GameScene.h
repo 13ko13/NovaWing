@@ -40,6 +40,10 @@ private:
 
 	//ボスが出現したか
 	bool m_isApearBoss = false;
+	//ボスBGMに切り替え済みか
+	bool m_isChangedToBossBGM = false;
+	//ボス死亡時のBGMフェードアウト済みか
+	bool m_isBossDeathBGMFadeOut = false;
 
 	//ボス登場時の演出ステート
 	enum class BossApearState

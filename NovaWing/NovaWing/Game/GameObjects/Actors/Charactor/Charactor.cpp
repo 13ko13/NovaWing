@@ -33,4 +33,23 @@ int Charactor::GetMaxHealth() const
 	return m_maxHealth;
 }
 
+bool Charactor::IsTakingDamageFrom(const DamageSource& source) const
+{
+	//setの中に同じ値があるかを探す
+	//みつからなければend()を返す
+	return m_damageSources.find(source) != m_damageSources.end();
+}
+
+void Charactor::StartTakingDamage(const DamageSource& source)
+{
+	//setに追加する
+	m_damageSources.insert(source);
+}
+
+void Charactor::OnLeaveDamaging(const DamageSource& source)
+{
+	//setから削除する
+	m_damageSources.erase(source);
+}
+
 

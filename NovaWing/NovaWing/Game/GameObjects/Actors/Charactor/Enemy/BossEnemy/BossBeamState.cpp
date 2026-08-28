@@ -4,6 +4,7 @@
 
 #include "BossBeamState.h"
 #include "Manager/ResourceLoader.h"
+#include "Manager/SoundManager.h"
 #include "BossEnemy.h"
 #include "Game/GameObjects/Actors/Charactor/Player/Player.h"
 #include "BossIdleState.h"
@@ -57,6 +58,9 @@ BossBeamState::~BossBeamState()
 
 void BossBeamState::Enter()
 {
+	//ビーム発射音を鳴らす
+	m_pBoss.lock()->GetSoundManager().lock()->Play(SoundManager::SoundType::BossBeam);
+
 	//ボスのモデルハンドル取得
 	int handle = m_pBoss.lock()->GetModelHandle();
 

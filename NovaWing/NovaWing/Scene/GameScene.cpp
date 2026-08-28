@@ -83,6 +83,12 @@ namespace
 
 	//ライトの方向
 	const Vector3 light_direction = Vector3(1.0f, -1.0f, 0.6f);
+
+	//地震音のフェードアウトにかける時間
+	constexpr float boss_quake_fade_out_time = 30.0f;
+
+	//ボス死亡待機状態になった時のBGMのフェードアウトにかける時間
+	constexpr float boss_death_bgm_fade_out_time = 30.0f;
 }
 
 GameScene::GameScene(SceneController& controller) :
@@ -116,11 +122,22 @@ void GameScene::Init()
 	//サウンドマネージャーの初期化
 	m_pSoundManager->Init();
 
+	//ゲームBGMを鳴らす
+	m_pSoundManager->Play(SoundManager::SoundType::GameBGM, true);
+
 	//プレイヤーを生成
 	m_pPlayer = std::make_shared<Player>(
 		m_pBulletManager, ResourceLoader::ModelID::Player,
-	std::weak_ptr<CameraBase>(),//カメラがまだ生成されていないので空のweak_ptrを渡す
-	m_pSoundManager);
+		std::weak_ptr<CameraBase>(),//カメラがまだ生成されていないので空のweak_ptrを渡す
+		m_pSoundManager);
+
+	//Initでターゲットマネージャーを必要とするので先に生成しておく
+	//ターゲットマネージャーの初期化
+	m_pTargetManager = std::make_shared<TargetManager>(m_pPlayer);
+
+	//プレイヤーにターゲットマネージャーをセットする
+	m_pPlayer->SetTargetManager(m_pTargetManager);
+
 	//プレイヤーの初期化処理
 	m_pPlayer->Init();
 
@@ -135,7 +152,8 @@ void GameScene::Init()
 	m_pBoss = BossEnemyDataSetter::CreateEnemy(
 		m_pPlayer,
 		m_pCamera,
-		m_pBulletManager);
+		m_pBulletManager,
+		m_pSoundManager);
 	m_pBoss->Init();
 
 	//衝突判定マネージャーの初期化
@@ -145,18 +163,14 @@ void GameScene::Init()
 		m_pCamera,
 		m_pBoss);
 
-	//ターゲットマネージャーの初期化
-	m_pTargetManager = std::make_shared<TargetManager>(m_pPlayer);
-	//プレイヤーにターゲットマネージャーをセットする
-	m_pPlayer->SetTargetManager(m_pTargetManager);
-
 	//敵生産工場の初期化
 	m_pEnemyFactory = std::make_shared<EnemyFactory>(
 		m_pPlayer,
 		m_pBulletManager,
 		m_pCamera,
 		m_pTargetManager,
-		m_pCollisionManager
+		m_pCollisionManager,
+		m_pSoundManager
 	);
 	//ボスに工場をセットする
 	m_pBoss->SetEnemyFactory(m_pEnemyFactory);
@@ -166,7 +180,8 @@ void GameScene::Init()
 	std::vector<std::shared_ptr<EnemyBase>> floatingEnemies = FloatingEnemyDataSetter::CreateEnemy(
 		m_pPlayer,
 		m_pCamera,
-		m_pBulletManager
+		m_pBulletManager,
+		m_pSoundManager
 	);
 	//それぞれの初期化
 	for (std::shared_ptr<EnemyBase> pEnemy : floatingEnemies)
@@ -184,7 +199,8 @@ void GameScene::Init()
 	std::vector<std::shared_ptr<EnemyBase>> wormEnemies = WormEnemyDataSetter::CreateEnemy(
 		m_pPlayer,
 		m_pCamera,
-		m_pBulletManager
+		m_pBulletManager,
+		m_pSoundManager
 	);
 	for (std::shared_ptr<EnemyBase> pEnemy : wormEnemies)
 	{
@@ -280,11 +296,14 @@ void GameScene::Update()
 			{
 			case BossApearState::None:
 				//スタート時ステートに遷移
+				m_pSoundManager->Stop(SoundManager::SoundType::GameBGM);
 				m_bossApearState = BossApearState::Start;
 				break;
 			case BossApearState::Start:
 				//カメラを揺らす(地震のように)
 				m_pCamera->OnShake(boss_appear_shake_power, boss_appear_shake_frame);
+				//地震音を鳴らす
+				m_pSoundManager->Play(SoundManager::SoundType::BossQuake);
 				//出現ステートに遷移
 				m_bossApearState = BossApearState::Apear;
 				break;
@@ -304,6 +323,8 @@ void GameScene::Update()
 					//ボスの最初の着地が完了していたら
 					if (m_pBoss->IsFirstLanding())
 					{
+						//揺れのステートを抜けるので、地震音が鳴っていればフェードアウトする
+						m_pSoundManager->FadeOut(SoundManager::SoundType::BossQuake, boss_quake_fade_out_time);
 						m_bossApearState = BossApearState::Landing;
 					}
 				}
@@ -338,14 +359,21 @@ void GameScene::Update()
 				break;
 			}
 		}
-	}
 
-	//プレイヤーが死んだらゲームオーバーシーンに遷移する
-	if (m_pPlayer->IsDead())
-	{
-		m_controller.ChangeScene(
-			std::make_shared<GameoverScene>(
-				m_controller), frame_per_second);
+		//ボスが出現していて、まだボスBGMに切り替えていない場合
+		//カメラのズームが終わったタイミングでボスBGMに切り替える
+		if (m_isApearBoss && !m_isChangedToBossBGM && !m_pCamera->IsZoom())
+		{
+			m_pSoundManager->Play(SoundManager::SoundType::BossBGM, true);
+			m_isChangedToBossBGM = true;
+		}
+
+		//ボスが死亡待機状態になった瞬間、一度だけBGMをフェードアウトする
+		if (m_pBoss->IsDying() && !m_isBossDeathBGMFadeOut)
+		{
+			m_pSoundManager->FadeOut(SoundManager::SoundType::BossBGM, boss_death_bgm_fade_out_time);
+			m_isBossDeathBGMFadeOut = true;
+		}
 	}
 
 	//ボスを倒したらクリアにする

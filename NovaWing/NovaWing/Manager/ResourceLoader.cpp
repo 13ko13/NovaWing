@@ -531,6 +531,74 @@ void ResourceLoader::KeepSound()
 	handle = LoadSoundMem(somersoult_se_path);
 	assert(handle >= 0);
 	m_soundHandles[ResourceLoader::SoundID::Somersoult] = handle;
+
+	//ボスの着地音
+	handle = LoadSoundMem(boss_move_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::BossMove] = handle;
+	//ボスのビーム発射音
+	handle = LoadSoundMem(boss_beam_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::BossBeam] = handle;
+	//ボスの雑魚召喚音
+	handle = LoadSoundMem(boss_summon_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::BossSummon] = handle;
+	//ボスの無敵シールド被弾音
+	handle = LoadSoundMem(boss_recovery_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::BossRecovery] = handle;
+	//ボスの被弾音
+	handle = LoadSoundMem(boss_damage_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::BossDamage] = handle;
+	//ボスの死亡音
+	handle = LoadSoundMem(boss_death_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::BossDeath] = handle;
+	//ボス出現前の地震音
+	handle = LoadSoundMem(boss_quake_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::BossQuake] = handle;
+
+	//浮遊敵・ワームエネミー共通の死亡音
+	handle = LoadSoundMem(enemy_death_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::EnemyDeath] = handle;
+	//浮遊敵・ワームエネミー共通の弾発射音
+	handle = LoadSoundMem(enemy_shoot_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::EnemyShoot] = handle;
+	//浮遊敵がactiveになるときの音
+	handle = LoadSoundMem(enemy_boot_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::EnemyBoot] = handle;
+	//ワームエネミーの移動音
+	handle = LoadSoundMem(worm_move_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::WormMove] = handle;
+
+	//ゲームBGM
+	handle = LoadSoundMem(game_bgm_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::GameBGM] = handle;
+	//ボスBGM
+	handle = LoadSoundMem(boss_bgm_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::BossBGM] = handle;
+
+	//リザルトBGM
+	handle = LoadSoundMem(result_bgm_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::ResultBGM] = handle;
+	//リザルトのカーテン演出音
+	handle = LoadSoundMem(data_appear_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::DataAppear] = handle;
+	//リザルトのスコア加算音
+	handle = LoadSoundMem(score_count_se_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::ScoreCount] = handle;
 }
 
 void ResourceLoader::KeepFont()

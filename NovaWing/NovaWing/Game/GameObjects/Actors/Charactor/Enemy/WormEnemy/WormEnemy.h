@@ -9,6 +9,7 @@
 class Player;
 class BulletManager;
 class CameraBase;
+class SoundManager;
 class WormEnemy : public EnemyBase
 {
 public:
@@ -25,7 +26,8 @@ public:
 	WormEnemy(const std::weak_ptr<Player> pPlayer,//プレイヤー
 		const std::weak_ptr<BulletManager> pBulletManager,//バレットマネージャー
 		std::weak_ptr<CameraBase> camera,//カメラ
-		const WormEnemyData& data//ワームエネミーに必要なデータ
+		const WormEnemyData& data,//ワームエネミーに必要なデータ
+		std::weak_ptr<SoundManager> pSoundManager
 	);
 	~WormEnemy();
 
@@ -68,5 +70,8 @@ private:
 	Vector2 m_spiralCenter;
 	//プレイヤーがどの位置(Z)まで来たら動き出すか
 	float m_activatePlayerZ = 0.0f;
+
+	//音のマネージャー
+	std::weak_ptr<SoundManager> m_pSoundManager;
 };
 

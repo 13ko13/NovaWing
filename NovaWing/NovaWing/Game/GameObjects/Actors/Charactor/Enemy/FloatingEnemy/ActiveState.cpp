@@ -5,6 +5,7 @@
 #include "FloatingEnemy.h"
 #include "LeaveState.h"
 #include "Manager/BulletManager.h"
+#include "Manager/SoundManager.h"
 
 namespace
 {
@@ -35,7 +36,8 @@ ActiveState::~ActiveState()
 
 void ActiveState::Enter()
 {
-
+	//activeになった音を鳴らす
+	m_pEnemy.lock()->GetSoundManager().lock()->Play(SoundManager::SoundType::EnemyBoot);
 }
 
 void ActiveState::Update()
@@ -81,6 +83,9 @@ void ActiveState::Update()
 		pBulletManager->CreateBullet(
 			BulletManager::BulletType::EnemyBullet,//敵の弾
 			shootPos, shootVel, bullet_power);//発射位置と速度と攻撃力
+
+		//発射音を鳴らす
+		pEnemy->GetSoundManager().lock()->Play(SoundManager::SoundType::EnemyShoot);
 	}
 
 	//Activeの時間が終了したら戦闘離脱ステートに遷移

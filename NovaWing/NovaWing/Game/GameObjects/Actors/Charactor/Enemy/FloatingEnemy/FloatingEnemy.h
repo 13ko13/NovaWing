@@ -8,6 +8,7 @@ class Player;
 class IFloatingEnemyState;
 class BulletManager;
 class CameraBase;
+class SoundManager;
 class FloatingEnemy : public EnemyBase
 {
 public:
@@ -16,7 +17,8 @@ public:
 		const std::weak_ptr<BulletManager> pBulletManager,
 		std::weak_ptr<CameraBase> camera,
 		const Vector3& pos,
-		int health);
+		int health,
+		std::weak_ptr<SoundManager> pSoundManager);
 	~FloatingEnemy();
 
 	void OnInit() override;//初期化処理
@@ -44,6 +46,9 @@ public:
 	//当たり判定を返す
 	std::vector<Sphere> GetCollisionSpheres() const override;
 
+	//サウンドマネージャー取得
+	std::weak_ptr<SoundManager> GetSoundManager() const { return m_pSoundManager; }
+
 private:
 	//敵の描画(シェーダ適応も含めた)
 	void DrawEnemy();
@@ -61,4 +66,7 @@ private:
 
 	//死亡状態中のフレーム計測
 	int m_dyingFrame = 0;
+
+	//音のマネージャー
+	std::weak_ptr<SoundManager> m_pSoundManager;
 };

@@ -1,8 +1,10 @@
 ﻿#pragma once
 #include <array>
+#include <memory>
 
 #include "Scene.h"
 
+class SoundManager;
 class GameoverScene : public Scene
 {
 public:
@@ -47,4 +49,7 @@ private:
 
 	//選択肢背景のカーテン演出のためのフレーム
 	int m_backGroundOpenFrame = 0;
+
+	//サウンドマネージャー
+	std::shared_ptr<SoundManager> m_pSoundManager;
 };

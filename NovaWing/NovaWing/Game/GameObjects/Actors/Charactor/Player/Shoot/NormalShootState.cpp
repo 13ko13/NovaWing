@@ -13,7 +13,7 @@ namespace
 	// 攻撃力
 	constexpr int attack_power = 10;
 	// クールタイム
-	constexpr int cool_time = 10;
+	constexpr int cool_time = 5;
 
 	// チャージ開始とみなすときの長押しフレーム数
 	constexpr int charge_start_frame = 10;

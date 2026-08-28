@@ -4,6 +4,7 @@
 #include "Game/GameObjects/Actors/Charactor/Enemy/EnemyFactory.h"
 #include "BossIdleState.h"
 #include "Manager/ResourceLoader.h"
+#include "Manager/SoundManager.h"
 #include "BossEnemy.h"
 
 SummonState::SummonState(
@@ -25,6 +26,9 @@ SummonState::~SummonState()
 
 void SummonState::Enter()
 {
+	//召喚音を鳴らす
+	m_pBoss.lock()->GetSoundManager().lock()->Play(SoundManager::SoundType::BossSummon);
+
 	//浮遊敵とワームエネミーをランダムで召喚
 	//GetRandが0を含むので-1
 	int rand = GetRand(

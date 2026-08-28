@@ -157,6 +157,9 @@ void TitleScene::Init()
 
 	//ブースト音を鳴らす
 	m_pSoundManager->Play(SoundManager::SoundType::TitleBoost);
+
+	//BGMを最初からフェードインで鳴らし始める
+	m_pSoundManager->PlayFadeIn(SoundManager::SoundType::TitleBGM, 60.0f, true);
 }
 
 void TitleScene::Update()
@@ -219,11 +222,6 @@ void TitleScene::Update()
 			{
 				m_pSoundManager->Play(SoundManager::SoundType::TitleLogoImpact);
 			}
-			//演出が終ってからBGMを鳴らし始める
-			if (m_titleLogoFrame == logo_max_frame)
-			{
-				m_pSoundManager->PlayFadeIn(SoundManager::SoundType::TitleBGM,60.0f,true);
-			}
 		}
 		if (select_max_frame > m_selectFadeFrame)
 		{
@@ -264,7 +262,7 @@ void TitleScene::Update()
 		if (input.IsTriggered(InputEvent::ok))
 		{
 			//決定音
-			m_pSoundManager->Play(SoundManager::SoundType::Decision);
+			m_pSoundManager->Play(SoundManager::SoundType::Decision,false,true);
 
 			switch (m_selectIndex)
 			{

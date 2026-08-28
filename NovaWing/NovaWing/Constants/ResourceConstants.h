@@ -163,4 +163,40 @@ namespace
 	constexpr const wchar_t* charge_complete_se_path = L"Data/Sounds/Game/Player/ChargeComplete.mp3";
 	//宙返り
 	constexpr const wchar_t* somersoult_se_path = L"Data/Sounds/Game/Player/Somersoult2.mp3";
+
+	//ボスの着地音
+	constexpr const wchar_t* boss_move_se_path = L"Data/Sounds/Game/Boss/BossMove.mp3";
+	//ボスのビーム発射音
+	constexpr const wchar_t* boss_beam_se_path = L"Data/Sounds/Game/Boss/BossBeam.mp3";
+	//ボスの雑魚召喚音
+	constexpr const wchar_t* boss_summon_se_path = L"Data/Sounds/Game/Boss/Summon.mp3";
+	//ボスの無敵シールド被弾音
+	constexpr const wchar_t* boss_recovery_se_path = L"Data/Sounds/Game/Boss/Recovery.mp3";
+	//ボスの被弾音
+	constexpr const wchar_t* boss_damage_se_path = L"Data/Sounds/Game/Boss/BossDamage.mp3";
+	//ボスの死亡音
+	constexpr const wchar_t* boss_death_se_path = L"Data/Sounds/Game/Boss/BossDeath.mp3";
+	//ボス出現前の地震音
+	constexpr const wchar_t* boss_quake_se_path = L"Data/Sounds/Game/Boss/Quake.mp3";
+
+	//浮遊敵・ワームエネミー共通の死亡音(爆発音)
+	constexpr const wchar_t* enemy_death_se_path = L"Data/Sounds/Game/EnemyDeath.mp3";
+	//浮遊敵・ワームエネミー共通の弾発射音
+	constexpr const wchar_t* enemy_shoot_se_path = L"Data/Sounds/Game/EnemyShoot.mp3";
+	//浮遊敵がactiveになるときの音
+	constexpr const wchar_t* enemy_boot_se_path = L"Data/Sounds/Game/Floating/EnemyBoot.mp3";
+	//ワームエネミーの移動音
+	constexpr const wchar_t* worm_move_se_path = L"Data/Sounds/Game/Worm/WormMove.mp3";
+
+	//ゲームBGM
+	constexpr const wchar_t* game_bgm_path = L"Data/Sounds/Game/GameBGM.mp3";
+	//ボスBGM
+	constexpr const wchar_t* boss_bgm_path = L"Data/Sounds/Game/BossBGM.mp3";
+
+	//リザルトBGM
+	constexpr const wchar_t* result_bgm_path = L"Data/Sounds/Result/ResultBGM.mp3";
+	//リザルトのカーテン演出音
+	constexpr const wchar_t* data_appear_se_path = L"Data/Sounds/Result/DataAppear.mp3";
+	//リザルトのスコア加算音
+	constexpr const wchar_t* score_count_se_path = L"Data/Sounds/Result/Score.mp3";
 }

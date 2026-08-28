@@ -1,8 +1,10 @@
 ﻿#pragma once
 #include <array>
+#include <memory>
 
 #include "Scene.h"
 
+class SoundManager;
 class ClearScene : public Scene
 {
 public:
@@ -84,4 +86,10 @@ private:
 
 	//次へボタンが押されたか
 	bool m_isPushNextButton = false;
+
+	//スコア加算音のクールタイム計測
+	int m_scoreCountSoundCT = 0;
+
+	//サウンドマネージャー
+	std::shared_ptr<SoundManager> m_pSoundManager;
 };

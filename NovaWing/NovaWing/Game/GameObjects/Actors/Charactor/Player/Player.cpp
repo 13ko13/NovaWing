@@ -425,7 +425,7 @@ void Player::TakeDamage(int damage)
 
 	//ダメージ音を鳴らす
 	std::shared_ptr<SoundManager> pSoundManager = m_pSoundManager.lock();
-	pSoundManager->Play(SoundManager::SoundType::PlayerDamage, false, true);
+	pSoundManager->Play(SoundManager::SoundType::PlayerDamage, false, false);
 
 	// HP0以下になったら死亡処理を行う
 	if (m_health <= 0)

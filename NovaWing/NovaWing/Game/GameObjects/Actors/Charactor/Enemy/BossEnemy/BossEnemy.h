@@ -8,6 +8,7 @@ class Player;
 class BulletManager;
 class IBossEnemyState;
 class EnemyFactory;
+class SoundManager;
 class BossEnemy : public EnemyBase
 {
 public:
@@ -18,6 +19,7 @@ public:
 		ResourceLoader::ModelID Id = ResourceLoader::ModelID::None;
 		std::weak_ptr<BulletManager> pBulletManager;
 		std::weak_ptr<CameraBase> pCamera;
+		std::weak_ptr<SoundManager> pSoundManager;
 		Vector3 pos;
 		int health = 0;
 	};
@@ -68,6 +70,9 @@ public:
 	//ボスの無敵部分に当たった時の処理
 	void OnHitInvincibleCol(const Position3& effectPos, const int attackPower);
 
+	//サウンドマネージャー取得
+	std::weak_ptr<SoundManager> GetSoundManager() const { return m_pSoundManager; }
+
 private:
 	//敵の描画(シェーダ適応も含めた)
 	void DrawEnemy();
@@ -101,6 +106,8 @@ private:
 	std::shared_ptr<IBossEnemyState> m_pState;
 	//敵生産工場
 	std::weak_ptr<EnemyFactory> m_pEnemyFactory;
+	//音のマネージャー
+	std::weak_ptr<SoundManager> m_pSoundManager;
 
 	//プレイヤーの弾が当たった時に、無敵判定する部分
 	Sphere m_invincibleHitCol;
@@ -121,4 +128,7 @@ private:
 
 	//死亡待機状態をどのぐらい続けるかを計測
 	int m_dyingFrame = 0;
+
+	//足音のクールタイム計測
+	int m_footstepCT = 0;
 };

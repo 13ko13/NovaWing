@@ -198,6 +198,11 @@ void CollisionManager::Update()
 			pBoss->GetCurrentState());
 		if (beamState != nullptr)
 		{
+			//今フレームビームに当たっているか
+			bool isHitBeam = false;
+			//ダメージ源の情報作成
+			DamageSource source = {DamageSourceType::Beam,pBoss->GetID()};
+
 			//ボスのビームとプレイヤーの当たり判定
 			//ビームのすべての球を取得
 			std::vector<Sphere> spheresL = pBoss->GetBeamSphereL();
@@ -209,10 +214,16 @@ void CollisionManager::Update()
 			{
 				if (playerCol.HitCollision(sphereL))
 				{
+					//当たったことを記録
+					isHitBeam = true;
+					//既にこのビームに当たっている場合は処理を行わない
+					if (pPlayer->IsTakingDamageFrom(source)) continue;
 					//プレイヤー被弾
 					pPlayer->TakeDamage(beamState->GetBeamDamage());
 					//カメラを揺らす
 					sharedCamera->OnShake(shake_power, shake_frame);
+					//このビームに当たったことを記録する
+					pPlayer->StartTakingDamage(source);
 				}
 			}
 			//右のビームとプレイヤー
@@ -220,11 +231,23 @@ void CollisionManager::Update()
 			{
 				if (playerCol.HitCollision(sphereR))
 				{
+					//当たったことを記録
+					isHitBeam = true;
+					//既にこのビームに当たっている場合は処理を行わない
+					if (pPlayer->IsTakingDamageFrom(source)) continue;
 					//プレイヤー被弾
 					pPlayer->TakeDamage(beamState->GetBeamDamage());
 					//カメラを揺らす
 					sharedCamera->OnShake(shake_power, shake_frame);
+					//このビームに当たったことを記録する
+					pPlayer->StartTakingDamage(source);
 				}
+			}
+
+			//もしビームに当たっていなければ、離れたことを記録する
+			if (!isHitBeam)
+			{
+				pPlayer->OnLeaveDamaging(source);
 			}
 		}
 	}
@@ -232,25 +255,44 @@ void CollisionManager::Update()
 	//プレイヤーとワームの頭、胴体の当たり判定が当たっているかを一つずつ調べる
 	//多重ヒットを起こさないために
 	//プレイヤーがダメージをすでに食らっていれば処理を行わない
-
 	for (std::shared_ptr<EnemyBase> pEnemy : pSharedEnemies)
 	{
 		std::shared_ptr<WormEnemy> pWormEnemy = std::dynamic_pointer_cast<WormEnemy>(pEnemy);
 		if (pWormEnemy == nullptr) continue;  //ワーム以外はスキップ
 		if (pWormEnemy->IsDead()) continue;
+
+		//今フレームこのワームと当たっているか
+		bool isHitThisWorm = false;
+
 		//プレイヤーの当たり判定を取得
 		Sphere playerCol = pPlayer->GetSphere();
+		//ダメージ源の情報を作成
+		DamageSource source = { DamageSourceType::Worm,pWormEnemy->GetID() };
+
 		//ワームエネミーの頭の当たり判定を取得
 		std::vector<Sphere> wormColliders = pWormEnemy->GetCollisionSpheres();
 		for (auto& wormCollider : wormColliders)
 		{
 			if (playerCol.HitCollision(wormCollider))
 			{
+				//当たったことを記録
+				isHitThisWorm = true;
+
+				//既にこのワームに当たっている場合は処理を行わない
+				if (pPlayer->IsTakingDamageFrom(source)) continue;
+
 				//食らっていなければプレイヤーのHPを減らす
 				pPlayer->TakeDamage(worm_contact_damage);
 				//カメラを揺らす
 				sharedCamera->OnShake(shake_power, shake_frame);
+				//このワームに当たったことを記録する
+				pPlayer->StartTakingDamage(source);
 			}
+		}
+		//もしこのワームに当たっていなければ、離れたことを記録する
+		if (!isHitThisWorm)
+		{
+			pPlayer->OnLeaveDamaging(source);
 		}
 	}
 
@@ -273,18 +315,37 @@ void CollisionManager::Update()
 		//岩の当たり判定を取得
 		std::vector<Sphere> rockCollisions = pRock->GetSpheres();
 
+		//ダメージ源の情報を作成
+		DamageSource source = { DamageSourceType::Rock,pRock->GetID() };
+
+		//今フレーム、この岩に当たっているか
+		bool isHitThisRock = false;
+
 		//その岩の中のすべての球とプレイヤーの球が当たっているかを検出
 		for (Sphere& rockColl : rockCollisions)
 		{
 			//当たっていて、ダメージを食らっていないときのみダメージを食らうようにする
 			if (playerCol.HitCollision(rockColl))
 			{
+				//当たったことを記録
+				isHitThisRock = true;
+
+				//この岩にすでに当たっている場合は処理を行わない
+				if (pPlayer->IsTakingDamageFrom(source)) continue;
+
 				//一度当たったら離れるまで当たらないようにする
 				//プレイヤーのHPを減らす
 				pPlayer->TakeDamage(hit_rock_damage);
 				//カメラを揺らす
 				sharedCamera->OnShake(shake_power, shake_frame);
+				//この岩に当たったことを記録する
+				pPlayer->StartTakingDamage(source);
 			}
+		}
+		//もしこの岩に当たっていなければ、離れたことを記録する
+		if (!isHitThisRock)
+		{
+			pPlayer->OnLeaveDamaging(source);
 		}
 	}
 

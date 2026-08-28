@@ -6,6 +6,7 @@
 #include "Game/GameObjects/Actors/Charactor/Player/Player.h"
 #include "BossBeamState.h"
 #include "Manager/InputManager.h"
+#include "Manager/SoundManager.h"
 
 namespace
 {
@@ -44,6 +45,9 @@ namespace
 	//死亡待機状態から完全死亡になるまでの時間
 	constexpr int true_dead_frame = 60 * 5 + 30;
 
+	//死亡待機状態になってから死亡音を鳴らすまでのフレーム
+	constexpr int death_sound_delay_frame = 90;
+
 	//死亡エフェクトのオフセット
 	const Vector3 death_effect_offset = Vector3(0.0f, 1000.0f, 0.0f);
 
@@ -52,12 +56,16 @@ namespace
 
 	//回復するときに、食らったダメージの何割を回復するか
 	constexpr float recovery_rate = 0.4f;
+
+	//足音を鳴らす間隔
+	constexpr int footstep_interval = 49;
 }
 
 BossEnemy::BossEnemy(BossEnemyData& data) :
 	EnemyBase(data.Id, data.pCamera, data.pPlayer,
 	data.pBulletManager,data.health),
-	m_animator(m_modelHandle)
+	m_animator(m_modelHandle),
+	m_pSoundManager(data.pSoundManager)
 {
 	//位置を反映
 	SetPos(data.pos);
@@ -130,6 +138,12 @@ void BossEnemy::Update()
 	{
 		if (m_pos.m_y < water_y)
 		{
+			//まだ着地していなければ着地音を鳴らす
+			if (!m_isFirstLanding)
+			{
+				m_pSoundManager.lock()->Play(SoundManager::SoundType::BossMove);
+			}
+
 			//着地完了とする
 			m_isFirstLanding = true;
 		}
@@ -152,6 +166,15 @@ void BossEnemy::Update()
 			myVel.m_y = 0.0f;
 			myVel.m_x = 0.0f;
 			SetVel(myVel);
+
+			//足音のクールタイムを進める
+			m_footstepCT++;
+			//クールタイムが経過していたら足音を鳴らす
+			if (m_footstepCT >= footstep_interval)
+			{
+				m_pSoundManager.lock()->Play(SoundManager::SoundType::BossMove);
+				m_footstepCT = 0;
+			}
 
 			//ステートの更新
 			m_pState->Update();
@@ -186,6 +209,13 @@ void BossEnemy::Update()
 	else
 	{
 		m_dyingFrame++;
+
+		//死亡待機状態になってから一定フレーム経ったら死亡音を鳴らす
+		if (m_dyingFrame == death_sound_delay_frame)
+		{
+			m_pSoundManager.lock()->Play(SoundManager::SoundType::BossDeath);
+		}
+
 		if (m_dyingFrame > true_dead_frame)
 		{
 			//完全死亡
@@ -283,8 +313,12 @@ void BossEnemy::TakeDamage(int damage)
 	// HPを減らす
 	m_health -= damage;
 
+	//被弾音を鳴らす
+	m_pSoundManager.lock()->Play(SoundManager::SoundType::BossDamage);
+
 	// HP0以下になったら死亡処理を行う
-	if (m_health <= 0)
+	if (m_health <= 0 && 
+		!m_isDying)
 	{
 		//死亡待機状態をtrueにする
 		m_isDying = true;
@@ -340,6 +374,9 @@ void BossEnemy::OnHitInvincibleCol(const Position3& effectPos,const int attackPo
 	//ボスを回復させる
 	//食らったダメージの5分の1回復する
 	m_health += static_cast<float>(attackPower) * recovery_rate;
+
+	//回復音を鳴らす
+	m_pSoundManager.lock()->Play(SoundManager::SoundType::BossRecovery);
 }
 
 void BossEnemy::DrawEnemy()

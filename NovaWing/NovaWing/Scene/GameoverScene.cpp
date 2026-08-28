@@ -8,6 +8,7 @@
 #include "Manager/ResourceLoader.h"
 #include "Utility/GraphShaderDraw.h"
 #include "Constants/ShaderRegister.h"
+#include "Manager/SoundManager.h"
 
 namespace
 {
@@ -56,6 +57,10 @@ GameoverScene::~GameoverScene()
 
 void GameoverScene::Init()
 {
+	//サウンドマネージャーの初期化
+	m_pSoundManager = std::make_shared<SoundManager>();
+	m_pSoundManager->Init();
+
 	//グリッチシェーダのロード
 	m_glitchPSH = LoadPixelShader(L"GlitchPS.pso");
 
@@ -76,6 +81,9 @@ void GameoverScene::Update()
 	m_pCBuffGlitchData->time = m_frame * time_speed;//シェーダ用のフレームに変換して渡す
 	UpdateShaderConstantBuffer(m_cbufferGlitch);
 
+	//サウンドマネージャーの更新
+	m_pSoundManager->Update();
+
 	//選択肢背景の開く演出用のフレーム更新
 	if (!m_controller.GetFade().IsFading())
 	{
@@ -95,6 +103,8 @@ void GameoverScene::Update()
 			static_cast<GameoverSelect>(
 				(static_cast<int>(m_selectIndex) + 1) %
 				static_cast<int>(GameoverSelect::SelectMax));
+		//選択音を鳴らす
+		m_pSoundManager->Play(SoundManager::SoundType::OnCursor);
 	}
 	//上入力で選択肢を上に移動(indexを減らす)
 	if (input.IsTriggered(InputEvent::up))
@@ -105,11 +115,16 @@ void GameoverScene::Update()
 			static_cast<GameoverSelect>(
 				(static_cast<int>(m_selectIndex) - 1 + static_cast<int>(GameoverSelect::SelectMax)) %
 				static_cast<int>(GameoverSelect::SelectMax));
+		//選択音を鳴らす
+		m_pSoundManager->Play(SoundManager::SoundType::OnCursor);
 	}
 	//背景が開ききっているときだけ決定入力を受け付ける
 	if (m_backGroundOpenFrame >= background_opne_max_frame &&
 		input.IsTriggered(InputEvent::ok))
 	{
+		//決定音を鳴らす
+		m_pSoundManager->Play(SoundManager::SoundType::Decision);
+
 		switch (m_selectIndex)
 		{
 		case GameoverSelect::Retry:

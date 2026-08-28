@@ -6,6 +6,7 @@
 #include "HideState.h"
 #include "Manager/LightingManager.h"
 #include "Constants/ShaderRegister.h"
+#include "Manager/SoundManager.h"
 
 namespace
 {
@@ -22,9 +23,11 @@ FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 	const std::weak_ptr<BulletManager> pBulletManager,
 	std::weak_ptr<CameraBase> camera,
 	const Vector3& pos,
-	int health) :
+	int health,
+	std::weak_ptr<SoundManager> pSoundManager) :
 	EnemyBase(Id,camera,pPlayer,pBulletManager,health),
-	m_colSphere(pos)
+	m_colSphere(pos),
+	m_pSoundManager(pSoundManager)
 {
 	//位置を反映
 	SetPos(pos);
@@ -159,6 +162,9 @@ void FloatingEnemy::TakeDamage(int damage)
 	{
 		//死亡待機状態をtrueにする
 		m_isDying = true;
+
+		//死亡音を鳴らす
+		m_pSoundManager.lock()->Play(SoundManager::SoundType::EnemyDeath);
 
 		//Effekseerのエフェクト再生を呼ぶ
 		m_effectPlayHandle = PlayEffekseer3DEffect(

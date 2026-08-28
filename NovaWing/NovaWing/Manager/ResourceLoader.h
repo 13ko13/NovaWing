@@ -114,6 +114,34 @@ public:
 		ChargeComplete,//チャージ完了
 		Charging,//チャージ中
 		Somersoult,//宙返り
+
+		//ボス
+		BossMove,//ボスの着地音
+		BossBeam,//ボスのビーム発射音
+		BossSummon,//ボスの雑魚召喚音
+		BossRecovery,//ボスの無敵シールド被弾音
+		BossDamage,//ボスの被弾音
+		BossDeath,//ボスの死亡音
+		BossQuake,//ボス出現前の地震音
+
+		//浮遊敵・ワームエネミー共通
+		EnemyDeath,//死亡音(爆発音)
+		EnemyShoot,//弾発射音
+
+		//浮遊敵
+		EnemyBoot,//activeになるときの音
+
+		//ワームエネミー
+		WormMove,//移動音
+
+		//BGM
+		GameBGM,//ゲームBGM
+		BossBGM,//ボスBGM
+		ResultBGM,//リザルトBGM
+
+		//リザルト
+		DataAppear,//カーテン演出音
+		ScoreCount,//スコア加算音
 	};
 
 	//フォントの種類

@@ -6,33 +6,68 @@
 namespace
 {
 	//タイトルでのブーストの音量
-	constexpr int title_boost_volume = 125;
-	//決定音の音量
-	constexpr int decision_volume = 80;
+	constexpr int title_boost_volume = 150;
 	//カーソルが乗った時の音の音量
-	constexpr int on_cursor_volume = 80;
+	constexpr int on_cursor_volume = 150;
 	//タイトルロゴ出現時の衝撃音の音量
-	constexpr int title_impact_volume = 125;
+	constexpr int title_impact_volume = 150;
 	//タイトルBGMの音量
-	constexpr int title_bgm_volume = 30;
+	constexpr int title_bgm_volume = 150;
 	//プレイヤー通常弾
-	constexpr int normal_shoot_volume = 125;
+	constexpr int normal_shoot_volume = 150;
 	//プレイヤー死亡
-	constexpr int player_death_volume = 125;
+	constexpr int player_death_volume = 150;
 	//プレイヤーダメージ
-	constexpr int player_damage_volume = 125;
+	constexpr int player_damage_volume = 150;
 	//プレイヤーチャージショット
-	constexpr int player_charge_shoot_volume = 125;
+	constexpr int player_charge_shoot_volume = 180;
 	//ブレーキ
 	constexpr int brake_volume = 125;
 	//ブースト
 	constexpr int boost_volume = 125;
 	//チャージ完了
-	constexpr int charge_complete_volume = 125;
+	constexpr int charge_complete_volume = 150;
 	//チャージ中
-	constexpr int charging_volume = 125;
+	constexpr int charging_volume = 150;
 	//宙返り
-	constexpr int somersoult_volume = 125;
+	constexpr int somersoult_volume = 150;
+
+	//ボスの着地音
+	constexpr int boss_move_volume = 180;
+	//ボスのビーム発射音
+	constexpr int boss_beam_volume = 180;
+	//ボスの雑魚召喚音
+	constexpr int boss_summon_volume = 150;
+	//ボスの無敵シールド被弾音
+	constexpr int boss_recovery_volume = 125;
+	//ボスの被弾音
+	constexpr int boss_damage_volume = 150;
+	//ボスの死亡音
+	constexpr int boss_death_volume = 180;
+	//ボス出現前の地震音
+	constexpr int boss_quake_volume = 160;
+
+	//浮遊敵・ワームエネミー共通の死亡音
+	constexpr int enemy_death_volume = 125;
+	//浮遊敵・ワームエネミー共通の弾発射音
+	constexpr int enemy_shoot_volume = 70;
+	//浮遊敵がactiveになるときの音
+	constexpr int enemy_boot_volume = 125;
+	//ワームエネミーの移動音
+	constexpr int worm_move_volume = 100;
+
+	//ゲームBGM
+	constexpr int game_bgm_volume = 150;
+	//ボスBGM
+	constexpr int boss_bgm_volume = 150;
+	//リザルトBGM
+	constexpr int result_bgm_volume = 150;
+	//リザルトのカーテン演出音
+	constexpr int data_appear_volume = 125;
+	//決定音
+	constexpr int decision_volume = 190;
+	//リザルトのスコア加算音
+	constexpr int score_count_volume = 190;
 }
 
 SoundManager::SoundManager()
@@ -59,11 +94,11 @@ void SoundManager::Init()
 	//カーソルが乗った時の音
 	InitData(SoundType::OnCursor,
 		ResourceLoader::SoundID::OnCursor,
-		true, decision_volume, false);
+		true, on_cursor_volume, false);
 	//決定音
 	InitData(SoundType::Decision,
 		ResourceLoader::SoundID::Decision,
-		true, on_cursor_volume, false);
+		true, decision_volume, false);
 	//タイトルロゴ出現時の衝撃音
 	InitData(SoundType::TitleLogoImpact,
 	ResourceLoader::SoundID::TitleLogoImpact,
@@ -109,6 +144,73 @@ void SoundManager::Init()
 	InitData(SoundType::Somersoult,
 		ResourceLoader::SoundID::Somersoult,
 		true, somersoult_volume, false);
+
+	//ボスの着地音
+	InitData(SoundType::BossMove,
+		ResourceLoader::SoundID::BossMove,
+		true, boss_move_volume, false);
+	//ボスのビーム発射音
+	InitData(SoundType::BossBeam,
+		ResourceLoader::SoundID::BossBeam,
+		true, boss_beam_volume, false);
+	//ボスの雑魚召喚音
+	InitData(SoundType::BossSummon,
+		ResourceLoader::SoundID::BossSummon,
+		true, boss_summon_volume, false);
+	//ボスの無敵シールド被弾音
+	InitData(SoundType::BossRecovery,
+		ResourceLoader::SoundID::BossRecovery,
+		true, boss_recovery_volume, false);
+	//ボスの被弾音
+	InitData(SoundType::BossDamage,
+		ResourceLoader::SoundID::BossDamage,
+		true, boss_damage_volume, false);
+	//ボスの死亡音
+	InitData(SoundType::BossDeath,
+		ResourceLoader::SoundID::BossDeath,
+		true, boss_death_volume, false);
+	//ボス出現前の地震音
+	InitData(SoundType::BossQuake,
+		ResourceLoader::SoundID::BossQuake,
+		true, boss_quake_volume, false);
+
+	//浮遊敵・ワームエネミー共通の死亡音
+	InitData(SoundType::EnemyDeath,
+		ResourceLoader::SoundID::EnemyDeath,
+		true, enemy_death_volume, false);
+	//浮遊敵・ワームエネミー共通の弾発射音
+	InitData(SoundType::EnemyShoot,
+		ResourceLoader::SoundID::EnemyShoot,
+		true, enemy_shoot_volume, false);
+	//浮遊敵がactiveになるときの音
+	InitData(SoundType::EnemyBoot,
+		ResourceLoader::SoundID::EnemyBoot,
+		true, enemy_boot_volume, false);
+	//ワームエネミーの移動音(ループ)
+	InitData(SoundType::WormMove,
+		ResourceLoader::SoundID::WormMove,
+		true, worm_move_volume, true);
+
+	//ゲームBGM(ループ)
+	InitData(SoundType::GameBGM,
+		ResourceLoader::SoundID::GameBGM,
+		true, game_bgm_volume, true);
+	//ボスBGM(ループ)
+	InitData(SoundType::BossBGM,
+		ResourceLoader::SoundID::BossBGM,
+		true, boss_bgm_volume, true);
+	//リザルトBGM(ループ)
+	InitData(SoundType::ResultBGM,
+		ResourceLoader::SoundID::ResultBGM,
+		true, result_bgm_volume, true);
+	//リザルトのカーテン演出音
+	InitData(SoundType::DataAppear,
+		ResourceLoader::SoundID::DataAppear,
+		true, data_appear_volume, false);
+	//リザルトのスコア加算音
+	InitData(SoundType::ScoreCount,
+		ResourceLoader::SoundID::ScoreCount,
+		true, score_count_volume, false);
 }
 
 void SoundManager::Update()
@@ -202,7 +304,11 @@ void SoundManager::Play(SoundType soundType, bool loop, bool isOnce)
 	auto it = m_sounds.find(soundType);
 	if (it == m_sounds.end() || !it->second.loaded) return;
 
-	const auto& data = it->second;
+	auto& data = it->second;
+	//フェード状態をリセットする
+	data.fadeState = FadeState::None;
+	//音量をデフォルトの音量に戻す
+	ChangeVolumeSoundMem(data.volume, data.handle);
 
 	//既に再生中なら再生しない
 	if (data.isLoop && CheckSoundMem(data.handle) == 1) return;

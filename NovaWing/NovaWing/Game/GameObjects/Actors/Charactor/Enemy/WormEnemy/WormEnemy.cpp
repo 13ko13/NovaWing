@@ -5,6 +5,8 @@
 #include "Manager/BulletManager.h"
 #include "Manager/LightingManager.h"
 #include "Constants/ShaderRegister.h"
+#include "Manager/SoundManager.h"
+#include "Game/GameObjects/Camera/CameraBase.h"
 
 namespace
 {
@@ -37,12 +39,14 @@ WormEnemy::WormEnemy(
 	const std::weak_ptr<Player> pPlayer,//プレイヤー
 	const std::weak_ptr<BulletManager> pBulletManager,//バレットマネージャー
 	std::weak_ptr<CameraBase> camera,//カメラ
-	const WormEnemyData& data) :
+	const WormEnemyData& data,//ワームエネミーに必要なデータ
+	std::weak_ptr<SoundManager> pSoundManager) :
 	EnemyBase(data.modelID,camera,pPlayer,pBulletManager),
 	m_segmentCount(data.segmentCount),
 	m_headSphere(data.pos),
 	m_moveDirection(data.direction),
-	m_activatePlayerZ(data.activatePlayerZ)
+	m_activatePlayerZ(data.activatePlayerZ),
+	m_pSoundManager(pSoundManager)
 {
 	//位置を反映
 	SetPos(data.pos);
@@ -95,6 +99,18 @@ void WormEnemy::Update()
 	//死亡待機状態じゃなければ更新処理を行う
 	if (!m_isDying)
 	{
+		//カメラのFar距離より奥(見えない位置)まで離れたら消す
+		std::shared_ptr<CameraBase> pCamera = m_pCamera.lock();
+		if (pCamera != nullptr)
+		{
+			float distFromCamera = (m_pos - GetCameraPos()).Length();
+			if (distFromCamera > pCamera->GetFarClip())
+			{
+				OnEnemyDead();
+				return;
+			}
+		}
+
 		//螺旋状に回転させる
 		m_rotationAngle += rot_speed;
 		//初期回転を適用したうえで
@@ -166,6 +182,9 @@ void WormEnemy::Update()
 			pBulletManager->CreateBullet(
 				BulletManager::BulletType::EnemyBullet,//敵の弾
 				shootPos, shootVel, bullet_power);//発射位置と速度と攻撃力
+
+			//発射音を鳴らす
+			m_pSoundManager.lock()->Play(SoundManager::SoundType::EnemyShoot);
 		}
 	}
 
@@ -204,6 +223,9 @@ void WormEnemy::Update()
 						m_segmentPositions[m_deathEffectNum - 1].m_z
 					);	
 				}
+
+				//爆発音を鳴らす
+				m_pSoundManager.lock()->Play(SoundManager::SoundType::EnemyDeath);
 
 				//エフェクトを出した数を更新
 				m_deathEffectNum++;
