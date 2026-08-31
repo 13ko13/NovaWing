@@ -36,16 +36,16 @@ namespace
 	constexpr int background_opne_max_frame = 30;
 
 	//テンプレート画像のサイズ
-	constexpr float templete_size = 0.75f;
+	constexpr float templete_size = 1.125f;
 
 	//敵を倒した数を表示する座標
-	const Vector2 kill_count_pos = Vector2(900.0f, 200.0f);
+	const Vector2 kill_count_pos = Vector2(0.7031f, 0.2778f);
 	//クリアタイムを表示する座標
-	const Vector2 clear_time_pos = Vector2(900.0f, 300.0f);
+	const Vector2 clear_time_pos = Vector2(0.7031f, 0.4167f);
 	//被弾回数を表示する座標
-	const Vector2 hit_count_pos = Vector2(900.0f, 410.0f);
+	const Vector2 hit_count_pos = Vector2(0.7031f, 0.5694f);
 	//スコアを表示する座標
-	const Vector2 score_pos = Vector2(900.0f, 537.0f);
+	const Vector2 score_pos = Vector2(0.7031f, 0.7458f);
 
 	//文字をぼかす範囲
 	constexpr int blur_range = 16;
@@ -74,22 +74,22 @@ namespace
 	constexpr int hit_count_color = 0xe13c3c;
 
 	//Aボタン画像の描画座標
-	const Vector2 a_button_pos = Vector2(1150.0f, 690.0f);
+	const Vector2 a_button_pos = Vector2(0.8984f, 0.9583f);
 	//つぎへのテキスト画像の描画座標
-	const Vector2 next_graph_pos = Vector2(1190.0f, 690.0f);
+	const Vector2 next_graph_pos = Vector2(0.9297f, 0.9583f);
 	//決定のテキスト画像の描画座標
-	const Vector2 decide_graph_pos = Vector2(1190.0f, 690.0f);
+	const Vector2 decide_graph_pos = Vector2(0.9297f, 0.9583f);
 	//Aボタン画像のサイズ
-	constexpr double a_button_scale = 0.3;
+	constexpr double a_button_scale = 0.45;
 	//つぎへのテキスト画像のサイズ
-	constexpr double next_graph_scale = 0.3;
+	constexpr double next_graph_scale = 0.45;
 	//決定のテキスト画像のサイズ
-	constexpr double decide_graph_scale = 0.3;
+	constexpr double decide_graph_scale = 0.45;
 
 	//選択肢画像のサイズ
-	constexpr double select_graph_scale = 0.8;
+	constexpr double select_graph_scale = 1.2;
 	//選択肢の背景画像のサイズ
-	constexpr double background_graph_scale = 1.5;
+	constexpr double background_graph_scale = 2.25;
 
 	//リトライ選択肢の位置
 	const Vector2 retry_ratio = Vector2(0.5f, 0.43f);//画面に対してどのあたりにしたいか
@@ -555,8 +555,8 @@ void ClearScene::Draw()
 	//二つの画像を描画
 	//Aボタン画像
 	DrawRotaGraph(
-		a_button_pos.m_x,
-		a_button_pos.m_y,
+		wsize.m_width * a_button_pos.m_x,
+		wsize.m_height * a_button_pos.m_y,
 		a_button_scale, 0.0, aButtonHandle, true
 	);
 
@@ -565,8 +565,8 @@ void ClearScene::Draw()
 	{
 		//決定のテキスト画像
 		DrawRotaGraph(
-			decide_graph_pos.m_x,
-			decide_graph_pos.m_y,
+			wsize.m_width * decide_graph_pos.m_x,
+			wsize.m_height * decide_graph_pos.m_y,
 			decide_graph_scale, 0.0, decideHandle, true
 		);
 	}
@@ -574,8 +574,8 @@ void ClearScene::Draw()
 	{
 		//次へ のテキスト画像
 		DrawRotaGraph(
-			next_graph_pos.m_x,
-			next_graph_pos.m_y,
+			wsize.m_width * next_graph_pos.m_x,
+			wsize.m_height *next_graph_pos.m_y,
 			next_graph_scale, 0.0, nextHandle, true
 		);
 	}
@@ -594,21 +594,24 @@ void ClearScene::DrawResultText(int fontHandle)
 	std::wstring killCountWString = std::to_wstring(static_cast<int>(m_currentKillCount));
 	int killCountWidth = GetDrawStringWidthToHandle(killCountWString.c_str(), killCountWString.size(), fontHandle);
 	DrawStringToHandle(
-		kill_count_pos.m_x - killCountWidth, kill_count_pos.m_y,
+		wsize.m_width * kill_count_pos.m_x - killCountWidth,
+		wsize.m_height * kill_count_pos.m_y,
 		killCountWString.c_str(), score_color, fontHandle
 	);
 	//クリアタイム
 	std::wstring clearTimeWString = std::to_wstring(static_cast<int>(m_currentClearTime));
 	int clearTimeWidth = GetDrawStringWidthToHandle(clearTimeWString.c_str(), clearTimeWString.size(), fontHandle);
 	DrawStringToHandle(
-		clear_time_pos.m_x - clearTimeWidth, clear_time_pos.m_y,
+		wsize.m_width * clear_time_pos.m_x - clearTimeWidth,
+		wsize.m_height * clear_time_pos.m_y,
 		clearTimeWString.c_str(), score_color, fontHandle
 	);
 	//被弾回数
 	std::wstring hitCountWString = std::to_wstring(static_cast<int>(m_currentHitCount));
 	int hitCountWidth = GetDrawStringWidthToHandle(hitCountWString.c_str(), hitCountWString.size(), fontHandle);
 	DrawStringToHandle(
-		hit_count_pos.m_x - hitCountWidth, hit_count_pos.m_y,
+		wsize.m_width * hit_count_pos.m_x - hitCountWidth,
+		wsize.m_height * hit_count_pos.m_y,
 		hitCountWString.c_str(), hit_count_color, fontHandle
 	);
 
@@ -616,7 +619,8 @@ void ClearScene::DrawResultText(int fontHandle)
 	std::wstring scoreWString = std::to_wstring(static_cast<int>(m_currentScore));
 	int scoreWidth = GetDrawStringWidthToHandle(scoreWString.c_str(), scoreWString.size(), fontHandle);
 	DrawStringToHandle(
-		score_pos.m_x - scoreWidth, score_pos.m_y,
+		wsize.m_width * score_pos.m_x - scoreWidth,
+		wsize.m_height * score_pos.m_y,
 		scoreWString.c_str(), score_color, fontHandle
 	);
 
@@ -628,22 +632,26 @@ void ClearScene::DrawResultText(int fontHandle)
 	ClearDrawScreen();
 	//敵を倒した数
 	DrawStringToHandle(
-		kill_count_pos.m_x - killCountWidth, kill_count_pos.m_y,
+		wsize.m_width * kill_count_pos.m_x - killCountWidth,
+		wsize.m_height * kill_count_pos.m_y,
 		killCountWString.c_str(), score_color, fontHandle
 	);
 	//クリアタイム
 	DrawStringToHandle(
-		clear_time_pos.m_x - clearTimeWidth, clear_time_pos.m_y,
+		wsize.m_width * clear_time_pos.m_x - clearTimeWidth,
+		wsize.m_height * clear_time_pos.m_y,
 		clearTimeWString.c_str(), score_color, fontHandle
 	);
 	//被弾回数
 	DrawStringToHandle(
-		hit_count_pos.m_x - hitCountWidth, hit_count_pos.m_y,
+		wsize.m_width * hit_count_pos.m_x - hitCountWidth,
+		wsize.m_height * hit_count_pos.m_y,
 		hitCountWString.c_str(), hit_count_color, fontHandle
 	);
 	//スコア
 	DrawStringToHandle(
-		score_pos.m_x - scoreWidth, score_pos.m_y,
+		wsize.m_width * score_pos.m_x - scoreWidth,
+		wsize.m_height * score_pos.m_y,
 		scoreWString.c_str(), score_color, fontHandle
 	);
 

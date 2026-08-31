@@ -24,9 +24,9 @@ namespace
 	constexpr int background_opne_max_frame = 30;
 
 	//選択肢画像のサイズ
-	constexpr double select_graph_scale = 0.8;
+	constexpr double select_graph_scale = 1.2;
 	//選択肢の背景画像のサイズ
-	constexpr double background_graph_scale = 1.5;
+	constexpr double background_graph_scale = 2.25;
 
 	//リトライ選択肢の位置
 	const Vector2 retry_ratio = Vector2(0.5f, 0.43f);//画面に対してどのあたりにしたいか
@@ -36,14 +36,15 @@ namespace
 	//カーソルが乗った時に何フレームで画像を切り替えるか
 	constexpr int wipe_max = 10;
 
-	//Aボタン画像の描画座標
-	const Vector2 a_button_pos = Vector2(1150.0f, 690.0f);
-	//決定のテキスト画像の描画座標
-	const Vector2 decide_graph_pos = Vector2(1190.0f, 690.0f);
+	//決定画像のウィンドウに対する位置の割合
+	const Vector2 decide_graph_pos_ratio = Vector2(0.9297f, 0.9583f);
 	//Aボタン画像のサイズ
-	constexpr double a_button_scale = 0.3;
+	constexpr double a_button_scale = 0.45;
 	//決定のテキスト画像のサイズ
-	constexpr double decide_graph_scale = 0.3;
+	constexpr double decide_graph_scale = 0.45;
+
+	//aボタン画像のウィンドウに対する位置の割合
+	const Vector2 a_button_pos_ratio = { 0.8984f,0.9583f };
 }
 
 GameoverScene::GameoverScene(SceneController& controller):
@@ -298,17 +299,28 @@ void GameoverScene::Draw()
 	//決定のテキスト画像
 	int decideHandle = loader.GetGraphic(ResourceLoader::GraphicID::DecideText);
 
+	//aボタン画像の描画位置
+	Vector2 aButtonDrawPos = Vector2(
+		wsize.m_width * a_button_pos_ratio.m_x,
+		wsize.m_height * a_button_pos_ratio.m_y
+	);
+	//決定画像描画位置
+	Vector2 decideDrawPos = Vector2(
+		wsize.m_width * decide_graph_pos_ratio.m_x,
+		wsize.m_height * decide_graph_pos_ratio.m_y
+	);
+
 	//二つの画像を描画
 	//Aボタン画像
 	DrawRotaGraph(
-		a_button_pos.m_x,
-		a_button_pos.m_y,
+		aButtonDrawPos.m_x,
+		aButtonDrawPos.m_y,
 		a_button_scale, 0.0, aButtonHandle, true
 	);
 	//決定のテキスト画像
 	DrawRotaGraph(
-		decide_graph_pos.m_x,
-		decide_graph_pos.m_y,
+		decideDrawPos.m_x,
+		decideDrawPos.m_y,
 		decide_graph_scale, 0.0, decideHandle, true
 	);
 }

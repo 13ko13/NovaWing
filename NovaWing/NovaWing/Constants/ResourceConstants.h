@@ -126,7 +126,7 @@ namespace
 	//フォント名
 	constexpr const wchar_t* result_font_name = L"Orbitron Black";
 	//サイズ
-	constexpr int result_font_size = 70;
+	constexpr int result_font_size = 105;
 	//太さ
 	constexpr int result_font_thick = 5;
 	//フォントタイプ

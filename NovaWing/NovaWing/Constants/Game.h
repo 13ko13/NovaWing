@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 
 namespace Game
 {
 	//ゲーム形を作る際に必要な定数
-	constexpr int screen_width = 1280;
-	constexpr int screen_height = 720;
+	constexpr int screen_width = 1920;
+	constexpr int screen_height = 1080;
 	constexpr int color_bit_num = 32;
 
 	//海面からどれぐらい離れたところにプレイヤーを押し戻すか

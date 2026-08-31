@@ -6,11 +6,12 @@
 #include "Utility/Size.h"
 #include "Utility/GraphShaderDraw.h"
 #include "Utility/Vector2.h"
+#include "Main/Application.h"
 
 namespace
 {
     //HP枠画像の位置
-    const Vector2 hp_frame_pos = { 15.0f,150.0f };
+    const Vector2 hp_frame_pos_ratio = { 0.03f,0.2f };
     //スキャンラインを入れる周期
     constexpr float scanline_frequency = 655.0f;
 }
@@ -47,8 +48,16 @@ void BossHPGaugeUI::Draw()
         int hpGaugeHandle = ResourceLoader::GetInstance().GetGraphic(
             ResourceLoader::GraphicID::BossHPGauge
         );
+
+        //ウィンドウサイズ
+        const Size& wsize = Application::GetInstance().GetWindowSize();
+        Vector2 frameDrawPos = Vector2(
+            wsize.m_width * hp_frame_pos_ratio.m_x,
+            wsize.m_height * hp_frame_pos_ratio.m_y
+        );
+
         //どちらもシェーダを通して描画する
-        DrawHPGauge(hpFrameHandle, hpGaugeHandle,hp_frame_pos,true);
+        DrawHPGauge(hpFrameHandle, hpGaugeHandle, frameDrawPos,true);
     }
 
 #ifdef _DEBUG

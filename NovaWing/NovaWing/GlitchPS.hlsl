@@ -20,10 +20,10 @@ static const float scanline_strength = 0.15f;//最大でどれぐらい明るさ
 
 float4 main(PS_Input input) : SV_TARGET
 {
-	// return float4(input.uv, 0.0f, 1.0f);//UV座標を色として可視化
-
 	//ベースのカラー
-	float4 baseCol = uiTex.Sample(smp,input.uv);
+    float4 baseCol = uiTex.Sample(smp, input.uv);
+
+    return float4(baseCol); //UV座標を色として可視化
 
 	//横線(スキャンライン)を計算
 	//uvにスキャンラインを入れる間隔をかける

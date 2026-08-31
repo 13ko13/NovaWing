@@ -25,21 +25,22 @@ namespace
 	//ゲームロゴ
 	constexpr float logo_ratio_x = 0.5f;//画面に対して横位置をどのあたりにしたいか
 	constexpr float logo_ratio_y = 0.3f;//画面に対して縦位置をどのあたりにしたいか
+	constexpr float logo_scale = 1.5f;//ゲームロゴ画像のサイズ
 
 	//ゲーム開始選択肢
 	constexpr float start_ratio_x = 0.5f;//画面に対して横位置をどのあたりにしたいか
 	constexpr float start_ratio_y = 0.74f;//画面に対して縦位置をどのあたりにしたいか
-	constexpr double start_graph_scale = 0.55;//選択肢画像のサイズ
+	constexpr double start_graph_scale = 0.825;//選択肢画像のサイズ
 
 	//ゲーム終了選択肢
 	constexpr float end_ratio_x = 0.5f;//画面に対して横位置をどのあたりにしたいか
 	constexpr float end_ratio_y = 0.85;//画面に対して縦位置をどのあたりにしたいか
-	constexpr double end_graph_scale = 0.55;//選択肢画像のサイズ
+	constexpr double end_graph_scale = 0.825;//選択肢画像のサイズ
 
 	//選択肢の背景画像
 	constexpr float back_ground_ratio_x = 0.5f;//画面に対して横位置をどのあたりにしたいか
 	constexpr float back_ground_ratio_y = 0.77f;//画面に対して縦位置をどのあたりにしたいか
-	constexpr double back_ground_graph_scale = 1.0;//背景画像のサイズ
+	constexpr double back_ground_graph_scale = 1.5;//背景画像のサイズ
 
 	constexpr int wipe_max = 15;//カーソルが乗った時に何秒で画像を切り替えるか
 
@@ -62,7 +63,7 @@ namespace
 	//タイトルロゴ出現演出にかけるフレーム
 	constexpr int logo_max_frame = 30;
 	//タイトルロゴのスタンプ演出時の最初の大きさ
-	constexpr double logo_max_scale = 3.0;
+	constexpr double logo_max_scale = 4.5;
 
 	//選択肢出現にかけるフレーム
 	constexpr int select_max_frame = 50;
@@ -367,7 +368,7 @@ void TitleScene::Draw()
 		//タイトルロゴの演出用進行度計算
 		double progress = static_cast<double>(m_titleLogoFrame) / logo_max_frame;
 		//最初の大きさから通常の大きさに補完する
-		m_titleLogoScale = std::lerp(logo_max_scale, 1.0, progress);
+		m_titleLogoScale = std::lerp(logo_max_scale, logo_scale, progress);
 
 		//タイトルロゴ描画
 		DrawRotaGraph(

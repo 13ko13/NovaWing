@@ -9,14 +9,15 @@
 #include "Utility/GraphShaderDraw.h"
 #include "Utility/Vector2.h"
 #include "Game/GameObjects/Actors/Charactor/Charactor.h"
+#include "Main/Application.h"
 
 namespace
 {
     //HP枠画像
-    constexpr double hp_frame_size = 0.3;//HP枠画像の大きさ
+    constexpr double hp_frame_size = 0.55;//HP枠画像の大きさ
 
     //HPゲージ画像
-    constexpr double hp_gauge_size = 0.3;//HPゲージの大きさ
+    constexpr double hp_gauge_size = 0.55;//HPゲージの大きさ
 
     //シェーダにフレームを渡すときに値が大きすぎるので小さくするための値
     constexpr float time_speed = 0.1f;

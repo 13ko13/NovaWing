@@ -36,7 +36,7 @@ Application& Application::GetInstance()
 bool Application::Init()
 {
 	//ウィンドウモード設定
-	ChangeWindowMode(true);
+	ChangeWindowMode(false);
 	//ゲーム名
 	SetMainWindowText(L"NovaWing");
 	//画面サイズと色数を設定

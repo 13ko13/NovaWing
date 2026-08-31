@@ -10,12 +10,13 @@
 #include "Utility/GraphShaderDraw.h"
 #include "Utility/Vector2.h"
 #include "Manager/InputManager.h"
+#include "Main/Application.h"
 
 namespace
 {
 	//スキャンラインを入れる周期
 	constexpr float scanline_frequency = 74.0f;
-	const Vector2 hp_frame_pos = { 30.0f,30.0f };//HP枠画像の位置
+	const Vector2 hp_frame_pos_ratio = Vector2(0.02f, 0.04f);
 }
 
 PlayerHPGaugeUI::PlayerHPGaugeUI(std::weak_ptr<Player> pPlayer) :
@@ -62,7 +63,12 @@ void PlayerHPGaugeUI::Draw()
 		ResourceLoader::GraphicID::PlayerHPGauge
 	);
 
-	DrawHPGauge(hpFrameHandle, hpGaugeHandle, hp_frame_pos);
+	const Size& wsize = Application::GetInstance().GetWindowSize();
+	Vector2 frameDrawPos = Vector2(
+		wsize.m_width * hp_frame_pos_ratio.m_x,
+		wsize.m_height * hp_frame_pos_ratio.m_y
+		);
+	DrawHPGauge(hpFrameHandle, hpGaugeHandle, frameDrawPos);
 
 #ifdef _DEBUG
 	DrawFormatString(0, 115, 0xffffff, L"scanlineFrequency : %f", m_scanlineFrequency);
