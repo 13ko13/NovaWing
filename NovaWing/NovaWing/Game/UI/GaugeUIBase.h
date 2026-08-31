@@ -5,11 +5,11 @@
 
 class Charactor;
 class Vector2;
-class HPGaugeUIBase : public UIBase
+class GaugeUIBase : public UIBase
 {
 public:
-	HPGaugeUIBase(std::weak_ptr<Charactor> pCharactor);
-	virtual ~HPGaugeUIBase();
+	GaugeUIBase();
+	virtual ~GaugeUIBase();
 
 	void Update() override;
 
@@ -32,14 +32,12 @@ protected:
 	int m_cbufferGlitch = -1;
 	GlitchBuffer* m_pCBuffGlitchData = nullptr;
 
-	//HP参照対象のキャラ
-	std::weak_ptr<Charactor> m_pHpTargetCharactor;
-
 protected:
-	void DrawHPGauge(
+	void DrawGauge(
 		int frameHandle,
 		int gaugeHandle,
 		const Vector2& drawPos,
+		float ratio,
 		bool isBoss = false
 	);
 };

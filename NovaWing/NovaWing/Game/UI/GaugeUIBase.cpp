@@ -1,7 +1,7 @@
 ﻿#include <DxLib.h>
 #include <cassert>
 
-#include "HPGaugeUIBase.h"
+#include "GaugeUIBase.h"
 #include "Manager/ResourceLoader.h"
 #include "Utility/SizeF.h"
 #include "Constants/ShaderRegister.h"
@@ -23,8 +23,7 @@ namespace
     constexpr float time_speed = 0.1f;
 }
 
-HPGaugeUIBase::HPGaugeUIBase(std::weak_ptr<Charactor> pCharactor):
-    m_pHpTargetCharactor(pCharactor)
+GaugeUIBase::GaugeUIBase()
 {
     //グリッチシェーダをロード
     m_glitchPSH = LoadPixelShader(L"GlitchPS.pso");
@@ -35,11 +34,11 @@ HPGaugeUIBase::HPGaugeUIBase(std::weak_ptr<Charactor> pCharactor):
     m_pCBuffGlitchData = static_cast<GlitchBuffer*>(GetBufferShaderConstantBuffer(m_cbufferGlitch));
 }
 
-HPGaugeUIBase::~HPGaugeUIBase()
+GaugeUIBase::~GaugeUIBase()
 {
 }
 
-void HPGaugeUIBase::Update()
+void GaugeUIBase::Update()
 {
     //フレームを更新
     m_frame++;
@@ -48,10 +47,11 @@ void HPGaugeUIBase::Update()
     UpdateShaderConstantBuffer(m_cbufferGlitch);
 }
 
-void HPGaugeUIBase::DrawHPGauge(
+void GaugeUIBase::DrawGauge(
     int frameHandle,
     int gaugeHandle,
     const Vector2& drawPos,
+    float ratio,
     bool isBoss
 )
 {
@@ -74,14 +74,6 @@ void HPGaugeUIBase::DrawHPGauge(
         frameSizeF, 1.0f,
         frameHandle
     );
-
-    //プレイヤーのshared_ptrを取得
-    std::shared_ptr<Charactor> pCharactor = m_pHpTargetCharactor.lock();
-
-    //HPの割合から、切り取り位置を計算
-    float ratio =
-        static_cast<float>(pCharactor->GetHealth()) /
-        static_cast<float>(pCharactor->GetMaxHealth());
 
     //HPゲージ画像の大きさを取得
     Size gaugeSize;

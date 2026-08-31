@@ -17,7 +17,6 @@ namespace
 }
 
 BossHPGaugeUI::BossHPGaugeUI(std::weak_ptr<BossEnemy> pBoss) :
-    HPGaugeUIBase(pBoss),
     m_pBoss(pBoss)
 {
     //スキャンラインを入れる周期をシェーダに渡す
@@ -32,7 +31,7 @@ BossHPGaugeUI::~BossHPGaugeUI()
 
 void BossHPGaugeUI::Update()
 {
-    HPGaugeUIBase::Update();
+    GaugeUIBase::Update();
 }
 
 void BossHPGaugeUI::Draw()
@@ -56,8 +55,18 @@ void BossHPGaugeUI::Draw()
             wsize.m_height * hp_frame_pos_ratio.m_y
         );
 
+        //HPの割合から、切り取り位置を計算
+        float ratio =
+            static_cast<float>(m_pBoss.lock()->GetHealth()) /
+            static_cast<float>(m_pBoss.lock()->GetMaxHealth());
+
         //どちらもシェーダを通して描画する
-        DrawHPGauge(hpFrameHandle, hpGaugeHandle, frameDrawPos,true);
+        DrawGauge(
+            hpFrameHandle,
+            hpGaugeHandle, 
+            frameDrawPos,
+            ratio,
+            true);
     }
 
 #ifdef _DEBUG

@@ -1,10 +1,10 @@
 ﻿#pragma once
 #include <memory>
 
-#include "HPGaugeUIBase.h"
+#include "GaugeUIBase.h"
 
 class Player;
-class PlayerHPGaugeUI : public HPGaugeUIBase
+class PlayerHPGaugeUI : public GaugeUIBase
 {
 public:
     //プレイヤーからHPを貰うためプレイヤーの弱参照を受け取る
@@ -20,5 +20,7 @@ private:
 #ifdef _DEBUG
     float m_scanlineFrequency = 0.0f;
 #endif
+	//プレイヤーの弱参照
+	std::weak_ptr<Player> m_pPlayer;
 };
 

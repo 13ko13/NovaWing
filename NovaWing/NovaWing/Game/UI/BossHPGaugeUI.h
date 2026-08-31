@@ -1,8 +1,8 @@
 ﻿#pragma once
-#include "HPGaugeUIBase.h"
+#include "GaugeUIBase.h"
 
 class BossEnemy;
-class BossHPGaugeUI : public HPGaugeUIBase
+class BossHPGaugeUI : public GaugeUIBase
 {
 public:
     //ボスからHPを貰うためボスの弱参照を受け取る

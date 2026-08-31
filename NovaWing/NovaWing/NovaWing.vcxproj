@@ -171,10 +171,11 @@
     <ClCompile Include="Game\UI\PlayerHPGaugeUI.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\IBossEnemyState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\SummonState.cpp" />
-    <ClCompile Include="Game\UI\HPGaugeUIBase.cpp" />
+    <ClCompile Include="Game\UI\GaugeUIBase.cpp" />
     <ClCompile Include="Game\GameObjects\Camera\TitleCamera.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\TitlePlayer.cpp" />
     <ClCompile Include="Manager\SoundManager.cpp" />
+    <ClCompile Include="Game\UI\SpecialGaugeUI.cpp" />
     <ClCompile Include="Utility\GraphShaderDraw.cpp" />
     <ClCompile Include="Scene\ClearScene.cpp" />
     <ClCompile Include="CSVData\CSVData.cpp" />
@@ -260,10 +261,11 @@
     <ClInclude Include="Game\UI\PlayerHPGaugeUI.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\IBossEnemyState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\SummonState.h" />
-    <ClInclude Include="Game\UI\HPGaugeUIBase.h" />
+    <ClInclude Include="Game\UI\GaugeUIBase.h" />
     <ClInclude Include="Game\GameObjects\Camera\TitleCamera.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\TitlePlayer.h" />
     <ClInclude Include="Manager\SoundManager.h" />
+    <ClInclude Include="SpecialGaugeUI.h" />
     <ClInclude Include="Utility\GraphShaderDraw.h" />
     <ClInclude Include="Scene\ClearScene.h" />
     <ClInclude Include="CSVData\CSVData.h" />

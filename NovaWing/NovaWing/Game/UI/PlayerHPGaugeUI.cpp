@@ -20,7 +20,7 @@ namespace
 }
 
 PlayerHPGaugeUI::PlayerHPGaugeUI(std::weak_ptr<Player> pPlayer) :
-	HPGaugeUIBase(pPlayer)
+	m_pPlayer(pPlayer)
 {
 	//スキャンラインを入れる周期をシェーダに渡す
 	m_pCBuffGlitchData->scanlineFrequency = scanline_frequency;
@@ -33,7 +33,7 @@ PlayerHPGaugeUI::~PlayerHPGaugeUI()
 
 void PlayerHPGaugeUI::Update()
 {
-	HPGaugeUIBase::Update();
+	GaugeUIBase::Update();
 
 #ifdef _DEBUG
 	//デバッグのため、スキャンラインを入れる周期を上げ下げできるようにしておく
@@ -68,7 +68,17 @@ void PlayerHPGaugeUI::Draw()
 		wsize.m_width * hp_frame_pos_ratio.m_x,
 		wsize.m_height * hp_frame_pos_ratio.m_y
 		);
-	DrawHPGauge(hpFrameHandle, hpGaugeHandle, frameDrawPos);
+
+	//HPの割合から、切り取り位置を計算
+	float ratio =
+		static_cast<float>(m_pPlayer.lock()->GetHealth()) /
+		static_cast<float>(m_pPlayer.lock()->GetMaxHealth());
+
+	DrawGauge(
+		hpFrameHandle,
+		hpGaugeHandle,
+		frameDrawPos,
+		ratio);
 
 #ifdef _DEBUG
 	DrawFormatString(0, 115, 0xffffff, L"scanlineFrequency : %f", m_scanlineFrequency);

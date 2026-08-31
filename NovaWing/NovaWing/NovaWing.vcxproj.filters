@@ -252,7 +252,7 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\DisabledShootState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\UI\HPGaugeUIBase.cpp">
+    <ClCompile Include="Game\UI\GaugeUIBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\UI\BossHPGaugeUI.cpp">
@@ -268,6 +268,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Manager\SoundManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\UI\SpecialGaugeUI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -524,7 +527,7 @@
     <ClInclude Include="Constants\ResourceConstants.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\UI\HPGaugeUIBase.h">
+    <ClInclude Include="Game\UI\GaugeUIBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\UI\BossHPGaugeUI.h">
@@ -540,6 +543,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Manager\SoundManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameObjects\Actors\Charactor\DamageSource.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="SpecialGaugeUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
