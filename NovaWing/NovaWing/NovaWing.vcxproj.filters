@@ -548,7 +548,7 @@
     <ClInclude Include="Game\GameObjects\Actors\Charactor\DamageSource.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="SpecialGaugeUI.h">
+    <ClInclude Include="Game\UI\SpecialGaugeUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

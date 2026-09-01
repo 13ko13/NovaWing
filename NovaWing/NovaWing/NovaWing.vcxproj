@@ -265,7 +265,7 @@
     <ClInclude Include="Game\GameObjects\Camera\TitleCamera.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\TitlePlayer.h" />
     <ClInclude Include="Manager\SoundManager.h" />
-    <ClInclude Include="SpecialGaugeUI.h" />
+    <ClInclude Include="Game\UI\SpecialGaugeUI.h" />
     <ClInclude Include="Utility\GraphShaderDraw.h" />
     <ClInclude Include="Scene\ClearScene.h" />
     <ClInclude Include="CSVData\CSVData.h" />

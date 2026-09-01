@@ -401,6 +401,16 @@ void ResourceLoader::KeepGraph()
 	handle = LoadGraph(back_title_on_cursor_path);
 	assert(handle >= 0);
 	m_graphicHandles[ResourceLoader::GraphicID::BackTitleOnCursor] = handle;
+
+	//スペシャルゲージの枠画像
+	handle = LoadGraph(special_gauge_frame_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::SpecialGaugeFrame] = handle;
+
+	//スペシャルゲージの画像
+	handle = LoadGraph(special_gauge_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::SpecialGauge] = handle;
 }
 
 void ResourceLoader::KeepEffect()

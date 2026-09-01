@@ -47,7 +47,7 @@ void GaugeActionStateBase::Update()
 		//ゲージを消費
 		pPlayer->ChangeGauge(gauge_consumption);
 		//ゲージが0になったら
-		if (pPlayer->GetGauge() <= 0)
+		if (pPlayer->GetSpecialGauge() <= 0)
 		{
 			//ステートを通常に戻す
 			ChangeState(std::make_shared<IdleMovementState>(pPlayer));

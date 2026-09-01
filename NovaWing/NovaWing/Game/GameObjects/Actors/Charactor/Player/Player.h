@@ -51,7 +51,9 @@ public:
 	void SetTargetManager(std::shared_ptr<TargetManager> pTargetManager) { m_pTargetManager = pTargetManager; }
 
 	//ゲージ取得
-	float GetGauge() const { return m_gauge; }
+	float GetSpecialGauge() const { return m_gauge; }
+	//ゲージの最大値取得
+	float GetMaxSpecialGauge() const;
 
 	//ゲージ変化
 	void ChangeGauge(float delta);

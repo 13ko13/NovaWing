@@ -74,6 +74,10 @@ namespace
 	constexpr const wchar_t* back_title_path = L"Data/Image/SelectFrame/Back_Title.png";
 	//カーソルが乗っているときのタイトルに戻る選択肢画像
 	constexpr const wchar_t* back_title_on_cursor_path = L"Data/Image/SelectFrame/Back_Title_OnCursor.png";
+	//スペシャルゲージの枠画像
+	constexpr const wchar_t* special_gauge_frame_path = L"Data/Image/SpecialGauge/Special_Frame.png";
+	//スペシャルゲージの画像
+	constexpr const wchar_t* special_gauge_path = L"Data/Image/SpecialGauge/Special_Gauge.png";
 
 	//---------- エフェクトのパス ----------
 	constexpr const wchar_t* player_bullet_effect_path = L"Data/Effect/PlayerBullet/PlayerBullet.efk";

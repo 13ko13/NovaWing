@@ -62,8 +62,8 @@ namespace
 	//ダメージシェーダのハンドル
 	constexpr const wchar_t* damage_shader_path = L"DamagePS.pso";
 
-	//ゲージの初期値
-	constexpr float first_gauge = 100.0f;
+	//ゲージの最大値
+	constexpr float max_gauge = 100.0f;
 } // namespace
 
 Player::Player(
@@ -93,7 +93,7 @@ void Player::OnInit()
 	// 初期座標
 	m_pos = first_pos;
 	// ゲージ初期化
-	m_gauge = first_gauge;
+	m_gauge = max_gauge;
 
 	// シェーダに渡す定数バッファを作成
 	CreateShaderBuffers();
@@ -450,6 +450,11 @@ void Player::LerpToAngleY(float targetAngle, float t)
 	m_rotationY = m_rotationY * (1 - t) + targetAngle * t;
 	// Rotationを適用する
 	UpdateRotation();
+}
+
+float Player::GetMaxSpecialGauge() const
+{
+	return max_gauge;
 }
 
 void Player::ChangeGauge(float delta)

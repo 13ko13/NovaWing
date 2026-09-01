@@ -23,7 +23,7 @@ float4 main(PS_Input input) : SV_TARGET
 	//ベースのカラー
     float4 baseCol = uiTex.Sample(smp, input.uv);
 
-    return float4(baseCol); //UV座標を色として可視化
+    //return float4(baseCol); //UV座標を色として可視化
 
 	//横線(スキャンライン)を計算
 	//uvにスキャンラインを入れる間隔をかける

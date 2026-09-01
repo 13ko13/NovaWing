@@ -42,6 +42,7 @@
 #include "Game/UI/BossHPGaugeUI.h"
 #include "Manager/LightingManager.h"
 #include "Manager/SoundManager.h"
+#include "Game/UI/SpecialGaugeUI.h"
 
 namespace
 {
@@ -218,6 +219,7 @@ void GameScene::Init()
 	m_pUIManager->Register(std::make_shared<ReticleUI>(m_pTargetManager, m_pPlayer));
 	m_pUIManager->Register(std::make_shared<PlayerHPGaugeUI>(m_pPlayer));
 	m_pUIManager->Register(std::make_shared<BossHPGaugeUI>(m_pBoss));
+	m_pUIManager->Register(std::make_shared<SpecialGaugeUI>(m_pPlayer));
 
 	//水マネージャーの初期化
 	m_pWaterManager = std::make_shared<WaterManager>(m_pCamera);

@@ -11,7 +11,7 @@
 namespace
 {
     //HP枠画像の位置
-    const Vector2 hp_frame_pos_ratio = { 0.03f,0.2f };
+    const Vector2 hp_frame_pos_ratio = { 0.9f,0.2f };
     //スキャンラインを入れる周期
     constexpr float scanline_frequency = 655.0f;
 }
