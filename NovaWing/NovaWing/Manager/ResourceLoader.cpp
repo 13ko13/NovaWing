@@ -601,6 +601,10 @@ void ResourceLoader::KeepSound()
 	handle = LoadSoundMem(result_bgm_path);
 	assert(handle >= 0);
 	m_soundHandles[ResourceLoader::SoundID::ResultBGM] = handle;
+	//ゲームオーバーBGM
+	handle = LoadSoundMem(gameover_bgm_path);
+	assert(handle >= 0);
+	m_soundHandles[ResourceLoader::SoundID::GameoverBGM] = handle;
 	//リザルトのカーテン演出音
 	handle = LoadSoundMem(data_appear_se_path);
 	assert(handle >= 0);

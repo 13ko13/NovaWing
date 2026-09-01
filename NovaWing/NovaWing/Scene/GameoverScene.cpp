@@ -62,6 +62,9 @@ void GameoverScene::Init()
 	m_pSoundManager = std::make_shared<SoundManager>();
 	m_pSoundManager->Init();
 
+	//ゲームオーバーBGMを鳴らす
+	m_pSoundManager->Play(SoundManager::SoundType::GameoverBGM, true);
+
 	//グリッチシェーダのロード
 	m_glitchPSH = LoadPixelShader(L"GlitchPS.pso");
 

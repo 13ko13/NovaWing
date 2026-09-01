@@ -62,6 +62,8 @@ namespace
 	constexpr int boss_bgm_volume = 150;
 	//リザルトBGM
 	constexpr int result_bgm_volume = 150;
+	//ゲームオーバーBGM
+	constexpr int gameover_bgm_volume = 150;
 	//リザルトのカーテン演出音
 	constexpr int data_appear_volume = 125;
 	//決定音
@@ -203,6 +205,10 @@ void SoundManager::Init()
 	InitData(SoundType::ResultBGM,
 		ResourceLoader::SoundID::ResultBGM,
 		true, result_bgm_volume, true);
+	//ゲームオーバーBGM(ループ)
+	InitData(SoundType::GameoverBGM,
+		ResourceLoader::SoundID::GameoverBGM,
+		true, gameover_bgm_volume, true);
 	//リザルトのカーテン演出音
 	InitData(SoundType::DataAppear,
 		ResourceLoader::SoundID::DataAppear,

@@ -64,6 +64,10 @@ namespace
 
 	//ゲージの最大値
 	constexpr float max_gauge = 100.0f;
+
+	//モデルの羽のボーン名
+	constexpr const wchar_t* left_wing_bone_name = L"Collider7";
+	constexpr const wchar_t* right_wing_bone_name = L"Collider6";
 } // namespace
 
 Player::Player(
@@ -191,6 +195,16 @@ void Player::Update()
 	// ちょっとずれているのでオフセットで修正
 	Vector3 collPos = m_pos + coll_sphere_offset;
 	m_collSphere.Update(collPos, coll_sphere_radius);
+
+	//プレイヤーが海すれすれにいたら、羽の位置を基準に
+	//海面に水しぶきのエフェクトを出す
+	//プレイヤーの羽のボーン位置を取得
+	VECTOR leftWingPos = MV1GetFramePosition(m_modelHandle, MV1SearchFrame(
+		m_modelHandle, left_wing_bone_name));//左の羽の位置を取得
+	VECTOR rightWingPos = MV1GetFramePosition(m_modelHandle, MV1SearchFrame(
+		m_modelHandle, right_wing_bone_name));//右の羽の位置を取得
+
+	//この二つの位置に水しぶきのエフェクトを出す
 
 #ifdef _DEBUG
 	// ボタンでゲージを減らしたり増やしたりできるようにする
@@ -363,6 +377,15 @@ void Player::Draw()
 
 	// 当たり判定の球を描画
 	m_collSphere.Draw(0xff0000);
+
+	VECTOR leftWingPos = MV1GetFramePosition(m_modelHandle, MV1SearchFrame(
+		m_modelHandle, left_wing_bone_name));//左の羽の位置を取得
+	VECTOR leftWingScreenPos = ConvWorldPosToScreenPos(leftWingPos);//左羽の位置をスクリーン座標に変換
+	//左羽の位置に丸を表示
+	DrawCircle(
+		static_cast<int>(leftWingScreenPos.x),
+		static_cast<int>(leftWingScreenPos.y),
+		10, GetColor(255, 0, 0), true);
 #endif
 }
 

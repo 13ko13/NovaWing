@@ -141,6 +141,7 @@ public:
 		GameBGM,//ゲームBGM
 		BossBGM,//ボスBGM
 		ResultBGM,//リザルトBGM
+		GameoverBGM,//ゲームオーバーBGM
 
 		//リザルト
 		DataAppear,//カーテン演出音

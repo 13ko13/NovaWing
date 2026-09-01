@@ -15,9 +15,9 @@
 namespace
 {
 	//ワームエネミー(頭・胴体共通)に接触した際のプレイヤーへのダメージ
-	constexpr int worm_contact_damage = 1;
+	constexpr int worm_contact_damage = 20;
 	//プレイヤーが岩に当たった時のダメージ
-	constexpr int hit_rock_damage = 1;
+	constexpr int hit_rock_damage = 20;
 	//プレイヤーがダメージを食らった時のカメラを揺らす力
 	constexpr float shake_power = 7.0f;
 	//プレイヤーがダメージを食らった時にどのくらいの時間カメラを揺らすか

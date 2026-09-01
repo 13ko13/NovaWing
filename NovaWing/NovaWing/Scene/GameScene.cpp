@@ -406,6 +406,12 @@ void GameScene::Update()
 		);
 	}
 
+	//プレイヤーが死亡したらゲームオーバーにする
+	if (m_pPlayer->IsDead())
+	{
+		m_controller.ChangeScene(std::make_shared<GameoverScene>(m_controller), frame_per_second);
+	}
+
 #ifdef _DEBUG
 	//Startボタンでリスタート
 	if (InputManager::GetInstance().IsTriggered(InputEvent::restart))

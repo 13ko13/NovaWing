@@ -203,4 +203,6 @@ namespace
 	constexpr const wchar_t* data_appear_se_path = L"Data/Sounds/Result/DataAppear.mp3";
 	//リザルトのスコア加算音
 	constexpr const wchar_t* score_count_se_path = L"Data/Sounds/Result/Score.mp3";
+	//ゲームオーバーBGM
+	constexpr const wchar_t* gameover_bgm_path = L"Data/Sounds/Result/GameoverBGM.mp3";
 }

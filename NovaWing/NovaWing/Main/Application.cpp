@@ -36,7 +36,13 @@ Application& Application::GetInstance()
 bool Application::Init()
 {
 	//ウィンドウモード設定
+#ifdef _DEBUG
+	//デバッグ中はウィンドウモードにする
+	ChangeWindowMode(true);
+#else
+	//リリース中はフルスクリーンにする
 	ChangeWindowMode(false);
+#endif
 	//ゲーム名
 	SetMainWindowText(L"NovaWing");
 	//画面サイズと色数を設定

@@ -3,8 +3,16 @@
 namespace Game
 {
 	//ゲーム形を作る際に必要な定数
+#ifdef _DEBUG
+	//デバッグ中はウィンドウモードにする
+	constexpr int screen_width = 1280;
+	constexpr int screen_height = 720;
+#else
 	constexpr int screen_width = 1920;
 	constexpr int screen_height = 1080;
+#endif
+	
+	
 	constexpr int color_bit_num = 32;
 
 	//海面からどれぐらい離れたところにプレイヤーを押し戻すか

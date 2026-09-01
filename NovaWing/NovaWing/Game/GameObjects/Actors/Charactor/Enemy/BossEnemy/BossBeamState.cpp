@@ -39,7 +39,7 @@ namespace
 	const Vector3 beam_hit_end_offset = Vector3(0.0f, 0.0f, -120.0f);
 
 	//ボスのビームのダメージ
-	constexpr int beam_damage = 1;
+	constexpr int beam_damage = 20;
 }
 
 BossBeamState::BossBeamState(std::weak_ptr<BossEnemy> pBoss,
