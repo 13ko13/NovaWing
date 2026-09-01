@@ -4,6 +4,7 @@
 #include "Game/GameObjects/Bullet/ChargeBullet.h"
 #include "Game/GameObjects/GameObject.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
+#include "Game/GameObjects/Camera/CameraBase.h"
 
 
 BulletManager::BulletManager()
@@ -23,18 +24,18 @@ void BulletManager::Update()
 			m_pAllBullets.end(),
 			[](const std::weak_ptr<BulletBase>& pBullet)
 			{
-				if(pBullet.lock() != nullptr) 
+				if (pBullet.lock() != nullptr)
 				{
 					return pBullet.lock()->IsDead();
 				}
 				return true;
 			}),
 			m_pAllBullets.end()
-		);
+	);
 }
 
 void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos,
-	const Vector3& vel, const int attackPower,
+	const Vector3& vel, const int attackPower, std::weak_ptr<CameraBase> pCamera,
 		std::weak_ptr<EnemyBase> pTarget)
 {
 	switch (bulletType)
@@ -43,7 +44,7 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 	{
 		//インスタンスを作成
 		std::shared_ptr<PlayerBullet> pBullet =
-			std::make_shared<PlayerBullet>(pos, vel, attackPower);
+			std::make_shared<PlayerBullet>(pos, vel, attackPower, pCamera);
 
 		//初期化
 		pBullet->Init();
@@ -59,7 +60,7 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 		//敵の弾も同様に作成
 		//インスタンスを作成
 		std::shared_ptr<EnemyBullet> pBullet =
-			std::make_shared<EnemyBullet>(pos, vel, attackPower);
+			std::make_shared<EnemyBullet>(pos, vel, attackPower, pCamera);
 
 		//初期化
 		pBullet->Init();
@@ -74,7 +75,7 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 	{
 		//チャージ弾はターゲットを受け取る必要がある
 		std::shared_ptr<ChargeBullet> pBullet =
-			std::make_shared<ChargeBullet>(pos, vel, attackPower, pTarget);
+			std::make_shared<ChargeBullet>(pos, vel, attackPower, pTarget, pCamera);
 
 		///初期化
 		pBullet->Init();

@@ -55,7 +55,7 @@ void NormalShootState::Update()
 		const Vector3 vel = -pPlayer->GetForward() * move_speed;				 // 速度
 
 		pBulletManager->CreateBullet(BulletManager::BulletType::PlayerBullet,
-									 pos, vel, attack_power);
+									 pos, vel, attack_power,pPlayer->GetCamera());
 
 		// 発射音を鳴らす
 		m_pSoundManager.lock()->Play(SoundManager::SoundType::NormalShoot);

@@ -1,10 +1,12 @@
 ﻿#pragma once
 #include "BulletBase.h"
+
+class CameraBase;
 class EnemyBullet : public BulletBase
 {
 public:
 	EnemyBullet(const Vector3& pos, const Vector3& vel,
-		const int attackPower);
+		const int attackPower,std::weak_ptr<CameraBase> pCamera);
 	~EnemyBullet();
 
 	void Update() override;//更新処理
@@ -17,4 +19,3 @@ private:
 	//Effekseerのエフェクト再生中のハンドル
 	int m_effectPlayHandle = -1;
 };
-

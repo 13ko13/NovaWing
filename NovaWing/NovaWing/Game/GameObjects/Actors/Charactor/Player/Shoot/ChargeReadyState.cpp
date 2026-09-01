@@ -90,7 +90,7 @@ void ChargeReadyState::Update()
 			std::weak_ptr<EnemyBase> pTarget = m_pPlayer.lock()->GetForcusTarget();
 
 			pBulletManager->CreateBullet(BulletManager::BulletType::ChargeBullet,
-										 pos, vel, attack_power, pTarget);
+										 pos, vel, attack_power, pPlayer->GetCamera(), pTarget);
 
 			// チャージショット発射音を鳴らす
 			m_pSoundManager.lock()->Play(SoundManager::SoundType::ChargeShoot);

@@ -10,6 +10,7 @@ class GameObject;
 struct Vector3;
 class BulletBase;
 class EnemyBase;
+class CameraBase;
 class BulletManager
 {
 public:
@@ -30,7 +31,7 @@ public:
 	//別クラスから種類を指定してもらってその弾を作成する
 	//ターゲットはデフォルトではNull,チャージショットの時のみターゲットを設定する
 	void CreateBullet(const BulletType bulletType, const Vector3& pos,
-		const Vector3& vel, const int attackPower,
+	const Vector3& vel, const int attackPower, std::weak_ptr<CameraBase> pCamera,
 		std::weak_ptr<EnemyBase> pTarget = std::weak_ptr<EnemyBase>());
 
 	//プレイヤー弾の配列のゲッター

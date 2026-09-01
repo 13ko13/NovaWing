@@ -2,6 +2,7 @@
 
 #include "BulletBase.h"
 #include "Manager/LightingManager.h"
+#include "Game/GameObjects/Camera/CameraBase.h"
 
 namespace
 {
@@ -11,10 +12,16 @@ namespace
 	const Vector3 model_size = Vector3(0.4f, 0.4f, 0.4f);
 }
 
-BulletBase::BulletBase(const Vector3& pos, const Vector3& vel, int attackPower, float radius):
+BulletBase::BulletBase(
+	const Vector3& pos,
+	const Vector3& vel,
+	int attackPower,
+	float radius,
+	std::weak_ptr<CameraBase> pCamera):
 	m_attackPower(attackPower),
 	m_lifeTime(0),
-	m_radius(radius)
+	m_radius(radius),
+	m_pCamera(pCamera)
 {
 	//位置を設定
 	SetPos(pos);
@@ -39,7 +46,18 @@ void BulletBase::Update()
 	{
 		OnDead();
 	}
-	//TODO:画面外判定を決めてそこを越えたら死亡判定にする
+
+	//カメラのfarを超えたら死亡にする
+	float far_clip = m_pCamera.lock()->GetFarClip();
+	//カメラと弾の間のベクトルの距離がfar_clipを超えたら
+	Vector3 cameraToBullet = m_pos - m_pCamera.lock()->GetPos();
+	float cameraToBulletDistance = cameraToBullet.Length();
+
+	if (cameraToBulletDistance > far_clip)
+	{
+		//消す
+		OnDead();
+	}
 
 	//球の位置を更新
 	m_sphere.Update(m_pos, m_radius);

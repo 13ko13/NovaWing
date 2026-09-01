@@ -51,11 +51,9 @@ namespace
 
 	//1秒あたりのフレーム数
 	constexpr int frame_per_second = 60;
-	//プレイヤーの位置がどのあたりに行ったらクリアにするか(仮)
-	constexpr float clear_pos_z = 30000.0f;
 
 	//ボスを登場タイミングz座標(プレイヤー位置)
-	constexpr float boss_appear_z = 20000.0f;
+	constexpr float boss_appear_z = 27000.0f;
 
 	//地震のような強く長い揺れ
 	//ボス登場時のカメラを揺らす力

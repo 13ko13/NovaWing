@@ -96,6 +96,9 @@ public:
 	//倒した敵の数を取得
 	int GetDefeatedEnemyCount() const { return m_defeatedEnemyCount; }
 
+	//カメラ取得
+	std::weak_ptr<CameraBase> GetCamera() const { return m_pCamera; }
+
 private:
 	//回転の更新
 	void UpdateRotation();

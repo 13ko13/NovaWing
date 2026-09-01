@@ -8,8 +8,12 @@ namespace
 	constexpr float radius = 32.0f;
 }
 
-EnemyBullet::EnemyBullet(const Vector3& pos, const Vector3& vel, const int attackPower):
-	BulletBase(pos,vel,attackPower, radius)
+EnemyBullet::EnemyBullet(
+	const Vector3& pos,
+	const Vector3& vel,
+	const int attackPower,
+	std::weak_ptr<CameraBase> pCamera):
+	BulletBase(pos,vel,attackPower, radius,pCamera)
 {
 	//Effekseerのエフェクト再生を呼ぶ
 	m_effectPlayHandle = PlayEffekseer3DEffect(

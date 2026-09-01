@@ -128,7 +128,7 @@ void ChargeShootState::Update()
 
 			pBulletManager->CreateBullet(
 				BulletManager::BulletType::PlayerBullet,
-				pos, vel, attack_power);
+				pos, vel, attack_power, pPlayer->GetCamera());
 
 			// 発射音を鳴らす
 			m_pSoundManager.lock()->Play(SoundManager::SoundType::NormalShoot);

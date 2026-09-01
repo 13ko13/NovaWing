@@ -10,11 +10,11 @@
 namespace
 {
 	// 手前のレティクルの大きさ
-	constexpr double front_reticle_size = 0.2;
+	constexpr double front_reticle_size = 0.3;
 	// 奥のレティクルの大きさ
-	constexpr double depth_reticle_size = 0.1;
+	constexpr double depth_reticle_size = 0.15;
 	// チャージレティクルの大きさ
-	constexpr double charge_reticle_size = 0.2;
+	constexpr double charge_reticle_size = 0.3;
 
 	// フォーカスのアルファ値が1フレームでどれぐらい変化するか
 	constexpr float focus_alpha_speed = 25.0f;

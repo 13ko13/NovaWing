@@ -6,6 +6,7 @@
 #include "LeaveState.h"
 #include "Manager/BulletManager.h"
 #include "Manager/SoundManager.h"
+#include "Game/GameObjects/Camera/CameraBase.h"
 
 namespace
 {
@@ -79,10 +80,14 @@ void ActiveState::Update()
 		toPlayerDir = toPlayerDir.Normalized();
 		//方向に速度をかける
 		Vector3 shootVel = toPlayerDir * bullet_speed;
+
+		//敵からカメラを取得
+		std::shared_ptr<CameraBase> pCamera = m_pEnemy.lock()->GetCamera().lock();
+
 		//弾管理者に発射を依頼
 		pBulletManager->CreateBullet(
 			BulletManager::BulletType::EnemyBullet,//敵の弾
-			shootPos, shootVel, bullet_power);//発射位置と速度と攻撃力
+			shootPos, shootVel, bullet_power, pCamera);//発射位置と速度と攻撃力
 
 		//発射音を鳴らす
 		pEnemy->GetSoundManager().lock()->Play(SoundManager::SoundType::EnemyShoot);

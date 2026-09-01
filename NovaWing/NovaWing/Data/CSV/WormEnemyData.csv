@@ -1,4 +1,10 @@
 modelID,x,y,z,segmentCount,direction,activatePlayerZ
 WormHead,0,500,-1200,5,1,3000
-WormHead,200,500,2900,5,-1,100
+WormHead,200,500,2900,5,-1,5000
 WormHead,-300,300,5000,7,-1,2000
+WormHead,0,700,-1200,5,1,3000
+WormHead,200,400,2900,5,-1,10000
+WormHead,-300,1000,5000,7,-1,2000
+WormHead,0,200,-100,5,-1,3000
+WormHead,200,300,10000,5,1,8000
+WormHead,-300,800,20000,7,1,15000

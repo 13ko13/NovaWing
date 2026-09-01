@@ -9,8 +9,9 @@ namespace
 }
 
 PlayerBullet::PlayerBullet(
-	const Vector3& pos, const Vector3& vel,const int attackPower) :
-	BulletBase(pos,vel,attackPower, radius)
+	const Vector3& pos, const Vector3& vel,const int attackPower,
+	std::weak_ptr<CameraBase> pCamera) :
+	BulletBase(pos,vel,attackPower, radius,pCamera)
 {
 	//Effekseerのエフェクト再生を呼ぶ
 	m_effectPlayHandle = PlayEffekseer3DEffect(

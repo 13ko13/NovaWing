@@ -4,10 +4,17 @@
 #include "Game/GameObjects/GameObject.h"
 #include "Utility/Sphere.h"
 
+class CameraBase;
 class BulletBase : public GameObject
 {
 public:
-	BulletBase(const Vector3& pos,const Vector3& vel,int attackPower,float radius);
+	BulletBase(
+		const Vector3& pos,
+		const Vector3& vel,
+		int attackPower,
+		float radius,
+		std::weak_ptr<CameraBase> pCamera
+	);
 	virtual ~BulletBase();
 
 	virtual void Update();//更新処理
@@ -25,6 +32,9 @@ public:
 protected:
 	//当たり判定用の球
 	Sphere m_sphere;
+
+	//カメラ
+	std::weak_ptr<CameraBase> m_pCamera;
 
 	//攻撃力
 	int m_attackPower = 0;

@@ -10,8 +10,13 @@ namespace
 	constexpr float radius = 32.0f;
 }
 
-ChargeBullet::ChargeBullet(const Vector3& pos, const Vector3& vel, int attackPower, std::weak_ptr<GameObject> pTarget):
-	BulletBase(pos,vel,attackPower,radius),
+ChargeBullet::ChargeBullet(
+	const Vector3& pos,
+	const Vector3& vel,
+	int attackPower,
+	std::weak_ptr<GameObject> pTarget,
+	std::weak_ptr<CameraBase> pCamera):
+	BulletBase(pos,vel,attackPower,radius,pCamera),
 	m_pTarget(pTarget)
 {
 	m_speed = vel.Length();

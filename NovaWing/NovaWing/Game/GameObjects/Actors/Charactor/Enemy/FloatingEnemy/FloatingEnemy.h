@@ -49,6 +49,9 @@ public:
 	//サウンドマネージャー取得
 	std::weak_ptr<SoundManager> GetSoundManager() const { return m_pSoundManager; }
 
+	//カメラを取得
+	std::weak_ptr<CameraBase> GetCamera() const { return m_pCamera; }
+
 private:
 	//敵の描画(シェーダ適応も含めた)
 	void DrawEnemy();

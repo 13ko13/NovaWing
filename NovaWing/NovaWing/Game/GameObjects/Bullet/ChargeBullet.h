@@ -1,9 +1,16 @@
 ﻿#pragma once
 #include "BulletBase.h"
+
+class CameraBase;
 class ChargeBullet :  public BulletBase
 {
 public:
-	ChargeBullet(const Vector3& pos, const Vector3& vel, int attackPower,std::weak_ptr<GameObject> pTarget);
+	ChargeBullet(
+		const Vector3& pos,
+		const Vector3& vel,
+		int attackPower,
+		std::weak_ptr<GameObject> pTarget,
+		std::weak_ptr<CameraBase> pCamera);
 	~ChargeBullet();
 
 	void Update() override;//更新処理
