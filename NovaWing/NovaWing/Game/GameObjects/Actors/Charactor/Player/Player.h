@@ -99,6 +99,11 @@ public:
 	//カメラ取得
 	std::weak_ptr<CameraBase> GetCamera() const { return m_pCamera; }
 
+	//Xの回転角取得
+	float GetRotationX() const { return m_rotationX; }
+	//Yの回転角取得
+	float GetRotationY() const { return m_rotationY; }
+
 private:
 	//回転の更新
 	void UpdateRotation();

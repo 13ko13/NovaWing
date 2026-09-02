@@ -40,6 +40,12 @@ InputManager::InputManager() :
 	m_inputTable[InputEvent::next] = { {PeripheralType::keyboard, KEY_INPUT_A}, // キーボード:下矢印
 									  {PeripheralType::pad1, PAD_INPUT_A} };	  // パッド:スティック下又は十字下
 
+	m_inputTable[InputEvent::pause] = { {PeripheralType::pad1, PAD_INPUT_R} };//STARTボタン
+
+	m_inputTable[InputEvent::close] = { {PeripheralType::pad1, PAD_INPUT_B } };//Bボタン
+
+	m_inputTable[InputEvent::how_to] = { {PeripheralType::pad1, PAD_INPUT_L } };//LBボタン
+
 #ifdef _DEBUG
 	m_inputTable[InputEvent::restart] = { {PeripheralType::pad1, PAD_INPUT_R} };			// パッド:スティック右又は十字右
 	m_inputTable[InputEvent::gaugeUp] = { {PeripheralType::keyboard, KEY_INPUT_UP} };		// キーボード:上

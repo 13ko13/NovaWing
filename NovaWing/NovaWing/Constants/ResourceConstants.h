@@ -78,6 +78,10 @@ namespace
 	constexpr const wchar_t* special_gauge_frame_path = L"Data/Image/SpecialGauge/Special_Frame.png";
 	//スペシャルゲージの画像
 	constexpr const wchar_t* special_gauge_path = L"Data/Image/SpecialGauge/Special_Gauge.png";
+	//ゲームに戻る選択肢の画像
+	constexpr const wchar_t* back_game_path = L"Data/Image/SelectFrame/Back_Game.png";
+	//カーソルが乗っているときのゲームに戻る選択肢の画像
+	constexpr const wchar_t* back_game_on_cursor_path = L"Data/Image/SelectFrame/Back_Game_OnCursor.png";
 
 	//---------- エフェクトのパス ----------
 	constexpr const wchar_t* player_bullet_effect_path = L"Data/Effect/PlayerBullet/PlayerBullet.efk";
@@ -100,6 +104,8 @@ namespace
 	constexpr const wchar_t* hit_effect_path = L"Data/Effect/HitEffect/HitEffect.efk";
 	//ボスの死亡エフェクト
 	constexpr const wchar_t* boss_death_eff_path = L"Data/Effect/BossDeath/BossDeath.efk";
+	//ブーストのエフェクト
+	constexpr const wchar_t* boost_effect_path = L"Data/Effect/Boost/Boost.efk";
 
 	//---------- CSV上でのモデル識別文字列 ----------
 	constexpr const wchar_t* rock1_csv_name = L"Rock1";
@@ -123,6 +129,7 @@ namespace
 	constexpr float boss_shield_eff_scale = 4.0f;
 	constexpr float hit_effect_scale = 2.0f;
 	constexpr float boss_death_eff_scale = 1.0f;
+	constexpr float boost_effect_scale = 1.0f;
 
 	//----------フォント系-----------------
 	//ファイル場所

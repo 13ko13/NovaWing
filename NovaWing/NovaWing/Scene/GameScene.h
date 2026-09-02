@@ -45,6 +45,9 @@ private:
 	//ボス死亡時のBGMフェードアウト済みか
 	bool m_isBossDeathBGMFadeOut = false;
 
+	//操作説明の出てくる演出の進行度
+	float m_howToControllOpenProgress = 0.0f;
+
 	//ボス登場時の演出ステート
 	enum class BossApearState
 	{

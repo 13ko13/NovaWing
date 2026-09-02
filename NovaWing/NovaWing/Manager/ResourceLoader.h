@@ -77,6 +77,9 @@ public:
 
 		SpecialGaugeFrame,//プレイヤーのスペシャルゲージの枠
 		SpecialGauge,//スペシャルゲージ
+
+		BackGame,//ゲームに戻る
+		BackGameOnCursor,//カーソルが乗っているときのゲームに戻る
 	};
 
 	//エフェクトの種類
@@ -95,6 +98,7 @@ public:
 		BossShield,//ボスのシールドエフェクト
 		HitEffect,//被弾時エフェクト(敵味方共通)
 		BossDeath,//ボスの死亡エフェクト
+		Boost,//ブーストエフェクト
 	};
 
 	//音の種類

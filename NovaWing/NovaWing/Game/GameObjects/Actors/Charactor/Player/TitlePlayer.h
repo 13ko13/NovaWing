@@ -24,6 +24,9 @@ public:
 	//宙返りが終了しているかを返す
 	bool IsSomersaultEnd();
 
+	//見た目通りの前方向・後方向が欲しいときはこちらを使う
+	Vector3 GetVisualForward() const { return GetBack(); }
+
 private:
 	enum class Phase
 	{
@@ -35,4 +38,6 @@ private:
 
 	//宙返りの時間管理用
 	int m_somersaultFrame = 0;
+
+	int m_boostPlayEffect = -1;
 };

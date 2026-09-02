@@ -68,6 +68,10 @@ namespace
 	//モデルの羽のボーン名
 	constexpr const wchar_t* left_wing_bone_name = L"Collider7";
 	constexpr const wchar_t* right_wing_bone_name = L"Collider6";
+
+	//宙返りを使用できるゲージ量
+	constexpr float somersoult_use_gauge = 50.0f;
+
 } // namespace
 
 Player::Player(
@@ -263,9 +267,17 @@ void Player::Somersault(InputManager& input)
 		static_cast<float>(input.GetBufX()) / stick_input_max,
 		static_cast<float>(input.GetBufY()) / stick_input_max};
 
+	bool isSomersoult = false;
+	if (std::dynamic_pointer_cast<SomersaultState>(m_pSpecialState))
+	{
+		isSomersoult = true;
+	}
+
 	// 宙返りボタンが押されていたらステートをそれぞれ切り替える
 	if (input.IsTriggered(InputEvent::somersault) &&
-		stick.m_y < somersault_stick_threshold)
+		stick.m_y < somersault_stick_threshold && 
+		m_gauge > somersoult_use_gauge && 
+		!isSomersoult)
 	{
 		// 射撃のみできるようにする
 		// 全ての入った時の処理も呼ぶ

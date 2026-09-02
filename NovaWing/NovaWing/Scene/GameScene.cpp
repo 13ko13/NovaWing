@@ -43,6 +43,7 @@
 #include "Manager/LightingManager.h"
 #include "Manager/SoundManager.h"
 #include "Game/UI/SpecialGaugeUI.h"
+#include "PauseScene.h"
 
 namespace
 {
@@ -88,6 +89,11 @@ namespace
 
 	//ボス死亡待機状態になった時のBGMのフェードアウトにかける時間
 	constexpr float boss_death_bgm_fade_out_time = 30.0f;
+
+	//操作説明を隠してる状態の時の位置
+	const Vector2 hide_how_to_pos = Vector2(-100.0f, 600.0f);
+	//出現状態の時の位置
+	const Vector2 appear_how_to_pos = Vector2(200.0f, 600.0f);
 }
 
 GameScene::GameScene(SceneController& controller) :
@@ -412,6 +418,23 @@ void GameScene::Update()
 		m_controller.ChangeScene(std::make_shared<GameoverScene>(m_controller), frame_per_second);
 	}
 
+	//pauseをsceneに上乗せする
+	if (InputManager::GetInstance().IsTriggered(InputEvent::pause))
+	{
+		m_controller.PushScene(std::make_shared<PauseScene>(m_controller));
+	}
+
+	//HowToボタンを長押ししていたら
+	if (InputManager::GetInstance().IsPressed(InputEvent::how_to))
+	{
+		m_howToControllOpenProgress++;
+	}
+	else
+	{
+		m_howToControllOpenProgress--;
+	}
+	m_howToControllOpenProgress = std::clamp(m_howToControllOpenProgress, 0.0f, 1.0f);
+
 #ifdef _DEBUG
 	//Startボタンでリスタート
 	if (InputManager::GetInstance().IsTriggered(InputEvent::restart))
@@ -461,6 +484,8 @@ void GameScene::Draw()
 	//レティクルよりプレイヤーが優先的に描画されてほしいので
 	//プレイヤーをもう一度描画する
 	m_pPlayer->Draw();
+
+	
 
 	//Effekseerのエフェクト描画
 	DrawEffekseer3D();

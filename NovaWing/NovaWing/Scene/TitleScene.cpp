@@ -1,6 +1,7 @@
 ﻿#include <algorithm>
 #include <memory>
 #include <cmath>
+#include <EffekseerForDXLib.h>
 
 #include "TitleScene.h"
 #include "Manager/InputManager.h"
@@ -179,6 +180,10 @@ void TitleScene::Update()
 
 	//サウンドマネージャーの更新
 	m_pSoundManager->Update();
+
+	//Effekseerのエフェクト更新
+	Effekseer_Sync3DSetting();
+	UpdateEffekseer3D();
 	
 	switch (m_phase)
 	{
@@ -360,6 +365,9 @@ void TitleScene::Draw()
 
 	//ウィンドウサイズ
 	Size wsize = Application::GetInstance().GetWindowSize();
+
+	//Effekseerのエフェクト描画
+	DrawEffekseer3D();
 
 
 	//ロゴ演出フェーズになってからロゴを描画

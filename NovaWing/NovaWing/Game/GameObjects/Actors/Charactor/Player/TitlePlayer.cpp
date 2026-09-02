@@ -1,4 +1,5 @@
 ﻿#include <DxLib.h>
+#include <EffekseerForDXLib.h>
 
 #include "TitlePlayer.h"
 #include "Constants/ShaderRegister.h"
@@ -7,9 +8,9 @@
 namespace
 {
 	//前進フェーズで進む速度
-	constexpr float move_speed = 10.0f;
+	constexpr float move_speed = 20.0f;
 	//ブーストフェーズで進む速度
-	constexpr float boost_speed = 30.0f;
+	constexpr float boost_speed = 70.0f;
 
 	// モデルのサイズ
 	const Vector3 model_scale = { 0.3f, 0.3f, 0.3f };
@@ -21,7 +22,10 @@ namespace
 	constexpr float somersault_move_speed = 20.0f;
 
 	//プレイヤーの初期位置
-	const Vector3 first_pos = Vector3(0.0f, 300.0f, 3100.0f);
+	const Vector3 first_pos = Vector3(0.0f, 300.0f, 2500.0f);
+
+	//ブーストエフェクトのオフセット位置
+	const Vector3 boost_effect_offset_pos = Vector3(0.0f, 0.0f, -200.0f);
 }
 
 TitlePlayer::TitlePlayer(
@@ -82,6 +86,19 @@ void TitlePlayer::Update()
 	case Phase::Boost:
 		//前に進む
 		SetVel(Vector3(0.0f, 0.0f, boost_speed));
+
+		//プレイヤーより少し後ろの位置にエフェクトを出す
+		VECTOR effectPos = (
+			m_pos + GetVisualForward() * 
+			boost_effect_offset_pos.m_z).ToDxLib();
+
+		//エフェクトの位置
+		SetPosPlayingEffekseer3DEffect(
+			m_boostPlayEffect,
+			effectPos.x,
+			effectPos.y,
+			effectPos.z
+		);
 		break;
 	}
 
@@ -131,6 +148,9 @@ void TitlePlayer::StartSomersault()
 
 void TitlePlayer::StartBoost()
 {
+	//ブーストエフェクトを出す
+	int boostEffectH = ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::Boost);
+	m_boostPlayEffect = PlayEffekseer3DEffect(boostEffectH);
 	//ブーストステートに遷移
 	m_phase = Phase::Boost;
 }

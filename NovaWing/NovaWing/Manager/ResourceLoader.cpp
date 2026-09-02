@@ -411,6 +411,16 @@ void ResourceLoader::KeepGraph()
 	handle = LoadGraph(special_gauge_path);
 	assert(handle >= 0);
 	m_graphicHandles[ResourceLoader::GraphicID::SpecialGauge] = handle;
+
+	//ゲームに戻る選択肢の画像
+	handle = LoadGraph(back_game_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::BackGame] = handle;
+
+	//カーソルが乗っているときのゲームに戻る選択肢の画像
+	handle = LoadGraph(back_game_on_cursor_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::BackGameOnCursor] = handle;
 }
 
 void ResourceLoader::KeepEffect()
@@ -480,6 +490,11 @@ void ResourceLoader::KeepEffect()
 	handle = LoadEffekseerEffect(boss_death_eff_path, boss_death_eff_scale);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::BossDeath] = handle;
+
+	//ブーストエフェクト
+	handle = LoadEffekseerEffect(boost_effect_path, boost_effect_scale);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::Boost] = handle;
 }
 
 void ResourceLoader::KeepSound()
