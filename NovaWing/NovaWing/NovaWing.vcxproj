@@ -176,6 +176,7 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\TitlePlayer.cpp" />
     <ClCompile Include="Manager\SoundManager.cpp" />
     <ClCompile Include="Game\UI\SpecialGaugeUI.cpp" />
+    <ClCompile Include="Scene\PauseScene.cpp" />
     <ClCompile Include="Utility\GraphShaderDraw.cpp" />
     <ClCompile Include="Scene\ClearScene.cpp" />
     <ClCompile Include="CSVData\CSVData.cpp" />
@@ -266,6 +267,7 @@
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\TitlePlayer.h" />
     <ClInclude Include="Manager\SoundManager.h" />
     <ClInclude Include="Game\UI\SpecialGaugeUI.h" />
+    <ClInclude Include="Scene\PauseScene.h" />
     <ClInclude Include="Utility\GraphShaderDraw.h" />
     <ClInclude Include="Scene\ClearScene.h" />
     <ClInclude Include="CSVData\CSVData.h" />

@@ -1,5 +1,4 @@
 modelID,x,y,z,hp
-FloatingEnemy,100,100,3000,5
 FloatingEnemy,180,300,8000,5
 FloatingEnemy,-180,300,8000,5
 FloatingEnemy,-200,700,14000,5
