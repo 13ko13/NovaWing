@@ -579,3 +579,59 @@
 ## 参考: コスト表について
 
 進捗管理はリポジトリ直下の`NovaWing_詳細.xlsx`が本体（Teams側は参照しない）。Claudeは`.xlsx`を直接読めないため、PowerShellのExcel COMオブジェクト経由で読み書きする（Excelで開いたままだとロックされるため閉じてもらう）。コミットはユーザー自身が行う。
+
+### 進捗（フルスクリーン化に伴うUI座標修正、流れ弾誤射バグ修正、ポーズシーン実装、操作説明UI着手）
+
+**背景: 解像度を1280×720からフルスクリーン(1920×1080)に変更したところ、UIの位置・サイズが画面左上に小さく寄って見える不具合が発生。**
+
+**原因:** UI要素の座標・サイズが「画面解像度に対する比率」ではなく「1280×720基準の固定ピクセル値」で書かれていたため。`TitleScene`は既に`wsize.m_width * ratio_x`という比率方式だったが、`PlayerHPGaugeUI`/`BossHPGaugeUI`（位置）、`HPGaugeUIBase`（サイズ）、`ClearScene`のリザルトテキスト4項目・ボタン類は固定値のままだった。
+
+**対応方針:** 位置は「1280×720時点でどこに見えていたか」を比率(0〜1)に逆算して`_ratio`変数に置き換え、`wsize.m_width`/`wsize.m_height`を掛けて計算する形に統一。サイズ(スケール値)は理論値(×1.5)をベースに、実機で見た目を確認しながら微調整する方針で対応（`HPGaugeUIBase`の`hp_frame_size`/`hp_gauge_size`は理論値0.45では小さすぎたため、最終的に0.55に調整して確定）。
+
+**対応済み:** `PlayerHPGaugeUI`/`BossHPGaugeUI`の位置、`HPGaugeUIBase`のサイズ、`ClearScene`のリザルトテキスト位置（通常描画・ぼかし描画の両方）、`TitleScene`/`GameoverScene`/`ClearScene`の選択肢・ボタン位置は全て比率化済みで確認済み。
+**残タスク:** `TitleScene`/`GameoverScene`/`ClearScene`の各種`_scale`定数（`select_graph_scale`、`background_graph_scale`、`a_button_scale`等）はまだ画面解像度に応じた調整が済んでいないものが残っている可能性があるため、実機で見比べながら要確認。
+
+### 進捗（FloatingEnemyの配置が実行のたびに消える問題→流れ弾による誤射と判明、Far距離での弾消去を実装）
+
+**発端:** `FloatingEnemyData.csv`のZ=14000に配置した4体の敵が、実行するたびに何体か消えている現象が発覚。原因調査で`GameObjectManager`/`TargetManager`/`CollisionManager`等を広く調査したが、最終的にユーザー自身が「弾が奥まで飛んで敵に当たって死んでいるだけ」と気づいて解決。
+
+**対応: 弾がカメラのFarクリップ距離を超えたら自動的に消える仕組みを実装。**
+- `BulletBase`/`BulletManager`/`PlayerBullet`/`ChargeBullet`/`EnemyBullet`のコンストラクタ・`CreateBullet()`に`weak_ptr<CameraBase>`を追加で配線（当初`weak_ptr<GameCamera>`型で設計していたが、`BulletBase`が実際に使うのは`CameraBase`の`GetFarClip()`/`GetPos()`だけなので、途中で`CameraBase`型に統一する設計変更を行い、キャストの手間を削減）。
+- `BulletBase::Update()`に「カメラ位置と弾位置の距離が`GetFarClip()`を超えたら`OnDead()`」という判定を追加。
+- 呼び出し元5箇所（`NormalShootState`/`ChargeShootState`/`ChargeReadyState`/`WormEnemy`/`FloatingEnemy`の`ActiveState`）それぞれにカメラを渡す配線が必要になり、`Player`/`FloatingEnemy`に`GetCamera()`ゲッターを新設して対応。`WormEnemy`は`Actor`のprotectedな`m_pCamera`を直接使えるため配線不要だった。
+- ユーザー自身が実装、Claudeはファイル確認とレビューに徹する形で進めた（[[feedback_no_direct_code_edit]]のルール通り）。
+
+**残タスク:** 特になし、この機能は完成・動作確認済み。
+
+### 進捗（Boostエフェクト追加、シーン切り替え時のEffekseerエフェクト残留バグ修正）
+
+**Boostエフェクト（ブースト中に噴射エフェクトを出す）を新規実装、完成。**
+- `ResourceLoader`に`EffectID::Boost`を追加、`Data/Effect/Boost/Boost.efk`をロード。
+- `BoostState`に`Update()`をオーバーライドして追加する際、基底クラス`GaugeActionStateBase::Update()`の呼び出しを書き忘れ、ブースト中の移動・ゲージ消費処理が完全に失われてプレイヤーが動かなくなるバグが発生→`GaugeActionStateBase::Update()`を明示的に呼ぶ形で解決。
+- エフェクトの位置をワールド座標の固定オフセット(`Vector3(0,0,-200)`加算)で計算していたため、プレイヤーが回転すると位置がズレる不具合が発生→過去の`ChargeReadyState`と同じ教訓（`GetVisualForward()`等、回転を反映した方向ベクトルを使う）で解決。
+- エフェクトの**向き**をプレイヤーの回転に追従させたい要望があり、`SetRotationPlayingEffekseer3DEffect`（オイラー角X/Y/Zのみ、Quaternion非対応）を使用。`Player`が既に持つ`m_rotationX`/`m_rotationY`（オイラー角）をそのまま使えたため、Quaternion→オイラー角の変換は不要だった。`Player.h`に`GetRotationX()`/`GetRotationY()`ゲッターを新設。Y軸には`DX_PI_F`のオフセットが必要だった（プレイヤーモデルが逆向きに作られているため）。
+
+**シーン切り替え（リトライ等）時にEffekseerエフェクトが再生されたまま残るバグを修正。**
+- EffekseerForDXLibには「全エフェクトを一括停止する」関数が無いため、個別ハンドルのStopではなく、**根本原因（古いシーンのオブジェクトが破棄されるタイミングの問題）を直す方針**で対応。
+- 原因: `GameObjectManager`はシングルトンで`ClearAll()`は新シーンの`Init()`内で呼ばれていたが、`SceneController::ResetScene()`で古いシーンの`shared_ptr`を`clear()`する際、`GameObjectManager`側がまだ古いオブジェクトへの参照を握ったままのため、古いオブジェクトのデストラクタ（`StopEffekseer3DEffect`を呼ぶ処理を含む）が正しいタイミングで呼ばれていなかった。
+- 対処: `GameObjectManager::ClearAll()`の呼び出しを、新シーンの`GameScene::Init()`からではなく、`SceneController::ResetScene()`の`m_scenes.clear()`の**直前**に移動。順序を「古いオブジェクト全解放→新シーン生成」に修正して解決。
+
+**残タスク:** 特になし、両機能とも完成。
+
+### 進捗（ポーズシーン実装、操作説明UI着手・途中）
+
+**`PauseScene`（`SceneController::PushScene`でゲームシーンに重ねる方式）を新規実装、「ゲームに戻る」「タイトルに戻る」の2択が完成。**
+- `GameoverScene`の実装パターン（カーテンで開く背景演出＋ワイプでカーソルオン画像に切り替える演出）をそのまま踏襲する方針で、変数名の対応表を使って移植する形で進めた。
+- 画像は`GraphicID::BackGame`/`BackGameOnCursor`（新規登録）、`BackTitle`/`BackTitleOnCursor`（既存流用）を使用。
+- **ハマった点1**: `SceneController::PushScene()`が`Init()`を呼んでいなかったため、`PauseScene`のシェーダバッファ等が未初期化のままアクセスされ`nullptr`例外が発生。既存の`ResetScene`/`ChangeScene`が`SceneController`側で`Init()`を呼ぶ設計と一貫性を持たせるため、`PushScene()`にも`scene->Init()`を追加して解決。
+- **ハマった点2**: `Select` enumに`HowToControll`という3番目の選択肢を用意していたが、`Draw()`の`switch(m_select)`に対応する`case`を書き忘れており、`HowToControll`を経由した際に選択肢画像が両方消える不具合が発生。最終的に`HowToControll`は使わない方針となり`Select` enumから削除、`BackGame`/`BackTitle`の2択に整理して解決。
+- **ハマった点3**: `Bボタンでポーズを閉じる`機能(`InputEvent::close`)を追加した際、`if (input.IsTriggered(InputEvent::close))`のブロックを誤って`if (... && input.IsTriggered(InputEvent::ok))`の**内側**に書いてしまい、「OKボタンとBボタンを同時押ししたときだけ閉じる」という意図しない動作になっていた。外側の独立したif文に出して解決。
+
+**操作説明UI（LBボタン長押しで左下からスライドイン、離すとスライドアウト）に着手・実装場所の認識違いあり、次回続き。**
+- 当初`PauseScene`側で実装しようとしていたが、正しくは**`GameScene`側（ポーズを開かなくてもゲームプレイ中に使える機能）**という認識のズレが発覚。`GameScene.h`には既に`m_howToControllOpenProgress`(0〜1の進行度)が用意されており、`GameScene.cpp`の`Update()`にも`InputEvent::how_to`(LBボタン、`InputManager`に新規登録済み)の押下判定・進行度の増減処理が実装されていた。
+- **発覚した未修正のバグ**: `m_howToControllOpenProgress++`/`--`が**1フレームあたり1.0**の増減になっており、0〜1のクランプと合わさって「ボタンを押した瞬間に一気に全開、離した瞬間に一気に全閉」という動作になってしまう（「にょきっとスライドする」演出になっていない）。`1.0f / 何らかのフレーム数`という緩やかな係数（他の`wipeProgress`と同じ考え方）に直す必要がある。**次回作業再開時、この修正がまだ反映されていないか確認すること。**
+
+**次回やること:**
+1. `m_howToControllOpenProgress`の増減を`++`/`--`ではなく緩やかな係数（例: `1.0f / 15.0f`等）に修正する。
+2. `m_howToControllOpenProgress`(0〜1)を使って、実際に操作説明画像を左下からスライドイン/アウトさせる`Draw()`側の実装（画面外の位置から目標位置までLerpで座標を計算する）はまだ未着手。
+3. 操作説明用の画像自体（`GraphicID::HowToControll`/`HowToControllOnCursor`は登録済みだが、内容がスライド演出向けかどうかは未確認）の内容確認。
