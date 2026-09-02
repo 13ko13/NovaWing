@@ -9,6 +9,7 @@
 #include "Manager/ResourceLoader.h"
 #include "Scene/TitleScene.h"
 #include "Utility/GraphShaderDraw.h"
+#include "Manager/SoundManager.h"
 
 namespace
 {
@@ -32,8 +33,9 @@ namespace
 	constexpr float black_graph_alpha = 126;
 }
 
-PauseScene::PauseScene(SceneController& controller) :
-	Scene(controller)
+PauseScene::PauseScene(SceneController& controller, std::weak_ptr<SoundManager> pSoundManager) :
+	Scene(controller),
+	m_pSoundManager(pSoundManager)
 {
 }
 
@@ -63,12 +65,16 @@ void PauseScene::Update()
 
 	InputManager& input = InputManager::GetInstance();
 
+	//借りているサウンドマネージャー(GameScene所有)。ポーズ中はGameScene::Updateが止まるので
+	//フェード等は進まないが、単発SEの再生には問題ない
+	auto pSound = m_pSoundManager.lock();
+
 	//選択肢のカーソルもこのフェーズ以外では触れないようにする
 	//下入力で選択肢を下に移動(indexを増やす) 
 	if (input.IsTriggered(InputEvent::down))
 	{
 		//カーソルが乗った時の音を鳴らす
-		//m_pSoundManager->Play(SoundManager::SoundType::OnCursor);
+		if (pSound) pSound->Play(SoundManager::SoundType::OnCursor);
 
 		//選択肢の最大数で割った余りを取ることで、
 		//選択肢の範囲内に収める
@@ -82,7 +88,7 @@ void PauseScene::Update()
 	if (input.IsTriggered(InputEvent::up))
 	{
 		//カーソルが乗った時の音を鳴らす
-		//m_pSoundManager->Play(SoundManager::SoundType::OnCursor);
+		if (pSound) pSound->Play(SoundManager::SoundType::OnCursor);
 
 		//選択肢の最大数で割った余りを取ることで、
 		//選択肢の範囲内に収める
@@ -104,6 +110,9 @@ void PauseScene::Update()
 	if (m_backGroundOpenFrame >= background_opne_max_frame &&
 		input.IsTriggered(InputEvent::ok))
 	{
+		//決定音を鳴らす
+		if (pSound) pSound->Play(SoundManager::SoundType::Decision);
+
 		switch (m_select)
 		{
 		case Select::BackGame:
@@ -128,6 +137,8 @@ void PauseScene::Update()
 		//Bボタンでも閉じるようにする
 		if (input.IsTriggered(InputEvent::close))
 		{
+			//決定音を鳴らす
+			if (pSound) pSound->Play(SoundManager::SoundType::Decision);
 			//ゲームに戻る(ポーズシーンを閉じるだけ)
 			m_controller.PopScene();
 		}

@@ -421,6 +421,11 @@ void ResourceLoader::KeepGraph()
 	handle = LoadGraph(back_game_on_cursor_path);
 	assert(handle >= 0);
 	m_graphicHandles[ResourceLoader::GraphicID::BackGameOnCursor] = handle;
+
+	//操作説明の画像
+	handle = LoadGraph(how_to_play_path);
+	assert(handle >= 0);
+	m_graphicHandles[ResourceLoader::GraphicID::HowToPlay] = handle;
 }
 
 void ResourceLoader::KeepEffect()
@@ -495,6 +500,11 @@ void ResourceLoader::KeepEffect()
 	handle = LoadEffekseerEffect(boost_effect_path, boost_effect_scale);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::Boost] = handle;
+
+	//羽の水しぶきエフェクト
+	handle = LoadEffekseerEffect(wing_splash_effect_path, wing_splash_effect_scale);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::WingSplash] = handle;
 }
 
 void ResourceLoader::KeepSound()

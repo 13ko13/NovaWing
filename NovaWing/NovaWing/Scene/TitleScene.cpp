@@ -17,6 +17,7 @@
 #include "Game/GameObjects/Camera/TitleCamera.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/WaterManager.h"
+#include "Manager/WaterRevealManager.h"
 #include "Game/BackGround/SkyBox.h"
 #include "Manager/LightingManager.h"
 #include "Manager/SoundManager.h"
@@ -135,6 +136,10 @@ void TitleScene::Init()
 	m_pTitleCamera->Init();
 	//プレイヤーにカメラをセット
 	m_pPlayer->SetCamera(m_pTitleCamera);
+
+	//前のシーン(GameScene)のキャプチャ内容がWaterManagerに透けて残るのを防ぐため
+	//キャプチャ画面を1度クリアしておく(タイトルではキャプチャパスを回さない)
+	WaterRevealManager::GetInstance().ClearCapture();
 
 	//水マネージャーの初期化
 	m_pWaterManager = std::make_shared<WaterManager>(m_pTitleCamera);

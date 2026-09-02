@@ -1,10 +1,19 @@
 ﻿#include "InputManager.h"
 #include <DxLib.h>
+#include <cmath>
 
 namespace
 {
 	constexpr int min_dedzone_r = 3000;	 // 右スティックの最小デッドゾーン
 	constexpr int max_dedzone_r = 28000; // 右スティックの最大デッドゾーン
+
+	// 左スティック(移動用)の最小デッドゾーン
+	constexpr int left_stick_deadzone = 8000;
+	// XInputのThumbLX/LY(±32768)を従来のGetBufX/Yのスケール(±1000)に合わせる係数
+	constexpr float left_stick_to_buf_scale = 1000.0f / 32768.0f;
+
+	// XINPUT_STATE::Buttonsの要素数
+	constexpr int xinput_button_num = 16;
 } // namespace
 
 InputManager::InputManager() :
@@ -15,39 +24,40 @@ InputManager::InputManager() :
 	m_bufY(0),
 	m_rightStickDir({ 0.0f, 0.0f })
 {
-	// イベント名を添え時にして、右辺値に実際の入力種別と押されたボタンの配列を置く
-	m_inputTable[InputEvent::ok] = { {PeripheralType::keyboard, KEY_INPUT_A}, // キーボード:エンターキー
-									{PeripheralType::pad1, PAD_INPUT_A} };	 // パッド:A
+	// イベント名を添え字にして、右辺値に実際の入力種別と押されたボタンの配列を置く
+	// パッド側はXINPUT_BUTTON_*(GetJoypadXInputStateのButtons配列のインデックス)を指定する
+	m_inputTable[InputEvent::ok] = { {PeripheralType::keyboard, KEY_INPUT_A}, // キーボード:A
+									{PeripheralType::pad1, XINPUT_BUTTON_A} };	 // パッド:Aボタン
 
 	m_inputTable[InputEvent::shoot] = { {PeripheralType::keyboard, KEY_INPUT_Z}, // キーボード:Z
-									   {PeripheralType::pad1, PAD_INPUT_B} };	// パッド:Bボタン
+									   {PeripheralType::pad1, XINPUT_BUTTON_B} };	// パッド:Bボタン
 
 	m_inputTable[InputEvent::somersault] = { {PeripheralType::keyboard, KEY_INPUT_Z}, // キーボード:Z
-											{PeripheralType::pad1, PAD_INPUT_X} };	 // パッド:Yボタン
+											{PeripheralType::pad1, XINPUT_BUTTON_DPAD_UP} };	 // パッド:十字キー上
 
 	m_inputTable[InputEvent::boost] = { {PeripheralType::keyboard, KEY_INPUT_Z}, // キーボード:Z
-									   {PeripheralType::pad1, PAD_INPUT_C} };	// パッド:?ボタン
+									   {PeripheralType::pad1, XINPUT_BUTTON_X} };	// パッド:Xボタン
 
 	m_inputTable[InputEvent::brake] = { {PeripheralType::keyboard, KEY_INPUT_Z}, // キーボード:Z
-									   {PeripheralType::pad1, PAD_INPUT_A} };	// パッド:Aボタン
+									   {PeripheralType::pad1, XINPUT_BUTTON_A} };	// パッド:Aボタン
 
 	m_inputTable[InputEvent::up] = { {PeripheralType::keyboard, KEY_INPUT_UP}, // キーボード:上矢印
-									{PeripheralType::pad1, PAD_INPUT_UP} };	  // パッド:スティック上又は十字上
+									{PeripheralType::pad1_lstick_up, 0} };	  // パッド:左スティック上
 
 	m_inputTable[InputEvent::down] = { {PeripheralType::keyboard, KEY_INPUT_DOWN}, // キーボード:下矢印
-									  {PeripheralType::pad1, PAD_INPUT_DOWN} };	  // パッド:スティック下又は十字下
+									  {PeripheralType::pad1_lstick_down, 0} };	  // パッド:左スティック下
 
-	m_inputTable[InputEvent::next] = { {PeripheralType::keyboard, KEY_INPUT_A}, // キーボード:下矢印
-									  {PeripheralType::pad1, PAD_INPUT_A} };	  // パッド:スティック下又は十字下
+	m_inputTable[InputEvent::next] = { {PeripheralType::keyboard, KEY_INPUT_A}, // キーボード:A
+									  {PeripheralType::pad1, XINPUT_BUTTON_A} };	  // パッド:Aボタン
 
-	m_inputTable[InputEvent::pause] = { {PeripheralType::pad1, PAD_INPUT_R} };//STARTボタン
+	m_inputTable[InputEvent::pause] = { {PeripheralType::pad1, XINPUT_BUTTON_START} };//STARTボタン
 
-	m_inputTable[InputEvent::close] = { {PeripheralType::pad1, PAD_INPUT_B } };//Bボタン
+	m_inputTable[InputEvent::close] = { {PeripheralType::pad1, XINPUT_BUTTON_B } };//Bボタン
 
-	m_inputTable[InputEvent::how_to] = { {PeripheralType::pad1, PAD_INPUT_L } };//LBボタン
+	m_inputTable[InputEvent::how_to] = { {PeripheralType::pad1, XINPUT_BUTTON_LEFT_SHOULDER } };//LBボタン
 
 #ifdef _DEBUG
-	m_inputTable[InputEvent::restart] = { {PeripheralType::pad1, PAD_INPUT_R} };			// パッド:スティック右又は十字右
+	m_inputTable[InputEvent::restart] = { {PeripheralType::pad1, XINPUT_BUTTON_START} };			// パッド:STARTボタン
 	m_inputTable[InputEvent::gaugeUp] = { {PeripheralType::keyboard, KEY_INPUT_UP} };		// キーボード:上
 	m_inputTable[InputEvent::gaugeDown] = { {PeripheralType::keyboard, KEY_INPUT_DOWN} }; // キーボード:下
 	m_inputTable[InputEvent::bossWarp] = { {PeripheralType::keyboard, KEY_INPUT_W} }; // キーボード:W
@@ -76,7 +86,11 @@ void InputManager::Update()
 	// まず入力情報を取得
 	char keyState[256];
 	GetHitKeyStateAll(keyState);					   // 生のキーボード情報
-	int padState = GetJoypadInputState(DX_INPUT_PAD1); // 生のPAD1情報
+
+	// XInputの状態をまとめて取得(ボタン・左右スティックすべてここから読む)
+	XINPUT_STATE xinputState;
+	GetJoypadXInputState(DX_INPUT_PAD1, &xinputState);
+
 	m_lastInputData = m_inputData;					   // 直前の入力を保存する(前のフレーム情報をコピー)
 	// すべての入力イベントをチェックします
 	// ここでinputDataが更新される
@@ -98,9 +112,17 @@ void InputManager::Update()
 				input = keyState[state.id];
 				break;
 			case PeripheralType::pad1:
-				// GetJoypadInputStateでとってきたビット情報を見て
-				// 登録されているビット情報と&を取り、そのビットが立っているかどうかを見る
-				input = (padState & state.id);
+				// state.idにはXINPUT_BUTTON_*が入っている。
+				// それをそのままButtons配列のインデックスとして使い、押されているか見る
+				input = xinputState.Buttons[state.id];
+				break;
+			case PeripheralType::pad1_lstick_up:
+				// 左スティックを上に倒しているか(ThumbLYは上方向が正)
+				input = (xinputState.ThumbLY > left_stick_deadzone);
+				break;
+			case PeripheralType::pad1_lstick_down:
+				// 左スティックを下に倒しているか
+				input = (xinputState.ThumbLY < -left_stick_deadzone);
 				break;
 			}
 			if (input) // 大事
@@ -112,16 +134,20 @@ void InputManager::Update()
 		}
 	}
 
-	// アナログスティック(左)の値を取得し続ける
-	GetJoypadAnalogInput(&m_bufX, &m_bufY, DX_INPUT_PAD1);
-	// アナログスティック(右)の値を取得し続ける
-	XINPUT_STATE input;
-	GetJoypadXInputState(DX_INPUT_PAD1, &input);
+	// 左スティック(移動用)をThumbLX/LYから取得する。
+	// デッドゾーン処理をしたうえで、従来のGetBufX/Yのスケール(±1000)に変換する
+	int rawLX = xinputState.ThumbLX;
+	int rawLY = xinputState.ThumbLY;
+	if (std::abs(rawLX) < left_stick_deadzone) rawLX = 0;
+	if (std::abs(rawLY) < left_stick_deadzone) rawLY = 0;
+	m_bufX = static_cast<int>(rawLX * left_stick_to_buf_scale);
+	// XInputのThumbLYは上方向が正。従来のGetJoypadAnalogInputは下方向が正だったので符号を反転する
+	m_bufY = static_cast<int>(-rawLY * left_stick_to_buf_scale);
 
-	// 右スティックの値をfloatに変換する
+	// 右スティックの値をfloatに変換する(上で取得済みのxinputStateを使う)
 	Vector2 result = {
-		static_cast<float>(input.ThumbRX),
-		static_cast<float>(input.ThumbRY) };
+		static_cast<float>(xinputState.ThumbRX),
+		static_cast<float>(xinputState.ThumbRY) };
 
 	// 入力ベクトルの長さを求める
 	float len = result.Length();
@@ -136,7 +162,7 @@ void InputManager::Update()
 
 	m_rightStickDir = result.Normalized() * lenRate;
 
-	//----------AnyKey,AnyButtonの処理-----------
+	//AnyKey,AnyButtonの処理
 	bool anyPressed = false;
 
 	// キーボード
@@ -151,10 +177,14 @@ void InputManager::Update()
 	}
 
 	// パッド
-	// padStateのビットが0以外ならどれかのボタンが押されていることになる
-	if (padState != 0)
+	// XInputの全ボタンをループ、どれか一つでも押されていたらtrueにする
+	for (int i = 0; i < xinput_button_num; i++)
 	{
-		anyPressed = true;
+		if (xinputState.Buttons[i])
+		{
+			anyPressed = true;
+			break;
+		}
 	}
 
 	// 結果を保存する

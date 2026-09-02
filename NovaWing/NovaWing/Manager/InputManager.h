@@ -40,7 +40,9 @@ namespace InputEvent
 enum class PeripheralType
 {
 	keyboard,
-	pad1
+	pad1,//XInput対応ゲームパッドのボタン
+	pad1_lstick_up,//左スティックを上に倒した(idは未使用)
+	pad1_lstick_down//左スティックを下に倒した(idは未使用)
 };
 
 /// <summary>
@@ -49,7 +51,7 @@ enum class PeripheralType
 struct InputState
 {
 	PeripheralType type;//入力された機器の種別
-	int id;//入力情報が入る(キーボードの場合はインデックス、パッドの場合はビット)
+	int id;//キーボード:キーコード / パッド:XINPUT_BUTTON_*(Buttons配列のインデックス) / 左スティック:未使用
 };
 
 /// <summary>

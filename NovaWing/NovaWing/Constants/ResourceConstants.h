@@ -82,6 +82,8 @@ namespace
 	constexpr const wchar_t* back_game_path = L"Data/Image/SelectFrame/Back_Game.png";
 	//カーソルが乗っているときのゲームに戻る選択肢の画像
 	constexpr const wchar_t* back_game_on_cursor_path = L"Data/Image/SelectFrame/Back_Game_OnCursor.png";
+	//操作説明の画像
+	constexpr const wchar_t* how_to_play_path = L"Data/Image/Button/HowTo.png";
 
 	//---------- エフェクトのパス ----------
 	constexpr const wchar_t* player_bullet_effect_path = L"Data/Effect/PlayerBullet/PlayerBullet.efk";
@@ -106,6 +108,8 @@ namespace
 	constexpr const wchar_t* boss_death_eff_path = L"Data/Effect/BossDeath/BossDeath.efk";
 	//ブーストのエフェクト
 	constexpr const wchar_t* boost_effect_path = L"Data/Effect/Boost/Boost.efk";
+	//羽の水しぶきのエフェクト	
+	constexpr const wchar_t* wing_splash_effect_path = L"Data/Effect/WingSplash/WingSplash.efk";
 
 	//---------- CSV上でのモデル識別文字列 ----------
 	constexpr const wchar_t* rock1_csv_name = L"Rock1";
@@ -130,6 +134,7 @@ namespace
 	constexpr float hit_effect_scale = 2.0f;
 	constexpr float boss_death_eff_scale = 1.0f;
 	constexpr float boost_effect_scale = 1.0f;
+	constexpr float wing_splash_effect_scale = 1.0f;
 
 	//----------フォント系-----------------
 	//ファイル場所

@@ -1,12 +1,16 @@
 ﻿#pragma once
 #include <array>
+#include <memory>
 
 #include "Scene.h"
+
+class SoundManager;
 
 class PauseScene : public Scene
 {
 public:
-	PauseScene(SceneController& controller);
+	//pSoundManagerはGameSceneから渡す(ポーズ中も鳴り続けさせるため、PauseScene破棄の影響を受けない)
+	PauseScene(SceneController& controller, std::weak_ptr<SoundManager> pSoundManager);
 	~PauseScene();
 
 	void Init() override;
@@ -37,4 +41,7 @@ private:
 	GlitchBuffer* m_pCBuffGlitchData = nullptr;
 	int m_frame = 0;
 	int m_backGroundOpenFrame = 0;
+
+	//サウンドマネージャーへのポインタ(GameSceneが所有するものを借りている)
+	std::weak_ptr<SoundManager> m_pSoundManager;
 };

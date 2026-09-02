@@ -126,6 +126,10 @@ private:
 	//特殊行動系ステートを変更する
 	void ChangeSpecialState(std::shared_ptr<ISpecialActionState>(newState));
 
+	//羽のボーンのy座標以外を使用して海面に
+	//水しぶきエフェクトをループ再生させる
+	void UpdateWingSplash(int& splashHandle,const VECTOR& wingPos);
+
 	//ステートの更新
 	//テンプレート関数なのでヘッダに実装をかく
 	template <typename T>
@@ -209,4 +213,8 @@ private:
 
 	//倒した敵の数
 	int m_defeatedEnemyCount = 0;
+
+	//左右の羽の水しぶきエフェクト再生ハンドル
+	int m_leftWingEffectH = -1;
+	int m_rightWingEffectH = -1;
 };

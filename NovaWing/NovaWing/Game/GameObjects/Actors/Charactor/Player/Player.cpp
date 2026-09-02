@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <EffekseerForDXLib.h>
 
 #include "Charactor/Player/Movement/IdleMovementState.h"
 #include "Charactor/Player/Rotation/DefaultRotationState.h"
@@ -71,6 +72,15 @@ namespace
 
 	//宙返りを使用できるゲージ量
 	constexpr float somersoult_use_gauge = 50.0f;
+
+	//海の高さ
+	constexpr float sea_height = 100.0f;
+	//海面に水しぶきのエフェクトを出す高さ
+	constexpr float sea_splash_height_threshold = 200.0f;
+	//水しぶきのエフェクトのオフセットX
+	constexpr float sea_splash_offset_x = 0.0f;
+	//水しぶきのエフェクトのオフセットZ
+	constexpr float sea_splash_offset_z = 250.0f;
 
 } // namespace
 
@@ -208,7 +218,16 @@ void Player::Update()
 	VECTOR rightWingPos = MV1GetFramePosition(m_modelHandle, MV1SearchFrame(
 		m_modelHandle, right_wing_bone_name));//右の羽の位置を取得
 
+	//羽よりもすこし左右にずらす
+	leftWingPos.x -= sea_splash_offset_x;
+	rightWingPos.x += sea_splash_offset_x;
+	//羽よりもすこし後ろにずらす
+	leftWingPos.z -= sea_splash_offset_z;
+	rightWingPos.z -= sea_splash_offset_z;
+
 	//この二つの位置に水しぶきのエフェクトを出す
+	UpdateWingSplash(m_leftWingEffectH, leftWingPos);
+	UpdateWingSplash(m_rightWingEffectH, rightWingPos);
 
 #ifdef _DEBUG
 	// ボタンでゲージを減らしたり増やしたりできるようにする
@@ -261,12 +280,6 @@ void Player::ClampPosition()
 
 void Player::Somersault(InputManager& input)
 {
-	// 宙返りの処理
-	// 左スティックの値を取得して-1～1にする
-	Vector2 stick = {
-		static_cast<float>(input.GetBufX()) / stick_input_max,
-		static_cast<float>(input.GetBufY()) / stick_input_max};
-
 	bool isSomersoult = false;
 	if (std::dynamic_pointer_cast<SomersaultState>(m_pSpecialState))
 	{
@@ -275,7 +288,6 @@ void Player::Somersault(InputManager& input)
 
 	// 宙返りボタンが押されていたらステートをそれぞれ切り替える
 	if (input.IsTriggered(InputEvent::somersault) &&
-		stick.m_y < somersault_stick_threshold && 
 		m_gauge > somersoult_use_gauge && 
 		!isSomersoult)
 	{
@@ -370,6 +382,53 @@ void Player::ChangeSpecialState(std::shared_ptr<ISpecialActionState>(newState))
 	newState->Enter();
 }
 
+void Player::UpdateWingSplash(int& splashHandle, const VECTOR& wingPos)
+{
+	//エフェクトを取得
+	int effectHandle = ResourceLoader::GetInstance().GetEffect(
+		ResourceLoader::EffectID::WingSplash);
+
+	//羽と海面の距離を計算
+	float distWingToSea = wingPos.y - sea_height;
+	//海面付近にいるかをチェック
+	if(distWingToSea < sea_splash_height_threshold)
+	{
+		//既に再生されていれば処理を飛ばす
+		if (splashHandle == -1 || 
+			IsEffekseer3DEffectPlaying(splashHandle) == -1)
+
+		{
+			//海面付近にいるので水しぶきのエフェクトを出す
+			splashHandle = PlayEffekseer3DEffect(effectHandle);
+		}
+		//位置更新
+		//水しぶきの高さのみ海に合わせる
+		SetPosPlayingEffekseer3DEffect(
+			splashHandle,
+			wingPos.x,
+			sea_height,
+			wingPos.z);
+
+		//エフェクトの向きを機体のY軸回転に合わせる。
+		//水面から上がる表現なのでXとZは反映しない。
+		//プレイヤーモデルは逆向きに作られているのでBoostと同じく+DX_PI_Fで補正
+		SetRotationPlayingEffekseer3DEffect(
+			splashHandle,
+			0.0f,
+			GetRotationY() + DX_PI_F,
+			0.0f);
+	}
+	else
+	{
+		//海面付近にいないので水しぶきのエフェクトを止める
+		if (splashHandle != -1)
+		{
+			StopEffekseer3DEffect(splashHandle);
+			splashHandle = -1;
+		}
+	}
+}
+
 void Player::Draw()
 {
 	// モデルに行列を適用
@@ -398,6 +457,10 @@ void Player::Draw()
 		static_cast<int>(leftWingScreenPos.x),
 		static_cast<int>(leftWingScreenPos.y),
 		10, GetColor(255, 0, 0), true);
+
+	//再生ハンドル
+	printfDx(L"LeftWingSplashHandle : %d\n", m_leftWingEffectH);
+	printfDx(L"RightWingSplashHandle : %d\n", m_rightWingEffectH);
 #endif
 }
 

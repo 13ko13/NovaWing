@@ -20,6 +20,11 @@ public:
     //バックバッファに描画先を戻す
     void EndCapture();
 
+    //キャプチャ画面の中身を空(透明)にする
+    //キャプチャパスを回さないシーン(タイトル等)に入るとき、前のシーンの描画内容が
+    //残ってWaterManagerに透けて見えるのを防ぐために1度だけ呼ぶ
+    void ClearCapture();
+
     //キャプチャ中かどうかを返す
     bool IsCaptureMode() const { return m_isCapture; }
 

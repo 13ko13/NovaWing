@@ -90,10 +90,17 @@ namespace
 	//ボス死亡待機状態になった時のBGMのフェードアウトにかける時間
 	constexpr float boss_death_bgm_fade_out_time = 30.0f;
 
-	//操作説明を隠してる状態の時の位置
-	const Vector2 hide_how_to_pos = Vector2(-100.0f, 600.0f);
-	//出現状態の時の位置
-	const Vector2 appear_how_to_pos = Vector2(200.0f, 600.0f);
+	//操作説明を隠している状態の位置（画面比率、画面外の左下）
+	const Vector2 hide_how_to_ratio = Vector2(-0.30f, 0.7f);
+	//操作説明が完全に出現した状態の位置（画面比率）
+	const Vector2 appear_how_to_ratio = Vector2(0.065f, 0.7f);
+	//操作説明画像の拡大率
+	constexpr double how_to_graph_scale = 0.65;
+
+	//操作説明のスライド演出の補間係数(大きいほど早く開閉)
+	constexpr float how_to_open_lerp_rate = 0.15f;
+	//操作説明の進行度をこの値未満まで戻ったら完全に閉じたとみなす閾値
+	constexpr float how_to_open_close_threshold = 0.005f;
 }
 
 GameScene::GameScene(SceneController& controller) :
@@ -421,19 +428,34 @@ void GameScene::Update()
 	//pauseをsceneに上乗せする
 	if (InputManager::GetInstance().IsTriggered(InputEvent::pause))
 	{
-		m_controller.PushScene(std::make_shared<PauseScene>(m_controller));
+		//ポーズを開くときも決定音を鳴らす
+		m_pSoundManager->Play(SoundManager::SoundType::Decision);
+		m_controller.PushScene(std::make_shared<PauseScene>(m_controller, m_pSoundManager));
 	}
 
-	//HowToボタンを長押ししていたら
+	//HowToボタンを長押ししていたら開く方向、
+	//押していなかったら閉じる方向に進行度を進める
+	float howToTarget = 0.0f;
 	if (InputManager::GetInstance().IsPressed(InputEvent::how_to))
 	{
-		m_howToControllOpenProgress++;
+		howToTarget = 1.0f;
 	}
 	else
 	{
-		m_howToControllOpenProgress--;
+		howToTarget = 0.0f;
 	}
-	m_howToControllOpenProgress = std::clamp(m_howToControllOpenProgress, 0.0f, 1.0f);
+	//進行度を補間する
+	m_howToControllOpenProgress =std::lerp(
+		m_howToControllOpenProgress,
+		howToTarget,
+		how_to_open_lerp_rate
+	);
+
+	//閾値を下回ったら完全に閉じたとみなす
+	if(m_howToControllOpenProgress < how_to_open_close_threshold)
+	{
+		m_howToControllOpenProgress = 0.0f;
+	}
 
 #ifdef _DEBUG
 	//Startボタンでリスタート
@@ -485,7 +507,32 @@ void GameScene::Draw()
 	//プレイヤーをもう一度描画する
 	m_pPlayer->Draw();
 
-	
+	//操作説明の画像を描画
+	//進行度に応じて位置を補間する
+	if(m_howToControllOpenProgress > 0.0f)
+	{
+		//操作説明画像取得
+		int howToPlayGraphic = ResourceLoader::GetInstance().GetGraphic(
+			ResourceLoader::GraphicID::HowToPlay);
+
+		//ウィンドウサイズ取得
+		const Size& wsize = Application::GetInstance().GetWindowSize();
+
+		//進行度で隠れ位置から出現位置まで補間する
+		float x = std::lerp(
+			hide_how_to_ratio.m_x,
+			appear_how_to_ratio.m_x,
+			m_howToControllOpenProgress) * wsize.m_width;
+		float y = appear_how_to_ratio.m_y * wsize.m_height;
+
+		//描画
+		DrawRotaGraph(
+		   static_cast<int>(x), static_cast<int>(y),
+		   how_to_graph_scale, 0.0,
+		   howToPlayGraphic,
+		   true
+		);
+	}
 
 	//Effekseerのエフェクト描画
 	DrawEffekseer3D();

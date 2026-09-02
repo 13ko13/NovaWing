@@ -41,3 +41,12 @@ void WaterRevealManager::EndCapture()
     SetUseVertexShader(-1);
     SetUsePixelShader(-1);
 }
+
+void WaterRevealManager::ClearCapture()
+{
+    //キャプチャ画面を描画先にして中身をクリア(アルファ込みで透明になる)
+    SetDrawScreen(m_captureH);
+    ClearDrawScreen();
+    //描画先をバックバッファに戻す
+    SetDrawScreen(DX_SCREEN_BACK);
+}

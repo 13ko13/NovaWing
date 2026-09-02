@@ -80,6 +80,8 @@ public:
 
 		BackGame,//ゲームに戻る
 		BackGameOnCursor,//カーソルが乗っているときのゲームに戻る
+
+		HowToPlay,//操作説明の画像
 	};
 
 	//エフェクトの種類
@@ -99,6 +101,7 @@ public:
 		HitEffect,//被弾時エフェクト(敵味方共通)
 		BossDeath,//ボスの死亡エフェクト
 		Boost,//ブーストエフェクト
+		WingSplash,//羽の水しぶきエフェクト
 	};
 
 	//音の種類
