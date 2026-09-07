@@ -118,7 +118,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)/DxLib_h;$(ProjectDir);$(ProjectDir)/Game/GameObjects/Actors/</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -129,6 +129,10 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)/DxLib_h</AdditionalLibraryDirectories>
+      <!-- Effekseer 配布物は Debug(_d) が /MDd、Release が /MT でチグハグ。
+           Bullet が /MT 固定のため、Debug でも /MT 版 Effekseer をリンクして統一する。 -->
+      <IgnoreSpecificDefaultLibraries>Effekseer_vs2022_x64_d.lib;EffekseerRendererDX9_vs2022_x64_d.lib;EffekseerRendererDX11_vs2022_x64_d.lib;EffekseerRendererCommon_vs2022_x64_d.lib;EffekseerForDXLib_vs2022_x64_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalDependencies>Effekseer_vs2022_x64.lib;EffekseerRendererDX9_vs2022_x64.lib;EffekseerRendererDX11_vs2022_x64.lib;EffekseerRendererCommon_vs2022_x64.lib;EffekseerForDXLib_vs2022_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
