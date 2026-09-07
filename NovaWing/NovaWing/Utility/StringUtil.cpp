@@ -1,4 +1,4 @@
-#include "StringUtil.h"
+﻿#include "StringUtil.h"
 #include <cassert> 
 
 TCHAR* StringUtil::ToTCHAR(const char* character)
