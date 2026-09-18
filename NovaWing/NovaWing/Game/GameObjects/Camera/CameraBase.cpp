@@ -66,8 +66,8 @@ Vector2 CameraBase::GetFrustumHalfSize(float distZ) const
 	float screenHToWorld = std::tanf(fov / 2) * distZ;
 	// そこにアスペクト比をかけて画面の横方向の半分の幅を求める
 	const Size& wsize = Application::GetInstance().GetWindowSize();
-	float screenWToWorld = screenHToWorld * (static_cast<float>(wsize.m_width) /
-											 static_cast<float>(wsize.m_height));
+	float screenWToWorld = screenHToWorld * (static_cast<float>(wsize.width) /
+											 static_cast<float>(wsize.height));
 
 	return Vector2(screenWToWorld, screenHToWorld);
 }

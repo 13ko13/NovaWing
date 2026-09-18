@@ -77,8 +77,8 @@ void TitlePlayer::Update()
 
 		//回転角に応じた速度を作る(縦に一回転する軌道)
 		Vector3 vel;
-		vel.m_y = sinf(targetAngleX) * somersault_move_speed;
-		vel.m_z = cosf(-targetAngleX) * somersault_move_speed;
+		vel.y = sinf(targetAngleX) * somersault_move_speed;
+		vel.z = cosf(-targetAngleX) * somersault_move_speed;
 		SetVel(vel);
 
 		break;
@@ -90,7 +90,7 @@ void TitlePlayer::Update()
 		//プレイヤーより少し後ろの位置にエフェクトを出す
 		VECTOR effectPos = (
 			m_pos + GetVisualForward() * 
-			boost_effect_offset_pos.m_z).ToDxLib();
+			boost_effect_offset_pos.z).ToDxLib();
 
 		//エフェクトの位置
 		SetPosPlayingEffekseer3DEffect(
@@ -135,7 +135,7 @@ void TitlePlayer::Draw()
 
 #ifdef _DEBUG
 	//プレイヤーの位置表示
-	DrawFormatString(0, 15, 0xffffff, L"playerPosZ : %f", m_pos.m_z);
+	DrawFormatString(0, 15, 0xffffff, L"playerPosZ : %f", m_pos.z);
 #endif
 }
 

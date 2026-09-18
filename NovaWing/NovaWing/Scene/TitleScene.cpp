@@ -345,17 +345,17 @@ void TitleScene::Draw()
 	VECTOR endPos;
 
 	//ステージのサイズに合わせてグリッドを描画する
-	for (int z = static_cast<int>(-grid_size.m_z);
-		z <= static_cast<int>(grid_size.m_z); z += 100)
+	for (int z = static_cast<int>(-grid_size.z);
+		z <= static_cast<int>(grid_size.z); z += 100)
 	{
-		startPos = VGet(-grid_size.m_x, 0.0f, static_cast<float>(z));
-		endPos = VGet(grid_size.m_x, 0.0f, static_cast<float>(z));
+		startPos = VGet(-grid_size.x, 0.0f, static_cast<float>(z));
+		endPos = VGet(grid_size.x, 0.0f, static_cast<float>(z));
 		DrawLine3D(startPos, endPos, 0xff0000);
 	}
-	for (int x = static_cast<int>(-grid_size.m_x); x <= static_cast<int>(grid_size.m_x); x += 100)
+	for (int x = static_cast<int>(-grid_size.x); x <= static_cast<int>(grid_size.x); x += 100)
 	{
-		startPos = VGet(static_cast<float>(x), 0.0f, -grid_size.m_z);
-		endPos = VGet(static_cast<float>(x), 0.0f, grid_size.m_z);
+		startPos = VGet(static_cast<float>(x), 0.0f, -grid_size.z);
+		endPos = VGet(static_cast<float>(x), 0.0f, grid_size.z);
 		DrawLine3D(startPos, endPos, 0x0000ff);
 	}
 #endif
@@ -385,8 +385,8 @@ void TitleScene::Draw()
 
 		//タイトルロゴ描画
 		DrawRotaGraph(
-			wsize.m_width * logo_ratio_x,
-			wsize.m_height * logo_ratio_y,
+			wsize.width * logo_ratio_x,
+			wsize.height * logo_ratio_y,
 			m_titleLogoScale, 0.0, m_titleLogoH, true);
 
 		//ちょっと遅めに選択肢も出現させる
@@ -399,8 +399,8 @@ void TitleScene::Draw()
 
 		//選択肢の背景をシェーダを通して描画
 		DrawGraphToShaderByCenter(
-			wsize.m_width * back_ground_ratio_x,
-			wsize.m_height * back_ground_ratio_y,
+			wsize.width * back_ground_ratio_x,
+			wsize.height * back_ground_ratio_y,
 			back_ground_graph_scale,
 			m_selectBackGroundH,
 			selectProgress
@@ -417,8 +417,8 @@ void TitleScene::Draw()
 			if (m_wipeProgress[static_cast<int>(TitleSelect::StartGame)] > 0.0f)
 			{
 				DrawGraphToShaderByCenter(
-					wsize.m_width * start_ratio_x,
-					wsize.m_height * start_ratio_y,
+					wsize.width * start_ratio_x,
+					wsize.height * start_ratio_y,
 					start_graph_scale,
 					m_gameStartOnCursorGraphH,
 					selectProgress,
@@ -428,8 +428,8 @@ void TitleScene::Draw()
 
 			//ゲーム終了選択肢描画
 			DrawGraphToShaderByCenter(
-				wsize.m_width * end_ratio_x,
-				wsize.m_height * end_ratio_y,
+				wsize.width * end_ratio_x,
+				wsize.height * end_ratio_y,
 				end_graph_scale,
 				m_gameEndGraphH,
 				selectProgress
@@ -440,8 +440,8 @@ void TitleScene::Draw()
 		{
 			//ゲーム開始選択肢描画
 			DrawGraphToShaderByCenter(
-				wsize.m_width * start_ratio_x,
-				wsize.m_height * start_ratio_y,
+				wsize.width * start_ratio_x,
+				wsize.height * start_ratio_y,
 				start_graph_scale,
 				m_gameStartGraphH,
 				selectProgress
@@ -454,8 +454,8 @@ void TitleScene::Draw()
 			{
 				//ゲーム終了選択肢描画
 				DrawGraphToShaderByCenter(
-					wsize.m_width * end_ratio_x,
-					wsize.m_height * end_ratio_y,
+					wsize.width * end_ratio_x,
+					wsize.height * end_ratio_y,
 					end_graph_scale,
 					m_gameEndOnCursorGraphH,
 					selectProgress,

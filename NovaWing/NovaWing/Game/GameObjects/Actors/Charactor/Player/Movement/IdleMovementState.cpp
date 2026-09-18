@@ -46,12 +46,12 @@ void IdleMovementState::Update()
 
 	//先に正規化しておく
 	float length = std::sqrtf(
-		stick.m_x * stick.m_x + stick.m_y * stick.m_y
+		stick.x * stick.x + stick.y * stick.y
 	);
 	if (length > 1.0f)
 	{
-		stick.m_x /= length;
-		stick.m_y /= length;
+		stick.x /= length;
+		stick.y /= length;
 	}
 
 	//少しでも入力が入っていればステートを変更する

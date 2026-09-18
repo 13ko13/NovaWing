@@ -121,7 +121,7 @@ void BossEnemy::OnInit()
 
 	//無敵判定球初期化
 	Vector3 invincibleColPos = m_pos;
-	invincibleColPos.m_y += invincible_col_offset_y;//Y座標のみ補正する
+	invincibleColPos.y += invincible_col_offset_y;//Y座標のみ補正する
 	m_invincibleHitCol = Sphere(invincibleColPos, invincible_col_radius);
 
 	
@@ -134,9 +134,9 @@ void BossEnemy::Update()
 {
 	
 	//着地が終了していない間に着地したら
-	if(m_velocity.m_y < 0.0f)
+	if(m_velocity.y < 0.0f)
 	{
-		if (m_pos.m_y < water_y)
+		if (m_pos.y < water_y)
 		{
 			//まだ着地していなければ着地音を鳴らす
 			if (!m_isFirstLanding)
@@ -150,9 +150,9 @@ void BossEnemy::Update()
 	}
 
 	//海より下に行かないようにする
-	if (m_pos.m_y < water_y)
+	if (m_pos.y < water_y)
 	{
-		m_pos.m_y = water_y;
+		m_pos.y = water_y;
 	}
 
 	//死亡待機状態じゃない場合の処理
@@ -163,8 +163,8 @@ void BossEnemy::Update()
 			//プレイヤーと同じ速度で移動する
 			Vector3 myVel = m_pPlayer.lock()->GetVel();
 			//zのみコピー
-			myVel.m_y = 0.0f;
-			myVel.m_x = 0.0f;
+			myVel.y = 0.0f;
+			myVel.x = 0.0f;
 			SetVel(myVel);
 
 			//足音のクールタイムを進める
@@ -198,7 +198,7 @@ void BossEnemy::Update()
 
 		//当たり判定の更新
 		Vector3 hitColPos = m_pos;
-		hitColPos.m_y += invincible_col_offset_y;//Y座標のみ補正する
+		hitColPos.y += invincible_col_offset_y;//Y座標のみ補正する
 		m_invincibleHitCol.Update(hitColPos, invincible_col_radius);
 
 		//ダメージ判定更新
@@ -336,9 +336,9 @@ void BossEnemy::TakeDamage(int damage)
 		Vector3 effectPos = m_pos + death_effect_offset;
 		SetPosPlayingEffekseer3DEffect(
 			m_deathEffectPlayH,
-			effectPos.m_x,
-			effectPos.m_y,
-			effectPos.m_z
+			effectPos.x,
+			effectPos.y,
+			effectPos.z
 		);
 	}
 }
@@ -366,9 +366,9 @@ void BossEnemy::OnHitInvincibleCol(const Position3& effectPos,const int attackPo
 	//エフェクトの位置をセット
 	SetPosPlayingEffekseer3DEffect(
 		m_shieldEffectPlayH,
-		effectPos.m_x,
-		effectPos.m_y,
-		effectPos.m_z
+		effectPos.x,
+		effectPos.y,
+		effectPos.z
 	);
 
 	//ボスを回復させる

@@ -3,5 +3,5 @@
 struct SizeF
 {
 public:
-	float m_width, m_height;
+	float width, height;
 };

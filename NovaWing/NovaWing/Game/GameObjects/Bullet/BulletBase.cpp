@@ -80,5 +80,5 @@ void BulletBase::OnHitEnemy()
 	m_hitEffectPlayH = PlayEffekseer3DEffect(hitEffectHandle);
 	
 	//位置をセット
-	SetPosPlayingEffekseer3DEffect(m_hitEffectPlayH, m_pos.m_x, m_pos.m_y, m_pos.m_z);
+	SetPosPlayingEffekseer3DEffect(m_hitEffectPlayH, m_pos.x, m_pos.y, m_pos.z);
 }

@@ -3,5 +3,5 @@
 struct Size
 {
 public:
-	int m_width, m_height;
+	int width, height;
 };

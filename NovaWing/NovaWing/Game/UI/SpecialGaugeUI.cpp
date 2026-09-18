@@ -47,8 +47,8 @@ void SpecialGaugeUI::Draw()
 
 	const Size& wsize = Application::GetInstance().GetWindowSize();
 	Vector2 frameDrawPos = Vector2(
-		wsize.m_width * hp_frame_pos_ratio.m_x,
-		wsize.m_height * hp_frame_pos_ratio.m_y
+		wsize.width * hp_frame_pos_ratio.x,
+		wsize.height * hp_frame_pos_ratio.y
 	);
 
 	//HPの割合から、切り取り位置を計算

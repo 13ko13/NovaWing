@@ -71,9 +71,9 @@ void ChargeShootState::Update()
 	// エフェクトの位置をプレイヤーの位置に設定する
 	SetPosPlayingEffekseer3DEffect(
 		m_chargingPlayEffectH,
-		effectPos.m_x,
-		effectPos.m_y,
-		effectPos.m_z);
+		effectPos.x,
+		effectPos.y,
+		effectPos.z);
 
 	InputManager& input = InputManager::GetInstance();
 
@@ -91,23 +91,23 @@ void ChargeShootState::Update()
 	else
 	{
 		// 全方向の大きさを下げる
-		m_effectScale.m_x--;
-		m_effectScale.m_y--;
-		m_effectScale.m_z--;
+		m_effectScale.x--;
+		m_effectScale.y--;
+		m_effectScale.z--;
 		// 0未満にならないようにクランプする
-		m_effectScale.m_x = std::clamp(m_effectScale.m_x, 0.0f, m_effectScale.m_x);
-		m_effectScale.m_y = std::clamp(m_effectScale.m_y, 0.0f, m_effectScale.m_y);
-		m_effectScale.m_z = std::clamp(m_effectScale.m_z, 0.0f, m_effectScale.m_z);
+		m_effectScale.x = std::clamp(m_effectScale.x, 0.0f, m_effectScale.x);
+		m_effectScale.y = std::clamp(m_effectScale.y, 0.0f, m_effectScale.y);
+		m_effectScale.z = std::clamp(m_effectScale.z, 0.0f, m_effectScale.z);
 
 		// 大きさをセットする
 		SetScalePlayingEffekseer3DEffect(
 			m_chargingPlayEffectH,
-			m_effectScale.m_x,
-			m_effectScale.m_y,
-			m_effectScale.m_z);
+			m_effectScale.x,
+			m_effectScale.y,
+			m_effectScale.z);
 
 		// もし大きさが0になったらノーマルステートに戻す
-		if (m_effectScale.m_x == 0.0f)
+		if (m_effectScale.x == 0.0f)
 		{
 			// ノーマルステートに戻す
 			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager,m_pTargetManager));
@@ -179,7 +179,7 @@ void ChargeShootState::Enter()
 	// エフェクトの位置をプレイヤーの位置に設定する
 	SetPosPlayingEffekseer3DEffect(
 		m_chargingPlayEffectH,
-		effectPos.m_x,
-		effectPos.m_y,
-		effectPos.m_z);
+		effectPos.x,
+		effectPos.y,
+		effectPos.z);
 }

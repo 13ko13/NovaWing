@@ -53,7 +53,7 @@ void Fade::Draw()
 		//アルファ値をもとにウィンドウ全体に黒い四角形を描画する
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(m_alpha * 255));
 		//黒い四角形描画する
-		DrawBox(0, 0, windowSize.m_width, windowSize.m_height, GetColor(0, 0, 0), TRUE);
+		DrawBox(0, 0, windowSize.width, windowSize.height, GetColor(0, 0, 0), TRUE);
 		//描画後はブレンドモードを元に戻す
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 		break;
@@ -68,7 +68,7 @@ void Fade::Draw()
 		//アルファ値をもとにウィンドウ全体に黒い四角形を描画する
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>((1.0f - m_alpha) * 255));
 		//黒い四角形描画する
-		DrawBox(0, 0, windowSize.m_width, windowSize.m_height, GetColor(0, 0, 0), TRUE);
+		DrawBox(0, 0, windowSize.width, windowSize.height, GetColor(0, 0, 0), TRUE);
 		//描画後はブレンドモードを元に戻す
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 		break;

@@ -297,7 +297,7 @@ void GameScene::Update()
 
 	//プレイヤーが特定のz座標まで到達したら
 	//カメラを揺らしてボスを登場させる
-	if (m_pPlayer->GetPos().m_z > boss_appear_z)
+	if (m_pPlayer->GetPos().z > boss_appear_z)
 	{
 		//ボスが出現していない場合のみ行う
 		if (!m_isApearBoss)
@@ -329,7 +329,7 @@ void GameScene::Update()
 					//ボスを登場させる
 					//重力を加える
 					Vector3 currentVec = m_pBoss->GetVel();
-					currentVec.m_y -= boss_fall_speed;
+					currentVec.y -= boss_fall_speed;
 
 					m_pBoss->SetVel(currentVec);
 
@@ -520,10 +520,10 @@ void GameScene::Draw()
 
 		//進行度で隠れ位置から出現位置まで補間する
 		float x = std::lerp(
-			hide_how_to_ratio.m_x,
-			appear_how_to_ratio.m_x,
-			m_howToControllOpenProgress) * wsize.m_width;
-		float y = appear_how_to_ratio.m_y * wsize.m_height;
+			hide_how_to_ratio.x,
+			appear_how_to_ratio.x,
+			m_howToControllOpenProgress) * wsize.width;
+		float y = appear_how_to_ratio.y * wsize.height;
 
 		//描画
 		DrawRotaGraph(
@@ -546,17 +546,17 @@ void GameScene::DrawGrid()
 	VECTOR endPos;
 
 	//ステージのサイズに合わせてグリッドを描画する
-	for (int z = static_cast<int>(-grid_size.m_z);
-		z <= static_cast<int>(grid_size.m_z); z += 100)
+	for (int z = static_cast<int>(-grid_size.z);
+		z <= static_cast<int>(grid_size.z); z += 100)
 	{
-		startPos = VGet(-grid_size.m_x, 0.0f, static_cast<float>(z));
-		endPos = VGet(grid_size.m_x, 0.0f, static_cast<float>(z));
+		startPos = VGet(-grid_size.x, 0.0f, static_cast<float>(z));
+		endPos = VGet(grid_size.x, 0.0f, static_cast<float>(z));
 		DrawLine3D(startPos, endPos, 0xff0000);
 	}
-	for (int x = static_cast<int>(-grid_size.m_x); x <= static_cast<int>(grid_size.m_x); x += 100)
+	for (int x = static_cast<int>(-grid_size.x); x <= static_cast<int>(grid_size.x); x += 100)
 	{
-		startPos = VGet(static_cast<float>(x), 0.0f, -grid_size.m_z);
-		endPos = VGet(static_cast<float>(x), 0.0f, grid_size.m_z);
+		startPos = VGet(static_cast<float>(x), 0.0f, -grid_size.z);
+		endPos = VGet(static_cast<float>(x), 0.0f, grid_size.z);
 		DrawLine3D(startPos, endPos, 0x0000ff);
 	}
 #endif

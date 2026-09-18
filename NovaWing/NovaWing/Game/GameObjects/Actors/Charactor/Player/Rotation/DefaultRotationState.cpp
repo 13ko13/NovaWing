@@ -40,21 +40,21 @@ void DefaultRotationState::Update()
 
 	//先に正規化しておく
 	float length = std::sqrtf(
-		stick.m_x * stick.m_x + stick.m_y * stick.m_y
+		stick.x * stick.x + stick.y * stick.y
 	);
 	if (length > 1.0f)
 	{
-		stick.m_x /= length;
-		stick.m_y /= length;
+		stick.x /= length;
+		stick.y /= length;
 	}
 
-	if (std::abs(stick.m_x) < stick_dead_zone)
+	if (std::abs(stick.x) < stick_dead_zone)
 	{
-		stick.m_x = 0.0f;
+		stick.x = 0.0f;
 	}
-	if (std::abs(stick.m_y) < stick_dead_zone)
+	if (std::abs(stick.y) < stick_dead_zone)
 	{
-		stick.m_y = 0.0f;
+		stick.y = 0.0f;
 	}
 
 	//weak_ptrからshared_ptrに変換
@@ -64,14 +64,14 @@ void DefaultRotationState::Update()
 
 	//上下入力
 	//X軸回転
-	targetAngle = stick.m_y * max_tilt_angle;
+	targetAngle = stick.y * max_tilt_angle;
 	pPlayer->LerpToAngleX(targetAngle, rot_lerp_t);
 
 	//左右入力
 	//Y軸回転
 	//モデルの前後が逆なので180度回した状態を基準として
 	//回転を行う
-	targetAngle = DX_PI_F + (stick.m_x * max_tilt_angle);
+	targetAngle = DX_PI_F + (stick.x * max_tilt_angle);
 	pPlayer->LerpToAngleY(targetAngle, rot_lerp_t);
 }
 

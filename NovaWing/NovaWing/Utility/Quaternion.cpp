@@ -17,9 +17,9 @@ Quaternion::Quaternion(const Vector3& axis, float angle)
 {
 	//それぞれの成分を軸と角度から公式を使用して求める
 	m_w = std::cosf(angle / 2);
-	m_x = std::sinf(angle / 2) * axis.m_x;
-	m_y = std::sinf(angle / 2) * axis.m_y;
-	m_z = std::sinf(angle / 2) * axis.m_z;
+	m_x = std::sinf(angle / 2) * axis.x;
+	m_y = std::sinf(angle / 2) * axis.y;
+	m_z = std::sinf(angle / 2) * axis.z;
 }
 
 Quaternion Quaternion::Normalize() 
@@ -87,7 +87,7 @@ Quaternion Quaternion::operator*(const Quaternion& other) const
 Vector3 Quaternion::operator*(const Vector3& vec) const
 {
 	//Vector3をクォータニオンに変換する
-	Quaternion p(0.0f, vec.m_x, vec.m_y, vec.m_z);
+	Quaternion p(0.0f, vec.x, vec.y, vec.z);
 
 	//q*pを計算
 	Quaternion temp = (*this) * p;

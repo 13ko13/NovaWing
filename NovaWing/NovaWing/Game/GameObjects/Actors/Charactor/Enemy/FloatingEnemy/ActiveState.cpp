@@ -48,7 +48,7 @@ void ActiveState::Update()
 
 	//上下の揺れ
 	Vector3 vel;
-	vel.m_y = sinf(m_frame * wave_speed) * move_speed;
+	vel.y = sinf(m_frame * wave_speed) * move_speed;
 	//プレイヤーの前方向と同じ方向に一緒に進む
 	std::shared_ptr<FloatingEnemy> pEnemy = m_pEnemy.lock();
 	Vector3 forward = pEnemy->GetPlayerFoward();
@@ -58,7 +58,7 @@ void ActiveState::Update()
 	
 	pEnemy->SetVel(vel);
 #ifdef _DEBUG
-	DrawFormatString(0, 230, 0xffffff, L"velY : %f", vel.m_y);
+	DrawFormatString(0, 230, 0xffffff, L"velY : %f", vel.y);
 #endif
 
 	//弾の発射

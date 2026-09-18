@@ -55,7 +55,7 @@ void LeaveState::Update()
 	}
 	
 	// 上下に揺らす
-	vel.m_y += sinf(m_frame * wave_speed) * move_speed;
+	vel.y += sinf(m_frame * wave_speed) * move_speed;
 
 	pEnemy->SetVel(vel);
 

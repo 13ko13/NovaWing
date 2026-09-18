@@ -73,7 +73,7 @@ std::shared_ptr<EnemyBase> EnemyFactory::Create(
 		//動き出す位置は関係なくすぐ動き始める
 		if (m_pPlayer.lock() != nullptr)
 		{
-			data.activatePlayerZ = m_pPlayer.lock()->GetPos().m_z;
+			data.activatePlayerZ = m_pPlayer.lock()->GetPos().z;
 		}
 		else
 		{

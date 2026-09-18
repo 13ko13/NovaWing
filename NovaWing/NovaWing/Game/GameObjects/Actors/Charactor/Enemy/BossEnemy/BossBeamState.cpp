@@ -87,17 +87,17 @@ void BossBeamState::Enter()
 	m_leftBeamEffectPlayH = PlayEffekseer3DEffect(effectHandle);
 	SetPosPlayingEffekseer3DEffect(
 		m_leftBeamEffectPlayH,
-		m_beamPosL.m_x,
-		m_beamPosL.m_y,
-		m_beamPosL.m_z
+		m_beamPosL.x,
+		m_beamPosL.y,
+		m_beamPosL.z
 	);
 	//右
 	m_rightBeamEffectPlayH = PlayEffekseer3DEffect(effectHandle);
 	SetPosPlayingEffekseer3DEffect(
 		m_rightBeamEffectPlayH,
-		m_beamPosR.m_x,
-		m_beamPosR.m_y,
-		m_beamPosR.m_z
+		m_beamPosR.x,
+		m_beamPosR.y,
+		m_beamPosR.z
 	);
 
 	//ビームの進む方向初期化　
@@ -142,14 +142,14 @@ void BossBeamState::Update()
 		pSharedPlayer->GetVisualBack() * target_offset;
 
 	//もしターゲットを越えたらそこからはプレイヤーを追いかけずにその方向に進む
-	if (pSharedPlayer->GetPos().m_z < m_beamPosL.m_z)
+	if (pSharedPlayer->GetPos().z < m_beamPosL.z)
 	{
 		//ビームの先端からターゲットまでの方向を計算
 		Vector3 leftToTargetDir = Vector3(targetPos - m_beamPosL).Normalized();//左
 		//進む方向を保存しておく
 		m_beamMoveDirL = leftToTargetDir;
 	}
-	if (pSharedPlayer->GetPos().m_z < m_beamPosR.m_z)
+	if (pSharedPlayer->GetPos().z < m_beamPosR.z)
 	{
 		//ビームの先端からターゲットまでの方向を計算
 		Vector3 rightToTargetDir = Vector3(targetPos - m_beamPosR).Normalized();//右
@@ -167,7 +167,7 @@ void BossBeamState::Update()
 	//オフセットを足しておく
 	Vector3 hitEndPos = playerPos + beam_hit_end_offset;
 
-	if (m_beamPosL.m_z >= hitEndPos.m_z)
+	if (m_beamPosL.z >= hitEndPos.z)
 	{
 		if (m_beamFrame % beam_col_interval == 0)
 		{
@@ -177,7 +177,7 @@ void BossBeamState::Update()
 			m_beamSpheresL.push_back(col);
 		}
 	}
-	if (m_beamPosR.m_z >= hitEndPos.m_z)
+	if (m_beamPosR.z >= hitEndPos.z)
 	{
 		if (m_beamFrame % beam_col_interval == 0)
 		{
@@ -195,7 +195,7 @@ void BossBeamState::Update()
 			m_beamSpheresL.end(),
 			[hitEndPos](const Sphere sphere)
 			{
-				return sphere.GetPos().m_z < hitEndPos.m_z;
+				return sphere.GetPos().z < hitEndPos.z;
 			}),
 		m_beamSpheresL.end()
 	);
@@ -205,7 +205,7 @@ void BossBeamState::Update()
 			m_beamSpheresR.end(),
 			[hitEndPos](const Sphere sphere)
 			{
-				return sphere.GetPos().m_z < hitEndPos.m_z;
+				return sphere.GetPos().z < hitEndPos.z;
 			}),
 		m_beamSpheresR.end()
 	);
@@ -213,15 +213,15 @@ void BossBeamState::Update()
 	//ビームエフェクトの位置更新
 	SetPosPlayingEffekseer3DEffect(
 		m_leftBeamEffectPlayH,
-		m_beamPosL.m_x,
-		m_beamPosL.m_y,
-		m_beamPosL.m_z
+		m_beamPosL.x,
+		m_beamPosL.y,
+		m_beamPosL.z
 	);
 	SetPosPlayingEffekseer3DEffect(
 		m_rightBeamEffectPlayH,
-		m_beamPosR.m_x,
-		m_beamPosR.m_y,
-		m_beamPosR.m_z
+		m_beamPosR.x,
+		m_beamPosR.y,
+		m_beamPosR.z
 	);
 
 #ifdef _DEBUG

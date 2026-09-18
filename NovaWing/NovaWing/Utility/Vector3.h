@@ -11,7 +11,7 @@ public:
 	Vector3();
 	Vector3(float x, float y, float z);
 
-	float m_x, m_y, m_z;
+	float x, y, z;
 	float Length()const;//ベクトルの大きさ
 	void Normalize();//ベクトルの大きさを1にする
 	Vector3 Normalized() const;///大きさを１にしたベクトルを返す
@@ -45,9 +45,9 @@ public:
 	//DXlibのVECTOR型を代入できるようにする
 	Vector3& operator=(const VECTOR& v)
 	{
-		m_x = v.x;
-		m_y = v.y;
-		m_z = v.z;
+		x = v.x;
+		y = v.y;
+		z = v.z;
 		return *this;
 	}
 };

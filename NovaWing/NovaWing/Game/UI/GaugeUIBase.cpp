@@ -61,46 +61,46 @@ void GaugeUIBase::DrawGauge(
 
     //枠の画像サイズを取得
     Size frameSize;
-    GetGraphSize(frameHandle, &frameSize.m_width, &frameSize.m_height);
+    GetGraphSize(frameHandle, &frameSize.width, &frameSize.height);
     SizeF frameSizeF = {
-        static_cast<float>(frameSize.m_width) * static_cast<float>(hp_frame_size),
-        static_cast<float>(frameSize.m_height) * static_cast<float>(hp_frame_size)
+        static_cast<float>(frameSize.width) * static_cast<float>(hp_frame_size),
+        static_cast<float>(frameSize.height) * static_cast<float>(hp_frame_size)
     };
 
     //枠の画像を描画
     DrawRectHorizontalGraphToShader(
-        drawPos.m_x,
-        drawPos.m_y,
+        drawPos.x,
+        drawPos.y,
         frameSizeF, 1.0f,
         frameHandle
     );
 
     //HPゲージ画像の大きさを取得
     Size gaugeSize;
-    GetGraphSize(gaugeHandle, &gaugeSize.m_width, &gaugeSize.m_height);
+    GetGraphSize(gaugeHandle, &gaugeSize.width, &gaugeSize.height);
     SizeF gaugeSizeF = {
-        static_cast<float>(gaugeSize.m_width) * static_cast<float>(hp_gauge_size),
-        static_cast<float>(gaugeSize.m_height) * static_cast<float>(hp_gauge_size)
+        static_cast<float>(gaugeSize.width) * static_cast<float>(hp_gauge_size),
+        static_cast<float>(gaugeSize.height) * static_cast<float>(hp_gauge_size)
     };
 
     //ゲージ位置を定義(左上座標は枠の場所と同じ)
-    Vector2 gaugePos = Vector2(drawPos.m_x, drawPos.m_y);
+    Vector2 gaugePos = Vector2(drawPos.x, drawPos.y);
 
     //ゲージを描画
     //ボスじゃない場合
     if (isBoss)
     {
         DrawRectVerticalGraphToShader(
-            gaugePos.m_x,
-            gaugePos.m_y,//位置
+            gaugePos.x,
+            gaugePos.y,//位置
             gaugeSizeF, ratio, gaugeHandle
         );
     }
     else
     {
         DrawRectHorizontalGraphToShader(
-            gaugePos.m_x,
-            gaugePos.m_y,//位置
+            gaugePos.x,
+            gaugePos.y,//位置
             gaugeSizeF, ratio, gaugeHandle
         );
     }

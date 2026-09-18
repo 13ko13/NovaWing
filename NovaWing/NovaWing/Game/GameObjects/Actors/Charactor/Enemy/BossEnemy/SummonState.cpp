@@ -48,9 +48,9 @@ void SummonState::Enter()
 		//位置を設定
 		SetPosPlayingEffekseer3DEffect(
 			m_floatingEffPlayH,
-			m_summonPos.m_x, 
-			m_summonPos.m_y,
-			m_summonPos.m_z
+			m_summonPos.x, 
+			m_summonPos.y,
+			m_summonPos.z
 		);
 		break;
 	case EnemyFactory::EnemyType::WormEnemy:
@@ -62,9 +62,9 @@ void SummonState::Enter()
 		//位置を設定
 		SetPosPlayingEffekseer3DEffect(
 			m_wormEffPlayH,
-			m_summonPos.m_x,
-			m_summonPos.m_y,
-			m_summonPos.m_z
+			m_summonPos.x,
+			m_summonPos.y,
+			m_summonPos.z
 		);
 		break;
 	}

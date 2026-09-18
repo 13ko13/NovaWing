@@ -179,9 +179,9 @@ void WaterManager::CreateVertexData()
 			VERTEX3DSHADER vertexData;
 			//頂点の座標
 			vertexData.pos.x =
-				j * (grid_size.m_width / horizontal_grid_num) - (grid_size.m_width / 2);//-1500～1500
+				j * (grid_size.width / horizontal_grid_num) - (grid_size.width / 2);//-1500～1500
 			vertexData.pos.y = 0.0f;//高さは波の高さなのでシェーダ側で動かす
-			vertexData.pos.z = i * (grid_size.m_height / vertical_grid_num);
+			vertexData.pos.z = i * (grid_size.height / vertical_grid_num);
 
 			//頂点の法線
 			//真上を向かせる
@@ -240,12 +240,12 @@ void WaterManager::UpdateShaderMatrixData()
 	//カメラの位置を取得
 	Vector3 cameraPos = m_pCamera.lock()->GetPos();
 	//メッシュの終端位置を計算
-	float meshEndPos = m_meshZOffset + grid_size.m_height;
+	float meshEndPos = m_meshZOffset + grid_size.height;
 	//カメラのZがその終端から閾値内に近づいているかを判定
-	while(cameraPos.m_z > meshEndPos - warp_threshould)
+	while(cameraPos.z > meshEndPos - warp_threshould)
 	{
-		m_meshZOffset += grid_size.m_height - warp_threshould;
-		meshEndPos = m_meshZOffset + grid_size.m_height;//終端も更新しないと無限ループが起きる
+		m_meshZOffset += grid_size.height - warp_threshould;
+		meshEndPos = m_meshZOffset + grid_size.height;//終端も更新しないと無限ループが起きる
 	}
 
 	//平行移動行列を作成

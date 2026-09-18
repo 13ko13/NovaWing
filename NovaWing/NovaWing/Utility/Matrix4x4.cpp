@@ -106,16 +106,16 @@ Matrix4x4 Matrix4x4::Translate(Vector3 right)
 		     1.0f,      0.0f,      0.0f, 0.0f,
 		     0.0f,      1.0f,      0.0f, 0.0f,
 		     0.0f,      0.0f,      1.0f, 0.0f,
-		right.m_x, right.m_y, right.m_z, 1.0f
+		right.x, right.y, right.z, 1.0f
 	);
 }
 
 Matrix4x4 Matrix4x4::Scale(Vector3 right)
 {
 	return Matrix4x4(
-		right.m_x,     0.0f,     0.0f, 0.0f,
-		     0.0f,right.m_y,     0.0f, 0.0f,
-		     0.0f,     0.0f,right.m_z, 0.0f,
+		right.x,     0.0f,     0.0f, 0.0f,
+		     0.0f,right.y,     0.0f, 0.0f,
+		     0.0f,     0.0f,right.z, 0.0f,
 		     0.0f,     0.0f,     0.0f, 1.0f
 	);
 }
@@ -124,9 +124,9 @@ Vector3 Matrix4x4::Transform(const Vector3& vector) const
 {
 	Vector3 result;
 	
-	result.m_x = vector.m_x * m_x0 + vector.m_y * m_y0 + vector.m_z * m_z0 + m_w0;
-	result.m_y = vector.m_x * m_x1 + vector.m_y * m_y1 + vector.m_z * m_z1 + m_w1;
-	result.m_z = vector.m_x * m_x2 + vector.m_y * m_y2 + vector.m_z * m_z2 + m_w2;
+	result.x = vector.x * m_x0 + vector.y * m_y0 + vector.z * m_z0 + m_w0;
+	result.y = vector.x * m_x1 + vector.y * m_y1 + vector.z * m_z1 + m_w1;
+	result.z = vector.x * m_x2 + vector.y * m_y2 + vector.z * m_z2 + m_w2;
 
 	return result;
 }

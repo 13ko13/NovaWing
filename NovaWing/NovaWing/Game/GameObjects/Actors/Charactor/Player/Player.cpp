@@ -242,7 +242,7 @@ void Player::Update()
 	//Wキーでボスまでワープ
 	if (input.IsPressed(InputEvent::bossWarp))
 	{
-		m_pos.m_z = 19000.0f;
+		m_pos.z = 19000.0f;
 	}
 
 #endif
@@ -262,7 +262,7 @@ void Player::ClampPosition()
 	// カメラとプレイヤーの位置の差からZ方向の距離を求める
 	Vector3 cameraPos = pCamera->GetPos(); // カメラ位置
 	Vector3 playerPos = m_pos;
-	float distZ = std::abs((playerPos - cameraPos).m_z);
+	float distZ = std::abs((playerPos - cameraPos).z);
 
 	// 求めたdistZを使用してプレイヤーが移動できる範囲を
 	// ワールド座標で算出する
@@ -270,12 +270,12 @@ void Player::ClampPosition()
 
 	// プレイヤーの位置をそれぞれ求めた範囲でクランプする
 	//-screenWToWorld～screenWToWorldがクランプ範囲
-	m_pos.m_x = std::clamp(m_pos.m_x, -frustumHalf.m_x, frustumHalf.m_x);
+	m_pos.x = std::clamp(m_pos.x, -frustumHalf.x, frustumHalf.x);
 	// 海面と、視錐台の下限を比べて制限が厳しい方を実際の下限として使用する
-	m_pos.m_y = std::clamp(
-		m_pos.m_y,
-		std::max(-frustumHalf.m_y, Game::sea_player_margin),
-		frustumHalf.m_y);
+	m_pos.y = std::clamp(
+		m_pos.y,
+		std::max(-frustumHalf.y, Game::sea_player_margin),
+		frustumHalf.y);
 }
 
 void Player::Somersault(InputManager& input)
@@ -441,7 +441,7 @@ void Player::Draw()
 	DrawPlayer();
 
 #ifdef _DEBUG
-	DrawFormatString(0, 300, 0xffffff, L"playerPosX:%f,Y : %f,Z:%f", m_pos.m_x, m_pos.m_y, m_pos.m_z);
+	DrawFormatString(0, 300, 0xffffff, L"playerPosX:%f,Y : %f,Z:%f", m_pos.x, m_pos.y, m_pos.z);
 	DrawFormatString(0, 250, 0xffffff, L"Gauge : %f", m_gauge);
 	DrawFormatString(1080, 20, 0xffffff, L"Health : %d", m_health);
 	DrawFormatString(0, 365, 0xffffff, L"IsFocus : %d", IsFocus());

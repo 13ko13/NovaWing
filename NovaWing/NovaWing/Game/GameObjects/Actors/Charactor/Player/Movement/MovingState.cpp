@@ -48,22 +48,22 @@ void MovingState::Update()
 	};
 	//先に正規化しておく
 	float length = std::sqrtf(
-		stick.m_x * stick.m_x + stick.m_y * stick.m_y
+		stick.x * stick.x + stick.y * stick.y
 	);
 	if (length > 1.0f)
 	{
-		stick.m_x /= length;
-		stick.m_y /= length;
+		stick.x /= length;
+		stick.y /= length;
 	}
 
 	//デッドゾーンより値が小さければ入力無しとする
-	if (std::abs(stick.m_x) < stick_dead_zone)
+	if (std::abs(stick.x) < stick_dead_zone)
 	{
-		stick.m_x = 0.0f;
+		stick.x = 0.0f;
 	}
-	if (std::abs(stick.m_y) < stick_dead_zone)
+	if (std::abs(stick.y) < stick_dead_zone)
 	{
-		stick.m_y = 0.0f;
+		stick.y = 0.0f;
 	}
 
 	//weak_ptrからshared_ptrに変換
@@ -72,12 +72,12 @@ void MovingState::Update()
 	Vector3 vel;
 
 	//上下入力
-	vel.m_y = -stick.m_y * move_speed_y;
+	vel.y = -stick.y * move_speed_y;
 	//左右入力
-	vel.m_x = stick.m_x * move_speed_x;
+	vel.x = stick.x * move_speed_x;
 
 	//進むときのスピードを設定する
-	vel.m_z = move_speed_z;
+	vel.z = move_speed_z;
 	pPlayer->SetVel(vel);
 
 	//lengthがしきい値未満ならIdleMovementStateに戻る
@@ -87,7 +87,7 @@ void MovingState::Update()
 	}
 
 #ifdef _DEBUG
-	DrawFormatString(0, 100, 0xffffff, L"stickX:%f,stickY:%f", stick.m_x, stick.m_y);
+	DrawFormatString(0, 100, 0xffffff, L"stickX:%f,stickY:%f", stick.x, stick.y);
 #endif
 }
 

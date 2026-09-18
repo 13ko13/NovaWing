@@ -174,7 +174,7 @@ void PauseScene::Draw()
 	const auto& wsize = Application::GetInstance().GetWindowSize();
 
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, black_graph_alpha);
-	DrawBox(0, 0, wsize.m_width, wsize.m_height, 0x000000, true);
+	DrawBox(0, 0, wsize.width, wsize.height, 0x000000, true);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 	ResourceLoader& loader = ResourceLoader::GetInstance();
@@ -194,7 +194,7 @@ void PauseScene::Draw()
 	//選択肢背景画像
 	int backgroundH = loader.GetGraphic(ResourceLoader::GraphicID::SelectBackGround);
 	DrawGraphToShaderByCenter(
-		wsize.m_width * back_ground_ratio_x, wsize.m_height * back_ground_ratio_y,
+		wsize.width * back_ground_ratio_x, wsize.height * back_ground_ratio_y,
 		back_ground_graph_scale, backgroundH,
 		1.0f,
 		uvMaxU,
@@ -215,8 +215,8 @@ void PauseScene::Draw()
 	{
 		//ゲームに戻る選択肢を描画
 		DrawGraphToShaderByCenter(
-			wsize.m_width * back_game_ratio.m_x,
-			wsize.m_height * back_game_ratio.m_y,
+			wsize.width * back_game_ratio.x,
+			wsize.height * back_game_ratio.y,
 			select_graph_scale, backGameHandle,
 			1.0f,
 			uvMaxU,
@@ -224,8 +224,8 @@ void PauseScene::Draw()
 		);
 		//タイトルに戻る選択肢を描画
 		DrawGraphToShaderByCenter(
-			wsize.m_width * back_title_ratio.m_x,
-			wsize.m_height * back_title_ratio.m_y,
+			wsize.width * back_title_ratio.x,
+			wsize.height * back_title_ratio.y,
 			select_graph_scale, backTitleHandle,
 			1.0f,
 			uvMaxU,
@@ -241,16 +241,16 @@ void PauseScene::Draw()
 			if (m_wipeProgress[static_cast<int>(Select::BackGame)] > 0.0f)
 			{
 				DrawGraphToShaderByCenter(
-					wsize.m_width * back_game_ratio.m_x,
-					wsize.m_height * back_game_ratio.m_y,
+					wsize.width * back_game_ratio.x,
+					wsize.height * back_game_ratio.y,
 					select_graph_scale, backGameOnCursorHandle,
 					1.0f,
 					m_wipeProgress[static_cast<int>(Select::BackGame)]
 				);
 			}
 			DrawGraphToShaderByCenter(
-				wsize.m_width * back_title_ratio.m_x,
-				wsize.m_height * back_title_ratio.m_y,
+				wsize.width * back_title_ratio.x,
+				wsize.height * back_title_ratio.y,
 				select_graph_scale, backTitleHandle,
 				1.0f
 			);
@@ -261,15 +261,15 @@ void PauseScene::Draw()
 			if (m_wipeProgress[static_cast<int>(Select::BackTitle)] > 0.0f)
 			{
 				DrawGraphToShaderByCenter(
-					wsize.m_width * back_title_ratio.m_x,
-					wsize.m_height * back_title_ratio.m_y,
+					wsize.width * back_title_ratio.x,
+					wsize.height * back_title_ratio.y,
 					select_graph_scale, backTitleOnCursorHandle,
 					1.0f, m_wipeProgress[static_cast<int>(Select::BackTitle)]
 				);
 			}
 			DrawGraphToShaderByCenter(
-				wsize.m_width * back_game_ratio.m_x,
-				wsize.m_height * back_game_ratio.m_y,
+				wsize.width * back_game_ratio.x,
+				wsize.height * back_game_ratio.y,
 				select_graph_scale, backGameHandle,
 				1.0f
 			);

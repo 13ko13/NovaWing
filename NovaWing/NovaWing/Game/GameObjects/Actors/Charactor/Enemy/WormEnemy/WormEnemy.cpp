@@ -52,7 +52,7 @@ WormEnemy::WormEnemy(
 	SetPos(data.pos);
 
 	//螺旋の中心を保存
-	m_spiralCenter = Vector2(data.pos.m_x, data.pos.m_y);
+	m_spiralCenter = Vector2(data.pos.x, data.pos.y);
 }
 
 WormEnemy::~WormEnemy()
@@ -91,7 +91,7 @@ void WormEnemy::OnInit()
 void WormEnemy::Update()
 {
 	//プレイヤーがワームの動き出し距離まで来ていなければ処理を飛ばす
-	if(m_pPlayer.lock()->GetPos().m_z < m_activatePlayerZ) return;
+	if(m_pPlayer.lock()->GetPos().z < m_activatePlayerZ) return;
 
 	//フレーム更新
 	m_frame++;
@@ -128,10 +128,10 @@ void WormEnemy::Update()
 		m_rotation = rotZ * initRot;
 
 		//頭の移動を螺旋状にする
-		m_pos.m_z += move_speed * m_moveDirection;
-		m_pos.m_x = m_spiralCenter.m_x + cosf(m_rotationAngle * DX_PI_F / 180.0f) *
+		m_pos.z += move_speed * m_moveDirection;
+		m_pos.x = m_spiralCenter.x + cosf(m_rotationAngle * DX_PI_F / 180.0f) *
 			spiral_radius;
-		m_pos.m_y = m_spiralCenter.m_y + sinf(m_rotationAngle * DX_PI_F / 180.0f) *
+		m_pos.y = m_spiralCenter.y + sinf(m_rotationAngle * DX_PI_F / 180.0f) *
 			spiral_radius;
 
 		//頭の位置を履歴に追加
@@ -206,7 +206,7 @@ void WormEnemy::Update()
 					);
 					//再生直後に正しい位置へ即座にセットする(1フレーム目のワープ軌跡を防ぐ)
 					SetPosPlayingEffekseer3DEffect(
-						m_deathPlayHandle, m_pos.m_x, m_pos.m_y, m_pos.m_z
+						m_deathPlayHandle, m_pos.x, m_pos.y, m_pos.z
 					);	
 				}
 				else
@@ -218,9 +218,9 @@ void WormEnemy::Update()
 					//再生直後に胴体の位置にセットする
 					SetPosPlayingEffekseer3DEffect(
 						m_deathPlayHandle,
-						m_segmentPositions[m_deathEffectNum - 1].m_x,
-						m_segmentPositions[m_deathEffectNum - 1].m_y,
-						m_segmentPositions[m_deathEffectNum - 1].m_z
+						m_segmentPositions[m_deathEffectNum - 1].x,
+						m_segmentPositions[m_deathEffectNum - 1].y,
+						m_segmentPositions[m_deathEffectNum - 1].z
 					);	
 				}
 
@@ -242,7 +242,7 @@ void WormEnemy::Update()
 void WormEnemy::Draw()
 {
 	//プレイヤーがワームの動き出し距離まで来ていなければ処理を飛ばす
-	if(m_pPlayer.lock()->GetPos().m_z < m_activatePlayerZ) return;
+	if(m_pPlayer.lock()->GetPos().z < m_activatePlayerZ) return;
 
 	//頭がまだ爆発していなければ描画する
 	if (m_deathEffectNum == 0)

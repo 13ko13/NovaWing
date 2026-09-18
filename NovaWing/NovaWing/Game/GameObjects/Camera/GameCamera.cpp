@@ -40,12 +40,12 @@ GameCamera::GameCamera(const std::shared_ptr<Player> pPlayer)
 
 	// 初期位置を設定
 	// プレイヤーが動くと、カメラもプレイヤーよりも小さい量で移動する
-	m_pos.m_x = playerPos.m_x * camera_move_strength_x;
+	m_pos.x = playerPos.x * camera_move_strength_x;
 	// yはxよりも小さく動いて、海面より下にはならないようにする
-	m_pos.m_y = playerPos.m_y * camera_move_strength_y * -1.0f + camera_offset_y;
-	m_pos.m_y = std::max(m_pos.m_y, Game::sea_camera_margin);
+	m_pos.y = playerPos.y * camera_move_strength_y * -1.0f + camera_offset_y;
+	m_pos.y = std::max(m_pos.y, Game::sea_camera_margin);
 	// zはプレイヤーよりも少し手前
-	m_pos.m_z = playerPos.m_z - camera_offset_z;
+	m_pos.z = playerPos.z - camera_offset_z;
 
 	//前フレームの位置に初期位置を保存しておく
 	m_prevPos = m_pos;
@@ -92,12 +92,12 @@ void GameCamera::UpdatePosition()
 		m_targetPos = Vector3::Lerp(m_prevTargetPos, m_targetPos, lerp_t);
 
 		// プレイヤーが動くと、カメラもプレイヤーよりも小さい量で移動する
-		m_pos.m_x = playerPos.m_x * camera_move_strength_x;
+		m_pos.x = playerPos.x * camera_move_strength_x;
 		// yはxよりも小さく動いて、海面より下にはならないようにする
-		m_pos.m_y = playerPos.m_y * camera_move_strength_y + camera_offset_y;
-		m_pos.m_y = std::max(m_pos.m_y, Game::sea_camera_margin);
+		m_pos.y = playerPos.y * camera_move_strength_y + camera_offset_y;
+		m_pos.y = std::max(m_pos.y, Game::sea_camera_margin);
 		// zはプレイヤーよりも少し手前
-		m_pos.m_z = playerPos.m_z - camera_offset_z;
+		m_pos.z = playerPos.z - camera_offset_z;
 
 		//前フレームのカメラの位置から今のフレームの位置まで補間する
 		m_pos = Vector3::Lerp(m_prevPos, m_pos, lerp_t);

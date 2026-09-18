@@ -63,8 +63,8 @@ void SomersaultState::Update()
 
 	// 速度
 	Vector3 vel;
-	vel.m_y = sinf(targetAngleX) * move_speed;
-	vel.m_z = cosf(-targetAngleX) * move_speed;
+	vel.y = sinf(targetAngleX) * move_speed;
+	vel.z = cosf(-targetAngleX) * move_speed;
 	// 速度を設定
 	pPlayer->SetVel(vel);
 

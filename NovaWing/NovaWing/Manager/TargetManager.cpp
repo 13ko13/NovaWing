@@ -160,8 +160,8 @@ bool TargetManager::IsOnScreen(const Vector3& worldPos)
 	const Size& wsize = Application::GetInstance().GetWindowSize();
 
 	//スクリーン内に入っていなければfalseを返す
-	if (screenPos.x < 0 || screenPos.x > wsize.m_width) return false;
-	if (screenPos.y < 0 || screenPos.y > wsize.m_height) return false;
+	if (screenPos.x < 0 || screenPos.x > wsize.width) return false;
+	if (screenPos.y < 0 || screenPos.y > wsize.height) return false;
 	if (screenPos.z >= 1.0f) return false;//視錐台より奥(背後)
 
 	//それ以外はスクリーン内ということになる

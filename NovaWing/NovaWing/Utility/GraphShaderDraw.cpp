@@ -33,10 +33,10 @@ void DrawRectHorizontalGraphToShader(
 	VERTEX2DSHADER vertexDatas[vertex_num];
 	//1つ目の頂点のデータ
 	//位置
-	vertexDatas[vertex_left_top].pos = Vector2(left + size.m_width * uvMinU, top).ToDxLib();//左上
-	vertexDatas[vertex_right_top].pos = Vector2(left + size.m_width * uvMaxU, top).ToDxLib();//右上
-	vertexDatas[vertex_left_bottom].pos = Vector2(left + size.m_width * uvMinU, top + size.m_height).ToDxLib();//左下
-	vertexDatas[vertex_right_bottom].pos = Vector2(left + size.m_width * uvMaxU, top + size.m_height).ToDxLib();//右下
+	vertexDatas[vertex_left_top].pos = Vector2(left + size.width * uvMinU, top).ToDxLib();//左上
+	vertexDatas[vertex_right_top].pos = Vector2(left + size.width * uvMaxU, top).ToDxLib();//右上
+	vertexDatas[vertex_left_bottom].pos = Vector2(left + size.width * uvMinU, top + size.height).ToDxLib();//左下
+	vertexDatas[vertex_right_bottom].pos = Vector2(left + size.width * uvMaxU, top + size.height).ToDxLib();//右下
 
 	//UV
 	//左上
@@ -95,11 +95,11 @@ void DrawRectVerticalGraphToShader(
 	//1つ目の頂点のデータ
 	//位置
 	vertexDatas[vertex_left_top].pos = Vector2(left, top +
-		 size.m_height * (1.0f - uvMaxV)).ToDxLib();//左上
-	vertexDatas[vertex_right_top].pos = Vector2(left + size.m_width, top +
-		 size.m_height * (1.0f - uvMaxV)).ToDxLib();//右上
-	vertexDatas[vertex_left_bottom].pos = Vector2(left, top + size.m_height).ToDxLib();//左下
-	vertexDatas[vertex_right_bottom].pos = Vector2(left + size.m_width, top + size.m_height).ToDxLib();//右下
+		 size.height * (1.0f - uvMaxV)).ToDxLib();//左上
+	vertexDatas[vertex_right_top].pos = Vector2(left + size.width, top +
+		 size.height * (1.0f - uvMaxV)).ToDxLib();//右上
+	vertexDatas[vertex_left_bottom].pos = Vector2(left, top + size.height).ToDxLib();//左下
+	vertexDatas[vertex_right_bottom].pos = Vector2(left + size.width, top + size.height).ToDxLib();//右下
 
 	//UV
 	//左上と右上はHPが減るので割合位置をかける
@@ -155,14 +155,14 @@ void DrawGraphToShaderByCenter(
 	Size texSize;
 	GetGraphSize(
 		texH,
-		&texSize.m_width,
-		&texSize.m_height
+		&texSize.width,
+		&texSize.height
 	);
 	//float型のSizeに変換
 	SizeF texSizeSizeF =
 	{
-		texSize.m_width * scale,
-		texSize.m_height * scale
+		texSize.width * scale,
+		texSize.height * scale
 	};
 
 	//左上座標を計算
@@ -171,14 +171,14 @@ void DrawGraphToShaderByCenter(
 	//uvMinUを0のままuvMaxUだけ動かせば左端固定で右に伸びるワイプに、
 	//中心対称に動かせば中心から左右に開く演出になる
 	Vector2 leftTopPos = Vector2(
-		centerX - texSizeSizeF.m_width / 2,
-		centerY - texSizeSizeF.m_height / 2
+		centerX - texSizeSizeF.width / 2,
+		centerY - texSizeSizeF.height / 2
 	);
 
 	//画像をシェーダーを通して描画
 	DrawRectHorizontalGraphToShader(
-		leftTopPos.m_x,
-		leftTopPos.m_y,
+		leftTopPos.x,
+		leftTopPos.y,
 		texSizeSizeF, uvMaxU, texH,
 		alpha,
 		uvMinU

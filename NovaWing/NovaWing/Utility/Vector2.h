@@ -10,7 +10,7 @@ public:
 	Vector2();
 	Vector2(float x, float y);
 
-	float m_x, m_y;
+	float x, y;
 	float Length()const;//ベクトルの大きさ
 	void Normalize();//ベクトルの大きさを1にする
 	Vector2 Normalized() const;///大きさを１にしたベクトルを返す

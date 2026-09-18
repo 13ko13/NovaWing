@@ -148,9 +148,9 @@ void ClearScene::Init()
 
 	//文字にもシェーダをかけるために1枚の画像として
 	//文字のみ描画された画像を作るためにオフスクリーンを用意
-	m_textRenderTargetH = MakeScreen(wsize.m_width, wsize.m_height, true);
+	m_textRenderTargetH = MakeScreen(wsize.width, wsize.height, true);
 	//発光用のぼかし画像を作るためにオフスクリーンを用意
-	m_textGlowH = MakeScreen(wsize.m_width, wsize.m_height, true);
+	m_textGlowH = MakeScreen(wsize.width, wsize.height, true);
 	//リザルト情報をオフスクリーンに描画描画(シェーダ適用済み+ぼかし適用済み)
 	DrawResultText(fontHandle);
 }
@@ -385,8 +385,8 @@ void ClearScene::Draw()
 	//ウィンドウサイズ
 	Size wsize = Application::GetInstance().GetWindowSize();
 	//画面の真ん中
-	int x = wsize.m_width / 2;
-	int y = wsize.m_height / 2;
+	int x = wsize.width / 2;
+	int y = wsize.height / 2;
 	ResourceLoader& loader = ResourceLoader::GetInstance();
 
 	SetUsePixelShader(m_glitchPSH);
@@ -405,8 +405,8 @@ void ClearScene::Draw()
 	int handle = ResourceLoader::GetInstance().GetGraphic(
 		ResourceLoader::GraphicID::ResultTemplete);
 	DrawGraphToShaderByCenter(
-		wsize.m_width * 0.5f,
-		wsize.m_height * 0.5f,
+		wsize.width * 0.5f,
+		wsize.height * 0.5f,
 		templete_size,
 		handle,
 		1.0f,
@@ -418,14 +418,14 @@ void ClearScene::Draw()
 	//ぼかし画像を先に加算合成で描画する
 	SetDrawBlendMode(DX_BLENDMODE_ADD, blur_alpha);
 	DrawGraphToShaderByCenter(
-		wsize.m_width * 0.5f, wsize.m_height * 0.5f,
+		wsize.width * 0.5f, wsize.height * 0.5f,
 		1.0, m_textGlowH,
 		1.0f, uvMaxU, uvMinU
 	);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 
 	DrawGraphToShaderByCenter(
-		wsize.m_width * 0.5f, wsize.m_height * 0.5f,
+		wsize.width * 0.5f, wsize.height * 0.5f,
 		1.0, m_textRenderTargetH,
 		1.0f, uvMaxU, uvMinU
 	);
@@ -444,7 +444,7 @@ void ClearScene::Draw()
 		//選択肢背景画像
 		int backgroundH = loader.GetGraphic(ResourceLoader::GraphicID::SelectBackGround);
 		DrawGraphToShaderByCenter(
-			wsize.m_width * 0.5f, wsize.m_height * 0.5f,
+			wsize.width * 0.5f, wsize.height * 0.5f,
 			background_graph_scale, backgroundH,
 			1.0f,
 			uvMaxU,
@@ -467,8 +467,8 @@ void ClearScene::Draw()
 		{
 			//リトライ選択肢を描画
 			DrawGraphToShaderByCenter(
-				wsize.m_width * retry_ratio.m_x,
-				wsize.m_height * retry_ratio.m_y,
+				wsize.width * retry_ratio.x,
+				wsize.height * retry_ratio.y,
 				select_graph_scale, retryHandle,
 				1.0f,
 				uvMaxU,
@@ -476,8 +476,8 @@ void ClearScene::Draw()
 			);
 			//タイトルに戻る選択肢を描画
 			DrawGraphToShaderByCenter(
-				wsize.m_width * back_title_ratio.m_x,
-				wsize.m_height * back_title_ratio.m_y,
+				wsize.width * back_title_ratio.x,
+				wsize.height * back_title_ratio.y,
 				select_graph_scale, backTitleHandle,
 				1.0f,
 				uvMaxU,
@@ -499,8 +499,8 @@ void ClearScene::Draw()
 				{
 					//リトライ選択肢を描画
 					DrawGraphToShaderByCenter(
-						wsize.m_width * retry_ratio.m_x,
-						wsize.m_height * retry_ratio.m_y,
+						wsize.width * retry_ratio.x,
+						wsize.height * retry_ratio.y,
 						select_graph_scale, retryOnCursorHandle,
 						1.0f,
 						m_wipeProgress[static_cast<int>(ClearSelect::ReTry)]
@@ -508,8 +508,8 @@ void ClearScene::Draw()
 				}
 				//タイトルに戻る選択肢を描画
 				DrawGraphToShaderByCenter(
-					wsize.m_width * back_title_ratio.m_x,
-					wsize.m_height * back_title_ratio.m_y,
+					wsize.width * back_title_ratio.x,
+					wsize.height * back_title_ratio.y,
 					select_graph_scale, backTitleHandle,
 					1.0f
 				);
@@ -523,16 +523,16 @@ void ClearScene::Draw()
 				{
 					//タイトルに戻る選択肢を描画
 					DrawGraphToShaderByCenter(
-						wsize.m_width * back_title_ratio.m_x,
-						wsize.m_height * back_title_ratio.m_y,
+						wsize.width * back_title_ratio.x,
+						wsize.height * back_title_ratio.y,
 						select_graph_scale, backTitleOnCursorHandle,
 						1.0f, m_wipeProgress[static_cast<int>(ClearSelect::BackTitle)]
 					);
 				}
 				//リトライ選択肢を描画
 				DrawGraphToShaderByCenter(
-					wsize.m_width * retry_ratio.m_x,
-					wsize.m_height * retry_ratio.m_y,
+					wsize.width * retry_ratio.x,
+					wsize.height * retry_ratio.y,
 					select_graph_scale, retryHandle,
 					1.0f
 				);
@@ -555,8 +555,8 @@ void ClearScene::Draw()
 	//二つの画像を描画
 	//Aボタン画像
 	DrawRotaGraph(
-		wsize.m_width * a_button_pos.m_x,
-		wsize.m_height * a_button_pos.m_y,
+		wsize.width * a_button_pos.x,
+		wsize.height * a_button_pos.y,
 		a_button_scale, 0.0, aButtonHandle, true
 	);
 
@@ -565,8 +565,8 @@ void ClearScene::Draw()
 	{
 		//決定のテキスト画像
 		DrawRotaGraph(
-			wsize.m_width * decide_graph_pos.m_x,
-			wsize.m_height * decide_graph_pos.m_y,
+			wsize.width * decide_graph_pos.x,
+			wsize.height * decide_graph_pos.y,
 			decide_graph_scale, 0.0, decideHandle, true
 		);
 	}
@@ -574,8 +574,8 @@ void ClearScene::Draw()
 	{
 		//次へ のテキスト画像
 		DrawRotaGraph(
-			wsize.m_width * next_graph_pos.m_x,
-			wsize.m_height *next_graph_pos.m_y,
+			wsize.width * next_graph_pos.x,
+			wsize.height *next_graph_pos.y,
 			next_graph_scale, 0.0, nextHandle, true
 		);
 	}
@@ -594,24 +594,24 @@ void ClearScene::DrawResultText(int fontHandle)
 	std::wstring killCountWString = std::to_wstring(static_cast<int>(m_currentKillCount));
 	int killCountWidth = GetDrawStringWidthToHandle(killCountWString.c_str(), killCountWString.size(), fontHandle);
 	DrawStringToHandle(
-		wsize.m_width * kill_count_pos.m_x - killCountWidth,
-		wsize.m_height * kill_count_pos.m_y,
+		wsize.width * kill_count_pos.x - killCountWidth,
+		wsize.height * kill_count_pos.y,
 		killCountWString.c_str(), score_color, fontHandle
 	);
 	//クリアタイム
 	std::wstring clearTimeWString = std::to_wstring(static_cast<int>(m_currentClearTime));
 	int clearTimeWidth = GetDrawStringWidthToHandle(clearTimeWString.c_str(), clearTimeWString.size(), fontHandle);
 	DrawStringToHandle(
-		wsize.m_width * clear_time_pos.m_x - clearTimeWidth,
-		wsize.m_height * clear_time_pos.m_y,
+		wsize.width * clear_time_pos.x - clearTimeWidth,
+		wsize.height * clear_time_pos.y,
 		clearTimeWString.c_str(), score_color, fontHandle
 	);
 	//被弾回数
 	std::wstring hitCountWString = std::to_wstring(static_cast<int>(m_currentHitCount));
 	int hitCountWidth = GetDrawStringWidthToHandle(hitCountWString.c_str(), hitCountWString.size(), fontHandle);
 	DrawStringToHandle(
-		wsize.m_width * hit_count_pos.m_x - hitCountWidth,
-		wsize.m_height * hit_count_pos.m_y,
+		wsize.width * hit_count_pos.x - hitCountWidth,
+		wsize.height * hit_count_pos.y,
 		hitCountWString.c_str(), hit_count_color, fontHandle
 	);
 
@@ -619,8 +619,8 @@ void ClearScene::DrawResultText(int fontHandle)
 	std::wstring scoreWString = std::to_wstring(static_cast<int>(m_currentScore));
 	int scoreWidth = GetDrawStringWidthToHandle(scoreWString.c_str(), scoreWString.size(), fontHandle);
 	DrawStringToHandle(
-		wsize.m_width * score_pos.m_x - scoreWidth,
-		wsize.m_height * score_pos.m_y,
+		wsize.width * score_pos.x - scoreWidth,
+		wsize.height * score_pos.y,
 		scoreWString.c_str(), score_color, fontHandle
 	);
 
@@ -632,26 +632,26 @@ void ClearScene::DrawResultText(int fontHandle)
 	ClearDrawScreen();
 	//敵を倒した数
 	DrawStringToHandle(
-		wsize.m_width * kill_count_pos.m_x - killCountWidth,
-		wsize.m_height * kill_count_pos.m_y,
+		wsize.width * kill_count_pos.x - killCountWidth,
+		wsize.height * kill_count_pos.y,
 		killCountWString.c_str(), score_color, fontHandle
 	);
 	//クリアタイム
 	DrawStringToHandle(
-		wsize.m_width * clear_time_pos.m_x - clearTimeWidth,
-		wsize.m_height * clear_time_pos.m_y,
+		wsize.width * clear_time_pos.x - clearTimeWidth,
+		wsize.height * clear_time_pos.y,
 		clearTimeWString.c_str(), score_color, fontHandle
 	);
 	//被弾回数
 	DrawStringToHandle(
-		wsize.m_width * hit_count_pos.m_x - hitCountWidth,
-		wsize.m_height * hit_count_pos.m_y,
+		wsize.width * hit_count_pos.x - hitCountWidth,
+		wsize.height * hit_count_pos.y,
 		hitCountWString.c_str(), hit_count_color, fontHandle
 	);
 	//スコア
 	DrawStringToHandle(
-		wsize.m_width * score_pos.m_x - scoreWidth,
-		wsize.m_height * score_pos.m_y,
+		wsize.width * score_pos.x - scoreWidth,
+		wsize.height * score_pos.y,
 		scoreWString.c_str(), score_color, fontHandle
 	);
 

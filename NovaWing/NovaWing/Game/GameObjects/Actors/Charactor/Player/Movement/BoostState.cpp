@@ -51,7 +51,7 @@ void BoostState::Update()
 	//プレイヤーより少し後ろの位置にエフェクトを出す
 	VECTOR effectPos = (
 		pPlayer->GetPos() + pPlayer->GetVisualForward() * 
-		boost_effect_offset_pos.m_z).ToDxLib();
+		boost_effect_offset_pos.z).ToDxLib();
 
 	//プレイヤーから回転角を取得してエフェクトの角度を変える
 	SetRotationPlayingEffekseer3DEffect(

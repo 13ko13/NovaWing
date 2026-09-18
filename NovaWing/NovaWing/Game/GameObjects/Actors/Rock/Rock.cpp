@@ -20,9 +20,9 @@ Rock::Rock(std::weak_ptr<CameraBase> pCamera, const RockData& data):
     {
         //受け取った岩のデータからYオフセットと半径をセットする
         Vector3 posWithOffset = Vector3(
-            data.pos.m_x,
-            data.pos.m_y + data.sphereYOffsets[i],
-            data.pos.m_z
+            data.pos.x,
+            data.pos.y + data.sphereYOffsets[i],
+            data.pos.z
         );
 
         //その球の半径を受け取ってセットする

@@ -197,7 +197,7 @@ void GameoverScene::Draw()
 	//選択肢背景画像
 	int backgroundH = loader.GetGraphic(ResourceLoader::GraphicID::SelectBackGround);
 	DrawGraphToShaderByCenter(
-		wsize.m_width * 0.5f, wsize.m_height * 0.5f,
+		wsize.width * 0.5f, wsize.height * 0.5f,
 		background_graph_scale, backgroundH,
 		1.0f,
 		uvMaxU,
@@ -220,8 +220,8 @@ void GameoverScene::Draw()
 	{
 		//リトライ選択肢を描画
 		DrawGraphToShaderByCenter(
-			wsize.m_width * retry_ratio.m_x,
-			wsize.m_height * retry_ratio.m_y,
+			wsize.width * retry_ratio.x,
+			wsize.height * retry_ratio.y,
 			select_graph_scale, retryHandle,
 			1.0f,
 			uvMaxU,
@@ -229,8 +229,8 @@ void GameoverScene::Draw()
 		);
 		//ゲーム終了選択肢を描画
 		DrawGraphToShaderByCenter(
-			wsize.m_width * exit_game_ratio.m_x,
-			wsize.m_height * exit_game_ratio.m_y,
+			wsize.width * exit_game_ratio.x,
+			wsize.height * exit_game_ratio.y,
 			select_graph_scale, exitGameHandle,
 			1.0f,
 			uvMaxU,
@@ -252,8 +252,8 @@ void GameoverScene::Draw()
 			{
 				//リトライ選択肢を描画
 				DrawGraphToShaderByCenter(
-					wsize.m_width * retry_ratio.m_x,
-					wsize.m_height * retry_ratio.m_y,
+					wsize.width * retry_ratio.x,
+					wsize.height * retry_ratio.y,
 					select_graph_scale, retryOnCursorHandle,
 					1.0f,
 					m_wipeProgress[static_cast<int>(GameoverSelect::Retry)]
@@ -261,8 +261,8 @@ void GameoverScene::Draw()
 			}
 			//ゲーム終了選択肢を描画
 			DrawGraphToShaderByCenter(
-				wsize.m_width * exit_game_ratio.m_x,
-				wsize.m_height * exit_game_ratio.m_y,
+				wsize.width * exit_game_ratio.x,
+				wsize.height * exit_game_ratio.y,
 				select_graph_scale, exitGameHandle,
 				1.0f
 			);
@@ -276,16 +276,16 @@ void GameoverScene::Draw()
 			{
 				//ゲーム終了選択肢を描画
 				DrawGraphToShaderByCenter(
-					wsize.m_width * exit_game_ratio.m_x,
-					wsize.m_height * exit_game_ratio.m_y,
+					wsize.width * exit_game_ratio.x,
+					wsize.height * exit_game_ratio.y,
 					select_graph_scale, exitGameOnCursorHandle,
 					1.0f, m_wipeProgress[static_cast<int>(GameoverSelect::ExitGame)]
 				);
 			}
 			//リトライ選択肢を描画
 			DrawGraphToShaderByCenter(
-				wsize.m_width * retry_ratio.m_x,
-				wsize.m_height * retry_ratio.m_y,
+				wsize.width * retry_ratio.x,
+				wsize.height * retry_ratio.y,
 				select_graph_scale, retryHandle,
 				1.0f
 			);
@@ -304,26 +304,26 @@ void GameoverScene::Draw()
 
 	//aボタン画像の描画位置
 	Vector2 aButtonDrawPos = Vector2(
-		wsize.m_width * a_button_pos_ratio.m_x,
-		wsize.m_height * a_button_pos_ratio.m_y
+		wsize.width * a_button_pos_ratio.x,
+		wsize.height * a_button_pos_ratio.y
 	);
 	//決定画像描画位置
 	Vector2 decideDrawPos = Vector2(
-		wsize.m_width * decide_graph_pos_ratio.m_x,
-		wsize.m_height * decide_graph_pos_ratio.m_y
+		wsize.width * decide_graph_pos_ratio.x,
+		wsize.height * decide_graph_pos_ratio.y
 	);
 
 	//二つの画像を描画
 	//Aボタン画像
 	DrawRotaGraph(
-		aButtonDrawPos.m_x,
-		aButtonDrawPos.m_y,
+		aButtonDrawPos.x,
+		aButtonDrawPos.y,
 		a_button_scale, 0.0, aButtonHandle, true
 	);
 	//決定のテキスト画像
 	DrawRotaGraph(
-		decideDrawPos.m_x,
-		decideDrawPos.m_y,
+		decideDrawPos.x,
+		decideDrawPos.y,
 		decide_graph_scale, 0.0, decideHandle, true
 	);
 }

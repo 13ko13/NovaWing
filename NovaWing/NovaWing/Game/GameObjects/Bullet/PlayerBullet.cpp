@@ -20,7 +20,7 @@ PlayerBullet::PlayerBullet(
 
 	//再生直後に正しい位置へ即座にセットする(1フレーム目のワープ軌跡を防ぐ)
 	SetPosPlayingEffekseer3DEffect(
-		m_effectPlayHandle, pos.m_x, pos.m_y, pos.m_z
+		m_effectPlayHandle, pos.x, pos.y, pos.z
 	);
 }
 
@@ -37,7 +37,7 @@ void PlayerBullet::Update()
 
 	//エフェクトの位置の調整する
 	SetPosPlayingEffekseer3DEffect(
-		m_effectPlayHandle, GetPos().m_x, GetPos().m_y, GetPos().m_z
+		m_effectPlayHandle, GetPos().x, GetPos().y, GetPos().z
 	);
 }
 
