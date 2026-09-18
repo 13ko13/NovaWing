@@ -635,3 +635,28 @@
 1. `m_howToControllOpenProgress`の増減を`++`/`--`ではなく緩やかな係数（例: `1.0f / 15.0f`等）に修正する。
 2. `m_howToControllOpenProgress`(0〜1)を使って、実際に操作説明画像を左下からスライドイン/アウトさせる`Draw()`側の実装（画面外の位置から目標位置までLerpで座標を計算する）はまだ未着手。
 3. 操作説明用の画像自体（`GraphicID::HowToControll`/`HowToControllOnCursor`は登録済みだが、内容がスライド演出向けかどうかは未確認）の内容確認。
+
+### 進捗（2026-09-19・当たり判定のICollider化、設計〜Player着手途中）
+
+**目的: `CollisionManager::Update()`（300行超、Player/敵/岩/弾/ボスの組み合わせを個別にベタ書き）を、`ICollider`インターフェース経由の統一ループに書き換える。** 最初は「Actorに多重継承させる」案から出発したが、議論の末に方針転換。
+
+**確定した設計（試行錯誤の結論、後で見返す用に理由も残す）:**
+- **多重継承はしない。** ActorはGameObjectのみ継承したまま。当たり判定は各Actor派生クラスが専用の小さな内部クラス（例: `PlayerCollider`）を**コンポジションで保有**する形にした。理由: ProjectNeaR（参考プロジェクト、`C:\Users\Admin\Documents\GitHub\ProjectNeaR`）の`Collidable`/`ColliderBase`分離パターンを参考にしつつ、Actor本体への多重継承は避けたいというユーザー要望を優先した。
+- **`ICollider`（`Game/Collision/ICollider.h`、完成済み）**: `GetCollision()`(shared_ptr<ColliderShape>を返す)、`GetTag()`、`OnCollision(const ICollider&)`、`IsCollisionActive()`の4つを持つ純粋仮想interface。`ColliderTag` enumもここに定義。
+  - 試行錯誤の跡: 一度`Shape`を`enum`のまま返す案、`SphereData`構造体を直接持たせる案、`ShapeKind`+データの複合構造体案を経て、最終的に「Sphere固有のデータをICollider.hに持たせるのは違和感がある」というユーザーの指摘から、形状データは完全に別ファイル（`ColliderShape`/`SphereShape`）に分離する形に着地。
+- **`ColliderShape`（`Game/Collision/ColliderShape.h`、完成済み）**: `Shape`(enum: 今はSphereのみ)と、デバッグ描画用の純粋仮想`Draw()`のみを持つ抽象基底。
+- **`SphereShape`（`Game/Collision/SphereShape.h/.cpp`、完成済み）**: 既存の`Utility/Sphere`クラス（位置+半径+`HitCollision`+デバッグ`Draw`)と役割が完全に重複していたため、**`Sphere`を置き換える形でSphereShapeに位置・半径・`HitCollision`・`Draw`全てを統合**する方針にした。今後`Sphere`型を使っている全箇所（Player/Rock/EnemyBase系/Bullet系/CollisionManager、10ファイル以上）を`SphereShape`に順次置き換えていく必要がある。
+- **OnCollisionの責務範囲**: 「自分のreaction（ダメージを受ける等）」のみを担当させ、カメラシェイクや多重ヒット防止(`DamageSource`関連)などゲーム進行に関わる処理は今まで通り`CollisionManager`側に残す。ダメージ量は`OnCollision`内で`other.GetTag()`を見てswitchし、弾の`GetAttackPower()`のような`ICollider`契約外の情報が要る場合は`other`を具体型へ`static_cast`することも許容する方針。
+- **`DamageSource`による多重ヒット防止の仕組みは今回のスコープ外。** Player固有のメソッド（`IsTakingDamageFrom`等）としてそのまま残す。
+
+**現在の実装状況（2026-09-19時点、`git status`で確認）:**
+- `Game/Collision/`ディレクトリに`ICollider.h`、`ColliderShape.h`、`SphereShape.h/.cpp`は完成・確認済み。
+- `PlayerCollider.h/.cpp`は雛形まで作成したが、**`GetCollision()`/`IsCollisionActive()`のみ実装済みで、`OnCollision()`は未着手**（Rock側のICollider実装と合わせて後で決める予定だった）。
+- **`Player.h`/`Player.cpp`への変更はまだ未反映**（`m_collSphere`を`Sphere`型→`std::shared_ptr<SphereShape>`型に変える、`PlayerCollider m_collider`をメンバに追加する等、提示済みだが未入力の状態）。
+
+**次回やること（優先順）:**
+1. `Player.h`/`Player.cpp`に提示済みの変更（`m_collSphere`の型変更、`PlayerCollider`メンバ追加、コンストラクタ初期化リストとUpdate/Draw内の呼び出し変更）を反映する。
+2. `Rock`用の`ICollider`実装（`RockCollider`）を同じパターンで作成する。
+3. Player/Rock両方が揃った時点で`PlayerCollider::OnCollision`の中身（Rock相手のときのダメージ処理呼び出し）を実装し、`CollisionManager`のPlayer↔Rock部分だけ試験的にICollider経由へ書き換えてビルド確認する。
+4. パターンが確立したら、残り（`EnemyBase`とその派生`WormEnemy`/`FloatingEnemy`/`BossEnemy`、`BulletBase`とその派生`PlayerBullet`/`EnemyBullet`/`ChargeBullet`）に横展開し、最終的に`CollisionManager::Update()`全体をICollider経由のループに書き換える。
+5. 上記と並行して、既存の`Sphere`型使用箇所（`GetSphere()`/`GetSpheres()`/`GetCollisionSpheres()`を持つ全クラス）を`SphereShape`ベースに置き換えていく。

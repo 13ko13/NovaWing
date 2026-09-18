@@ -161,6 +161,7 @@
   <ItemGroup>
     <ClCompile Include="Game\Collision\Collidable.cpp" />
     <ClCompile Include="Game\Collision\ColliderBase.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\ItemBase.cpp" />
     <ClCompile Include="Game\GameObjects\Camera\GameCamera.cpp" />
     <ClCompile Include="Game\UI\BossHPGaugeUI.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\DisabledShootState.cpp" />
@@ -179,7 +180,9 @@
     <ClCompile Include="Manager\SoundManager.cpp" />
     <ClCompile Include="Game\UI\SpecialGaugeUI.cpp" />
     <ClCompile Include="Game\Collision\Rigidbody.cpp" />
+    <ClCompile Include="Game\Collision\PlayerCollider.cpp" />
     <ClCompile Include="Scene\PauseScene.cpp" />
+    <ClCompile Include="Game\Collision\SphereShape.cpp" />
     <ClCompile Include="Utility\GraphShaderDraw.cpp" />
     <ClCompile Include="Scene\ClearScene.cpp" />
     <ClCompile Include="CSVData\CSVData.cpp" />
@@ -251,9 +254,11 @@
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemyDataSetter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\Collision\ColliderShape.h" />
     <ClInclude Include="Game\Collision\Collidable.h" />
     <ClInclude Include="Game\Collision\ColliderBase.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\DamageSource.h" />
+    <ClInclude Include="Game\GameObjects\Actors\ItemBase.h" />
     <ClInclude Include="Game\GameObjects\Camera\GameCamera.h" />
     <ClInclude Include="Game\UI\BossHPGaugeUI.h" />
     <ClInclude Include="Constants\ResourceConstants.h" />
@@ -270,10 +275,13 @@
     <ClInclude Include="Game\UI\GaugeUIBase.h" />
     <ClInclude Include="Game\GameObjects\Camera\TitleCamera.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\TitlePlayer.h" />
+    <ClInclude Include="Game\Collision\ICollider.h" />
     <ClInclude Include="Manager\SoundManager.h" />
     <ClInclude Include="Game\UI\SpecialGaugeUI.h" />
     <ClInclude Include="Game\Collision\Rigidbody.h" />
+    <ClInclude Include="Game\Collision\PlayerCollider.h" />
     <ClInclude Include="Scene\PauseScene.h" />
+    <ClInclude Include="Game\Collision\SphereShape.h" />
     <ClInclude Include="Utility\GraphShaderDraw.h" />
     <ClInclude Include="Scene\ClearScene.h" />
     <ClInclude Include="CSVData\CSVData.h" />
