@@ -17,6 +17,9 @@ namespace
 
 	// チャージ開始とみなすときの長押しフレーム数
 	constexpr int charge_start_frame = 10;
+
+	//弾を出現させる位置を少し前にする
+	const Vector3 fire_pos_offset = Vector3(0.0f, 0.0f, 200.0f);
 }
 
 NormalShootState::NormalShootState(
@@ -51,8 +54,9 @@ void NormalShootState::Update()
 		// BulletManagerに弾の生成を依頼する
 		std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock(); // 一時的にshared_ptrに変換
 		std::shared_ptr<Player> pPlayer = m_pPlayer.lock();						 // 一時的にshared_ptrに変換
-		const Vector3 pos = pPlayer->GetPos();									 // プレイヤーの位置
+		Vector3 pos = pPlayer->GetPos();									 // プレイヤーの位置
 		const Vector3 vel = -pPlayer->GetForward() * move_speed;				 // 速度
+		pos += fire_pos_offset;
 
 		pBulletManager->CreateBullet(BulletManager::BulletType::PlayerBullet,
 									 pos, vel, attack_power,pPlayer->GetCamera());

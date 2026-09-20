@@ -2,7 +2,7 @@
 #include <memory>
 #include <vector>
 
-#include "Utility/Sphere.h"
+#include "Game/Collision/SphereShape.h"
 #include "Utility/Vector2.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
 
@@ -40,7 +40,7 @@ public:
 	
 	void TakeDamage(int damage) override;//ダメージを受ける
 	//当たり判定を返す
-	std::vector<Sphere> GetCollisionSpheres() const override;
+	std::vector<std::shared_ptr<SphereShape>> GetCollisionSpheres() const override;
 
 private:
 	//胴体の数
@@ -50,9 +50,9 @@ private:
 	//間隔を決めるときのフレーム
 	int m_frame = 0;
 
-	Sphere m_headSphere;//当たり判定(球)
+	std::shared_ptr<SphereShape> m_headSphere = std::make_shared<SphereShape>();//当たり判定(球)
 	std::vector<Vector3> m_segmentPositions;//胴体一つ一つの位置
-	std::vector<Sphere> m_segmentSpheres;//胴体一つ一つの当たり判定球
+	std::vector<std::shared_ptr<SphereShape>> m_segmentSpheres;//胴体一つ一つの当たり判定球
 
 	//頭の位置を履歴として持つ
 	std::vector<Vector3> m_headHistory;

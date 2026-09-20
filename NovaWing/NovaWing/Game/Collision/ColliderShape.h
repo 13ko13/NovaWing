@@ -19,6 +19,8 @@ public:
 
 	//当たり判定の形の種類を取得
 	Shape GetShape() const { return m_shape; }
+	//デバッグ用の描画
+	virtual void Draw(unsigned int color, bool isFill = false) = 0;
 
 private:
 	Shape m_shape;//当たり判定の形

@@ -43,7 +43,7 @@ WormEnemy::WormEnemy(
 	std::weak_ptr<SoundManager> pSoundManager) :
 	EnemyBase(data.modelID,camera,pPlayer,pBulletManager),
 	m_segmentCount(data.segmentCount),
-	m_headSphere(data.pos),
+	m_headSphere(std::make_shared<SphereShape>(data.pos, 0.0f)),
 	m_moveDirection(data.direction),
 	m_activatePlayerZ(data.activatePlayerZ),
 	m_pSoundManager(pSoundManager)
@@ -74,9 +74,9 @@ void WormEnemy::OnInit()
 		segmentPos = m_pos;
 	}
 	//当たり判定の初期化
-	for (Sphere& sphere : m_segmentSpheres)
+	for (std::shared_ptr<SphereShape>& sphere : m_segmentSpheres)
 	{
-		sphere = Sphere(m_pos);
+		sphere = std::make_shared<SphereShape>(m_pos, 0.0f);
 	}
 	//Y軸に180度回転する(モデルが反対を向いているので)
 	Vector3 axis = Vector3(0.0f, 1.0f, 0.0f);
@@ -150,12 +150,12 @@ void WormEnemy::Update()
 
 		//各Sphereの位置を更新
 		//頭の当たり判定更新
-		m_headSphere.Update(m_pos, sphere_radius);
+		m_headSphere->Update(m_pos, sphere_radius);
 		//胴体の当たり判定更新(胴体の数だけループ)
 		for (int i = 0; i < m_segmentCount; i++)
 		{
 			//対応する位置をそれぞれ更新する
-			m_segmentSpheres[i].Update(
+			m_segmentSpheres[i]->Update(
 				m_segmentPositions[i], sphere_radius
 			);
 		}
@@ -277,11 +277,11 @@ void WormEnemy::Draw()
 
 #ifdef _DEBUG
 	//頭の当たり判定を描画
-	m_headSphere.Draw(0xff0000);
+	m_headSphere->Draw(0xff0000);
 	//胴体の当たり判定を描画
-	for (Sphere& sphere : m_segmentSpheres)
+	for (std::shared_ptr<SphereShape>& sphere : m_segmentSpheres)
 	{
-		sphere.Draw(0x00ff00);
+		sphere->Draw(0x00ff00);
 	}
 #endif
 }
@@ -363,10 +363,10 @@ void WormEnemy::TakeDamage(int damage)
 	}
 }
 
-std::vector<Sphere> WormEnemy::GetCollisionSpheres() const
+std::vector<std::shared_ptr<SphereShape>> WormEnemy::GetCollisionSpheres() const
 {
 	//頭と胴体の当たり判定を全部詰めて返す
-	std::vector<Sphere> spheres;
+	std::vector<std::shared_ptr<SphereShape>> spheres;
 	spheres.push_back(m_headSphere);
 	spheres.insert(spheres.end(), m_segmentSpheres.begin(), m_segmentSpheres.end());
 	return spheres;

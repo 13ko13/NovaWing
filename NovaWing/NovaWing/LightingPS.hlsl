@@ -47,7 +47,7 @@ float4 main(PS_INPUT input) : SV_TARGET
     //ノイズをサンプリングする
     //岩のuvが変なので、worldPosを使ったuvを作成する
     float2 worldBaseUV = input.worldPos.xy / noise_uv_scale;
-    float3 noiseCol = noiseTex.Sample(smp,worldBaseUV);
+    float3 noiseCol = noiseTex.Sample(smp,worldBaseUV).rgb;
 
     //ノイズのカラーの値が閾値よりも小さければそのピクセルの描画を行わない
     if(noiseCol.r < noise_threshold) discard;

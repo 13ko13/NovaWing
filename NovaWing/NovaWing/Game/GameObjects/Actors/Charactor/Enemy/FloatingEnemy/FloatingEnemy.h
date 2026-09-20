@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Manager/ResourceLoader.h"
-#include "Utility/Sphere.h"
+#include "Game/Collision/SphereShape.h"
 #include "Utility/ModelAnimator.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
 
@@ -44,7 +44,7 @@ public:
 	ModelAnimator& GetAnimator() { return *m_pAnimator; }
 
 	//当たり判定を返す
-	std::vector<Sphere> GetCollisionSpheres() const override;
+	std::vector<std::shared_ptr<SphereShape>> GetCollisionSpheres() const override;
 
 	//サウンドマネージャー取得
 	std::weak_ptr<SoundManager> GetSoundManager() const { return m_pSoundManager; }
@@ -59,7 +59,7 @@ private:
 private:
 	std::shared_ptr<IFloatingEnemyState> m_pState;//ステート
 
-	Sphere m_colSphere;//当たり判定(球)
+	std::shared_ptr<SphereShape> m_colSphere = std::make_shared<SphereShape>();//当たり判定(球)
 
 	//アニメーター
 	std::shared_ptr<ModelAnimator> m_pAnimator;

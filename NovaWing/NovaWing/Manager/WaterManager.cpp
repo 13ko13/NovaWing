@@ -43,14 +43,14 @@ void WaterManager::Init()
 	CreateIndicesData();
 
 	//GPUに渡す頂点バッファを作成する
-	m_vertexBufferH = CreateVertexBuffer(m_vertexData.size(), DX_VERTEX_TYPE_SHADER_3D);
+	m_vertexBufferH = CreateVertexBuffer(static_cast<int>(m_vertexData.size()), DX_VERTEX_TYPE_SHADER_3D);
 	//GPUに渡すインデックスバッファを作成
-	m_indexBufferH = CreateIndexBuffer(m_indices.size(), DX_INDEX_TYPE_16BIT);
+	m_indexBufferH = CreateIndexBuffer(static_cast<int>(m_indices.size()), DX_INDEX_TYPE_16BIT);
 
 	//頂点バッファにデータを書き込む
-	SetVertexBufferData(0, m_vertexData.data(), m_vertexData.size(), m_vertexBufferH);
+	SetVertexBufferData(0, m_vertexData.data(), static_cast<int>(m_vertexData.size()), m_vertexBufferH);
 	//インデックスバッファにデータを書き込む
-	SetIndexBufferData(0, m_indices.data(), m_indices.size(), m_indexBufferH);
+	SetIndexBufferData(0, m_indices.data(), static_cast<int>(m_indices.size()), m_indexBufferH);
 
 	//シェーダのロード
 	m_waterPSH = LoadPixelShader(L"WaterPS.pso");
@@ -179,9 +179,9 @@ void WaterManager::CreateVertexData()
 			VERTEX3DSHADER vertexData;
 			//頂点の座標
 			vertexData.pos.x =
-				j * (grid_size.width / horizontal_grid_num) - (grid_size.width / 2);//-1500～1500
+				static_cast<float>(j * (grid_size.width / horizontal_grid_num) - (grid_size.width / 2));//-1500～1500
 			vertexData.pos.y = 0.0f;//高さは波の高さなのでシェーダ側で動かす
-			vertexData.pos.z = i * (grid_size.height / vertical_grid_num);
+			vertexData.pos.z = static_cast<float>(i * (grid_size.height / vertical_grid_num));
 
 			//頂点の法線
 			//真上を向かせる

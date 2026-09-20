@@ -30,7 +30,7 @@ namespace
 	//シェーダに渡すときに、早すぎるため倍率を低くする
 	constexpr float time_speed = 0.1f;
 	//ポーズ中の黒画像のアルファ
-	constexpr float black_graph_alpha = 126;
+	constexpr int black_graph_alpha = 126;
 }
 
 PauseScene::PauseScene(SceneController& controller, std::weak_ptr<SoundManager> pSoundManager) :

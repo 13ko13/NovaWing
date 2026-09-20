@@ -316,14 +316,14 @@ void GameoverScene::Draw()
 	//二つの画像を描画
 	//Aボタン画像
 	DrawRotaGraph(
-		aButtonDrawPos.x,
-		aButtonDrawPos.y,
+		static_cast<int>(aButtonDrawPos.x),
+		static_cast<int>(aButtonDrawPos.y),
 		a_button_scale, 0.0, aButtonHandle, true
 	);
 	//決定のテキスト画像
 	DrawRotaGraph(
-		decideDrawPos.x,
-		decideDrawPos.y,
+		static_cast<int>(decideDrawPos.x),
+		static_cast<int>(decideDrawPos.y),
 		decide_graph_scale, 0.0, decideHandle, true
 	);
 }

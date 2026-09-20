@@ -649,14 +649,30 @@
 - **OnCollisionの責務範囲**: 「自分のreaction（ダメージを受ける等）」のみを担当させ、カメラシェイクや多重ヒット防止(`DamageSource`関連)などゲーム進行に関わる処理は今まで通り`CollisionManager`側に残す。ダメージ量は`OnCollision`内で`other.GetTag()`を見てswitchし、弾の`GetAttackPower()`のような`ICollider`契約外の情報が要る場合は`other`を具体型へ`static_cast`することも許容する方針。
 - **`DamageSource`による多重ヒット防止の仕組みは今回のスコープ外。** Player固有のメソッド（`IsTakingDamageFrom`等）としてそのまま残す。
 
-**現在の実装状況（2026-09-19時点、`git status`で確認）:**
-- `Game/Collision/`ディレクトリに`ICollider.h`、`ColliderShape.h`、`SphereShape.h/.cpp`は完成・確認済み。
-- `PlayerCollider.h/.cpp`は雛形まで作成したが、**`GetCollision()`/`IsCollisionActive()`のみ実装済みで、`OnCollision()`は未着手**（Rock側のICollider実装と合わせて後で決める予定だった）。
-- **`Player.h`/`Player.cpp`への変更はまだ未反映**（`m_collSphere`を`Sphere`型→`std::shared_ptr<SphereShape>`型に変える、`PlayerCollider m_collider`をメンバに追加する等、提示済みだが未入力の状態）。
+**追加の設計判断（2026-09-19後半、Player実装〜ビルド確認で発覚）:**
+- **Player.hが`m_collSphere`(旧`Sphere`型)と`m_collider`(PlayerCollider)を両方持つのは責務重複という指摘があり、`SphereShape`の所有権をPlayer本体からPlayerColliderに完全移動した。** `Player`は`PlayerCollider m_collider`のみを持ち、`Player::GetSphere()`/`Update()`内の球更新/`Draw()`内の球描画は全て`m_collider`経由（`m_collider.GetSphere()`、`m_collider.UpdateShape(pos, radius)`、`m_collider.GetSphere()->Draw(...)`）に委譲する形にした。「当たり判定に関する情報は全部PlayerColliderの中にある」という一貫性を優先。
+- **`ColliderShape::Draw`を純粋仮想として追加、`SphereShape`がoverride。** 元々の`Utility/Sphere`が持っていたデバッグ描画機能(`DrawSphere3D`呼び出し)を`SphereShape`側に完全移植する方針にしたため。
+- **`ICollider::GetCollision()`の戻り値を`std::shared_ptr<ColliderShape>`(単体)から`std::vector<std::shared_ptr<ColliderShape>>`(複数)に変更。** 理由: `Rock`は1つのActorが複数の当たり判定球(`std::vector<Sphere> m_spheres`)を持つ構造になっており、単体しか返せないインターフェースでは表現できないことが判明したため。Playerのような単一球のケースは`{ m_sphere }`のように1要素のvectorで返せばよい。
+
+**ビルドで発覚したハマりどころ（今後の参考用）:**
+- **`.vcxproj`/`.vcxproj.filters`に、過去に作って削除したはずの`Rigidbody`/`ColliderBase`/`Collidable`(.h/.cpp、ProjectNeaRを参考にした際の試行錯誤の残骸)への参照が残っており、ビルド時に`C1083: ソースファイルを開けません`エラーの原因になっていた。** Visual Studioのソリューションエクスプローラー上でファイルを削除したつもりでも、プロジェクトファイル側の参照だけ残ることがあるので、ファイルが実在しないのにビルドエラーで名前が出てきたら`.vcxproj`を直接grepして確認するとよい。今回は該当6項目をClaudeが`.vcxproj`/`.vcxproj.filters`から直接削除して解消（このファイルは.h/.cppではないため直接編集OKの対象）。
+- **Playerだけを先にSphereShape化した段階で、`CollisionManager.cpp`内の`Sphere playerCol = pPlayer->GetSphere();`のような箇所が軒並み型不一致エラー(`C2440`)になった。** `CollisionManager`はPlayer/Rock/Bullet/Boss全部を`Sphere`型前提の直接比較で書いているため、1クラスだけ型を変えると即座に整合性が壊れる。→「Player→Rockの順で先に両方ICollider化してからCollisionManagerを直す」の元々の段取り通りに進めることで対応中。
+
+**現在の実装状況（2026-09-19時点、`git status`で確認、このセッション終了時点）:**
+- `Game/Collision/`の`ICollider.h`、`ColliderShape.h`は`GetCollision()`のvector化・`Draw`純粋仮想追加まで完成済み。
+- `SphereShape.h/.cpp`は位置・半径・`Update`・`Draw`・`HitCollision`まで実装済み・確認済み。
+- **`Player.h`/`Player.cpp`は`m_collSphere`削除・`m_collider`経由への統一まで完了・ビルド確認的にも整合性OK。**
+- **`PlayerCollider.h/.cpp`が要修正のまま停止中。** `ICollider::GetCollision()`をvector化したのに、`PlayerCollider`側の`GetCollision()`宣言・実装がまだ`std::shared_ptr<ColliderShape>`単体を返す古いシグネチャのまま（`vector化前`の状態）。次回最初にここを直す必要がある：
+  - `PlayerCollider.h`: `std::shared_ptr<ColliderShape> GetCollision() const override;` → `std::vector<std::shared_ptr<ColliderShape>> GetCollision() const override;`
+  - `PlayerCollider.cpp`: `return m_sphere;` → `return { m_sphere };`
+- `PlayerCollider::OnCollision()`は中身が空のまま未着手（Rock側の実装と合わせて後で決める）。
+- `Rock`用の`RockCollider`はまだ着手していない。
+- `CollisionManager.cpp`はまだ全く手を付けておらず、`Sphere`型前提のコードのまま（Player側の型変更により既に型不一致エラーが出る状態）。
 
 **次回やること（優先順）:**
-1. `Player.h`/`Player.cpp`に提示済みの変更（`m_collSphere`の型変更、`PlayerCollider`メンバ追加、コンストラクタ初期化リストとUpdate/Draw内の呼び出し変更）を反映する。
-2. `Rock`用の`ICollider`実装（`RockCollider`）を同じパターンで作成する。
+1. `PlayerCollider.h/.cpp`の`GetCollision()`をvector化対応する（上記の2箇所）。
+2. `Rock`用の`ICollider`実装（`RockCollider`）を`PlayerCollider`と同じパターンで作成する。Rockは複数球を持つので、`RockCollider`は`std::vector<std::shared_ptr<SphereShape>>`のようなvectorを内部に持ち、`GetCollision()`でそのまま(`ColliderShape`型にキャストして)返す形になる見込み。
 3. Player/Rock両方が揃った時点で`PlayerCollider::OnCollision`の中身（Rock相手のときのダメージ処理呼び出し）を実装し、`CollisionManager`のPlayer↔Rock部分だけ試験的にICollider経由へ書き換えてビルド確認する。
 4. パターンが確立したら、残り（`EnemyBase`とその派生`WormEnemy`/`FloatingEnemy`/`BossEnemy`、`BulletBase`とその派生`PlayerBullet`/`EnemyBullet`/`ChargeBullet`）に横展開し、最終的に`CollisionManager::Update()`全体をICollider経由のループに書き換える。
 5. 上記と並行して、既存の`Sphere`型使用箇所（`GetSphere()`/`GetSpheres()`/`GetCollisionSpheres()`を持つ全クラス）を`SphereShape`ベースに置き換えていく。
+6. ビルド確認は現状Visual Studio上で行うこと。コマンドラインMSBuildはDxLib/EffekseerForDXLibのインクルードパスがVS IDE設定と噛み合わず`C1083`で失敗するため、この方法での確認は避ける。

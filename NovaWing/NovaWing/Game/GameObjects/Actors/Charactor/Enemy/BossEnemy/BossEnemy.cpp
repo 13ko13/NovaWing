@@ -122,12 +122,12 @@ void BossEnemy::OnInit()
 	//無敵判定球初期化
 	Vector3 invincibleColPos = m_pos;
 	invincibleColPos.y += invincible_col_offset_y;//Y座標のみ補正する
-	m_invincibleHitCol = Sphere(invincibleColPos, invincible_col_radius);
+	m_invincibleHitCol = std::make_shared<SphereShape>(invincibleColPos, invincible_col_radius);
 
-	
+
 	//ダメージ判定球初期化
 	Vector3 damageColPos = m_pos + damage_col_offset;
-	m_damageCol = Sphere(damageColPos, damage_col_radius);
+	m_damageCol = std::make_shared<SphereShape>(damageColPos, damage_col_radius);
 }
 
 void BossEnemy::Update()
@@ -199,11 +199,11 @@ void BossEnemy::Update()
 		//当たり判定の更新
 		Vector3 hitColPos = m_pos;
 		hitColPos.y += invincible_col_offset_y;//Y座標のみ補正する
-		m_invincibleHitCol.Update(hitColPos, invincible_col_radius);
+		m_invincibleHitCol->Update(hitColPos, invincible_col_radius);
 
 		//ダメージ判定更新
 		Vector3 damageColPos = m_pos + damage_col_offset;
-		m_damageCol.Update(damageColPos, damage_col_radius);
+		m_damageCol->Update(damageColPos, damage_col_radius);
 	}
 	//死亡待機状態になった場合
 	else
@@ -302,9 +302,9 @@ void BossEnemy::Draw()
 	DrawFormatString(800, 15, 0xff0000, L"BossHP : %d",m_health);
 
 	//無敵判定球の描画
-	m_invincibleHitCol.Draw(0xff0000);
+	m_invincibleHitCol->Draw(0xff0000);
 	//ダメージ判定球の描画
-	m_damageCol.Draw(0xff00ff);
+	m_damageCol->Draw(0xff00ff);
 #endif
 }
 
@@ -343,13 +343,13 @@ void BossEnemy::TakeDamage(int damage)
 	}
 }
 
-std::vector<Sphere> BossEnemy::GetBeamSphereL() const
+std::vector<std::shared_ptr<SphereShape>> BossEnemy::GetBeamSphereL() const
 {
 	//左のビームの球を返す
 	return std::dynamic_pointer_cast<BossBeamState>(m_pState)->GetLeftBeamSpheres();
 }
 
-std::vector<Sphere> BossEnemy::GetBeamSphereR() const
+std::vector<std::shared_ptr<SphereShape>> BossEnemy::GetBeamSphereR() const
 {
 	//右のビームの球を返す
 	return std::dynamic_pointer_cast<BossBeamState>(m_pState)->GetRightBeamSpheres();
@@ -373,7 +373,7 @@ void BossEnemy::OnHitInvincibleCol(const Position3& effectPos,const int attackPo
 
 	//ボスを回復させる
 	//食らったダメージの5分の1回復する
-	m_health += static_cast<float>(attackPower) * recovery_rate;
+	m_health += static_cast<int>(static_cast<float>(attackPower) * recovery_rate);
 
 	//回復音を鳴らす
 	m_pSoundManager.lock()->Play(SoundManager::SoundType::BossRecovery);

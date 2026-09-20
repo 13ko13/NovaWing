@@ -66,7 +66,7 @@ namespace
 	//ボスが着地した時の揺らす力
 	constexpr float boss_landing_shake_power = 55.0f;
 	//ボスが着地した時の揺らすフレーム
-	constexpr float boss_landing_shake_frame = 20;
+	constexpr int boss_landing_shake_frame = 20;
 
 	//ボスを落下させるときの速度
 	constexpr float boss_fall_speed = 4.0f;

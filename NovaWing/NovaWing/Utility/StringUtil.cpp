@@ -1,15 +1,6 @@
 ﻿#include "StringUtil.h"
 #include <cassert> 
 
-TCHAR* StringUtil::ToTCHAR(const char* character)
-{
-	//char* → TCHAR* への変換
-	TCHAR cT[256];
-	//文字列をUTF-16文字列に変換する関数
-	MultiByteToWideChar(CP_ACP, 0, character, -1, cT, 256);
-	return cT;
-}
-
 std::wstring StringUtil::InsertNewLines(const std::wstring& str, int maxLength)
 {
 	std::wstring newStr;
@@ -54,9 +45,9 @@ std::wstring StringUtil::InsertNewLines(const std::wstring& str, int maxLength)
 int StringUtil::WStringLineNum(const std::wstring& str)
 {
 	size_t count = 0;
-	for (char c : str)
+	for (wchar_t c : str)
 	{
-		if(c == '\n')
+		if(c == L'\n')
 		{
 			count++;
 		}
@@ -72,9 +63,9 @@ std::string StringUtil::WstringToString(const std::wstring& wstr)
 		CP_ACP,
 		0,
 		wstr.c_str(),
-		wstr.length(),
-		nullptr, 
-		0, 
+		static_cast<int>(wstr.length()),
+		nullptr,
+		0,
 		nullptr,
 		nullptr);
 	assert(result >= 0); //変換に失敗していないか確認
@@ -84,9 +75,9 @@ std::string StringUtil::WstringToString(const std::wstring& wstr)
 		CP_ACP,
 		0,
 		wstr.c_str(),
-		wstr.length(),
+		static_cast<int>(wstr.length()),
 		ret.data(),
-		ret.size(),
+		static_cast<int>(ret.size()),
 		nullptr,
 		nullptr);
 	return ret;

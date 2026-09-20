@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "Game/GameObjects/Actors/Charactor/Charactor.h"
-#include "Utility/Sphere.h"
+#include "Game/Collision/SphereShape.h"
 
 class Player;
 class BulletManager;
@@ -28,7 +28,7 @@ public:
 
 	//当たり判定に使う球の配列を返す
 	//当たり判定を持つ敵がoverrideする
-	virtual std::vector<Sphere> GetCollisionSpheres() const { return {}; }
+	virtual std::vector<std::shared_ptr<SphereShape>> GetCollisionSpheres() const { return {}; }
 
 private:
 

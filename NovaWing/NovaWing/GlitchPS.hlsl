@@ -36,7 +36,7 @@ float4 main(PS_Input input) : SV_TARGET
 	//少し弱くなるようにsccanlineをlerpで補間する
 	//最小で1.0f-scanline_strengthになる
 	float brightnessScanline = lerp(1.0f,scanline,scanline_strength);//0.7～1.0になる
-	float3 finalCol = baseCol * brightnessScanline;
+	float3 finalCol = baseCol.rgb * brightnessScanline;
 	//ベースのアルファに受け取った頂点カラーのアルファをかけないと
 	//外部からのアルファ操作ができない
 	return float4(finalCol,baseCol.a * input.dif.a);

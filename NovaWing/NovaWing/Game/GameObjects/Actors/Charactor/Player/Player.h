@@ -3,7 +3,8 @@
 #include <set>
 
 #include "../Charactor.h"
-#include "Utility/Sphere.h"
+#include "Game/Collision/SphereShape.h"
+#include "Game/Collision/PlayerCollider.h"
 #include "Manager/SoundManager.h"
 
 class InputManager;
@@ -65,7 +66,9 @@ public:
 	//ゲージを使用してるかを取得
 	bool IsUseGauge() const;
 	//当たり判定用の球を取得
-	Sphere GetSphere() const { return m_collSphere; }
+	std::shared_ptr <SphereShape> GetSphere() const;
+	//当たり判定インターフェースを取得
+	ICollider& GetCollider() { return m_collider; }
 
 	//フォーカスターゲットを取得
 	std::weak_ptr<EnemyBase> GetForcusTarget() const;
@@ -193,8 +196,8 @@ private:
 	//特殊行動系ステート
 	std::shared_ptr<ISpecialActionState> m_pSpecialState;
 
-	//当たり判定用の球
-	Sphere m_collSphere;
+	//当たり判定インターフェース
+	PlayerCollider m_collider;
 
 	//ターゲットマネージャー
 	std::weak_ptr<TargetManager> m_pTargetManager;

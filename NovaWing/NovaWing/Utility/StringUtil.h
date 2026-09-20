@@ -5,13 +5,6 @@
 namespace StringUtil
 {
 	/// <summary>
-	/// char->TCHARの変換
-	/// </summary>
-	/// <param name="character"></param>
-	/// <returns></returns>
-	TCHAR* ToTCHAR(const char* character);
-
-	/// <summary>
 	/// 文字数がある数を超えるたびに改行を挟み、その文字列を返す関数
 	/// </summary>
 	/// <param name="str">対象の文字列</param>

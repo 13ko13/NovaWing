@@ -161,8 +161,8 @@ void DrawGraphToShaderByCenter(
 	//float型のSizeに変換
 	SizeF texSizeSizeF =
 	{
-		texSize.width * scale,
-		texSize.height * scale
+		static_cast<float>(texSize.width * scale),
+		static_cast<float>(texSize.height * scale)
 	};
 
 	//左上座標を計算

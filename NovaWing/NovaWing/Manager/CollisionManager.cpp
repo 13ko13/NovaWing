@@ -128,13 +128,13 @@ void CollisionManager::Update()
 		if (pEnemy->IsDead()) continue;
 
 		//その敵が持つ当たり判定球すべてをチェック
-		std::vector<Sphere> enemyCols = pEnemy->GetCollisionSpheres();
-		for (Sphere& enemyCol : enemyCols)
+		std::vector<std::shared_ptr<SphereShape>> enemyCols = pEnemy->GetCollisionSpheres();
+		for (std::shared_ptr<SphereShape>& enemyCol : enemyCols)
 		{
 			for (std::shared_ptr<BulletBase> pPlayerBullet : sharedAllBullets)
 			{
-				Sphere bulletCol = pPlayerBullet->GetSphere();
-				if (enemyCol.HitCollision(bulletCol))
+				std::shared_ptr<SphereShape> bulletCol = pPlayerBullet->GetSphere();
+				if (enemyCol->HitCollision(*bulletCol))
 				{
 					pEnemy->TakeDamage(pPlayerBullet->GetAttackPower());
 					pPlayerBullet->OnHitEnemy();
@@ -150,11 +150,11 @@ void CollisionManager::Update()
 		if (pEnemyBullet->IsDead()) continue;
 
 		//プレイヤーの当たり判定を取得
-		Sphere playerCol = pPlayer->GetSphere();
+		std::shared_ptr<SphereShape> playerCol = pPlayer->GetSphere();
 		//敵弾の当たり判定を取得
-		Sphere enemyBulletCol = pEnemyBullet->GetSphere();
+		std::shared_ptr<SphereShape> enemyBulletCol = pEnemyBullet->GetSphere();
 		//当たっていたら
-		if (playerCol.HitCollision(enemyBulletCol))
+		if (playerCol->HitCollision(*enemyBulletCol))
 		{
 			//プレイヤーのHPを減らす
 			pPlayer->TakeDamage(pEnemyBullet->GetAttackPower());
@@ -172,21 +172,21 @@ void CollisionManager::Update()
 		for (std::shared_ptr<BulletBase> pPlayerBullet : sharedAllBullets)
 		{
 			//ボスの無敵判定球とダメージ判定球に当たっている場合で処理を分ける
-			Sphere invinsibleCol = pBoss->GetInvinsibleSphere();
-			Sphere damageCol = pBoss->GetDamageSphere();
-			Sphere bulletCol = pPlayerBullet->GetSphere();
+			std::shared_ptr<SphereShape> invinsibleCol = pBoss->GetInvinsibleSphere();
+			std::shared_ptr<SphereShape> damageCol = pBoss->GetDamageSphere();
+			std::shared_ptr<SphereShape> bulletCol = pPlayerBullet->GetSphere();
 			//ダメージ判定の場合
-			if (damageCol.HitCollision(bulletCol))
+			if (damageCol->HitCollision(*bulletCol))
 			{
 				//ボスの被弾処理
 				pBoss->TakeDamage(pPlayerBullet->GetAttackPower());
 				//敵に当たった時のプレイヤー弾の処理
 				pPlayerBullet->OnHitEnemy();
 			}
-			else if (invinsibleCol.HitCollision(bulletCol))
+			else if (invinsibleCol->HitCollision(*bulletCol))
 			{
 				//ボスの無敵判定処理
-				pBoss->OnHitInvincibleCol(bulletCol.GetPos(),pPlayerBullet->GetAttackPower());
+				pBoss->OnHitInvincibleCol(bulletCol->GetPos(),pPlayerBullet->GetAttackPower());
 				//敵に当たった時のプレイヤー弾の処理
 				pPlayerBullet->OnHitEnemy();
 			}
@@ -205,14 +205,14 @@ void CollisionManager::Update()
 
 			//ボスのビームとプレイヤーの当たり判定
 			//ビームのすべての球を取得
-			std::vector<Sphere> spheresL = pBoss->GetBeamSphereL();
-			std::vector<Sphere> spheresR = pBoss->GetBeamSphereR();
+			std::vector<std::shared_ptr<SphereShape>> spheresL = pBoss->GetBeamSphereL();
+			std::vector<std::shared_ptr<SphereShape>> spheresR = pBoss->GetBeamSphereR();
 			//プレイヤーの球
-			Sphere playerCol = pPlayer->GetSphere();
+			std::shared_ptr<SphereShape> playerCol = pPlayer->GetSphere();
 			//左のビームとプレイヤー
-			for (Sphere& sphereL : spheresL)
+			for (std::shared_ptr<SphereShape>& sphereL : spheresL)
 			{
-				if (playerCol.HitCollision(sphereL))
+				if (playerCol->HitCollision(*sphereL))
 				{
 					//当たったことを記録
 					isHitBeam = true;
@@ -227,9 +227,9 @@ void CollisionManager::Update()
 				}
 			}
 			//右のビームとプレイヤー
-			for (Sphere& sphereR : spheresR)
+			for (std::shared_ptr<SphereShape>& sphereR : spheresR)
 			{
-				if (playerCol.HitCollision(sphereR))
+				if (playerCol->HitCollision(*sphereR))
 				{
 					//当たったことを記録
 					isHitBeam = true;
@@ -265,15 +265,15 @@ void CollisionManager::Update()
 		bool isHitThisWorm = false;
 
 		//プレイヤーの当たり判定を取得
-		Sphere playerCol = pPlayer->GetSphere();
+		std::shared_ptr<SphereShape> playerCol = pPlayer->GetSphere();
 		//ダメージ源の情報を作成
 		DamageSource source = { DamageSourceType::Worm,pWormEnemy->GetID() };
 
 		//ワームエネミーの頭の当たり判定を取得
-		std::vector<Sphere> wormColliders = pWormEnemy->GetCollisionSpheres();
+		std::vector<std::shared_ptr<SphereShape>> wormColliders = pWormEnemy->GetCollisionSpheres();
 		for (auto& wormCollider : wormColliders)
 		{
-			if (playerCol.HitCollision(wormCollider))
+			if (playerCol->HitCollision(*wormCollider))
 			{
 				//当たったことを記録
 				isHitThisWorm = true;
@@ -311,9 +311,9 @@ void CollisionManager::Update()
 	for (std::shared_ptr<Rock> pRock : sharedRocks)
 	{
 		//プレイヤーの当たり判定を取得
-		Sphere playerCol = pPlayer->GetSphere();
+		std::shared_ptr<SphereShape> playerCol = pPlayer->GetSphere();
 		//岩の当たり判定を取得
-		std::vector<Sphere> rockCollisions = pRock->GetSpheres();
+		std::vector<std::shared_ptr<SphereShape>> rockCollisions = pRock->GetSpheres();
 
 		//ダメージ源の情報を作成
 		DamageSource source = { DamageSourceType::Rock,pRock->GetID() };
@@ -322,10 +322,10 @@ void CollisionManager::Update()
 		bool isHitThisRock = false;
 
 		//その岩の中のすべての球とプレイヤーの球が当たっているかを検出
-		for (Sphere& rockColl : rockCollisions)
+		for (std::shared_ptr<SphereShape>& rockColl : rockCollisions)
 		{
 			//当たっていて、ダメージを食らっていないときのみダメージを食らうようにする
-			if (playerCol.HitCollision(rockColl))
+			if (playerCol->HitCollision(*rockColl))
 			{
 				//当たったことを記録
 				isHitThisRock = true;

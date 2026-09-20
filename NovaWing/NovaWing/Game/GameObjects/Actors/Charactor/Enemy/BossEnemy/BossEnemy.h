@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
 #include "Manager/ResourceLoader.h"
-#include "Utility/Sphere.h"
+#include "Game/Collision/SphereShape.h"
 #include "Utility/ModelAnimator.h"
 
 class Player;
@@ -48,13 +48,13 @@ public:
 	std::weak_ptr<Player> GetPlayer() const { return m_pPlayer; }
 
 	//自分の無敵当たり判定を返す
-	Sphere GetInvinsibleSphere() const { return m_invincibleHitCol; }
+	std::shared_ptr<SphereShape> GetInvinsibleSphere() const { return m_invincibleHitCol; }
 	//自分のダメージ当たり判定を返す
-	Sphere GetDamageSphere() const { return m_damageCol; }
+	std::shared_ptr<SphereShape> GetDamageSphere() const { return m_damageCol; }
 
 	//ビームを出しているときにビームの当たり判定を返す
-	std::vector<Sphere> GetBeamSphereL() const;//左のビーム
-	std::vector<Sphere> GetBeamSphereR() const;//右のビーム
+	std::vector<std::shared_ptr<SphereShape>> GetBeamSphereL() const;//左のビーム
+	std::vector<std::shared_ptr<SphereShape>> GetBeamSphereR() const;//右のビーム
 
 	//現在のステートを返す
 	std::shared_ptr<IBossEnemyState> GetCurrentState() const { return m_pState; }
@@ -110,9 +110,9 @@ private:
 	std::weak_ptr<SoundManager> m_pSoundManager;
 
 	//プレイヤーの弾が当たった時に、無敵判定する部分
-	Sphere m_invincibleHitCol;
+	std::shared_ptr<SphereShape> m_invincibleHitCol = std::make_shared<SphereShape>();
 	//プレイヤーの弾が当たった時のダメージ判定する部分
-	Sphere m_damageCol;
+	std::shared_ptr<SphereShape> m_damageCol = std::make_shared<SphereShape>();
 
 	//ボスが出現完了しているか
 	//ゲームシーン側からセットさせる

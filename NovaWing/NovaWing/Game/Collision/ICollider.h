@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <memory>
+#include <vector>
 
 #include "ColliderShape.h"
 
@@ -25,7 +26,7 @@ public:
 	virtual ~ICollider() = default;
 
 	//当たり判定の形状取得
-	virtual std::shared_ptr<ColliderShape> GetCollision() const = 0;
+	virtual std::vector<std::shared_ptr<ColliderShape>> GetCollision() const = 0;
 	//自分のタグを取得
 	virtual ColliderTag GetTag() const = 0;
 	//衝突時処理

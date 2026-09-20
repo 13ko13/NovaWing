@@ -59,8 +59,8 @@ void ReticleUI::Draw()
 	int chargeH = ResourceLoader::GetInstance().GetGraphic(ResourceLoader::GraphicID::ChargeReticle);
 
 	// 通常レティクル二枚を描画
-	DrawRotaGraph(frontScreenPos.x, frontScreenPos.y, front_reticle_size, 0.0, normalH, true);	   // 手前のレティクル
-	DrawRotaGraph(reticleScreenPos.x, reticleScreenPos.y, depth_reticle_size, 0.0, normalH, true); // 奥のレティクル
+	DrawRotaGraph(static_cast<int>(frontScreenPos.x), static_cast<int>(frontScreenPos.y), front_reticle_size, 0.0, normalH, true);	   // 手前のレティクル
+	DrawRotaGraph(static_cast<int>(reticleScreenPos.x), static_cast<int>(reticleScreenPos.y), depth_reticle_size, 0.0, normalH, true); // 奥のレティクル
 
 	// フォーカス中なら
 	if (pTargetManager->IsFocus())
@@ -91,7 +91,7 @@ void ReticleUI::Draw()
 			// アルファを適用
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(m_focusAlpha));
 			// チャージレティクル描画
-			DrawRotaGraph(targetScreenPos.x, targetScreenPos.y, scale, rotation, chargeH, true); // 奥のレティクル
+			DrawRotaGraph(static_cast<int>(targetScreenPos.x), static_cast<int>(targetScreenPos.y), scale, rotation, chargeH, true); // 奥のレティクル
 			// ブレンドを終了
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 		}

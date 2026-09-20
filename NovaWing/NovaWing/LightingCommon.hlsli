@@ -28,7 +28,7 @@ LightingResult CalcLighting(
 )
 {
 	//法線方向は-1～1の範囲なので変換する(タンジェント空間)
-    float3 normalTS = normMapCol * 2.0 - 1.0;
+    float3 normalTS = normMapCol.xyz * 2.0 - 1.0;
     //凹凸がしょぼいのでタンジェント空間の法線を強めにする
     normalTS.xy *= normal_map_strength;
 

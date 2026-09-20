@@ -4,7 +4,7 @@
 #include "UIBase.h"
 
 class Charactor;
-class Vector2;
+struct Vector2;
 class GaugeUIBase : public UIBase
 {
 public:

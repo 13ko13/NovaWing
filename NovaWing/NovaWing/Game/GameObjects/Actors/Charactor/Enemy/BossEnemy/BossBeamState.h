@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "IBossEnemyState.h"
 #include "Utility/Vector3.h"
-#include "Utility/Sphere.h"
+#include "Game/Collision/SphereShape.h"
 
 class Player;
 class BossEnemy;
@@ -18,8 +18,8 @@ public:
 	void Draw() override;
 
 	//ビームの球の位置
-	std::vector<Sphere> GetLeftBeamSpheres() const { return m_beamSpheresL; }
-	std::vector<Sphere> GetRightBeamSpheres() const { return m_beamSpheresR; }
+	std::vector<std::shared_ptr<SphereShape>> GetLeftBeamSpheres() const { return m_beamSpheresL; }
+	std::vector<std::shared_ptr<SphereShape>> GetRightBeamSpheres() const { return m_beamSpheresR; }
 	
 	//ビームを受けたときのダメージ取得
 	int GetBeamDamage() const;
@@ -47,8 +47,8 @@ private:
 	std::weak_ptr<Player> m_pPlayer;
 
 	//ビームの判定用球
-	std::vector<Sphere> m_beamSpheresL;
-	std::vector<Sphere> m_beamSpheresR;
+	std::vector<std::shared_ptr<SphereShape>> m_beamSpheresL;
+	std::vector<std::shared_ptr<SphereShape>> m_beamSpheresR;
 
 	//ビームがプレイヤーを越えた後の進む方向
 	Vector3 m_beamMoveDirR;
@@ -56,11 +56,11 @@ private:
 
 #ifdef _DEBUG
 	//ビームの目標地点
-	Sphere m_targetSphereL;
-	Sphere m_targetSphereR;
+	std::shared_ptr<SphereShape> m_targetSphereL = std::make_shared<SphereShape>();
+	std::shared_ptr<SphereShape> m_targetSphereR = std::make_shared<SphereShape>();
 	//ビームの先端位置
-	Sphere m_beamTipSphereL;
-	Sphere m_beamTipSphereR;
+	std::shared_ptr<SphereShape> m_beamTipSphereL = std::make_shared<SphereShape>();
+	std::shared_ptr<SphereShape> m_beamTipSphereR = std::make_shared<SphereShape>();
 #endif
 };
 

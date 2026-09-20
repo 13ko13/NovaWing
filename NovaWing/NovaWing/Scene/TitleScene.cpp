@@ -36,7 +36,7 @@ namespace
 
 	//ゲーム終了選択肢
 	constexpr float end_ratio_x = 0.5f;//画面に対して横位置をどのあたりにしたいか
-	constexpr float end_ratio_y = 0.85;//画面に対して縦位置をどのあたりにしたいか
+	constexpr float end_ratio_y = 0.85f;//画面に対して縦位置をどのあたりにしたいか
 	constexpr double end_graph_scale = 0.825;//選択肢画像のサイズ
 
 	//選択肢の背景画像
@@ -65,7 +65,7 @@ namespace
 	//タイトルロゴ出現演出にかけるフレーム
 	constexpr int logo_max_frame = 30;
 	//タイトルロゴのスタンプ演出時の最初の大きさ
-	constexpr double logo_max_scale = 4.5;
+	constexpr float logo_max_scale = 4.5f;
 
 	//選択肢出現にかけるフレーム
 	constexpr int select_max_frame = 50;
@@ -379,14 +379,14 @@ void TitleScene::Draw()
 	if (m_phase == Phase::LogoAndSelect)
 	{
 		//タイトルロゴの演出用進行度計算
-		double progress = static_cast<double>(m_titleLogoFrame) / logo_max_frame;
+		float progress = static_cast<float>(m_titleLogoFrame) / logo_max_frame;
 		//最初の大きさから通常の大きさに補完する
 		m_titleLogoScale = std::lerp(logo_max_scale, logo_scale, progress);
 
 		//タイトルロゴ描画
 		DrawRotaGraph(
-			wsize.width * logo_ratio_x,
-			wsize.height * logo_ratio_y,
+			static_cast<int>(wsize.width * logo_ratio_x),
+			static_cast<int>(wsize.height * logo_ratio_y),
 			m_titleLogoScale, 0.0, m_titleLogoH, true);
 
 		//ちょっと遅めに選択肢も出現させる

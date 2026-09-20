@@ -60,14 +60,14 @@ void BulletBase::Update()
 	}
 
 	//球の位置を更新
-	m_sphere.Update(m_pos, m_radius);
+	m_sphere->Update(m_pos, m_radius);
 }
 
 void BulletBase::Draw()
 {
 #ifdef _DEBUG
 	//球を描画
-	m_sphere.Draw(0xffffff);
+	m_sphere->Draw(0xffffff);
 #endif
 }
 

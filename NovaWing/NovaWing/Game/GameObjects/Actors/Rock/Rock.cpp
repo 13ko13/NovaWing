@@ -10,7 +10,8 @@ namespace
 }
 
 Rock::Rock(std::weak_ptr<CameraBase> pCamera, const RockData& data):
-    Actor(data.modelId, pCamera)
+    Actor(data.modelId, pCamera),
+    m_collider(*this)
 {
     //位置を反映
     SetPos(data.pos);
@@ -28,8 +29,7 @@ Rock::Rock(std::weak_ptr<CameraBase> pCamera, const RockData& data):
         //その球の半径を受け取ってセットする
         float radius = data.sphereRadii[i];
 
-        Sphere sphere = Sphere(posWithOffset, radius);
-        m_spheres.push_back(sphere);
+        m_collider.AddSphere(posWithOffset, radius);
     }
 }
 
@@ -71,9 +71,9 @@ void Rock::Draw()
 
 #ifdef _DEBUG
     //全ての球を描画
-    for (Sphere& sphere : m_spheres)
+    for (auto& sphere : m_collider.GetSpheres())
     {
-        sphere.Draw(0xff0000);
+        sphere->Draw(0xff0000);
     }
 #endif // _DEBUG
 }

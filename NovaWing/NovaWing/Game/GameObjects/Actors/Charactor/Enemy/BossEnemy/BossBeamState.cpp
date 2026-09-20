@@ -172,7 +172,7 @@ void BossBeamState::Update()
 		if (m_beamFrame % beam_col_interval == 0)
 		{
 			//球生成
-			Sphere col = Sphere(m_beamPosL, beam_sphere_radius);
+			std::shared_ptr<SphereShape> col = std::make_shared<SphereShape>(m_beamPosL, beam_sphere_radius);
 			//配列にいれる
 			m_beamSpheresL.push_back(col);
 		}
@@ -182,7 +182,7 @@ void BossBeamState::Update()
 		if (m_beamFrame % beam_col_interval == 0)
 		{
 			//球生成
-			Sphere col = Sphere(m_beamPosR, beam_sphere_radius);
+			std::shared_ptr<SphereShape> col = std::make_shared<SphereShape>(m_beamPosR, beam_sphere_radius);
 			//配列にいれる
 			m_beamSpheresR.push_back(col);
 		}
@@ -193,9 +193,9 @@ void BossBeamState::Update()
 		std::remove_if(
 			m_beamSpheresL.begin(),
 			m_beamSpheresL.end(),
-			[hitEndPos](const Sphere sphere)
+			[hitEndPos](const std::shared_ptr<SphereShape>& sphere)
 			{
-				return sphere.GetPos().z < hitEndPos.z;
+				return sphere->GetPos().z < hitEndPos.z;
 			}),
 		m_beamSpheresL.end()
 	);
@@ -203,9 +203,9 @@ void BossBeamState::Update()
 		std::remove_if(
 			m_beamSpheresR.begin(),
 			m_beamSpheresR.end(),
-			[hitEndPos](const Sphere sphere)
+			[hitEndPos](const std::shared_ptr<SphereShape>& sphere)
 			{
-				return sphere.GetPos().z < hitEndPos.z;
+				return sphere->GetPos().z < hitEndPos.z;
 			}),
 		m_beamSpheresR.end()
 	);
@@ -226,10 +226,10 @@ void BossBeamState::Update()
 
 #ifdef _DEBUG
 	//ビームの目標地点の球の更新
-	m_targetSphereL.Update(targetPos, beam_sphere_radius);
-	m_targetSphereR.Update(targetPos, beam_sphere_radius);
-	/*m_beamTipSphereL.Update(m_beamPosL, beam_sphere_radius);
-	m_beamTipSphereR.Update(m_beamPosR, beam_sphere_radius);*/
+	m_targetSphereL->Update(targetPos, beam_sphere_radius);
+	m_targetSphereR->Update(targetPos, beam_sphere_radius);
+	/*m_beamTipSphereL->Update(m_beamPosL, beam_sphere_radius);
+	m_beamTipSphereR->Update(m_beamPosR, beam_sphere_radius);*/
 #endif
 
 	//ビームは時間で終了させる
@@ -250,18 +250,18 @@ void BossBeamState::Draw()
 {
 #ifdef _DEBUG
 	//球のデバッグ描画
-	for (Sphere& col : m_beamSpheresL)
+	for (std::shared_ptr<SphereShape>& col : m_beamSpheresL)
 	{
-		col.Draw(0x00ff00);
+		col->Draw(0x00ff00);
 	}
-	for (Sphere& col : m_beamSpheresR)
+	for (std::shared_ptr<SphereShape>& col : m_beamSpheresR)
 	{
-		col.Draw(0x00ff00);
+		col->Draw(0x00ff00);
 	}
-	m_targetSphereL.Draw(0x00ff00);
-	m_targetSphereR.Draw(0x00ff00);
-	/*m_beamTipSphereL.Draw(0x00ff00);
-	m_beamTipSphereR.Draw(0x00ff00);*/
+	m_targetSphereL->Draw(0x00ff00);
+	m_targetSphereR->Draw(0x00ff00);
+	/*m_beamTipSphereL->Draw(0x00ff00);
+	m_beamTipSphereR->Draw(0x00ff00);*/
 #endif
 }
 

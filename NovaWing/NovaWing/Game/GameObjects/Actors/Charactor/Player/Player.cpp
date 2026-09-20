@@ -92,7 +92,7 @@ Player::Player(
 	Charactor(modelID, camera),
 	m_pBulletManager(bulletManager),
 	m_pSoundManager(soundManager),
-	m_collSphere(m_pos)
+	m_collider(*this)
 {
 }
 
@@ -208,7 +208,7 @@ void Player::Update()
 	// 当たり判定の球の位置更新
 	// ちょっとずれているのでオフセットで修正
 	Vector3 collPos = m_pos + coll_sphere_offset;
-	m_collSphere.Update(collPos, coll_sphere_radius);
+	m_collider.UpdateShape(collPos, coll_sphere_radius);
 
 	//プレイヤーが海すれすれにいたら、羽の位置を基準に
 	//海面に水しぶきのエフェクトを出す
@@ -447,7 +447,7 @@ void Player::Draw()
 	DrawFormatString(0, 365, 0xffffff, L"IsFocus : %d", IsFocus());
 
 	// 当たり判定の球を描画
-	m_collSphere.Draw(0xff0000);
+	m_collider.GetSphere()->Draw(0xff0000);
 
 	VECTOR leftWingPos = MV1GetFramePosition(m_modelHandle, MV1SearchFrame(
 		m_modelHandle, left_wing_bone_name));//左の羽の位置を取得
@@ -664,4 +664,9 @@ void Player::UpdateRotation()
 	Quaternion rotY = Quaternion(Vector3(0.0f, 1.0f, 0.0f), m_rotationY);
 	// 掛け合わせたものをrotationとする
 	m_rotation = rotX * rotY;
+}
+
+std::shared_ptr<SphereShape> Player::GetSphere() const
+{
+	return m_collider.GetSphere();
 }

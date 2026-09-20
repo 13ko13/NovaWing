@@ -26,7 +26,7 @@ FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 	int health,
 	std::weak_ptr<SoundManager> pSoundManager) :
 	EnemyBase(Id,camera,pPlayer,pBulletManager,health),
-	m_colSphere(pos),
+	m_colSphere(std::make_shared<SphereShape>(pos, 0.0f)),
 	m_pSoundManager(pSoundManager)
 {
 	//位置を反映
@@ -85,7 +85,7 @@ void FloatingEnemy::Update()
 		Charactor::Update();
 
 		//当たり判定の更新
-		m_colSphere.Update(m_pos, col_radius);
+		m_colSphere->Update(m_pos, col_radius);
 	}
 	//死亡待機中はフレームを数えて一定フレーム経ったら存在を削除
 	else
@@ -118,7 +118,7 @@ void FloatingEnemy::Draw()
 
 #ifdef _DEBUG
 	//当たり判定の描画
-	m_colSphere.Draw(0xffffff);
+	m_colSphere->Draw(0xffffff);
 	//位置
 	DrawFormatString(0, 320, 0xffffff, L"EPosX:%f,Y:%f,Z:%f", m_pos.x, m_pos.y, m_pos.z);
 
@@ -202,7 +202,7 @@ std::shared_ptr<BulletManager> FloatingEnemy::GetBulletManager() const
 	return pBulletManager;
 }
 
-std::vector<Sphere> FloatingEnemy::GetCollisionSpheres() const
+std::vector<std::shared_ptr<SphereShape>> FloatingEnemy::GetCollisionSpheres() const
 {
 	return { m_colSphere };
 }
