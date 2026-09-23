@@ -172,6 +172,8 @@ void PauseScene::Update()
 void PauseScene::Draw()
 {
 	const auto& wsize = Application::GetInstance().GetWindowSize();
+	//UIの見た目の大きさをDebug/Releaseで揃えるためのスケール
+	float uiScale = Application::GetInstance().GetUIScale();
 
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, black_graph_alpha);
 	DrawBox(0, 0, wsize.width, wsize.height, 0x000000, true);
@@ -195,7 +197,7 @@ void PauseScene::Draw()
 	int backgroundH = loader.GetGraphic(ResourceLoader::GraphicID::SelectBackGround);
 	DrawGraphToShaderByCenter(
 		wsize.width * back_ground_ratio_x, wsize.height * back_ground_ratio_y,
-		back_ground_graph_scale, backgroundH,
+		back_ground_graph_scale * uiScale, backgroundH,
 		1.0f,
 		uvMaxU,
 		uvMinU
@@ -217,7 +219,7 @@ void PauseScene::Draw()
 		DrawGraphToShaderByCenter(
 			wsize.width * back_game_ratio.x,
 			wsize.height * back_game_ratio.y,
-			select_graph_scale, backGameHandle,
+			select_graph_scale * uiScale, backGameHandle,
 			1.0f,
 			uvMaxU,
 			uvMinU
@@ -226,7 +228,7 @@ void PauseScene::Draw()
 		DrawGraphToShaderByCenter(
 			wsize.width * back_title_ratio.x,
 			wsize.height * back_title_ratio.y,
-			select_graph_scale, backTitleHandle,
+			select_graph_scale * uiScale, backTitleHandle,
 			1.0f,
 			uvMaxU,
 			uvMinU
@@ -243,7 +245,7 @@ void PauseScene::Draw()
 				DrawGraphToShaderByCenter(
 					wsize.width * back_game_ratio.x,
 					wsize.height * back_game_ratio.y,
-					select_graph_scale, backGameOnCursorHandle,
+					select_graph_scale * uiScale, backGameOnCursorHandle,
 					1.0f,
 					m_wipeProgress[static_cast<int>(Select::BackGame)]
 				);
@@ -251,7 +253,7 @@ void PauseScene::Draw()
 			DrawGraphToShaderByCenter(
 				wsize.width * back_title_ratio.x,
 				wsize.height * back_title_ratio.y,
-				select_graph_scale, backTitleHandle,
+				select_graph_scale * uiScale, backTitleHandle,
 				1.0f
 			);
 			break;
@@ -263,14 +265,14 @@ void PauseScene::Draw()
 				DrawGraphToShaderByCenter(
 					wsize.width * back_title_ratio.x,
 					wsize.height * back_title_ratio.y,
-					select_graph_scale, backTitleOnCursorHandle,
+					select_graph_scale * uiScale, backTitleOnCursorHandle,
 					1.0f, m_wipeProgress[static_cast<int>(Select::BackTitle)]
 				);
 			}
 			DrawGraphToShaderByCenter(
 				wsize.width * back_game_ratio.x,
 				wsize.height * back_game_ratio.y,
-				select_graph_scale, backGameHandle,
+				select_graph_scale * uiScale, backGameHandle,
 				1.0f
 			);
 			break;

@@ -11,8 +11,13 @@ namespace Game
 	constexpr int screen_width = 1920;
 	constexpr int screen_height = 1080;
 #endif
-	
-	
+
+	//UIのスケール計算の基準となる解像度
+	//screen_width/heightがDebug/Releaseで異なっていても、
+	//UIの見た目の大きさをこの解像度基準で揃えるために使う
+	constexpr int base_screen_width = 1920;
+	constexpr int base_screen_height = 1080;
+
 	constexpr int color_bit_num = 32;
 
 	//海面からどれぐらい離れたところにプレイヤーを押し戻すか

@@ -550,6 +550,14 @@ void Player::LerpToAngleY(float targetAngle, float t)
 	UpdateRotation();
 }
 
+void Player::LerpToAngleZ(float targetAngle, float t)
+{
+	// targetAngleに向けてrotationZをLerpする
+	m_rotationZ = m_rotationZ * (1 - t) + targetAngle * t;
+	// Rotationを適用する
+	UpdateRotation();
+}
+
 float Player::GetMaxSpecialGauge() const
 {
 	return max_gauge;
@@ -662,8 +670,9 @@ void Player::UpdateRotation()
 	// XとYの回転角からQuaternionを生成
 	Quaternion rotX = Quaternion(Vector3(1.0f, 0.0f, 0.0f), m_rotationX);
 	Quaternion rotY = Quaternion(Vector3(0.0f, 1.0f, 0.0f), m_rotationY);
+	Quaternion rotZ = Quaternion(Vector3(0.0f, 0.0f, 1.0f), m_rotationZ);
 	// 掛け合わせたものをrotationとする
-	m_rotation = rotX * rotY;
+	m_rotation = rotX * rotY * rotZ;
 }
 
 std::shared_ptr<SphereShape> Player::GetSphere() const

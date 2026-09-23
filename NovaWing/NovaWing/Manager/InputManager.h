@@ -19,8 +19,9 @@ namespace InputEvent
 	constexpr const char* down = "down";
 	constexpr const char* any_key = "anyKey";
 	constexpr const char* pause = "pause";
-	constexpr const char* how_to = "howTo";
 	constexpr const char* close = "close";
+	constexpr const char* right_rolling = "rightRolling";
+	constexpr const char* left_rolling = "leftRolling";
 
 #ifdef _DEBUG
 	//デバッグ用

@@ -11,5 +11,5 @@ public:
 	void Exit() override;//ステートから出たとき
 
 private:
-
+	
 };

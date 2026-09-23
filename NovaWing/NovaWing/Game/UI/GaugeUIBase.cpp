@@ -59,12 +59,15 @@ void GaugeUIBase::DrawGauge(
     SetUsePixelShader(m_glitchPSH);
     SetShaderConstantBuffer(m_cbufferGlitch, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
 
+    //UIの見た目の大きさをDebug/Releaseで揃えるためのスケール
+    float uiScale = Application::GetInstance().GetUIScale();
+
     //枠の画像サイズを取得
     Size frameSize;
     GetGraphSize(frameHandle, &frameSize.width, &frameSize.height);
     SizeF frameSizeF = {
-        static_cast<float>(frameSize.width) * static_cast<float>(hp_frame_size),
-        static_cast<float>(frameSize.height) * static_cast<float>(hp_frame_size)
+        static_cast<float>(frameSize.width) * static_cast<float>(hp_frame_size) * uiScale,
+        static_cast<float>(frameSize.height) * static_cast<float>(hp_frame_size) * uiScale
     };
 
     //枠の画像を描画
@@ -79,8 +82,8 @@ void GaugeUIBase::DrawGauge(
     Size gaugeSize;
     GetGraphSize(gaugeHandle, &gaugeSize.width, &gaugeSize.height);
     SizeF gaugeSizeF = {
-        static_cast<float>(gaugeSize.width) * static_cast<float>(hp_gauge_size),
-        static_cast<float>(gaugeSize.height) * static_cast<float>(hp_gauge_size)
+        static_cast<float>(gaugeSize.width) * static_cast<float>(hp_gauge_size) * uiScale,
+        static_cast<float>(gaugeSize.height) * static_cast<float>(hp_gauge_size) * uiScale
     };
 
     //ゲージ位置を定義(左上座標は枠の場所と同じ)

@@ -42,6 +42,15 @@ public:
 	/// <returns></returns>
 	const Size& GetWindowSize() const;
 
+	/// <summary>
+	/// UIの基準解像度(Game::base_screen_width/height)に対する
+	/// 実際のウィンドウサイズの比率を取得する
+	/// Debug/Releaseで解像度が異なっていても、
+	/// UIの見た目の大きさを揃えるためのスケール値として使う
+	/// </summary>
+	/// <returns>UIスケール倍率</returns>
+	float GetUIScale() const;
+
 	//ゲーム終了をリクエストされるときに呼んでもらう
 	void RequestExit() { m_isExitRequested = true; }
 

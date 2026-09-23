@@ -73,6 +73,28 @@ void DefaultRotationState::Update()
 	//回転を行う
 	targetAngle = DX_PI_F + (stick.x * max_tilt_angle);
 	pPlayer->LerpToAngleY(targetAngle, rot_lerp_t);
+
+	//ローリングが1回入力されたら機体を傾ける
+	//連続で二回入力されたら横に回転する
+	if (input.IsPressed(InputEvent::right_rolling))
+	{
+		//Z軸回転
+		//回転を行う
+		targetAngle = DX_PI_F / 2;
+		pPlayer->LerpToAngleZ(targetAngle, rot_lerp_t);
+	}
+	else if (input.IsPressed(InputEvent::left_rolling))
+	{
+		//Z軸回転
+		//回転を行う
+		targetAngle = -DX_PI_F / 2;
+		pPlayer->LerpToAngleZ(targetAngle, rot_lerp_t);
+	}
+	else
+	{
+		targetAngle = 0.0f;
+		pPlayer->LerpToAngleZ(targetAngle, rot_lerp_t);
+	}
 }
 
 void DefaultRotationState::Exit()

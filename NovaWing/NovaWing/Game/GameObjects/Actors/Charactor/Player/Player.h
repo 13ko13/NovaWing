@@ -45,6 +45,8 @@ public:
 	void LerpToAngleX(float targetAngle, float t);
 	//AngleYまでLerpする
 	void LerpToAngleY(float targetAngle, float t);
+	//AngleZまでLerpする
+	void LerpToAngleZ(float targetAngle, float t);
 
 	//GameSceneからカメラをセットさせる
 	void SetCamera(std::shared_ptr<CameraBase> pCamera) { m_pCamera = pCamera; }
@@ -186,6 +188,8 @@ private:
 	float m_rotationX = 0.0f;
 	//左右回転角
 	float m_rotationY = 0.0f;
+	//Z軸回転角
+	float m_rotationZ = 0.0f;
 
 	//移動系ステート
 	std::shared_ptr<IMovementState> m_pMovementState;

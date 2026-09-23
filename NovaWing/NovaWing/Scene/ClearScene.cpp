@@ -384,6 +384,8 @@ void ClearScene::Draw()
 {
 	//ウィンドウサイズ
 	Size wsize = Application::GetInstance().GetWindowSize();
+	//UIの見た目の大きさをDebug/Releaseで揃えるためのスケール
+	float uiScale = Application::GetInstance().GetUIScale();
 	//画面の真ん中
 	int x = wsize.width / 2;
 	int y = wsize.height / 2;
@@ -445,7 +447,7 @@ void ClearScene::Draw()
 		int backgroundH = loader.GetGraphic(ResourceLoader::GraphicID::SelectBackGround);
 		DrawGraphToShaderByCenter(
 			wsize.width * 0.5f, wsize.height * 0.5f,
-			background_graph_scale, backgroundH,
+			background_graph_scale * uiScale, backgroundH,
 			1.0f,
 			uvMaxU,
 			uvMinU
@@ -469,7 +471,7 @@ void ClearScene::Draw()
 			DrawGraphToShaderByCenter(
 				wsize.width * retry_ratio.x,
 				wsize.height * retry_ratio.y,
-				select_graph_scale, retryHandle,
+				select_graph_scale * uiScale, retryHandle,
 				1.0f,
 				uvMaxU,
 				uvMinU
@@ -478,7 +480,7 @@ void ClearScene::Draw()
 			DrawGraphToShaderByCenter(
 				wsize.width * back_title_ratio.x,
 				wsize.height * back_title_ratio.y,
-				select_graph_scale, backTitleHandle,
+				select_graph_scale * uiScale, backTitleHandle,
 				1.0f,
 				uvMaxU,
 				uvMinU
@@ -501,7 +503,7 @@ void ClearScene::Draw()
 					DrawGraphToShaderByCenter(
 						wsize.width * retry_ratio.x,
 						wsize.height * retry_ratio.y,
-						select_graph_scale, retryOnCursorHandle,
+						select_graph_scale * uiScale, retryOnCursorHandle,
 						1.0f,
 						m_wipeProgress[static_cast<int>(ClearSelect::ReTry)]
 					);
@@ -510,7 +512,7 @@ void ClearScene::Draw()
 				DrawGraphToShaderByCenter(
 					wsize.width * back_title_ratio.x,
 					wsize.height * back_title_ratio.y,
-					select_graph_scale, backTitleHandle,
+					select_graph_scale * uiScale, backTitleHandle,
 					1.0f
 				);
 				break;
@@ -525,7 +527,7 @@ void ClearScene::Draw()
 					DrawGraphToShaderByCenter(
 						wsize.width * back_title_ratio.x,
 						wsize.height * back_title_ratio.y,
-						select_graph_scale, backTitleOnCursorHandle,
+						select_graph_scale * uiScale, backTitleOnCursorHandle,
 						1.0f, m_wipeProgress[static_cast<int>(ClearSelect::BackTitle)]
 					);
 				}
@@ -533,7 +535,7 @@ void ClearScene::Draw()
 				DrawGraphToShaderByCenter(
 					wsize.width * retry_ratio.x,
 					wsize.height * retry_ratio.y,
-					select_graph_scale, retryHandle,
+					select_graph_scale * uiScale, retryHandle,
 					1.0f
 				);
 				break;
@@ -557,7 +559,7 @@ void ClearScene::Draw()
 	DrawRotaGraph(
 		static_cast<int>(wsize.width * a_button_pos.x),
 		static_cast<int>(wsize.height * a_button_pos.y),
-		a_button_scale, 0.0, aButtonHandle, true
+		a_button_scale * uiScale, 0.0, aButtonHandle, true
 	);
 
 	//次へボタンを押してからは決定画像に切り替え
@@ -567,7 +569,7 @@ void ClearScene::Draw()
 		DrawRotaGraph(
 			static_cast<int>(wsize.width * decide_graph_pos.x),
 			static_cast<int>(wsize.height * decide_graph_pos.y),
-			decide_graph_scale, 0.0, decideHandle, true
+			decide_graph_scale * uiScale, 0.0, decideHandle, true
 		);
 	}
 	else
@@ -576,7 +578,7 @@ void ClearScene::Draw()
 		DrawRotaGraph(
 			static_cast<int>(wsize.width * next_graph_pos.x),
 			static_cast<int>(wsize.height * next_graph_pos.y),
-			next_graph_scale, 0.0, nextHandle, true
+			next_graph_scale * uiScale, 0.0, nextHandle, true
 		);
 	}
 }

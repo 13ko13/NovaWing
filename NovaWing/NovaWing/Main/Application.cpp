@@ -129,3 +129,9 @@ const Size& Application::GetWindowSize() const
 {
 	return m_windowSize;
 }
+
+float Application::GetUIScale() const
+{
+	//基準解像度に対する実際のウィンドウ幅の比率をUIスケールとする
+	return static_cast<float>(m_windowSize.width) / static_cast<float>(Game::base_screen_width);
+}

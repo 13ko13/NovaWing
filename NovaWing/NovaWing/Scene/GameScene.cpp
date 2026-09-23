@@ -433,30 +433,6 @@ void GameScene::Update()
 		m_controller.PushScene(std::make_shared<PauseScene>(m_controller, m_pSoundManager));
 	}
 
-	//HowToボタンを長押ししていたら開く方向、
-	//押していなかったら閉じる方向に進行度を進める
-	float howToTarget = 0.0f;
-	if (InputManager::GetInstance().IsPressed(InputEvent::how_to))
-	{
-		howToTarget = 1.0f;
-	}
-	else
-	{
-		howToTarget = 0.0f;
-	}
-	//進行度を補間する
-	m_howToControllOpenProgress =std::lerp(
-		m_howToControllOpenProgress,
-		howToTarget,
-		how_to_open_lerp_rate
-	);
-
-	//閾値を下回ったら完全に閉じたとみなす
-	if(m_howToControllOpenProgress < how_to_open_close_threshold)
-	{
-		m_howToControllOpenProgress = 0.0f;
-	}
-
 #ifdef _DEBUG
 	//Startボタンでリスタート
 	if (InputManager::GetInstance().IsTriggered(InputEvent::restart))
@@ -506,33 +482,6 @@ void GameScene::Draw()
 	//レティクルよりプレイヤーが優先的に描画されてほしいので
 	//プレイヤーをもう一度描画する
 	m_pPlayer->Draw();
-
-	//操作説明の画像を描画
-	//進行度に応じて位置を補間する
-	if(m_howToControllOpenProgress > 0.0f)
-	{
-		//操作説明画像取得
-		int howToPlayGraphic = ResourceLoader::GetInstance().GetGraphic(
-			ResourceLoader::GraphicID::HowToPlay);
-
-		//ウィンドウサイズ取得
-		const Size& wsize = Application::GetInstance().GetWindowSize();
-
-		//進行度で隠れ位置から出現位置まで補間する
-		float x = std::lerp(
-			hide_how_to_ratio.x,
-			appear_how_to_ratio.x,
-			m_howToControllOpenProgress) * wsize.width;
-		float y = appear_how_to_ratio.y * wsize.height;
-
-		//描画
-		DrawRotaGraph(
-		   static_cast<int>(x), static_cast<int>(y),
-		   how_to_graph_scale, 0.0,
-		   howToPlayGraphic,
-		   true
-		);
-	}
 
 	//Effekseerのエフェクト描画
 	DrawEffekseer3D();

@@ -180,6 +180,8 @@ void GameoverScene::Draw()
 {
 	//ウィンドウサイズ
 	Size wsize = Application::GetInstance().GetWindowSize();
+	//UIの見た目の大きさをDebug/Releaseで揃えるためのスケール
+	float uiScale = Application::GetInstance().GetUIScale();
 	ResourceLoader& loader = ResourceLoader::GetInstance();
 
 	SetUsePixelShader(m_glitchPSH);
@@ -198,7 +200,7 @@ void GameoverScene::Draw()
 	int backgroundH = loader.GetGraphic(ResourceLoader::GraphicID::SelectBackGround);
 	DrawGraphToShaderByCenter(
 		wsize.width * 0.5f, wsize.height * 0.5f,
-		background_graph_scale, backgroundH,
+		background_graph_scale * uiScale, backgroundH,
 		1.0f,
 		uvMaxU,
 		uvMinU
@@ -222,7 +224,7 @@ void GameoverScene::Draw()
 		DrawGraphToShaderByCenter(
 			wsize.width * retry_ratio.x,
 			wsize.height * retry_ratio.y,
-			select_graph_scale, retryHandle,
+			select_graph_scale * uiScale, retryHandle,
 			1.0f,
 			uvMaxU,
 			uvMinU
@@ -231,7 +233,7 @@ void GameoverScene::Draw()
 		DrawGraphToShaderByCenter(
 			wsize.width * exit_game_ratio.x,
 			wsize.height * exit_game_ratio.y,
-			select_graph_scale, exitGameHandle,
+			select_graph_scale * uiScale, exitGameHandle,
 			1.0f,
 			uvMaxU,
 			uvMinU
@@ -254,7 +256,7 @@ void GameoverScene::Draw()
 				DrawGraphToShaderByCenter(
 					wsize.width * retry_ratio.x,
 					wsize.height * retry_ratio.y,
-					select_graph_scale, retryOnCursorHandle,
+					select_graph_scale * uiScale, retryOnCursorHandle,
 					1.0f,
 					m_wipeProgress[static_cast<int>(GameoverSelect::Retry)]
 				);
@@ -263,7 +265,7 @@ void GameoverScene::Draw()
 			DrawGraphToShaderByCenter(
 				wsize.width * exit_game_ratio.x,
 				wsize.height * exit_game_ratio.y,
-				select_graph_scale, exitGameHandle,
+				select_graph_scale * uiScale, exitGameHandle,
 				1.0f
 			);
 			break;
@@ -278,7 +280,7 @@ void GameoverScene::Draw()
 				DrawGraphToShaderByCenter(
 					wsize.width * exit_game_ratio.x,
 					wsize.height * exit_game_ratio.y,
-					select_graph_scale, exitGameOnCursorHandle,
+					select_graph_scale * uiScale, exitGameOnCursorHandle,
 					1.0f, m_wipeProgress[static_cast<int>(GameoverSelect::ExitGame)]
 				);
 			}
@@ -286,7 +288,7 @@ void GameoverScene::Draw()
 			DrawGraphToShaderByCenter(
 				wsize.width * retry_ratio.x,
 				wsize.height * retry_ratio.y,
-				select_graph_scale, retryHandle,
+				select_graph_scale * uiScale, retryHandle,
 				1.0f
 			);
 			break;
@@ -318,12 +320,12 @@ void GameoverScene::Draw()
 	DrawRotaGraph(
 		static_cast<int>(aButtonDrawPos.x),
 		static_cast<int>(aButtonDrawPos.y),
-		a_button_scale, 0.0, aButtonHandle, true
+		a_button_scale * uiScale, 0.0, aButtonHandle, true
 	);
 	//決定のテキスト画像
 	DrawRotaGraph(
 		static_cast<int>(decideDrawPos.x),
 		static_cast<int>(decideDrawPos.y),
-		decide_graph_scale, 0.0, decideHandle, true
+		decide_graph_scale * uiScale, 0.0, decideHandle, true
 	);
 }

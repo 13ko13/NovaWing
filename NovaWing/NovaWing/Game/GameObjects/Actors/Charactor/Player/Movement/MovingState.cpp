@@ -74,6 +74,8 @@ void MovingState::Update()
 	//上下入力
 	vel.y = -stick.y * move_speed_y;
 	//左右入力
+	//TODO:プレイヤーを通じて、ローリング状態を取得。
+	//ローリングされてたら、そのローリングの符号に応じた方向への移動速度を増やす
 	vel.x = stick.x * move_speed_x;
 
 	//進むときのスピードを設定する

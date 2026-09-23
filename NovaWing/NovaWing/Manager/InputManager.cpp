@@ -54,7 +54,9 @@ InputManager::InputManager() :
 
 	m_inputTable[InputEvent::close] = { {PeripheralType::pad1, XINPUT_BUTTON_B } };//Bボタン
 
-	m_inputTable[InputEvent::how_to] = { {PeripheralType::pad1, XINPUT_BUTTON_LEFT_SHOULDER } };//LBボタン
+	m_inputTable[InputEvent::right_rolling] = { {PeripheralType::pad1, XINPUT_BUTTON_RIGHT_SHOULDER } };//LBボタン
+
+	m_inputTable[InputEvent::left_rolling] = { {PeripheralType::pad1, XINPUT_BUTTON_LEFT_SHOULDER } };//RBボタン
 
 #ifdef _DEBUG
 	m_inputTable[InputEvent::restart] = { {PeripheralType::pad1, XINPUT_BUTTON_START} };			// パッド:STARTボタン

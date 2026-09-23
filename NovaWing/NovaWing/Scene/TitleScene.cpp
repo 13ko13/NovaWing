@@ -370,6 +370,8 @@ void TitleScene::Draw()
 
 	//ウィンドウサイズ
 	Size wsize = Application::GetInstance().GetWindowSize();
+	//UIの見た目の大きさをDebug/Releaseで揃えるためのスケール
+	float uiScale = Application::GetInstance().GetUIScale();
 
 	//Effekseerのエフェクト描画
 	DrawEffekseer3D();
@@ -387,7 +389,7 @@ void TitleScene::Draw()
 		DrawRotaGraph(
 			static_cast<int>(wsize.width * logo_ratio_x),
 			static_cast<int>(wsize.height * logo_ratio_y),
-			m_titleLogoScale, 0.0, m_titleLogoH, true);
+			m_titleLogoScale * uiScale, 0.0, m_titleLogoH, true);
 
 		//ちょっと遅めに選択肢も出現させる
 		float selectProgress = static_cast<float>(m_selectFadeFrame) /
@@ -401,7 +403,7 @@ void TitleScene::Draw()
 		DrawGraphToShaderByCenter(
 			wsize.width * back_ground_ratio_x,
 			wsize.height * back_ground_ratio_y,
-			back_ground_graph_scale,
+			back_ground_graph_scale * uiScale,
 			m_selectBackGroundH,
 			selectProgress
 		);
@@ -419,7 +421,7 @@ void TitleScene::Draw()
 				DrawGraphToShaderByCenter(
 					wsize.width * start_ratio_x,
 					wsize.height * start_ratio_y,
-					start_graph_scale,
+					start_graph_scale * uiScale,
 					m_gameStartOnCursorGraphH,
 					selectProgress,
 					m_wipeProgress[static_cast<int>(TitleSelect::StartGame)]
@@ -430,7 +432,7 @@ void TitleScene::Draw()
 			DrawGraphToShaderByCenter(
 				wsize.width * end_ratio_x,
 				wsize.height * end_ratio_y,
-				end_graph_scale,
+				end_graph_scale * uiScale,
 				m_gameEndGraphH,
 				selectProgress
 			);
@@ -442,7 +444,7 @@ void TitleScene::Draw()
 			DrawGraphToShaderByCenter(
 				wsize.width * start_ratio_x,
 				wsize.height * start_ratio_y,
-				start_graph_scale,
+				start_graph_scale * uiScale,
 				m_gameStartGraphH,
 				selectProgress
 			);
@@ -456,7 +458,7 @@ void TitleScene::Draw()
 				DrawGraphToShaderByCenter(
 					wsize.width * end_ratio_x,
 					wsize.height * end_ratio_y,
-					end_graph_scale,
+					end_graph_scale * uiScale,
 					m_gameEndOnCursorGraphH,
 					selectProgress,
 					m_wipeProgress[static_cast<int>(TitleSelect::ExitGame)]
