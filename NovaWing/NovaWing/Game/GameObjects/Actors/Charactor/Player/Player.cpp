@@ -558,6 +558,14 @@ void Player::LerpToAngleZ(float targetAngle, float t)
 	UpdateRotation();
 }
 
+void Player::AddRotationZ(float delta)
+{
+	//rotationZに直接角度加算
+	m_rotationZ += delta;
+	//Rotationを適用
+	UpdateRotation();
+}
+
 float Player::GetMaxSpecialGauge() const
 {
 	return max_gauge;

@@ -47,6 +47,8 @@ public:
 	void LerpToAngleY(float targetAngle, float t);
 	//AngleZまでLerpする
 	void LerpToAngleZ(float targetAngle, float t);
+	//現在のZ回転角度に直接deltaを加算する(lerpでできない周回運動を行う)
+	void AddRotationZ(float delta);
 
 	//GameSceneからカメラをセットさせる
 	void SetCamera(std::shared_ptr<CameraBase> pCamera) { m_pCamera = pCamera; }

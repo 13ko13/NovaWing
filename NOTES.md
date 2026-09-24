@@ -694,12 +694,43 @@
 - **原因1（解決済み）**: `Update()`内で`LerpToAngleZ`を1フレームに最大2回呼んでいた。2回押し成立時(`targetAngle = DX_PI_F`)の直後、同じフレーム内で必ず通常のロール処理(`IsPressed`時に`targetAngle = DX_PI_F / 2`)に到達し、**後に呼ばれた方が上書きしてしまい2回押し時の指示が無意味になっていた**。対処方針として合意: `bool m_isBarrelRolling`フラグを新設し、バレルロール中は通常のロール処理(`IsPressed`分岐)を丸ごとスキップするようガードする。終了判定は「目標角度との誤差が閾値未満になったら」という角度の近さベースで合意し、`Player`に`GetRotationZ()`ゲッター(`GetRotationX/Y`と同じパターン)を追加済み（`Player.h`112行目）。
 - **原因2（今回発覚、まだ未解決）: `LerpToAngleZ`は「現在角度→目標角度への最短距離Lerp」であり、360度(`DX_PI_F * 2`)を目標にしても数値上0度と同じ角度に収束するため、実質何も回転しない。** バレルロール（1周ぐるっと回る動き）はLerpという仕組み自体と原理的に相性が悪いと判明。`DX_PI_F * 2`に単純に変更するだけでは解決しないことをユーザーに説明済み。
 
-**次回の設計方針（合意、まだ未実装）:**
-- `LerpToAngleZ`を使うのをやめ、バレルロール中は`m_rotationZ`を毎フレーム一定の角速度で**加算**し続ける方式に変更する。`Player`に`AddRotationZ(float delta)`のような、Lerpではなく直接加算する新しい関数が必要になる見込み。
-- 終了判定も「角度の近さ」ではなく「回転開始からの**累積回転量**が360度に達したか」に変更する必要がある（`GetRotationZ()`だけでは、1周した後の角度が開始時と同じに戻ってしまい判定できないため）。
+**設計方針の第1段階（実装済み・2026-09-24時点でコード反映済み）:**
+- `LerpToAngleZ`をやめ、`Player::AddRotationZ(float delta)`（`m_rotationZ`に直接加算、コメント「バレルロール等、Lerpでは表現できない周回運動用」）を新設。
+- `DefaultRotationState`に`m_rollSumAngle`（累積回転量）を追加。`namespace`内に`constexpr float roll_frame = 30;`（1回転にかけるフレーム数、現在30固定）を追加。
+- 2回押し成立時: 誤っていた`LerpToAngleZ(DX_PI_F, ...)`呼び出しを削除し、`m_isStartRolling = true`と`m_rollSumAngle = 0.0f`のリセットのみに変更。
+- `m_isStartRolling`中: 毎フレーム`rotSpeed = (DX_PI_F*2) / roll_frame`を`AddRotationZ`で加算、`m_rollSumAngle`に累積し、`2π`に達したら`m_isStartRolling = false`にリセットする形に変更。
+- `roll_angle_threshold`（旧・角度の近さ判定用定数）は不要になり削除済み。
+
+**第1段階だけでは解決しなかった新事実（2026-09-24発覚、未実装）:**
+- 実機確認したところ「1周し終わる手前でゴムのように捻れてまた戻る」という見た目になった。原因は`Quaternion`の二重被覆性（`cos(angle/2)`,`sin(angle/2)`を使うため、`angle=0`と`angle=2π`が符号違いの同じ回転になり、`rotX*rotY*rotZ`の合成過程で不連続な挙動になる）と特定。`UpdateRotation()`（`Player.cpp`676行目付近）が毎フレーム**絶対角度からQuaternionを作り直す**構造になっているのが根本原因で、これがLerp方式のときと同じ「360度の壁」を今度はQuaternionレベルで再発させている。
+- 「スティックをぐるぐる回すとキャラも回り続ける」動き＝**差分角度だけをQuaternion化して現在の姿勢に掛け算で積み重ねていく方式**が正しい実装で、これなら2重被覆の問題に一切触れない。今の実装は「絶対角度を毎回ゼロから作り直す」方式だったのが問題、とユーザーに説明し合意済み。
+- さらに「バレルロール中もスティック入力によるX/Y方向の傾きは生かしたい」という要望があり、X/Y通常回転とバレルロールZ回転を**別々の変数で持ち、UpdateRotation内で毎回合成し直す**設計で最終合意した。
+
+**次回やること（優先順、設計は固まっているのでコードを書くだけの状態）:**
+1. `Player.h`: `m_rotationZ`宣言の下に`Quaternion m_barrelRollRotation;`（初期値は単位回転でよいのでデフォルト初期化のみ、明示初期化不要）を追加。`AddRotationZ`宣言の下に`void ResetBarrelRoll();`を追加。
+2. `Player.cpp`: `UpdateRotation()`の最終行を`m_rotation = rotX * rotY * rotZ;`から`m_rotation = rotX * rotY * rotZ * m_barrelRollRotation;`に変更。
+3. `Player.cpp`: `AddRotationZ`の中身を、`m_rotationZ += delta;`ではなく「`m_barrelRollRotation = m_barrelRollRotation * Quaternion(Vector3(0,0,1), delta);`のあと`UpdateRotation()`を呼ぶ」形に書き換える。
+4. `Player.cpp`: `ResetBarrelRoll()`を新規実装（中身は`m_barrelRollRotation = Quaternion();`だけ。`Quaternion()`のデフォルトコンストラクタは`w=1,x=y=z=0`＝単位回転であることは`Quaternion.cpp`6〜9行目で確認済み）。
+5. `DefaultRotationState.cpp`: `m_isStartRolling`ブロック内、`2π`に達して終了する`if`の中に`pPlayer->ResetBarrelRoll();`を1行追加。
+6. 実装後、実機で「1周してもねじれず、かつバレルロール中のスティック傾きも反映されるか」を確認する。この確認と、右バレルロールが完成したあとの「左バレルロール(`left_rolling`側)への横展開」はまだ未着手。
+
+### 進捗（2026-09-23〜24・Debug/ReleaseでUIの大きさが異なるバグを修正、完了）
+
+**報告された症状: 「タイトルでのUIの大きさが、Debug/Releaseで違って、リリース時のサイズでデバッグ時に表示される」**
+
+**根本原因の特定:**
+- `Constants/Game.h`で`screen_width`/`screen_height`が`#ifdef _DEBUG`により**Debug=1280x720、Release=1920x1080**と、解像度自体が異なる値で定義されていた（`Application.cpp`の`ChangeWindowMode`もDebugはウィンドウモード、Releaseはフルスクリーンで対応する意図的な分岐）。
+- UI画像の描画（`DrawRotaGraph`/`DrawGraphToShaderByCenter`/`GaugeUIBase::DrawGauge`等）は、**画像自体のピクセルサイズ**(`GetGraphSize`で取得)に定数の`scale`を掛けているだけで、解像度の情報を一切考慮していなかった。位置(`wsize.width * 比率`)は解像度に応じて変わるのに、大きさ自体は解像度に連動しないため、Debug(1280x720)ではUIが画面に対して相対的に大きく見えていた。
+
+**修正方針・実装内容:**
+- `Constants/Game.h`に`base_screen_width`/`base_screen_height`(常に1920x1080固定、UIスケール計算専用の基準解像度)を追加。既存の`screen_width`/`screen_height`(Debug/Releaseで異なる実解像度)はそのまま維持。
+- `Application`クラスに`float GetUIScale() const`を追加(`Application.h`/`.cpp`)。`実際のウィンドウ幅 / base_screen_width`を返す。
+- UIの`scale`引数を持つ描画箇所全てに`GetUIScale()`を掛けるよう修正。対象は`TitleScene.cpp`、`ClearScene.cpp`、`GameoverScene.cpp`、`PauseScene.cpp`（各シーンの選択肢・背景・Aボタン/決定テキスト画像）と、`Game/UI/GaugeUIBase.cpp`の`DrawGauge`(HP/特殊ゲージ共通処理、ここを直したことで`BossHPGaugeUI`/`PlayerHPGaugeUI`/`SpecialGaugeUI`は個別修正不要で解決)。
+- 一方で`TargetManager::IsOnScreen`(画面内判定)、`Utility/Fade.cpp`(全画面塗りつぶし)、`CameraBase.cpp`(アスペクト比計算)の`wsize`使用箇所は、そもそも解像度に自動追従する性質のものでスケール概念が不要と判断し、変更していない。
+
+**検証:** クリーンビルド(Debug/x64)でEffekseer以外の警告・エラー0件を確認済み。**実際にDebug/Release両方でタイトル・クリア・ゲームオーバー・ポーズ画面のUIの見た目の大きさが揃うかは、Visual Studio上で両構成を実際に起動して目視確認する必要がある(未実施)。**
 
 **次回やること:**
-1. `Player`に`AddRotationZ(float delta)`（Lerpではなく直接加算する版）を追加する。
-2. `DefaultRotationState`に累積回転量を記録する変数を追加し、2回押し成立時から`AddRotationZ`を毎フレーム呼びつつ累積量を加算、360度に達したら`m_isBarrelRolling`を降ろす設計に書き換える。
-3. `m_isBarrelRolling`中は既存の通常ロール処理(`IsPressed`分岐)をスキップするガードを追加する（まだ未実装）。
+1. Debug構成・Release構成それぞれで実際にゲームを起動し、タイトル/クリア/ゲームオーバー/ポーズ画面のUIサイズが一致しているか目視確認する。
+2. もし他の画面(ゲームプレイ中のUI等)でも同様のサイズ差に気づいた場合、`GaugeUIBase`以外にまだ見つかっていない`scale`定数の使用箇所がないか再度洗い出す。
 4. 左回転(`m_pushLeftRollFrame`)側は今回まだ手をつけていない。右回転のロジックが固まってから同じパターンで実装する。

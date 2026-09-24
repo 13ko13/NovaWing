@@ -16,4 +16,6 @@ private:
 	int m_pushLeftRollFrame = 0;
 	//ローリングを開始しているか
 	bool m_isStartRolling = false;
+	//ローリング中の累計回転量
+	float m_rollSumAngle = 0.0f;
 };

@@ -17,8 +17,8 @@ namespace
 	//ローリングボタン連続入力を二回押しと判定するまでの許容フレーム
 	constexpr int double_press_frame = 30;
 
-	//ローリング完了とみなす角度の誤差の許容値
-	constexpr float roll_angle_threshold = 0.05f;
+	//ローリング1回転(360)にかけるフレーム数
+	constexpr float roll_frame = 30;
 }
 
 DefaultRotationState::DefaultRotationState(const std::weak_ptr<Player> pPlayer) :
@@ -90,12 +90,11 @@ void DefaultRotationState::Update()
 			//連続で二回入力されたら横に回転する
 			if (input.IsTriggered(InputEvent::right_rolling))
 			{
-				//Z軸回転
-				//回転を行う
-				targetAngle = DX_PI_F;
-				pPlayer->LerpToAngleZ(targetAngle, rot_lerp_t);
+				//ローリング開始
 				m_pushRightRollFrame = 0;
 				m_isStartRolling = true;
+				//累計回転量をリセットする
+				m_rollSumAngle = 0.0f;
 			}
 		}
 		else m_pushRightRollFrame = 0;
@@ -115,14 +114,18 @@ void DefaultRotationState::Update()
 
 	if (m_isStartRolling)
 	{
-		//ローリング中は目標角度に向けて回転し続ける
-		targetAngle = DX_PI_F;
-		pPlayer->LerpToAngleZ(targetAngle, rot_lerp_t);
+		//1フレーム当たりの回転量
+		float rotSpeed = (DX_PI_F * 2.0f) / roll_frame;
+		//一定角速度で回転させ続ける
+		pPlayer->AddRotationZ(rotSpeed);
+		//累計回転量を計算
+		m_rollSumAngle += rotSpeed;
 
-		//角度が近づいたら終了
-		if (std::abs(pPlayer->GetRotationZ() - DX_PI_F) < roll_angle_threshold)
+		//1周し終わったら終了
+		if (m_rollSumAngle >= DX_PI_F * 2.0f)
 		{
 			m_isStartRolling = false;
+			m_rollSumAngle = 0.0f;
 		}
 	}
 	//ローリングが1回入力されたら機体を傾ける
