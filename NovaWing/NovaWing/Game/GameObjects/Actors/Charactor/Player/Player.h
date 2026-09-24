@@ -108,6 +108,8 @@ public:
 	float GetRotationX() const { return m_rotationX; }
 	//Yの回転角取得
 	float GetRotationY() const { return m_rotationY; }
+	//Zの回転角取得
+	float GetRotationZ() const { return m_rotationZ; }
 
 private:
 	//回転の更新

@@ -11,5 +11,9 @@ public:
 	void Exit() override;//ステートから出たとき
 
 private:
-	
+	//ローリングボタンを押してからのフレーム
+	int m_pushRightRollFrame = 0;
+	int m_pushLeftRollFrame = 0;
+	//ローリングを開始しているか
+	bool m_isStartRolling = false;
 };

@@ -658,21 +658,48 @@
 - **`.vcxproj`/`.vcxproj.filters`に、過去に作って削除したはずの`Rigidbody`/`ColliderBase`/`Collidable`(.h/.cpp、ProjectNeaRを参考にした際の試行錯誤の残骸)への参照が残っており、ビルド時に`C1083: ソースファイルを開けません`エラーの原因になっていた。** Visual Studioのソリューションエクスプローラー上でファイルを削除したつもりでも、プロジェクトファイル側の参照だけ残ることがあるので、ファイルが実在しないのにビルドエラーで名前が出てきたら`.vcxproj`を直接grepして確認するとよい。今回は該当6項目をClaudeが`.vcxproj`/`.vcxproj.filters`から直接削除して解消（このファイルは.h/.cppではないため直接編集OKの対象）。
 - **Playerだけを先にSphereShape化した段階で、`CollisionManager.cpp`内の`Sphere playerCol = pPlayer->GetSphere();`のような箇所が軒並み型不一致エラー(`C2440`)になった。** `CollisionManager`はPlayer/Rock/Bullet/Boss全部を`Sphere`型前提の直接比較で書いているため、1クラスだけ型を変えると即座に整合性が壊れる。→「Player→Rockの順で先に両方ICollider化してからCollisionManagerを直す」の元々の段取り通りに進めることで対応中。
 
-**現在の実装状況（2026-09-19時点、`git status`で確認、このセッション終了時点）:**
-- `Game/Collision/`の`ICollider.h`、`ColliderShape.h`は`GetCollision()`のvector化・`Draw`純粋仮想追加まで完成済み。
-- `SphereShape.h/.cpp`は位置・半径・`Update`・`Draw`・`HitCollision`まで実装済み・確認済み。
-- **`Player.h`/`Player.cpp`は`m_collSphere`削除・`m_collider`経由への統一まで完了・ビルド確認的にも整合性OK。**
-- **`PlayerCollider.h/.cpp`が要修正のまま停止中。** `ICollider::GetCollision()`をvector化したのに、`PlayerCollider`側の`GetCollision()`宣言・実装がまだ`std::shared_ptr<ColliderShape>`単体を返す古いシグネチャのまま（`vector化前`の状態）。次回最初にここを直す必要がある：
-  - `PlayerCollider.h`: `std::shared_ptr<ColliderShape> GetCollision() const override;` → `std::vector<std::shared_ptr<ColliderShape>> GetCollision() const override;`
-  - `PlayerCollider.cpp`: `return m_sphere;` → `return { m_sphere };`
-- `PlayerCollider::OnCollision()`は中身が空のまま未着手（Rock側の実装と合わせて後で決める）。
-- `Rock`用の`RockCollider`はまだ着手していない。
-- `CollisionManager.cpp`はまだ全く手を付けておらず、`Sphere`型前提のコードのまま（Player側の型変更により既に型不一致エラーが出る状態）。
+**実装状況（2026-09-24、コードを直接確認して現況を棚卸し）:**
+
+進んでいる部分と止まっている部分がはっきり分かれている。
+
+- ✅ **完了**: `ICollider.h`/`ColliderShape.h`（vector化・`Draw`純粋仮想とも完成）。
+- ✅ **完了**: `SphereShape.h/.cpp`（位置・半径・`Update`・`Draw`・`HitCollision`）。**`Sphere`型からの全面置き換えも完了済み**（`Utility/Sphere`はもう使われていない。Player/EnemyBase系/BulletBase系/BossEnemy/Rock全て`SphereShape`ベース）。
+- ✅ **完了**: `PlayerCollider.h/.cpp`。`GetCollision()`はvector化済み（`return { m_sphere };`）、`Player`は`m_collider`経由に統一済み。
+- ✅ **完了**: `RockCollider.h/.cpp`（新規作成済み）。`Rock`が`m_collider`として保持し、`AddSphere`で球を登録、`GetSpheres()`で取得する形まで実装・接続済み。
+- ✅ **完了（当初スコープ外だった別件）**: 多段ヒット防止（`DamageSource`/`DamageSourceType`、`IsTakingDamageFrom`/`StartTakingDamage`/`OnLeaveDamaging`）が`CollisionManager.cpp`のRock/Worm/Beamループに完全に組み込まれている。
+- ❌ **未着手**: `CollisionManager.cpp`本体は、`ICollider`経由の統一ループに**なっていない**。型は全部`SphereShape`に置き換わったが、`Update()`の中身は依然としてPlayer/EnemyBase/Rock/BossEnemyそれぞれに対する個別ベタ書きのまま（`GetCollisionSpheres()`/`GetSphere()`/`GetSpheres()`/`GetInvinsibleSphere()`等を直接呼んでいる）。`GetCollider()`/`ICollider::OnCollision`はどこからも呼ばれていない。
+- ❌ **未着手**: `PlayerCollider::OnCollision`/`RockCollider::OnCollision`は中身が空のまま。
+- ❌ **未着手**: `EnemyBase`系（`FloatingEnemy`/`WormEnemy`/`BossEnemy`）、`BulletBase`系（`PlayerBullet`/`EnemyBullet`/`ChargeBullet`）はどれも`ICollider`を実装していない（`SphereShape`型は使っているが、旧来の直接メソッド呼び出しパターンのまま）。
+
+**つまり「Sphere→SphereShapeへの型置き換え」は全クラスで完了しているが、「CollisionManagerをICollider経由の統一ループに書き換える」という本来の目的自体はまだ手つかず。** 型だけ揃えて中身は個別ベタ書きのまま止まっている状態。
 
 **次回やること（優先順）:**
-1. `PlayerCollider.h/.cpp`の`GetCollision()`をvector化対応する（上記の2箇所）。
-2. `Rock`用の`ICollider`実装（`RockCollider`）を`PlayerCollider`と同じパターンで作成する。Rockは複数球を持つので、`RockCollider`は`std::vector<std::shared_ptr<SphereShape>>`のようなvectorを内部に持ち、`GetCollision()`でそのまま(`ColliderShape`型にキャストして)返す形になる見込み。
-3. Player/Rock両方が揃った時点で`PlayerCollider::OnCollision`の中身（Rock相手のときのダメージ処理呼び出し）を実装し、`CollisionManager`のPlayer↔Rock部分だけ試験的にICollider経由へ書き換えてビルド確認する。
-4. パターンが確立したら、残り（`EnemyBase`とその派生`WormEnemy`/`FloatingEnemy`/`BossEnemy`、`BulletBase`とその派生`PlayerBullet`/`EnemyBullet`/`ChargeBullet`）に横展開し、最終的に`CollisionManager::Update()`全体をICollider経由のループに書き換える。
-5. 上記と並行して、既存の`Sphere`型使用箇所（`GetSphere()`/`GetSpheres()`/`GetCollisionSpheres()`を持つ全クラス）を`SphereShape`ベースに置き換えていく。
-6. ビルド確認は現状Visual Studio上で行うこと。コマンドラインMSBuildはDxLib/EffekseerForDXLibのインクルードパスがVS IDE設定と噛み合わず`C1083`で失敗するため、この方法での確認は避ける。
+1. `EnemyBase`/`BulletBase`/`BossEnemy`に`ICollider`実装を追加する（`PlayerCollider`/`RockCollider`と同じパターン）。`EnemyBase`は`FloatingEnemy`（単一球）/`WormEnemy`（頭+胴体複数球）/`BossEnemy`（無敵球+ダメージ球+ビーム球、やや特殊）で形が異なる点に注意。
+2. `PlayerCollider::OnCollision`/`RockCollider::OnCollision`の中身を実装する（`other.GetTag()`でswitchし、ダメージ処理を呼ぶ）。
+3. 全クラスの`ICollider`実装が揃ったら、`CollisionManager::Update()`を`std::vector<ICollider*>`（またはそれに準ずる形）を回す統一ループに書き換える。カメラシェイク・多重ヒット防止は`CollisionManager`側に残す方針（済）。
+4. ビルド確認は現状Visual Studio上で行うこと。コマンドラインMSBuildはDxLib/EffekseerForDXLibのインクルードパスがVS IDE設定と噛み合わず`C1083`で失敗するため、この方法での確認は避ける。
+
+### 進捗（RB/LB二回押しでバレルロール実装中、Lerp方式では360度回転できないと判明・設計転換が必要）
+
+**`DefaultRotationState`に「ローリングボタンを2回連続で押すと1回転する」動き（バレルロール）を実装中。既存の傾き操作（1回押しで機体を傾ける）と共存させる必要がある。**
+
+**定数命名の相談:** 2回押しと判定するまでの許容フレーム数の定数名を相談し、`double_press_frame`（コメント「ローリングボタン連続入力を二回押しと判定するまでの許容フレーム」）に決定。既存の`charge_start_frame`等の命名パターンに合わせた。
+
+**`DefaultRotationState.cpp`の2回押し判定ロジック、3つのバグを発見・ユーザーが自力で修正済み:**
+1. `if (m_pushRightRollFrame > 1)`という条件が、`m_pushRightRollFrame`が`1`にしかならない別ブロックより後に実行されるため一生成立しなかった。`> 1`→`> 0`に修正。
+2. `double_press_frame`を超えて時間切れになった場合に`m_pushRightRollFrame`をリセットする処理が無く、一度時間切れになると二度と1回目の判定に入れなくなるバグ。`else m_pushRightRollFrame = 0;`を追加。
+3. 2回目の入力で回転が成立した後も同様にリセットが無かった。成立時のブロック内に`m_pushRightRollFrame = 0;`を追加。
+
+**その後「まだちゃんと動かない」という報告を受け、2段階で原因を特定:**
+- **原因1（解決済み）**: `Update()`内で`LerpToAngleZ`を1フレームに最大2回呼んでいた。2回押し成立時(`targetAngle = DX_PI_F`)の直後、同じフレーム内で必ず通常のロール処理(`IsPressed`時に`targetAngle = DX_PI_F / 2`)に到達し、**後に呼ばれた方が上書きしてしまい2回押し時の指示が無意味になっていた**。対処方針として合意: `bool m_isBarrelRolling`フラグを新設し、バレルロール中は通常のロール処理(`IsPressed`分岐)を丸ごとスキップするようガードする。終了判定は「目標角度との誤差が閾値未満になったら」という角度の近さベースで合意し、`Player`に`GetRotationZ()`ゲッター(`GetRotationX/Y`と同じパターン)を追加済み（`Player.h`112行目）。
+- **原因2（今回発覚、まだ未解決）: `LerpToAngleZ`は「現在角度→目標角度への最短距離Lerp」であり、360度(`DX_PI_F * 2`)を目標にしても数値上0度と同じ角度に収束するため、実質何も回転しない。** バレルロール（1周ぐるっと回る動き）はLerpという仕組み自体と原理的に相性が悪いと判明。`DX_PI_F * 2`に単純に変更するだけでは解決しないことをユーザーに説明済み。
+
+**次回の設計方針（合意、まだ未実装）:**
+- `LerpToAngleZ`を使うのをやめ、バレルロール中は`m_rotationZ`を毎フレーム一定の角速度で**加算**し続ける方式に変更する。`Player`に`AddRotationZ(float delta)`のような、Lerpではなく直接加算する新しい関数が必要になる見込み。
+- 終了判定も「角度の近さ」ではなく「回転開始からの**累積回転量**が360度に達したか」に変更する必要がある（`GetRotationZ()`だけでは、1周した後の角度が開始時と同じに戻ってしまい判定できないため）。
+
+**次回やること:**
+1. `Player`に`AddRotationZ(float delta)`（Lerpではなく直接加算する版）を追加する。
+2. `DefaultRotationState`に累積回転量を記録する変数を追加し、2回押し成立時から`AddRotationZ`を毎フレーム呼びつつ累積量を加算、360度に達したら`m_isBarrelRolling`を降ろす設計に書き換える。
+3. `m_isBarrelRolling`中は既存の通常ロール処理(`IsPressed`分岐)をスキップするガードを追加する（まだ未実装）。
+4. 左回転(`m_pushLeftRollFrame`)側は今回まだ手をつけていない。右回転のロジックが固まってから同じパターンで実装する。
