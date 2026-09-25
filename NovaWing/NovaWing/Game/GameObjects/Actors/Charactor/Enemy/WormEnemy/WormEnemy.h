@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "Game/Collision/SphereShape.h"
+#include "Game/Collision/EnemyCollider.h"
 #include "Utility/Vector2.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
 
@@ -41,6 +42,8 @@ public:
 	void TakeDamage(int damage) override;//ダメージを受ける
 	//当たり判定を返す
 	std::vector<std::shared_ptr<SphereShape>> GetCollisionSpheres() const override;
+	//当たり判定インターフェースを返す
+	std::vector<ICollider*> GetColliders() override { return { &m_collider }; }
 
 private:
 	//胴体の数
@@ -73,5 +76,8 @@ private:
 
 	//音のマネージャー
 	std::weak_ptr<SoundManager> m_pSoundManager;
+
+	//当たり判定インターフェース
+	EnemyCollider m_collider;
 };
 

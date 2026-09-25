@@ -52,6 +52,10 @@
 - 複数の判定処理が同じ状態フラグを共有する設計では、「当たったかどうかの記録」と「実際に効果を適用するかどうかの制御」を分離すること。同じifの中に混ぜると、片方がガードでスキップされた時にもう片方の結果で誤ったリセットが起きる。
 - 前方宣言は対象が`class`/`struct`どちらで定義されているか一致させる必要がある。
 - 「Debugでは重いがReleaseでは軽い」場合、実配布に実害はないが開発効率に影響するなら軽量化する価値がある。
+- **メンバを前方宣言だけで持つには`std::unique_ptr`**（値で持つとサイズ計算に完全な定義が必要で.hに`#include`が要る）。ただし生成(`make_unique`)・`->`での呼び出し・破棄（デストラクタ）には完全な定義が要るので、`#include`は.cppに移す。デストラクタは必ず.cppで定義する（.hで`= default`にすると不完全型エラー）。
+- `unique_ptr`はコピーできず、戻り値にすると所有権ごと渡すことになる。外に使わせるだけなら`*ptr`で中身の参照を返して「貸す」。`weak_ptr`だけで持つと所有者がいなくて即破棄される。`shared_ptr`は共有する相手がいないなら不要で、オーナーへの参照を持つオブジェクトが持ち主より長生きする危険もある。
+- 前方宣言しかしていないクラスは、基底クラスへの変換（`PlayerCollider&`→`ICollider&`、ポインタも同じ）ができない。継承関係はそのクラスのヘッダを読むまでわからないため。
+- 値を返す関数・代入のつもりで`x - y;`や`obj->Func();`と書いて`return`や`=`を忘れるミスが今日2回あった（`m_rotationZ - X;`、`IsRolling()`の`return`漏れ）。コンパイルが通ってしまうので、警告C4715（値を返さないパス）やC4552（式の結果が使われていない）に注意する。
 
 ## 未解決・保留中のタスク
 
@@ -673,46 +677,54 @@
 
 **つまり「Sphere→SphereShapeへの型置き換え」は全クラスで完了しているが、「CollisionManagerをICollider経由の統一ループに書き換える」という本来の目的自体はまだ手つかず。** 型だけ揃えて中身は個別ベタ書きのまま止まっている状態。
 
-**次回やること（優先順）:**
-1. `EnemyBase`/`BulletBase`/`BossEnemy`に`ICollider`実装を追加する（`PlayerCollider`/`RockCollider`と同じパターン）。`EnemyBase`は`FloatingEnemy`（単一球）/`WormEnemy`（頭+胴体複数球）/`BossEnemy`（無敵球+ダメージ球+ビーム球、やや特殊）で形が異なる点に注意。
-2. `PlayerCollider::OnCollision`/`RockCollider::OnCollision`の中身を実装する（`other.GetTag()`でswitchし、ダメージ処理を呼ぶ）。
-3. 全クラスの`ICollider`実装が揃ったら、`CollisionManager::Update()`を`std::vector<ICollider*>`（またはそれに準ずる形）を回す統一ループに書き換える。カメラシェイク・多重ヒット防止は`CollisionManager`側に残す方針（済）。
-4. ビルド確認は現状Visual Studio上で行うこと。コマンドラインMSBuildはDxLib/EffekseerForDXLibのインクルードパスがVS IDE設定と噛み合わず`C1083`で失敗するため、この方法での確認は避ける。
+**2026-09-25、ICollider化をClaudeが実装（ユーザー依頼による直接編集の例外）。ビルド・実機確認は未実施。**
+- 新規コライダー（`Game/Collision/`、BOM付きUTF-8・CRLF、`.vcxproj`/`.filters`にもClaudeが追記済み）:
+  - `BulletCollider`（弾共通。タグはコンストラクタで`PlayerBullet`/`EnemyBullet`を渡す。`BulletBase`のコンストラクタに`ColliderTag`引数を追加）
+  - `EnemyCollider`（浮遊敵=`Enemy`タグ、ワーム=`Worm`タグ。形状は`GetCollisionSpheres()`をそのまま使う）
+  - ボスは反応ごとに分割: `BossDamageCollider` / `BossShieldCollider` / `BossBeamCollider`（ユーザー選択）。ボスの球は`OnInit`で作り直されるため、コライダーは球をコピーで持たず毎回ボスに問い合わせる。ビームは`BossBeamState`中のみ有効。
+- `ColliderTag`に`Worm`/`BossDamage`/`BossShield`/`BossBeam`を追加。`EnemyBase`に`virtual std::vector<ICollider*> GetColliders()`を追加（ボスは3つ返す）。
+- `PlayerCollider::OnCollision`にダメージ処理を実装（敵弾=弾の攻撃力、ビーム=ビームダメージ、ワーム/岩=固定20。定数は`CollisionManager`から移動）。`RockCollider`/`EnemyCollider`/`BossBeamCollider`に`GetOwnerID()`（多段ヒット防止の識別用）。
+- `CollisionManager::Update()`: 全コライダーをタグ別に集め、`hit_pairs`表の組み合わせだけを上から順に判定→`OnHit`で双方の`OnCollision`を呼ぶ。カメラ揺れと多段ヒット防止は`CollisionManager::OnHit`に残した（方針通り）。多段ヒットの「離れた」判定は、前フレームと今フレームのヒット集合の差分で`OnLeaveDamaging`を呼ぶ方式に変更。
+- **旧実装からの挙動の違い（意図したもの）**: ①弾は最初に当たった時点で消えるので、同じフレームに複数の敵・ワームの複数の球へ重複ダメージを与えなくなった。②死亡済みプレイヤーは被弾しない。③ビーム終了時にプレイヤーが触れていても「離れた」扱いになり、次のビームで正しくダメージが入る。
+- `CounterCollider`は今回触っていない（ユーザー担当）。`.vcxproj`に未登録のまま。
 
-### 進捗（RB/LB二回押しでバレルロール実装中、Lerp方式では360度回転できないと判明・設計転換が必要）
+**次回やること:**
+1. Visual Studioでビルドし、全パターン（弾×浮遊敵/ワーム、弾×ボスのダメージ・無敵判定、敵弾・ビーム・ワーム接触・岩×プレイヤー、多段ヒット防止）を実機確認。
+2. 確認後、ユーザーと一緒に`CounterCollider`（ローリング中に敵弾を跳ね返す）を統一ループに組み込む。
+3. ビルド確認は現状Visual Studio上で行うこと。コマンドラインMSBuildはDxLib/EffekseerForDXLibのインクルードパスがVS IDE設定と噛み合わず`C1083`で失敗するため、この方法での確認は避ける。
+
+### 進捗（RB/LB二回押しでバレルロール、左右とも実装済み）
 
 **`DefaultRotationState`に「ローリングボタンを2回連続で押すと1回転する」動き（バレルロール）を実装中。既存の傾き操作（1回押しで機体を傾ける）と共存させる必要がある。**
 
-**定数命名の相談:** 2回押しと判定するまでの許容フレーム数の定数名を相談し、`double_press_frame`（コメント「ローリングボタン連続入力を二回押しと判定するまでの許容フレーム」）に決定。既存の`charge_start_frame`等の命名パターンに合わせた。
+**ここまでの経緯（完了済み）:** 2回押し判定のバグ3件、`LerpToAngleZ`の同フレーム二重呼び出しによる上書きバグは解決済み。さらに「`LerpToAngleZ`は最短距離補間のため360度指定では回転しない」と判明し、`Player::AddRotationZ(float delta)`（`m_rotationZ`に直接加算）を新設、`DefaultRotationState`側も`m_rollSumAngle`で累積回転量を管理し2πで終了する方式に書き換え済み（コード確認済み、`DefaultRotationState.cpp`/`Player.cpp`に反映済み）。
 
-**`DefaultRotationState.cpp`の2回押し判定ロジック、3つのバグを発見・ユーザーが自力で修正済み:**
-1. `if (m_pushRightRollFrame > 1)`という条件が、`m_pushRightRollFrame`が`1`にしかならない別ブロックより後に実行されるため一生成立しなかった。`> 1`→`> 0`に修正。
-2. `double_press_frame`を超えて時間切れになった場合に`m_pushRightRollFrame`をリセットする処理が無く、一度時間切れになると二度と1回目の判定に入れなくなるバグ。`else m_pushRightRollFrame = 0;`を追加。
-3. 2回目の入力で回転が成立した後も同様にリセットが無かった。成立時のブロック内に`m_pushRightRollFrame = 0;`を追加。
+**現在の問題（2026-09-24発覚）:** 実機で「1周し終わる手前でゴムのように捻れてまた戻る」見た目になる。
 
-**その後「まだちゃんと動かない」という報告を受け、2段階で原因を特定:**
-- **原因1（解決済み）**: `Update()`内で`LerpToAngleZ`を1フレームに最大2回呼んでいた。2回押し成立時(`targetAngle = DX_PI_F`)の直後、同じフレーム内で必ず通常のロール処理(`IsPressed`時に`targetAngle = DX_PI_F / 2`)に到達し、**後に呼ばれた方が上書きしてしまい2回押し時の指示が無意味になっていた**。対処方針として合意: `bool m_isBarrelRolling`フラグを新設し、バレルロール中は通常のロール処理(`IsPressed`分岐)を丸ごとスキップするようガードする。終了判定は「目標角度との誤差が閾値未満になったら」という角度の近さベースで合意し、`Player`に`GetRotationZ()`ゲッター(`GetRotationX/Y`と同じパターン)を追加済み（`Player.h`112行目）。
-- **原因2（今回発覚、まだ未解決）: `LerpToAngleZ`は「現在角度→目標角度への最短距離Lerp」であり、360度(`DX_PI_F * 2`)を目標にしても数値上0度と同じ角度に収束するため、実質何も回転しない。** バレルロール（1周ぐるっと回る動き）はLerpという仕組み自体と原理的に相性が悪いと判明。`DX_PI_F * 2`に単純に変更するだけでは解決しないことをユーザーに説明済み。
+**原因の訂正（2026-09-25）:** 以前ここに「Quaternionの二重被覆が原因」と書いていたが**誤り**。`Quaternion::ToMatrix4x4()`は全要素が成分の2次式なので`q`と`-q`は同一の行列になり、毎フレーム角度から作り直す今の方式では二重被覆による見た目の破綻は起きない（Playerの回転ではQuaternionのLerpも使っていない）。この誤診をもとに「差分クォータニオン積み重ね方式」「ロール中はX傾きを諦める案B（`m_isBarrelRolling`で`rotY*rotZ`に分岐）」を検討したが、どちらも不要。
+- **本当の原因（2026-09-25、実機で解決確認済み）:** 1周終了時点で`m_rotationZ`が「開始角度+2π」のまま残り、次フレームから通常の`LerpToAngleZ(0 or ±π/2)`がその数値を戻そうとして**1周分を逆回転で巻き戻す**。Lerp(t=0.1)は最初速く後から遅いため、ゴムで戻るように見える。
+- **教訓:** 角度を数値Lerpする設計では、周回運動のあと角度の数値が2π単位でずれたまま残ると、見た目は同じなのにLerpが巻き戻しを起こす。周回させたら値を範囲内（-π〜π等）に正規化する。
 
-**設計方針の第1段階（実装済み・2026-09-24時点でコード反映済み）:**
-- `LerpToAngleZ`をやめ、`Player::AddRotationZ(float delta)`（`m_rotationZ`に直接加算、コメント「バレルロール等、Lerpでは表現できない周回運動用」）を新設。
-- `DefaultRotationState`に`m_rollSumAngle`（累積回転量）を追加。`namespace`内に`constexpr float roll_frame = 30;`（1回転にかけるフレーム数、現在30固定）を追加。
-- 2回押し成立時: 誤っていた`LerpToAngleZ(DX_PI_F, ...)`呼び出しを削除し、`m_isStartRolling = true`と`m_rollSumAngle = 0.0f`のリセットのみに変更。
-- `m_isStartRolling`中: 毎フレーム`rotSpeed = (DX_PI_F*2) / roll_frame`を`AddRotationZ`で加算、`m_rollSumAngle`に累積し、`2π`に達したら`m_isStartRolling = false`にリセットする形に変更。
-- `roll_angle_threshold`（旧・角度の近さ判定用定数）は不要になり削除済み。
+**解決（2026-09-25）:** `Player::AddRotationZ`に`if (m_rotationZ > DX_PI_F) m_rotationZ -= DX_TWO_PI_F;`を追加して-π〜πに収めた。案Bの分岐・フラグは削除し、`UpdateRotation()`は常に`rotX * rotY * rotZ`。右ローリングは巻き戻りなく動作確認済み。
+- 途中でハマった点: 閾値を2πにすると、0から1周した値（ほぼ2π、float誤差でわずかに下回る）が条件を満たさず巻き戻りが残る。閾値は「半周（π）」にする必要がある。また`m_rotationZ - X;`と書いて代入し忘れ、値が変わらないミスもあった。
 
-**第1段階だけでは解決しなかった新事実（2026-09-24発覚、未実装）:**
-- 実機確認したところ「1周し終わる手前でゴムのように捻れてまた戻る」という見た目になった。原因は`Quaternion`の二重被覆性（`cos(angle/2)`,`sin(angle/2)`を使うため、`angle=0`と`angle=2π`が符号違いの同じ回転になり、`rotX*rotY*rotZ`の合成過程で不連続な挙動になる）と特定。`UpdateRotation()`（`Player.cpp`676行目付近）が毎フレーム**絶対角度からQuaternionを作り直す**構造になっているのが根本原因で、これがLerp方式のときと同じ「360度の壁」を今度はQuaternionレベルで再発させている。
-- 「スティックをぐるぐる回すとキャラも回り続ける」動き＝**差分角度だけをQuaternion化して現在の姿勢に掛け算で積み重ねていく方式**が正しい実装で、これなら2重被覆の問題に一切触れない。今の実装は「絶対角度を毎回ゼロから作り直す」方式だったのが問題、とユーザーに説明し合意済み。
-- さらに「バレルロール中もスティック入力によるX/Y方向の傾きは生かしたい」という要望があり、X/Y通常回転とバレルロールZ回転を**別々の変数で持ち、UpdateRotation内で毎回合成し直す**設計で最終合意した。
+**左ローリングも実装済み（2026-09-25コード確認）:** `DefaultRotationState`に`m_rollDir`（右:1/左:-1/無:0）を追加して回転方向を記録、`AddRotationZ`にも`-π`を下回ったら2πを足す処理を追加済み。
 
-**次回やること（優先順、設計は固まっているのでコードを書くだけの状態）:**
-1. `Player.h`: `m_rotationZ`宣言の下に`Quaternion m_barrelRollRotation;`（初期値は単位回転でよいのでデフォルト初期化のみ、明示初期化不要）を追加。`AddRotationZ`宣言の下に`void ResetBarrelRoll();`を追加。
-2. `Player.cpp`: `UpdateRotation()`の最終行を`m_rotation = rotX * rotY * rotZ;`から`m_rotation = rotX * rotY * rotZ * m_barrelRollRotation;`に変更。
-3. `Player.cpp`: `AddRotationZ`の中身を、`m_rotationZ += delta;`ではなく「`m_barrelRollRotation = m_barrelRollRotation * Quaternion(Vector3(0,0,1), delta);`のあと`UpdateRotation()`を呼ぶ」形に書き換える。
-4. `Player.cpp`: `ResetBarrelRoll()`を新規実装（中身は`m_barrelRollRotation = Quaternion();`だけ。`Quaternion()`のデフォルトコンストラクタは`w=1,x=y=z=0`＝単位回転であることは`Quaternion.cpp`6〜9行目で確認済み）。
-5. `DefaultRotationState.cpp`: `m_isStartRolling`ブロック内、`2π`に達して終了する`if`の中に`pPlayer->ResetBarrelRoll();`を1行追加。
-6. 実装後、実機で「1周してもねじれず、かつバレルロール中のスティック傾きも反映されるか」を確認する。この確認と、右バレルロールが完成したあとの「左バレルロール(`left_rolling`側)への横展開」はまだ未着手。
+### 進捗（2026-09-25・ローリング中に敵弾を防ぐカウンター判定）
+
+**ローリング中だけ有効な`CounterCollider`を実装、`CollisionManager`に組み込み済み（ビルド・実機確認はまだ）。**
+- `Player::IsRolling()`（public）が回転ステートを`DefaultRotationState`にキャストして`IsRolling()`を中継。`CounterCollider::IsCollisionActive()`はこれを返す。
+- Playerはコライダーを**前方宣言＋`std::unique_ptr`**で持つ形に変更（`m_pHitCollider`/`m_pCounterCollider`、`#include`は`Player.cpp`側）。ユーザーの方針「.hに#includeを増やさない」による。`GetHitCollider()`/`GetCounterCollider()`は`ICollider&`を返し、本体は`Player.cpp`（`.h`では`PlayerCollider`が`ICollider`の子だとわからず変換できないため）。
+- カウンター球は半径100（本体の判定は50）で、`Player::Update()`で本体と同じ位置に更新。
+- `hit_pairs`に`{EnemyBullet, Counter}`を`{EnemyBullet, Player}`より**上**に追加。弾は当たると消えるので、ローリング中は本体に届かない。今は跳ね返さず、敵弾が消えるだけ（防御）。
+- ハマった点: `GetCollider()`を`std::unique_ptr<ICollider>`で返そうとした（コピー不可＋所有権が移ってしまう）→参照で「貸す」形に。`.cpp`側の定義に`const`が残り宣言と不一致。`UpdateShape`の定義漏れ（LNK2019になるところ）。
+
+**保留中のタスク（ユーザー判断で後回し）:**
+1. **敵弾の跳ね返し**: 方針は「反射で飛び出し、その後ゆるく敵に追従する」。最初の向きはカウンター球の中心→弾の位置を法線として`v - 2×Dot(v,n)×n`で反射。追従は`ChargeBullet`のホーミング（`BulletManager::CreateBullet`に`pTarget`を渡す）を流用し、チャージ弾より弱い追従率を使えるようにする。**未決定: 追従先を「撃ってきた敵」にするか「一番近い/レティクルに近い敵」にするか**（前者は敵弾に撃った敵を持たせる仕組みが必要）。追従の強さは実機で調整。
+2. **ビームの跳ね返し**: ビームは弾ではなくステートが作る判定球の列なので、本当に反射させると重い。現実的な案は「ローリング中はビームのダメージを無効化し、ボスに固定ダメージ（跳ね返した扱い）」。
+3. `CollisionManager.cpp`の`hit_pairs`にある`{BossBeam, Counter}`は、今は双方の`OnCollision`が空でビームも消えないため何も起きない（ビームはそのまま本体に当たる）。2に着手するまでは不要。
+4. `Player.h`の`GetCounterCollider()`のコメントが「カウンター用の球を取得」になっている（正しくはコライダー）。
+5. 各クラスのコライダーのメンバ変数に付いているコメント「当たり判定インターフェース」が不正確（中身は`ICollider`を実装した具体クラスで、インターフェースそのものではない）。`Rock.h`/`BulletBase.h`/`FloatingEnemy.h`/`WormEnemy.h`/`BossEnemy.h`に残っている。`GetCollider()`側の「当たり判定インターフェースを取得」は戻り値が`ICollider&`なので正しい。
 
 ### 進捗（2026-09-23〜24・Debug/ReleaseでUIの大きさが異なるバグを修正、完了）
 

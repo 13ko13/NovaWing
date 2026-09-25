@@ -4,7 +4,6 @@
 
 #include "../Charactor.h"
 #include "Game/Collision/SphereShape.h"
-#include "Game/Collision/PlayerCollider.h"
 #include "Manager/SoundManager.h"
 
 class InputManager;
@@ -16,6 +15,9 @@ class IShootState;
 class ISpecialActionState;
 class TargetManager;
 class EnemyBase;
+class CounterCollider;
+class PlayerCollider;
+class ICollider;
 class Player : public Charactor
 {
 public:
@@ -70,9 +72,13 @@ public:
 	//ゲージを使用してるかを取得
 	bool IsUseGauge() const;
 	//当たり判定用の球を取得
-	std::shared_ptr <SphereShape> GetSphere() const;
-	//当たり判定インターフェースを取得
-	ICollider& GetCollider() { return m_collider; }
+	std::shared_ptr <SphereShape> GetHitSphere() const;
+	//カウンター判定用の球を取得
+	std::shared_ptr <SphereShape> GetCounterSphere() const;
+	//当たり判定用のコライダーを取得
+	ICollider& GetHitCollider();
+	//カウンター用のコライダーを取得
+	ICollider& GetCounterCollider();
 
 	//フォーカスターゲットを取得
 	std::weak_ptr<EnemyBase> GetForcusTarget() const;
@@ -112,6 +118,9 @@ public:
 	float GetRotationY() const { return m_rotationY; }
 	//Zの回転角取得
 	float GetRotationZ() const { return m_rotationZ; }
+
+	//ローリング中かを取得
+	bool IsRolling() const;
 
 private:
 	//回転の更新
@@ -204,8 +213,10 @@ private:
 	//特殊行動系ステート
 	std::shared_ptr<ISpecialActionState> m_pSpecialState;
 
-	//当たり判定インターフェース
-	PlayerCollider m_collider;
+	//プレイヤーの当たり判定
+	std::unique_ptr <PlayerCollider> m_pHitCollider;
+	//カウンターの当たり判定
+	std::unique_ptr<CounterCollider> m_pCounterCollider;
 
 	//ターゲットマネージャー
 	std::weak_ptr<TargetManager> m_pTargetManager;

@@ -10,10 +10,15 @@
 enum class ColliderTag
 {
 	Player,//プレイヤー
-	Enemy,//敵
+	Enemy,//敵(接触してもダメージのない敵)
+	Worm,//ワームエネミー(接触するとプレイヤーにダメージ)
+	BossDamage,//ボスのダメージ判定
+	BossShield,//ボスの無敵判定(弾を弾く)
+	BossBeam,//ボスのビーム
 	Rock,//岩
 	EnemyBullet,//敵弾
 	PlayerBullet,//プレイヤーの弾
+	Counter,//カウンター
 };
 
 /// <summary>

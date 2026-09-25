@@ -16,7 +16,7 @@ ChargeBullet::ChargeBullet(
 	int attackPower,
 	std::weak_ptr<GameObject> pTarget,
 	std::weak_ptr<CameraBase> pCamera):
-	BulletBase(pos,vel,attackPower,radius,pCamera),
+	BulletBase(pos,vel,attackPower,radius,pCamera,ColliderTag::PlayerBullet),
 	m_pTarget(pTarget)
 {
 	m_speed = vel.Length();

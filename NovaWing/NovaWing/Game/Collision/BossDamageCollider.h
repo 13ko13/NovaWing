@@ -1,0 +1,25 @@
+﻿#pragma once
+#include "ICollider.h"
+
+class BossEnemy;
+/// <summary>
+/// ボスのダメージ判定(弾が当たるとダメージを受ける部分)
+/// </summary>
+class BossDamageCollider : public ICollider
+{
+public:
+	BossDamageCollider(BossEnemy& owner);
+
+	//当たり判定の形状データを取得
+	std::vector<std::shared_ptr<ColliderShape>> GetCollision() const override;
+	//自分のタグを取得
+	ColliderTag GetTag() const override { return ColliderTag::BossDamage; }
+	//衝突時処理
+	void OnCollision(const ICollider& other) override;
+	//判定が有効かどうか
+	bool IsCollisionActive() const override;
+
+private:
+	//ボスを参照したい
+	BossEnemy& m_owner;
+};

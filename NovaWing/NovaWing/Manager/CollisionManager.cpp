@@ -1,27 +1,90 @@
-﻿#include "CollisionManager.h"
+﻿#include <map>
+#include <algorithm>
+
+#include "CollisionManager.h"
 #include "Manager/BulletManager.h"
 #include "Game/GameObjects/Bullet/PlayerBullet.h"
 #include "Game/GameObjects/Bullet/ChargeBullet.h"
 #include "Game/GameObjects/Bullet/EnemyBullet.h"
-#include "Charactor/Enemy/FloatingEnemy/FloatingEnemy.h"
 #include "Charactor/Player/Player.h"
-#include "Charactor/Enemy/WormEnemy/WormEnemy.h"
-#include "TargetManager.h"
+#include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
 #include "Game/GameObjects/Actors/Rock/Rock.h"
 #include "Game/GameObjects/Camera/GameCamera.h"
 #include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossEnemy.h"
-#include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossBeamState.h"
+#include "Game/Collision/ICollider.h"
+#include "Game/Collision/SphereShape.h"
+#include "Game/Collision/EnemyCollider.h"
+#include "Game/Collision/RockCollider.h"
+#include "Game/Collision/BossBeamCollider.h"
 
 namespace
 {
-	//ワームエネミー(頭・胴体共通)に接触した際のプレイヤーへのダメージ
-	constexpr int worm_contact_damage = 20;
-	//プレイヤーが岩に当たった時のダメージ
-	constexpr int hit_rock_damage = 20;
 	//プレイヤーがダメージを食らった時のカメラを揺らす力
 	constexpr float shake_power = 7.0f;
 	//プレイヤーがダメージを食らった時にどのくらいの時間カメラを揺らすか
 	constexpr int shake_frame = 18;
+
+	//判定を行うタグの組み合わせ
+	struct TagPair
+	{
+		ColliderTag a;
+		ColliderTag b;
+	};
+	//上から順に処理する
+	//弾は当たると消えるので、ボスのダメージ判定を無敵判定より先に置いてダメージ判定を優先させる
+	const TagPair hit_pairs[] =
+	{
+		{ ColliderTag::PlayerBullet, ColliderTag::Enemy },
+		{ ColliderTag::PlayerBullet, ColliderTag::Worm },
+		{ ColliderTag::EnemyBullet,ColliderTag::Counter },
+		{ ColliderTag::EnemyBullet, ColliderTag::Player },
+		{ ColliderTag::PlayerBullet, ColliderTag::BossDamage },
+		{ ColliderTag::PlayerBullet, ColliderTag::BossShield },
+		{ ColliderTag::BossBeam, ColliderTag::Counter },
+		{ ColliderTag::BossBeam, ColliderTag::Player },
+		{ ColliderTag::Worm, ColliderTag::Player },
+		{ ColliderTag::Rock, ColliderTag::Player },
+	};
+
+	//2つのコライダーの形状のどれかが重なっているか
+	bool IsHit(const ICollider& a, const ICollider& b)
+	{
+		std::vector<std::shared_ptr<ColliderShape>> shapesA = a.GetCollision();
+		std::vector<std::shared_ptr<ColliderShape>> shapesB = b.GetCollision();
+		for (const std::shared_ptr<ColliderShape>& shapeA : shapesA)
+		{
+			for (const std::shared_ptr<ColliderShape>& shapeB : shapesB)
+			{
+				//今は球同士の判定しかない
+				if (shapeA->GetShape() != Shape::Sphere || shapeB->GetShape() != Shape::Sphere) continue;
+
+				const SphereShape& sphereA = static_cast<const SphereShape&>(*shapeA);
+				const SphereShape& sphereB = static_cast<const SphereShape&>(*shapeB);
+				if (sphereA.HitCollision(sphereB)) return true;
+			}
+		}
+		return false;
+	}
+
+	//触れ続けている間は1回しかダメージを与えない相手なら、そのダメージ源の情報を作る
+	bool TryGetDamageSource(const ICollider& collider, DamageSource& outSource)
+	{
+		//タグで相手の具体的な型が決まるのでstatic_castしてよい
+		switch (collider.GetTag())
+		{
+		case ColliderTag::Rock:
+			outSource = { DamageSourceType::Rock, static_cast<const RockCollider&>(collider).GetOwnerID() };
+			return true;
+		case ColliderTag::Worm:
+			outSource = { DamageSourceType::Worm, static_cast<const EnemyCollider&>(collider).GetOwnerID() };
+			return true;
+		case ColliderTag::BossBeam:
+			outSource = { DamageSourceType::Beam, static_cast<const BossBeamCollider&>(collider).GetOwnerID() };
+			return true;
+		default:
+			return false;
+		}
+	}
 }
 
 CollisionManager::CollisionManager(
@@ -60,294 +123,94 @@ void CollisionManager::Update()
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	std::shared_ptr<BossEnemy> pBoss = m_pBoss.lock();
 
-	//プレイヤー弾の配列を取得
-	std::vector<std::weak_ptr<PlayerBullet>> weakPlayerBullets = pBulletManager->GetPlayerBullets();
-	std::vector<std::shared_ptr<PlayerBullet>> sharedPlayerBullet;
+	//判定中にオブジェクトが解放されないよう、このフレームの間shared_ptrで保持しておく
+	std::vector<std::shared_ptr<GameObject>> keepAlive;
+	//タグごとにコライダーを分けて持つ
+	std::map<ColliderTag, std::vector<ICollider*>> colliders;
+	auto addCollider = [&colliders](ICollider& collider)
+		{
+			colliders[collider.GetTag()].push_back(&collider);
+		};
 
-	//敵弾の配列を取得
-	std::vector<std::weak_ptr<EnemyBullet>> weakEnemyBullets = pBulletManager->GetEnemyBullets();
-	std::vector<std::shared_ptr<EnemyBullet>> sharedEnemyBullets;
+	//プレイヤー
+	addCollider(pPlayer->GetHitCollider());
+	//プレイヤーのカウンター判定
+	addCollider(pPlayer->GetCounterCollider());
 
-	//チャージ弾の配列を取得
-	std::vector<std::weak_ptr<ChargeBullet>> weakChargeBullets = pBulletManager->GetChargeBullets();
-	std::vector<std::shared_ptr<ChargeBullet>> sharedChargeBullets;
-
-	//カメラのshared_ptr化
-	std::shared_ptr<GameCamera> sharedCamera = m_pCamera.lock();
-
-	//弾のすべてのweak_ptrをshared_ptrに変換
-	for (std::weak_ptr<PlayerBullet>& weakBullet : weakPlayerBullets)//プレイヤー弾
+	//弾
+	for (const std::weak_ptr<PlayerBullet>& weakBullet : pBulletManager->GetPlayerBullets())
 	{
 		std::shared_ptr<PlayerBullet> pBullet = weakBullet.lock();
-
-		//nullチェック
 		if (!pBullet) continue;
-
-		//変換したものを格納
-		sharedPlayerBullet.push_back(pBullet);
+		keepAlive.push_back(pBullet);
+		addCollider(pBullet->GetCollider());
 	}
-	for (std::weak_ptr<EnemyBullet>& weakBullet : weakEnemyBullets)//敵弾
-	{
-		std::shared_ptr<EnemyBullet> pBullet = weakBullet.lock();
-
-		//nullチェック
-		if (!pBullet) continue;
-
-		//変換したものを格納
-		sharedEnemyBullets.push_back(pBullet);
-	}
-	for (std::weak_ptr<ChargeBullet>& weakBullet : weakChargeBullets)//チャージ弾
+	for (const std::weak_ptr<ChargeBullet>& weakBullet : pBulletManager->GetChargeBullets())
 	{
 		std::shared_ptr<ChargeBullet> pBullet = weakBullet.lock();
-
-		//nullチェック
 		if (!pBullet) continue;
-
-		//変換したものを格納
-		sharedChargeBullets.push_back(pBullet);
+		keepAlive.push_back(pBullet);
+		addCollider(pBullet->GetCollider());
+	}
+	for (const std::weak_ptr<EnemyBullet>& weakBullet : pBulletManager->GetEnemyBullets())
+	{
+		std::shared_ptr<EnemyBullet> pBullet = weakBullet.lock();
+		if (!pBullet) continue;
+		keepAlive.push_back(pBullet);
+		addCollider(pBullet->GetCollider());
 	}
 
-	//チャージ弾とノーマル弾を一つにまとめる
-	std::vector<std::shared_ptr<BulletBase>> sharedAllBullets;
-	sharedAllBullets.insert(sharedAllBullets.end(), sharedPlayerBullet.begin(), sharedPlayerBullet.end());
-	sharedAllBullets.insert(sharedAllBullets.end(), sharedChargeBullets.begin(), sharedChargeBullets.end());
-
-	//敵も同様にshared_ptrに変換
-	//敵をすべてshared_ptrに変換
-	std::vector<std::shared_ptr<EnemyBase>> pSharedEnemies;
-	for (std::weak_ptr<EnemyBase> pWeakEnemy : m_pEnemies)
+	//敵(1体が複数のコライダーを持つことがある)
+	for (std::weak_ptr<EnemyBase>& weakEnemy : m_pEnemies)
 	{
-		std::shared_ptr<EnemyBase> pSharedEnemy = pWeakEnemy.lock();
-		if (!pSharedEnemy) continue;
-		pSharedEnemies.push_back(pSharedEnemy);
-	}
-
-	//全ての敵とプレイヤーの弾が当たっているか
-	for (std::shared_ptr<EnemyBase> pEnemy : pSharedEnemies)
-	{
-		if (pEnemy->IsDead()) continue;
-
-		//その敵が持つ当たり判定球すべてをチェック
-		std::vector<std::shared_ptr<SphereShape>> enemyCols = pEnemy->GetCollisionSpheres();
-		for (std::shared_ptr<SphereShape>& enemyCol : enemyCols)
+		std::shared_ptr<EnemyBase> pEnemy = weakEnemy.lock();
+		if (!pEnemy) continue;
+		keepAlive.push_back(pEnemy);
+		for (ICollider* pCollider : pEnemy->GetColliders())
 		{
-			for (std::shared_ptr<BulletBase> pPlayerBullet : sharedAllBullets)
+			addCollider(*pCollider);
+		}
+	}
+	for (ICollider* pCollider : pBoss->GetColliders())
+	{
+		addCollider(*pCollider);
+	}
+
+	//岩
+	for (std::weak_ptr<Rock>& weakRock : m_pRocks)
+	{
+		std::shared_ptr<Rock> pRock = weakRock.lock();
+		if (!pRock) continue;
+		keepAlive.push_back(pRock);
+		addCollider(pRock->GetCollider());
+	}
+
+	//決められた組み合わせだけ判定する
+	for (const TagPair& pair : hit_pairs)
+	{
+		for (ICollider* pA : colliders[pair.a])
+		{
+			for (ICollider* pB : colliders[pair.b])
 			{
-				std::shared_ptr<SphereShape> bulletCol = pPlayerBullet->GetSphere();
-				if (enemyCol->HitCollision(*bulletCol))
-				{
-					pEnemy->TakeDamage(pPlayerBullet->GetAttackPower());
-					pPlayerBullet->OnHitEnemy();
-				}
+				//当たって消えた弾などは、同じフレームでも以降は判定しない
+				if (!pA->IsCollisionActive() || !pB->IsCollisionActive()) continue;
+				if (!IsHit(*pA, *pB)) continue;
+
+				OnHit(*pA, *pB);
 			}
 		}
 	}
 
-	//プレイヤーとすべての敵の弾が当たっているかを一つずつ調べる
-	for (std::shared_ptr<EnemyBullet> pEnemyBullet : sharedEnemyBullets)
+	//前フレームは当たっていて今フレームは当たっていないダメージ源は、離れたことを記録する
+	for (const DamageSource& source : m_hitSourcesPrevFrame)
 	{
-		//死亡済みの弾は処理せずに、次の弾の処理に移る
-		if (pEnemyBullet->IsDead()) continue;
-
-		//プレイヤーの当たり判定を取得
-		std::shared_ptr<SphereShape> playerCol = pPlayer->GetSphere();
-		//敵弾の当たり判定を取得
-		std::shared_ptr<SphereShape> enemyBulletCol = pEnemyBullet->GetSphere();
-		//当たっていたら
-		if (playerCol->HitCollision(*enemyBulletCol))
-		{
-			//プレイヤーのHPを減らす
-			pPlayer->TakeDamage(pEnemyBullet->GetAttackPower());
-			//敵弾の当たったときの処理
-			pEnemyBullet->OnHitEnemy();
-			//カメラを揺らす
-			sharedCamera->OnShake(shake_power, shake_frame);
-		}
-	}
-
-	//もしボスが死んでいるなら処理を行わない
-	if (!pBoss->IsDead())
-	{
-		//ボスとプレイヤーの弾の当たり判定
-		for (std::shared_ptr<BulletBase> pPlayerBullet : sharedAllBullets)
-		{
-			//ボスの無敵判定球とダメージ判定球に当たっている場合で処理を分ける
-			std::shared_ptr<SphereShape> invinsibleCol = pBoss->GetInvinsibleSphere();
-			std::shared_ptr<SphereShape> damageCol = pBoss->GetDamageSphere();
-			std::shared_ptr<SphereShape> bulletCol = pPlayerBullet->GetSphere();
-			//ダメージ判定の場合
-			if (damageCol->HitCollision(*bulletCol))
-			{
-				//ボスの被弾処理
-				pBoss->TakeDamage(pPlayerBullet->GetAttackPower());
-				//敵に当たった時のプレイヤー弾の処理
-				pPlayerBullet->OnHitEnemy();
-			}
-			else if (invinsibleCol->HitCollision(*bulletCol))
-			{
-				//ボスの無敵判定処理
-				pBoss->OnHitInvincibleCol(bulletCol->GetPos(),pPlayerBullet->GetAttackPower());
-				//敵に当たった時のプレイヤー弾の処理
-				pPlayerBullet->OnHitEnemy();
-			}
-		}
-
-		//ビーム状態じゃないなら処理を行わない
-		std::shared_ptr<BossBeamState> beamState =
-			std::dynamic_pointer_cast<BossBeamState>(
-			pBoss->GetCurrentState());
-		if (beamState != nullptr)
-		{
-			//今フレームビームに当たっているか
-			bool isHitBeam = false;
-			//ダメージ源の情報作成
-			DamageSource source = {DamageSourceType::Beam,pBoss->GetID()};
-
-			//ボスのビームとプレイヤーの当たり判定
-			//ビームのすべての球を取得
-			std::vector<std::shared_ptr<SphereShape>> spheresL = pBoss->GetBeamSphereL();
-			std::vector<std::shared_ptr<SphereShape>> spheresR = pBoss->GetBeamSphereR();
-			//プレイヤーの球
-			std::shared_ptr<SphereShape> playerCol = pPlayer->GetSphere();
-			//左のビームとプレイヤー
-			for (std::shared_ptr<SphereShape>& sphereL : spheresL)
-			{
-				if (playerCol->HitCollision(*sphereL))
-				{
-					//当たったことを記録
-					isHitBeam = true;
-					//既にこのビームに当たっている場合は処理を行わない
-					if (pPlayer->IsTakingDamageFrom(source)) continue;
-					//プレイヤー被弾
-					pPlayer->TakeDamage(beamState->GetBeamDamage());
-					//カメラを揺らす
-					sharedCamera->OnShake(shake_power, shake_frame);
-					//このビームに当たったことを記録する
-					pPlayer->StartTakingDamage(source);
-				}
-			}
-			//右のビームとプレイヤー
-			for (std::shared_ptr<SphereShape>& sphereR : spheresR)
-			{
-				if (playerCol->HitCollision(*sphereR))
-				{
-					//当たったことを記録
-					isHitBeam = true;
-					//既にこのビームに当たっている場合は処理を行わない
-					if (pPlayer->IsTakingDamageFrom(source)) continue;
-					//プレイヤー被弾
-					pPlayer->TakeDamage(beamState->GetBeamDamage());
-					//カメラを揺らす
-					sharedCamera->OnShake(shake_power, shake_frame);
-					//このビームに当たったことを記録する
-					pPlayer->StartTakingDamage(source);
-				}
-			}
-
-			//もしビームに当たっていなければ、離れたことを記録する
-			if (!isHitBeam)
-			{
-				pPlayer->OnLeaveDamaging(source);
-			}
-		}
-	}
-
-	//プレイヤーとワームの頭、胴体の当たり判定が当たっているかを一つずつ調べる
-	//多重ヒットを起こさないために
-	//プレイヤーがダメージをすでに食らっていれば処理を行わない
-	for (std::shared_ptr<EnemyBase> pEnemy : pSharedEnemies)
-	{
-		std::shared_ptr<WormEnemy> pWormEnemy = std::dynamic_pointer_cast<WormEnemy>(pEnemy);
-		if (pWormEnemy == nullptr) continue;  //ワーム以外はスキップ
-		if (pWormEnemy->IsDead()) continue;
-
-		//今フレームこのワームと当たっているか
-		bool isHitThisWorm = false;
-
-		//プレイヤーの当たり判定を取得
-		std::shared_ptr<SphereShape> playerCol = pPlayer->GetSphere();
-		//ダメージ源の情報を作成
-		DamageSource source = { DamageSourceType::Worm,pWormEnemy->GetID() };
-
-		//ワームエネミーの頭の当たり判定を取得
-		std::vector<std::shared_ptr<SphereShape>> wormColliders = pWormEnemy->GetCollisionSpheres();
-		for (auto& wormCollider : wormColliders)
-		{
-			if (playerCol->HitCollision(*wormCollider))
-			{
-				//当たったことを記録
-				isHitThisWorm = true;
-
-				//既にこのワームに当たっている場合は処理を行わない
-				if (pPlayer->IsTakingDamageFrom(source)) continue;
-
-				//食らっていなければプレイヤーのHPを減らす
-				pPlayer->TakeDamage(worm_contact_damage);
-				//カメラを揺らす
-				sharedCamera->OnShake(shake_power, shake_frame);
-				//このワームに当たったことを記録する
-				pPlayer->StartTakingDamage(source);
-			}
-		}
-		//もしこのワームに当たっていなければ、離れたことを記録する
-		if (!isHitThisWorm)
+		if (m_hitSourcesThisFrame.find(source) == m_hitSourcesThisFrame.end())
 		{
 			pPlayer->OnLeaveDamaging(source);
 		}
 	}
-
-	std::vector<std::shared_ptr<Rock>> sharedRocks;
-	for (std::weak_ptr<Rock> pWeakRock : m_pRocks)
-	{
-		//shared_ptrに変換
-		std::shared_ptr<Rock> pSharedRock = pWeakRock.lock();
-		//nullチェック
-		if (!pSharedRock) continue;
-		//変換したものを格納
-		sharedRocks.push_back(pSharedRock);
-	}
-
-	//岩とプレイヤーが当たっているかを1つずつ調べる
-	for (std::shared_ptr<Rock> pRock : sharedRocks)
-	{
-		//プレイヤーの当たり判定を取得
-		std::shared_ptr<SphereShape> playerCol = pPlayer->GetSphere();
-		//岩の当たり判定を取得
-		std::vector<std::shared_ptr<SphereShape>> rockCollisions = pRock->GetSpheres();
-
-		//ダメージ源の情報を作成
-		DamageSource source = { DamageSourceType::Rock,pRock->GetID() };
-
-		//今フレーム、この岩に当たっているか
-		bool isHitThisRock = false;
-
-		//その岩の中のすべての球とプレイヤーの球が当たっているかを検出
-		for (std::shared_ptr<SphereShape>& rockColl : rockCollisions)
-		{
-			//当たっていて、ダメージを食らっていないときのみダメージを食らうようにする
-			if (playerCol->HitCollision(*rockColl))
-			{
-				//当たったことを記録
-				isHitThisRock = true;
-
-				//この岩にすでに当たっている場合は処理を行わない
-				if (pPlayer->IsTakingDamageFrom(source)) continue;
-
-				//一度当たったら離れるまで当たらないようにする
-				//プレイヤーのHPを減らす
-				pPlayer->TakeDamage(hit_rock_damage);
-				//カメラを揺らす
-				sharedCamera->OnShake(shake_power, shake_frame);
-				//この岩に当たったことを記録する
-				pPlayer->StartTakingDamage(source);
-			}
-		}
-		//もしこの岩に当たっていなければ、離れたことを記録する
-		if (!isHitThisRock)
-		{
-			pPlayer->OnLeaveDamaging(source);
-		}
-	}
+	m_hitSourcesPrevFrame = m_hitSourcesThisFrame;
+	m_hitSourcesThisFrame.clear();
 
 	//死んでいる敵は配列から消す
 	m_pEnemies.erase(
@@ -358,4 +221,37 @@ void CollisionManager::Update()
 		}),
 	m_pEnemies.end()
 	);
+}
+
+void CollisionManager::OnHit(ICollider& a, ICollider& b)
+{
+	//判定の組み合わせ上、プレイヤーが関わる衝突はすべてプレイヤーの被弾
+	bool isPlayerHit = a.GetTag() == ColliderTag::Player || b.GetTag() == ColliderTag::Player;
+
+	if (isPlayerHit)
+	{
+		//多段ヒット防止
+		ICollider& other = (a.GetTag() == ColliderTag::Player) ? b : a;
+		DamageSource source;
+		if (TryGetDamageSource(other, source))
+		{
+			//当たったことを記録
+			m_hitSourcesThisFrame.insert(source);
+
+			//既にこのダメージ源に当たっている場合は処理を行わない
+			std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+			if (pPlayer->IsTakingDamageFrom(source)) return;
+			pPlayer->StartTakingDamage(source);
+		}
+	}
+
+	//お互いの反応はそれぞれのコライダーに任せる
+	a.OnCollision(b);
+	b.OnCollision(a);
+
+	if (isPlayerHit)
+	{
+		//カメラを揺らす
+		m_pCamera.lock()->OnShake(shake_power, shake_frame);
+	}
 }

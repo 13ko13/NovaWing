@@ -25,6 +25,8 @@
 #include "SpecialAction/SomersaultState.h"
 #include "Utility/Quaternion.h"
 #include "Shoot/DisabledShootState.h"
+#include "Game/Collision/PlayerCollider.h"
+#include "Game/Collision/CounterCollider.h"
 
 namespace
 {
@@ -42,7 +44,7 @@ namespace
 	constexpr float somersault_stick_threshold = -0.2f;
 
 	// 当たり判定の球の半径
-	constexpr float coll_sphere_radius = 50.0f;
+	constexpr float hit_coll_sphere_radius = 50.0f;
 	// 当たり判定位置のオフセット
 	const Vector3 coll_sphere_offset = {0.0f, 0.0f, -90.0f};
 
@@ -81,6 +83,9 @@ namespace
 	constexpr float sea_splash_offset_x = 0.0f;
 	//水しぶきのエフェクトのオフセットZ
 	constexpr float sea_splash_offset_z = 250.0f;
+	
+	//カウンター用の球の半径
+	constexpr float counter_col_radius = 100.0f;
 
 } // namespace
 
@@ -91,9 +96,10 @@ Player::Player(
 	std::weak_ptr<SoundManager> soundManager) :
 	Charactor(modelID, camera),
 	m_pBulletManager(bulletManager),
-	m_pSoundManager(soundManager),
-	m_collider(*this)
+	m_pSoundManager(soundManager)
 {
+	m_pHitCollider = std::make_unique<PlayerCollider>(*this);
+	m_pCounterCollider = std::make_unique<CounterCollider>(*this);
 }
 
 Player::~Player()
@@ -208,7 +214,9 @@ void Player::Update()
 	// 当たり判定の球の位置更新
 	// ちょっとずれているのでオフセットで修正
 	Vector3 collPos = m_pos + coll_sphere_offset;
-	m_collider.UpdateShape(collPos, coll_sphere_radius);
+	m_pHitCollider->UpdateShape(collPos, hit_coll_sphere_radius);
+	//カウンターの球も更新
+	m_pCounterCollider->UpdateShape(collPos, counter_col_radius);
 
 	//プレイヤーが海すれすれにいたら、羽の位置を基準に
 	//海面に水しぶきのエフェクトを出す
@@ -447,7 +455,11 @@ void Player::Draw()
 	DrawFormatString(0, 365, 0xffffff, L"IsFocus : %d", IsFocus());
 
 	// 当たり判定の球を描画
-	m_collider.GetSphere()->Draw(0xff0000);
+	m_pHitCollider->GetSphere()->Draw(0xff0000);
+	if (m_pCounterCollider->IsCollisionActive())
+	{
+		m_pCounterCollider->GetSphere()->Draw(0x0000ff);
+	}
 
 	VECTOR leftWingPos = MV1GetFramePosition(m_modelHandle, MV1SearchFrame(
 		m_modelHandle, left_wing_bone_name));//左の羽の位置を取得
@@ -562,6 +574,8 @@ void Player::AddRotationZ(float delta)
 {
 	//rotationZに直接角度加算
 	m_rotationZ += delta;
+	if (m_rotationZ > DX_PI_F) m_rotationZ -= DX_TWO_PI_F;
+	if (m_rotationZ < -DX_PI_F) m_rotationZ += DX_TWO_PI_F;
 	//Rotationを適用
 	UpdateRotation();
 }
@@ -673,6 +687,17 @@ void Player::ChangeAllStateToNormal()
 	ChangeShootState(newShootState);
 }
 
+bool Player::IsRolling() const
+{
+	auto rotationState = std::dynamic_pointer_cast<DefaultRotationState>(m_pRotationState);
+	//DefaultRotationStateから回転中か取得
+	if (rotationState)
+	{
+		return rotationState->IsRolling();
+	}
+	else return false;
+}
+
 void Player::UpdateRotation()
 {
 	// XとYの回転角からQuaternionを生成
@@ -683,7 +708,26 @@ void Player::UpdateRotation()
 	m_rotation = rotX * rotY * rotZ;
 }
 
-std::shared_ptr<SphereShape> Player::GetSphere() const
+std::shared_ptr<SphereShape> Player::GetHitSphere() const
 {
-	return m_collider.GetSphere();
+	return m_pHitCollider->GetSphere();
+}
+
+std::shared_ptr<SphereShape> Player::GetCounterSphere() const
+{
+	return m_pCounterCollider->GetSphere();
+}
+
+ICollider& Player::GetHitCollider()
+{
+	//コライダーを取得
+	//間接参照
+	return *m_pHitCollider;
+}
+
+ICollider& Player::GetCounterCollider()
+{
+	//コライダーを取得
+	//間接参照
+	return *m_pCounterCollider;
 }

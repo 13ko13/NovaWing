@@ -65,7 +65,10 @@ BossEnemy::BossEnemy(BossEnemyData& data) :
 	EnemyBase(data.Id, data.pCamera, data.pPlayer,
 	data.pBulletManager,data.health),
 	m_animator(m_modelHandle),
-	m_pSoundManager(data.pSoundManager)
+	m_pSoundManager(data.pSoundManager),
+	m_damageCollider(*this),
+	m_shieldCollider(*this),
+	m_beamCollider(*this)
 {
 	//位置を反映
 	SetPos(data.pos);

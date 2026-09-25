@@ -17,11 +17,13 @@ BulletBase::BulletBase(
 	const Vector3& vel,
 	int attackPower,
 	float radius,
-	std::weak_ptr<CameraBase> pCamera):
+	std::weak_ptr<CameraBase> pCamera,
+	ColliderTag tag):
 	m_attackPower(attackPower),
 	m_lifeTime(0),
 	m_radius(radius),
-	m_pCamera(pCamera)
+	m_pCamera(pCamera),
+	m_collider(*this, tag)
 {
 	//位置を設定
 	SetPos(pos);

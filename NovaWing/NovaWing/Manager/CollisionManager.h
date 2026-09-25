@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include <memory>
 #include <vector>
+#include <set>
+
+#include "Game/GameObjects/Actors/Charactor/DamageSource.h"
 
 class Player;
 class BulletManager;
@@ -8,6 +11,7 @@ class EnemyBase;
 class Rock;
 class GameCamera;
 class BossEnemy;
+class ICollider;
 class CollisionManager
 {
 public:
@@ -24,6 +28,10 @@ public:
 	void Update();//更新処理
 
 private:
+	//2つのコライダーが当たった時の処理
+	void OnHit(ICollider& a, ICollider& b);
+
+private:
 	//プレイヤー
 	std::weak_ptr<Player> m_pPlayer;
 	//カメラ
@@ -36,5 +44,9 @@ private:
 	std::vector<std::weak_ptr<Rock>> m_pRocks;
 	//ボス
 	std::weak_ptr<BossEnemy> m_pBoss;
-};
 
+	//多段ヒット防止用、今フレーム当たっていたダメージ源
+	std::set<DamageSource> m_hitSourcesThisFrame;
+	//多段ヒット防止用、前フレーム当たっていたダメージ源
+	std::set<DamageSource> m_hitSourcesPrevFrame;
+};

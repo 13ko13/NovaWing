@@ -2,6 +2,9 @@
 #include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
 #include "Manager/ResourceLoader.h"
 #include "Game/Collision/SphereShape.h"
+#include "Game/Collision/BossDamageCollider.h"
+#include "Game/Collision/BossShieldCollider.h"
+#include "Game/Collision/BossBeamCollider.h"
 #include "Utility/ModelAnimator.h"
 
 class Player;
@@ -55,6 +58,9 @@ public:
 	//ビームを出しているときにビームの当たり判定を返す
 	std::vector<std::shared_ptr<SphereShape>> GetBeamSphereL() const;//左のビーム
 	std::vector<std::shared_ptr<SphereShape>> GetBeamSphereR() const;//右のビーム
+
+	//当たり判定インターフェースを返す(ダメージ・無敵・ビーム)
+	std::vector<ICollider*> GetColliders() override { return { &m_damageCollider, &m_shieldCollider, &m_beamCollider }; }
 
 	//現在のステートを返す
 	std::shared_ptr<IBossEnemyState> GetCurrentState() const { return m_pState; }
@@ -131,4 +137,9 @@ private:
 
 	//足音のクールタイム計測
 	int m_footstepCT = 0;
+
+	//当たり判定インターフェース
+	BossDamageCollider m_damageCollider;//ダメージ判定
+	BossShieldCollider m_shieldCollider;//無敵判定
+	BossBeamCollider m_beamCollider;//ビーム
 };

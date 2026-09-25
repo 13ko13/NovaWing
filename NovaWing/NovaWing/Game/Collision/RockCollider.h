@@ -25,6 +25,8 @@ public:
     //球を一つ追加する
     void AddSphere(const Vector3& pos, float radius);
     std::vector<std::shared_ptr<SphereShape>> GetSpheres() const { return m_spheres; }
+    //持ち主のIDを取得(多段ヒット防止の識別に使う)
+    int GetOwnerID() const;
 
 private:
     //岩を参照したい

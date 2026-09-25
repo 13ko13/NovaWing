@@ -13,7 +13,7 @@ EnemyBullet::EnemyBullet(
 	const Vector3& vel,
 	const int attackPower,
 	std::weak_ptr<CameraBase> pCamera):
-	BulletBase(pos,vel,attackPower, radius,pCamera)
+	BulletBase(pos,vel,attackPower, radius,pCamera,ColliderTag::EnemyBullet)
 {
 	//Effekseerのエフェクト再生を呼ぶ
 	m_effectPlayHandle = PlayEffekseer3DEffect(

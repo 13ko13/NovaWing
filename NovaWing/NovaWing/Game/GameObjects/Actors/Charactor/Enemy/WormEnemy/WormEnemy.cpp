@@ -46,7 +46,8 @@ WormEnemy::WormEnemy(
 	m_headSphere(std::make_shared<SphereShape>(data.pos, 0.0f)),
 	m_moveDirection(data.direction),
 	m_activatePlayerZ(data.activatePlayerZ),
-	m_pSoundManager(pSoundManager)
+	m_pSoundManager(pSoundManager),
+	m_collider(*this, ColliderTag::Worm)
 {
 	//位置を反映
 	SetPos(data.pos);

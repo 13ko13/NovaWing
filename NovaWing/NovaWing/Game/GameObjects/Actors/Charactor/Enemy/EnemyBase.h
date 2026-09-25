@@ -8,6 +8,7 @@
 class Player;
 class BulletManager;
 class CameraBase;
+class ICollider;
 class EnemyBase : public Charactor
 {
 public:
@@ -29,6 +30,9 @@ public:
 	//当たり判定に使う球の配列を返す
 	//当たり判定を持つ敵がoverrideする
 	virtual std::vector<std::shared_ptr<SphereShape>> GetCollisionSpheres() const { return {}; }
+
+	//この敵が持つ当たり判定インターフェースをすべて返す
+	virtual std::vector<ICollider*> GetColliders() { return {}; }
 
 private:
 

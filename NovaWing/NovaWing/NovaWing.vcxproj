@@ -159,6 +159,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\Collision\CounterCollider.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\ItemBase.cpp" />
     <ClCompile Include="Game\GameObjects\Camera\GameCamera.cpp" />
     <ClCompile Include="Game\UI\BossHPGaugeUI.cpp" />
@@ -179,6 +180,11 @@
     <ClCompile Include="Game\UI\SpecialGaugeUI.cpp" />
     <ClCompile Include="Game\Collision\PlayerCollider.cpp" />
     <ClCompile Include="Game\Collision\RockCollider.cpp" />
+    <ClCompile Include="Game\Collision\BulletCollider.cpp" />
+    <ClCompile Include="Game\Collision\EnemyCollider.cpp" />
+    <ClCompile Include="Game\Collision\BossDamageCollider.cpp" />
+    <ClCompile Include="Game\Collision\BossShieldCollider.cpp" />
+    <ClCompile Include="Game\Collision\BossBeamCollider.cpp" />
     <ClCompile Include="Scene\PauseScene.cpp" />
     <ClCompile Include="Game\Collision\SphereShape.cpp" />
     <ClCompile Include="Utility\GraphShaderDraw.cpp" />
@@ -253,6 +259,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
+    <ClInclude Include="Game\Collision\CounterCollider.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\DamageSource.h" />
     <ClInclude Include="Game\GameObjects\Actors\ItemBase.h" />
     <ClInclude Include="Game\GameObjects\Camera\GameCamera.h" />
@@ -276,6 +283,11 @@
     <ClInclude Include="Game\UI\SpecialGaugeUI.h" />
     <ClInclude Include="Game\Collision\PlayerCollider.h" />
     <ClInclude Include="Game\Collision\RockCollider.h" />
+    <ClInclude Include="Game\Collision\BulletCollider.h" />
+    <ClInclude Include="Game\Collision\EnemyCollider.h" />
+    <ClInclude Include="Game\Collision\BossDamageCollider.h" />
+    <ClInclude Include="Game\Collision\BossShieldCollider.h" />
+    <ClInclude Include="Game\Collision\BossBeamCollider.h" />
     <ClInclude Include="Scene\PauseScene.h" />
     <ClInclude Include="Game\Collision\SphereShape.h" />
     <ClInclude Include="Utility\GraphShaderDraw.h" />

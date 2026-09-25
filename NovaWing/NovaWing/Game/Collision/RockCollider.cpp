@@ -35,3 +35,8 @@ void RockCollider::AddSphere(const Vector3& pos, float radius)
 {
     m_spheres.push_back(std::make_shared<SphereShape>(pos, radius));
 }
+
+int RockCollider::GetOwnerID() const
+{
+    return m_owner.GetID();
+}

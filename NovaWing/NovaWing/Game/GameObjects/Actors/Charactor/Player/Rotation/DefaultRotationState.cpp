@@ -18,7 +18,7 @@ namespace
 	constexpr int double_press_frame = 30;
 
 	//ローリング1回転(360)にかけるフレーム数
-	constexpr float roll_frame = 30;
+	constexpr float roll_frame = 20;
 }
 
 DefaultRotationState::DefaultRotationState(const std::weak_ptr<Player> pPlayer) :
@@ -95,9 +95,32 @@ void DefaultRotationState::Update()
 				m_isStartRolling = true;
 				//累計回転量をリセットする
 				m_rollSumAngle = 0.0f;
+				//回転方向を記録
+				m_rollDir = 1;
 			}
 		}
 		else m_pushRightRollFrame = 0;
+	}
+	//ローリングボタンが一回押されていたらフレーム更新
+	if (m_pushLeftRollFrame > 0)
+	{
+		//更新
+		m_pushLeftRollFrame++;
+		if (m_pushLeftRollFrame < double_press_frame)
+		{
+			//連続で二回入力されたら横に回転する
+			if (input.IsTriggered(InputEvent::left_rolling))
+			{
+				//ローリング開始
+				m_pushLeftRollFrame = 0;
+				m_isStartRolling = true;
+				//累計回転量をリセットする
+				m_rollSumAngle = 0.0f;
+				//回転方向を記録
+				m_rollDir = -1;
+			}
+		}
+		else m_pushLeftRollFrame = 0;
 	}
 	if (input.IsTriggered(InputEvent::right_rolling) &&
 		m_pushRightRollFrame < 1 &&
@@ -114,18 +137,28 @@ void DefaultRotationState::Update()
 
 	if (m_isStartRolling)
 	{
+		float rotSpeed = 0.0f;
 		//1フレーム当たりの回転量
-		float rotSpeed = (DX_PI_F * 2.0f) / roll_frame;
+		if (m_rollDir > 0) rotSpeed = (DX_TWO_PI_F) / roll_frame;
+		if (m_rollDir < 0) rotSpeed = (-DX_TWO_PI_F) / roll_frame;
+
 		//一定角速度で回転させ続ける
 		pPlayer->AddRotationZ(rotSpeed);
 		//累計回転量を計算
 		m_rollSumAngle += rotSpeed;
 
 		//1周し終わったら終了
-		if (m_rollSumAngle >= DX_PI_F * 2.0f)
+		if (m_rollSumAngle >= DX_TWO_PI_F)
 		{
 			m_isStartRolling = false;
 			m_rollSumAngle = 0.0f;
+			m_rollDir = 0;
+		}
+		if (m_rollSumAngle <= -DX_TWO_PI_F)
+		{
+			m_isStartRolling = false;
+			m_rollSumAngle = 0.0f;
+			m_rollDir = 0;
 		}
 	}
 	//ローリングが1回入力されたら機体を傾ける

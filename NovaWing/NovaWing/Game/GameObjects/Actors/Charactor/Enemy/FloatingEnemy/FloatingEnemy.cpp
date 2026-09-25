@@ -27,7 +27,8 @@ FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 	std::weak_ptr<SoundManager> pSoundManager) :
 	EnemyBase(Id,camera,pPlayer,pBulletManager,health),
 	m_colSphere(std::make_shared<SphereShape>(pos, 0.0f)),
-	m_pSoundManager(pSoundManager)
+	m_pSoundManager(pSoundManager),
+	m_collider(*this, ColliderTag::Enemy)
 {
 	//位置を反映
 	SetPos(pos);

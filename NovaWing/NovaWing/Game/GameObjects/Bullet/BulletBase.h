@@ -3,6 +3,7 @@
 #include "Manager/ResourceLoader.h"
 #include "Game/GameObjects/GameObject.h"
 #include "Game/Collision/SphereShape.h"
+#include "Game/Collision/BulletCollider.h"
 
 class CameraBase;
 class BulletBase : public GameObject
@@ -13,7 +14,8 @@ public:
 		const Vector3& vel,
 		int attackPower,
 		float radius,
-		std::weak_ptr<CameraBase> pCamera
+		std::weak_ptr<CameraBase> pCamera,
+		ColliderTag tag
 	);
 	virtual ~BulletBase();
 
@@ -22,6 +24,8 @@ public:
 
 	//当たり判定用の球を取得
 	std::shared_ptr<SphereShape> GetSphere() const { return m_sphere; }
+	//当たり判定インターフェースを取得
+	ICollider& GetCollider() { return m_collider; }
 
 	//攻撃力を取得
 	const int GetAttackPower() const { return m_attackPower; }
@@ -45,5 +49,9 @@ protected:
 
 	//ヒットエフェクト再生ハンドル
 	int m_hitEffectPlayH = -1;
+
+private:
+	//当たり判定インターフェース
+	BulletCollider m_collider;
 };
 
