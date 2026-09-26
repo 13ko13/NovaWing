@@ -161,6 +161,7 @@
   <ItemGroup>
     <ClCompile Include="Game\Collision\CounterCollider.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\ItemBase.cpp" />
+    <ClCompile Include="Game\GameObjects\Bullet\ReflectedBullet.cpp" />
     <ClCompile Include="Game\GameObjects\Camera\GameCamera.cpp" />
     <ClCompile Include="Game\UI\BossHPGaugeUI.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\DisabledShootState.cpp" />
@@ -262,6 +263,7 @@
     <ClInclude Include="Game\Collision\CounterCollider.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\DamageSource.h" />
     <ClInclude Include="Game\GameObjects\Actors\ItemBase.h" />
+    <ClInclude Include="Game\GameObjects\Bullet\ReflectedBullet.h" />
     <ClInclude Include="Game\GameObjects\Camera\GameCamera.h" />
     <ClInclude Include="Game\UI\BossHPGaugeUI.h" />
     <ClInclude Include="Constants\ResourceConstants.h" />

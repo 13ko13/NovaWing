@@ -25,6 +25,9 @@ public:
 	//弾の位置を取得
 	Vector3 GetPos() const;
 
+	//参照先を取得
+	BulletBase& GetOwner() const;
+
 private:
 	//弾を参照したい
 	BulletBase& m_owner;

@@ -9,11 +9,11 @@ namespace
 }
 
 EnemyBullet::EnemyBullet(
-	const Vector3& pos,
-	const Vector3& vel,
-	const int attackPower,
-	std::weak_ptr<CameraBase> pCamera):
-	BulletBase(pos,vel,attackPower, radius,pCamera,ColliderTag::EnemyBullet)
+	const Vector3& pos, const Vector3& vel,
+	const int attackPower, std::weak_ptr<CameraBase> pCamera,
+	std::shared_ptr<EnemyBase> pShooter):
+	BulletBase(pos,vel,attackPower, radius,pCamera,ColliderTag::EnemyBullet),
+	m_pShooter(pShooter)
 {
 	//Effekseerのエフェクト再生を呼ぶ
 	m_effectPlayHandle = PlayEffekseer3DEffect(

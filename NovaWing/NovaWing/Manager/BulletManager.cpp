@@ -60,7 +60,7 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 		//敵の弾も同様に作成
 		//インスタンスを作成
 		std::shared_ptr<EnemyBullet> pBullet =
-			std::make_shared<EnemyBullet>(pos, vel, attackPower, pCamera);
+			std::make_shared<EnemyBullet>(pos, vel, attackPower, pCamera,pTarget.lock());
 
 		//初期化
 		pBullet->Init();

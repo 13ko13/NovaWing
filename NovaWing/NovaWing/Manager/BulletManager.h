@@ -29,7 +29,8 @@ public:
 	};
 
 	//別クラスから種類を指定してもらってその弾を作成する
-	//ターゲットはデフォルトではNull,チャージショットの時のみターゲットを設定する
+	//ターゲットはデフォルトではNull,チャージショットの時はホーミング先、
+	//敵弾の時は発射元の敵として使う
 	void CreateBullet(const BulletType bulletType, const Vector3& pos,
 	const Vector3& vel, const int attackPower, std::weak_ptr<CameraBase> pCamera,
 		std::weak_ptr<EnemyBase> pTarget = std::weak_ptr<EnemyBase>());

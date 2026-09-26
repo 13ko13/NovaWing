@@ -182,7 +182,8 @@ void WormEnemy::Update()
 			//弾管理者に発射を依頼
 			pBulletManager->CreateBullet(
 				BulletManager::BulletType::EnemyBullet,//敵の弾
-				shootPos, shootVel, bullet_power,m_pCamera);//発射位置と速度と攻撃力
+				shootPos, shootVel, bullet_power,m_pCamera,
+				std::static_pointer_cast<EnemyBase>(shared_from_this()));//発射位置と速度と攻撃力
 
 			//発射音を鳴らす
 			m_pSoundManager.lock()->Play(SoundManager::SoundType::EnemyShoot);

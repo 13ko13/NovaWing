@@ -87,7 +87,8 @@ void ActiveState::Update()
 		//弾管理者に発射を依頼
 		pBulletManager->CreateBullet(
 			BulletManager::BulletType::EnemyBullet,//敵の弾
-			shootPos, shootVel, bullet_power, pCamera);//発射位置と速度と攻撃力
+			shootPos, shootVel, bullet_power, pCamera,
+			std::static_pointer_cast<EnemyBase>(pEnemy));//発射位置と速度と攻撃力
 
 		//発射音を鳴らす
 		pEnemy->GetSoundManager().lock()->Play(SoundManager::SoundType::EnemyShoot);

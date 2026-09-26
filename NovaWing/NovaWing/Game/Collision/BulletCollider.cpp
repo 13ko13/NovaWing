@@ -32,3 +32,8 @@ Vector3 BulletCollider::GetPos() const
 {
 	return m_owner.GetPos();
 }
+
+BulletBase& BulletCollider::GetOwner() const
+{
+	return m_owner;
+}
