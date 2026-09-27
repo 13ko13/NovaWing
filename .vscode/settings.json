@@ -5,6 +5,43 @@
     "editor.formatOnPaste": false,
     "editor.formatOnSave": false,
     "editor.formatOnType": false,
+    // 既存ソースは UTF-8(BOM付き) が中心だが、一部 .hlsl が Shift-JIS なので自動判定させる。
+    // 新規ファイルは MSVC が文字コードを誤認しないよう BOM 付きで保存する (Visual Studio と同じ)。
+    "files.autoGuessEncoding": true,
+    "files.encoding": "utf8bom",
+    // Visual Studio 2019/2022 の Dark 配色 (C/C++ Themes 拡張 ms-vscode.cpptools-themes が必要)。
+    // テーマ側で VS とずれている「文字列」「列挙型・列挙子」だけ VS の既定色に合わせて上書きする。
+    "workbench.colorTheme": "Visual Studio Dark - C++",
+    "editor.tokenColorCustomizations": {
+        "[Visual Studio Dark - C++]": {
+            "textMateRules": [
+                {
+                    "scope": [
+                        "string",
+                        "meta.preprocessor.string"
+                    ],
+                    "settings": {
+                        "foreground": "#D69D85"
+                    }
+                },
+                {
+                    "scope": "variable.other.enummember",
+                    "settings": {
+                        "foreground": "#B8D7A3"
+                    }
+                }
+            ]
+        }
+    },
+    "editor.semanticTokenColorCustomizations": {
+        "[Visual Studio Dark - C++]": {
+            "rules": {
+                "stringLiteral": "#D69D85",
+                "enum": "#B8D7A3",
+                "enumMember": "#B8D7A3"
+            }
+        }
+    },
     "C_Cpp.clang_format_style": "file",
     "C_Cpp.formatting": "clangFormat",
     "[cpp]": {

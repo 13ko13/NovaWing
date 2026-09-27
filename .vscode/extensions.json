@@ -1,6 +1,8 @@
 {
     "recommendations": [
         "editorconfig.editorconfig",
-        "ms-vscode.cpptools"
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-themes",
+        "timgjones.hlsltools"
     ]
 }
