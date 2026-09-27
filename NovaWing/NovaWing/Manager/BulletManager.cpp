@@ -88,3 +88,18 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 	}
 	}
 }
+
+void BulletManager::CreateReflectedBullet(const ReflectedBullet::ReflectBulletData& data)
+{
+	//インスタンスを作成
+	//見た目は敵の弾のままだが、扱いはプレイヤー側の弾とする
+	std::shared_ptr<ReflectedBullet> pBullet =
+		std::make_shared<ReflectedBullet>(data);
+
+	//初期化
+	pBullet->Init();
+
+	//反射弾用の配列に格納
+	m_pReflectedBullets.push_back(pBullet);
+	m_pAllBullets.push_back(pBullet);
+}

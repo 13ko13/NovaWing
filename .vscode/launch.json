@@ -16,7 +16,7 @@
             "preLaunchTask": "MSBuild: Debug x64"
         },
         {
-            "name": "NovaWing (Release x64, no build)",
+            "name": "NovaWing (Release x64)",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}\\NovaWing\\x64\\Release\\NovaWing.exe",
@@ -24,7 +24,8 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}\\NovaWing\\NovaWing",
             "environment": [],
-            "console": "internalConsole"
+            "console": "internalConsole",
+            "preLaunchTask": "MSBuild: Release x64"
         }
     ]
 }

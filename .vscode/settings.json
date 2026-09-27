@@ -42,10 +42,12 @@
             }
         }
     },
-    // Visual Studio 側は「ClangFormat サポート」が有効で、リポジトリ直下の .clang-format で整形している
-    // (この場合 VS は NovaWing/.editorconfig の cpp_* 設定を使わない)。VS Code も同じ .clang-format を使う。
+    // Visual Studio は入力中 (; や } を打ったとき) は自前の整形エンジンで NovaWing/.editorconfig の cpp_* 設定を使い、
+    // clang-format (.clang-format) は Ctrl+K Ctrl+D などの手動整形のときだけ使う設定になっている。
+    // VS Code はどちらか一方しか選べないため、普段の入力中の動きを合わせて Visual C++ の整形エンジン (vcFormat) にする。
+    // (そのため VS Code の Ctrl+K Ctrl+D も .editorconfig 基準になり、VS の手動整形とは細部が違うことがある)
     "C_Cpp.clang_format_style": "file",
-    "C_Cpp.formatting": "clangFormat",
+    "C_Cpp.formatting": "vcFormat",
     // タブ幅4・インデント4・タブ文字は VS の [テキストエディター > C/C++ > タブ] と同じ。
     // formatOnType は VS の「; や } の入力時に自動で整形する」に合わせて有効にしている。
     "[cpp]": {

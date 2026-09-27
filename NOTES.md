@@ -720,11 +720,36 @@
 - ハマった点: `GetCollider()`を`std::unique_ptr<ICollider>`で返そうとした（コピー不可＋所有権が移ってしまう）→参照で「貸す」形に。`.cpp`側の定義に`const`が残り宣言と不一致。`UpdateShape`の定義漏れ（LNK2019になるところ）。
 
 **保留中のタスク（ユーザー判断で後回し）:**
-1. **敵弾の跳ね返し**: 方針は「反射で飛び出し、その後ゆるく敵に追従する」。最初の向きはカウンター球の中心→弾の位置を法線として`v - 2×Dot(v,n)×n`で反射。追従は`ChargeBullet`のホーミング（`BulletManager::CreateBullet`に`pTarget`を渡す）を流用し、チャージ弾より弱い追従率を使えるようにする。**未決定: 追従先を「撃ってきた敵」にするか「一番近い/レティクルに近い敵」にするか**（前者は敵弾に撃った敵を持たせる仕組みが必要）。追従の強さは実機で調整。
 2. **ビームの跳ね返し**: ビームは弾ではなくステートが作る判定球の列なので、本当に反射させると重い。現実的な案は「ローリング中はビームのダメージを無効化し、ボスに固定ダメージ（跳ね返した扱い）」。
 3. `CollisionManager.cpp`の`hit_pairs`にある`{BossBeam, Counter}`は、今は双方の`OnCollision`が空でビームも消えないため何も起きない（ビームはそのまま本体に当たる）。2に着手するまでは不要。
 4. `Player.h`の`GetCounterCollider()`のコメントが「カウンター用の球を取得」になっている（正しくはコライダー）。
 5. 各クラスのコライダーのメンバ変数に付いているコメント「当たり判定インターフェース」が不正確（中身は`ICollider`を実装した具体クラスで、インターフェースそのものではない）。`Rock.h`/`BulletBase.h`/`FloatingEnemy.h`/`WormEnemy.h`/`BossEnemy.h`に残っている。`GetCollider()`側の「当たり判定インターフェースを取得」は戻り値が`ICollider&`なので正しい。
+
+### 進捗（2026-09-27・敵弾の跳ね返し「ReflectedBullet」実装、完了）
+
+**カウンターで敵弾を跳ね返すと、見た目は敵弾のまま発射元の敵に完全ホーミングする弾に変わる機能を実装・クリーンビルド確認済み（実機動作もユーザー確認済み、良好）。**
+
+- 追従先は「撃ってきた敵」に決定。`BulletBase`ではなく`EnemyBullet`だけに`std::weak_ptr<EnemyBase> m_pShooter`を追加（`BulletBase`を汚さない設計、コンストラクタで受け取り`GetShooter()`で公開）。
+- `WormEnemy`/`FloatingEnemy::ActiveState`の弾生成時に`std::static_pointer_cast<EnemyBase>(shared_from_this())`（または`pEnemy`）を発射元として渡すよう変更。`BulletManager::CreateBullet`の既存`pTarget`引数（元々ChargeBullet専用）を敵弾生成にも流用。
+- `ReflectedBullet`（新規、`BulletBase`派生）: `ChargeBullet`と同じLerpホーミングだが`homingStrength`を外部から指定できる汎用クラス。タグは`PlayerBullet`（敵にダメージが通る）。コンストラクタ引数は`ReflectBulletData`という値型の構造体にまとめた（**参照メンバは危険なので値型にした教訓を検討済み**：一時オブジェクトを直接渡すと構造体生成時点でダングリング参照になるため）。
+- `BulletManager`に`m_pReflectedBullets`配列と`CreateReflectedBullet()`を新設（既存`CreateBullet`とは別メソッド。理由: `ReflectedBullet`だけ`homingStrength`という他の弾にない情報を持つため、無理に共通引数に混ぜるとシグネチャが歪む）。
+- `BulletCollider`に`GetOwner()`（`BulletBase&`を返す）を追加。
+- `CollisionManager::OnHit`の冒頭で`{Counter, EnemyBullet}`の組み合わせを検知したら`ReflectEnemyBullet()`を呼んで`return`（二重`OnCollision`呼び出しのバグを`return`忘れで一度発生させ、指摘されて修正）。`ReflectEnemyBullet`内で`dynamic_cast<EnemyBullet*>`し、発射元・現在位置・元の弾速を使って反射弾を生成、`homingStrength = 1.0f`（完全追従）で`CreateReflectedBullet`を呼ぶ。
+- **ユーザーの好み（今後のコードレビューでも意識する）**: 三項演算子や「参照変数への再代入に見える書き方」を避け、`if`/`else`とポインタで素直に書くことを好む。`bool`の条件式をワンライナーでまとめる書き方より、`if`/`else`で明示的に代入する書き方の方が読みやすいとのことで、後者を採用した。
+
+**次回やること（ユーザー明言のタスク）:**
+1. 反射弾（`ReflectedBullet`）にちょっとしたエフェクトを付けたい。現状は`ResourceLoader::EffectID::EnemyBullet`（見た目は敵弾のまま）を流用しているだけで、反射専用の見た目・エフェクトは未実装。
+
+### 保留タスク（2026-09-27相談・未着手）: ほぼ全エフェクトが見づらい問題
+
+**原因はユーザーが特定済み: エフェクトを加算合成(Additive Blend)で作っているため、背景が明るい/近い色だと確実に馴染んで埋もれる。** Effekseer側のブレンド設定だけではこの性質自体はどうにもならない（加算特有の「重なるほど輝く」表現を保ったまま視認性だけ上げたい）ので、シェーダー側での対処方法を相談された。
+
+**提示した方向性（まだどれで進めるか未決定、実装着手前）:**
+1. エフェクト用のレンダーターゲットを分離し、最終合成時にアウトライン/コントラスト強化を後処理として掛ける（要望の「アウトライン」に一番近い）。
+2. 加算前に、エフェクトの明るさに応じて背景色を一時的に暗くする(にじみ防止のダークニング)。
+3. Effekseerのノード側でフレネル的な縁光効果を追加する(シェーダー改修なしで近い効果を狙える可能性、要検証)。
+
+**次回再開時にやること:** どの方向性で進めるかユーザーと相談してから着手する。現状の描画パイプライン（オフスクリーン構成、Effekseer3D描画のタイミングなど）を先に洗い出す必要がある。
 
 ### 進捗（2026-09-23〜24・Debug/ReleaseでUIの大きさが異なるバグを修正、完了）
 
@@ -798,4 +823,5 @@
 
 - VS 2026の実設定(`%LOCALAPPDATA%\Microsoft\VisualStudio\18.0_*\Settings\CurrentSettings.vssettings`)を確認: C/C++はタブ幅4・インデント4・タブ文字・スマートインデントで、VS Code側と一致済み。
 - VSは「ClangFormatサポート」が有効(既定)→ リポジトリ直下の`.clang-format`で整形しており、`NovaWing/.editorconfig`の`cpp_*`書式設定は使われていない(Microsoftのドキュメントでも「ClangFormat有効時は個別設定を無視」)。VS Codeも同じ`.clang-format`を使うので整形ルールは同じ。
-- 違いは入力中の自動整形だけ: VSは`;`や`}`の入力時に整形する → `settings.json`の`[cpp]`/`[c]`で`editor.formatOnType`を有効化(C/C++拡張は`;` `}` 改行で整形)。貼り付け時の整形(VSの設定値`AutoFormatOnPaste2=1`)は意味を確定できず、オフのまま。
+- 違いは入力中の自動整形だけ: VSは`;`や`}`の入力時に整形する → `settings.json`の`[cpp]`/`[c]`で`editor.formatOnType`を有効化(C/C++拡張は`;` `}` 改行で整形)。貼り付け時の整形(VSの設定値`AutoFormatOnPaste2=1`)は意味を確定できず、オフのまま。- **訂正(同日):** VSは入力中の整形にclang-formatを使っていなかった(`ClangFormatExecution=1`は「手動の整形コマンドのときだけclang-format」の意味だった)。VS Codeで`if(...) return`の後に`;`を打つと、clang-format(Microsoftスタイル)が`return;`を次の行に分けてしまい、VSと違う動きになった。VSは入力中は自前の整形エンジン+`NovaWing/.editorconfig`で、その行を整えるだけ。
+  → `C_Cpp.formatting`を`vcFormat`(Visual C++の整形エンジン。`.editorconfig`の`cpp_*`設定を使う)に変更。代わりにVS CodeのCtrl+K Ctrl+Dも`.editorconfig`基準になり、VSの手動整形(`.clang-format`基準)とは細部が違うことがある(C/C++拡張は整形エンジンを1つしか選べないため)。- `launch.json`のRelease構成を「NovaWing (Release x64)」に改名し、`preLaunchTask`で起動前に`MSBuild: Release x64`を実行するようにした(Debugと同じくF5でビルド→起動)。Releaseビルドが.slnx経由で通ることを確認。

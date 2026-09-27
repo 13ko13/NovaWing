@@ -16,6 +16,8 @@
 #include "Game/Collision/EnemyCollider.h"
 #include "Game/Collision/RockCollider.h"
 #include "Game/Collision/BossBeamCollider.h"
+#include "Game/GameObjects/Bullet/ReflectedBullet.h"
+#include "Game/Collision/BulletCollider.h"
 
 namespace
 {
@@ -85,6 +87,9 @@ namespace
 			return false;
 		}
 	}
+
+	//反射弾をもとの弾のどれぐらいの速度で反射させるか
+	constexpr float reflect_bullet_speed_rate = 5.5f;
 }
 
 CollisionManager::CollisionManager(
@@ -159,6 +164,13 @@ void CollisionManager::Update()
 		keepAlive.push_back(pBullet);
 		addCollider(pBullet->GetCollider());
 	}
+	for (const std::weak_ptr<ReflectedBullet>& weakBullet : pBulletManager->GetReflectedBullets())
+	{
+		std::shared_ptr<ReflectedBullet> pBullet = weakBullet.lock();
+		if (!pBullet) continue;
+		keepAlive.push_back(pBullet);
+		addCollider(pBullet->GetCollider());
+	}
 
 	//敵(1体が複数のコライダーを持つことがある)
 	for (std::weak_ptr<EnemyBase>& weakEnemy : m_pEnemies)
@@ -225,6 +237,33 @@ void CollisionManager::Update()
 
 void CollisionManager::OnHit(ICollider& a, ICollider& b)
 {
+	//カウンターが敵弾を跳ね返した場合は専用処理を行う
+	bool isCounterVsEnemyBullet;
+	if((a.GetTag() == ColliderTag::Counter && b.GetTag() == ColliderTag::EnemyBullet) ||
+	(a.GetTag() == ColliderTag::EnemyBullet && b.GetTag() == ColliderTag::Counter))
+	{
+		isCounterVsEnemyBullet = true;
+	}
+	else isCounterVsEnemyBullet = false;
+
+	//カウンター成功の場合
+	if(isCounterVsEnemyBullet)
+	{
+		//タグが敵弾の方のコライダーを保持しておく
+		ICollider* pBulletCollider = &a;
+		if(a.GetTag() != ColliderTag::EnemyBullet)
+		{
+			pBulletCollider = &b;
+		}
+		//敵弾反射の関数にそのコライダーを渡す
+		ReflectEnemyBullet(static_cast<BulletCollider&>(*pBulletCollider));
+
+		//お互いの反応はそれぞれのコライダーに任せる
+		a.OnCollision(b);
+		b.OnCollision(a);
+		return;
+	}
+
 	//判定の組み合わせ上、プレイヤーが関わる衝突はすべてプレイヤーの被弾
 	bool isPlayerHit = a.GetTag() == ColliderTag::Player || b.GetTag() == ColliderTag::Player;
 
@@ -254,4 +293,34 @@ void CollisionManager::OnHit(ICollider& a, ICollider& b)
 		//カメラを揺らす
 		m_pCamera.lock()->OnShake(shake_power, shake_frame);
 	}
+}
+
+void CollisionManager::ReflectEnemyBullet(BulletCollider& bulletCollider)
+{
+	//実体は敵弾なのでキャストする
+	EnemyBullet* pEnemyBullet = dynamic_cast<EnemyBullet*>(&bulletCollider.GetOwner());
+	//仮に敵弾じゃない場合は処理を行わない
+	if (pEnemyBullet == nullptr) return;
+
+	//発射元の敵を取得できなければ反射しない
+	std::shared_ptr<EnemyBase> pShooter = pEnemyBullet->GetShooter().lock();
+	if (pShooter == nullptr) return;
+
+	//現在位置から発射元の敵への方向を反射方向とする
+	Vector3 pos = pEnemyBullet->GetPos();
+	Vector3 toShooterDir = (pShooter->GetPos() - pos).Normalized();
+	//元の弾より速い速度で反射
+	float speed = pEnemyBullet->GetVel().Length();
+
+	//反射弾用の情報を入れる
+	ReflectedBullet::ReflectBulletData data;
+	data.pos = pos;
+	data.vel = toShooterDir * speed * reflect_bullet_speed_rate;
+	data.attackPower = pEnemyBullet->GetAttackPower();
+	data.pTarget = pShooter;
+	data.homingStrength = 1.0f;
+	data.pCamera = m_pCamera;
+
+	//弾の管理者に反射用の弾を生み出させる
+	m_pBulletManager.lock()->CreateReflectedBullet(data);
 }

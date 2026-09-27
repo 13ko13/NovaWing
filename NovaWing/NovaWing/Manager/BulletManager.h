@@ -2,10 +2,12 @@
 #include <vector>
 #include <memory>
 #include "Manager/ResourceLoader.h"
+#include "Game/GameObjects/Bullet/ReflectedBullet.h"
 
 class PlayerBullet;
 class EnemyBullet;
 class ChargeBullet;
+class ReflectedBullet;
 class GameObject;
 struct Vector3;
 class BulletBase;
@@ -35,16 +37,30 @@ public:
 	const Vector3& vel, const int attackPower, std::weak_ptr<CameraBase> pCamera,
 		std::weak_ptr<EnemyBase> pTarget = std::weak_ptr<EnemyBase>());
 
+	//他の弾には必要ない情報がいくつかあるので
+	//反射弾の作成だけは別で行う
+	void CreateReflectedBullet(
+		const ReflectedBullet::ReflectBulletData& data
+	);
+
 	//プレイヤー弾の配列のゲッター
-	const std::vector<std::weak_ptr<PlayerBullet>>& GetPlayerBullets() const { return m_pPlayerBullets; }
+	const std::vector<std::weak_ptr<PlayerBullet>>& GetPlayerBullets() const 
+	{ return m_pPlayerBullets; }
 	//チャージ弾の配列のゲッター
-	const std::vector<std::weak_ptr<ChargeBullet>>& GetChargeBullets() const { return m_pChargeBullets; }
+	const std::vector<std::weak_ptr<ChargeBullet>>& GetChargeBullets() const
+	{ return m_pChargeBullets; }
 	//敵弾の配列のゲッター
-	const std::vector<std::weak_ptr<EnemyBullet>>& GetEnemyBullets() const { return m_pEnemyBullets; }
+	const std::vector<std::weak_ptr<EnemyBullet>>& GetEnemyBullets() const 
+	{ return m_pEnemyBullets; }
+	//反射弾の配列のゲッター
+	const std::vector<std::weak_ptr<ReflectedBullet>>& GetReflectedBullets() const
+	{ return m_pReflectedBullets; }
 
 private:
 	//敵弾の配列
 	std::vector<std::weak_ptr<EnemyBullet>> m_pEnemyBullets;
+	//反射弾の配列のゲッター
+	std::vector<std::weak_ptr<ReflectedBullet>> m_pReflectedBullets;
 	//プレイヤーの弾の配列
 	std::vector<std::weak_ptr<PlayerBullet>> m_pPlayerBullets;
 	//チャージ弾の配列

@@ -12,6 +12,7 @@ class Rock;
 class GameCamera;
 class BossEnemy;
 class ICollider;
+class BulletCollider;
 class CollisionManager
 {
 public:
@@ -30,8 +31,10 @@ public:
 private:
 	//2つのコライダーが当たった時の処理
 	void OnHit(ICollider& a, ICollider& b);
+	//敵弾を反射するときの処理
+	void ReflectEnemyBullet(BulletCollider& bulletCollider);
 
-private:
+  private:
 	//プレイヤー
 	std::weak_ptr<Player> m_pPlayer;
 	//カメラ
