@@ -783,3 +783,9 @@
 - 公式拡張「C/C++ Themes」(`ms-vscode.cpptools-themes`、マーケットプレイスで実在確認済み・インストール済み)を`extensions.json`の推奨に追加し、`settings.json`で`"workbench.colorTheme": "Visual Studio Dark - C++"`(=VS2019/2022 Dark相当)をワークスペース既定にした。
 - テーマ定義を確認し、VSとずれていた「文字列(#CE9178→#D69D85)」「列挙型・列挙子(→#B8D7A3)」だけを、このテーマ限定で`tokenColorCustomizations`/`semanticTokenColorCustomizations`で上書き。
 - 型・関数・引数・メンバー・ローカル変数などの色分けはC/C++拡張のセマンティックハイライト頼み(IntelliSenseの解析が終わるまでは大まかな色)。
+
+### 進捗（2026-09-27・ショートカットをVisual Studio寄りに）
+
+- 公式拡張「Visual Studio Keymap」(`ms-vscode.vs-keybindings` v0.2.1、マーケットプレイスで実在確認)を`extensions.json`の推奨に追加(未インストール)。中身を確認したところ、Ctrl+W(タブを閉じる→選択範囲の拡張)・Ctrl+B(サイドバー→関数ブレークポイント)・Ctrl+,(設定→ファイル検索)・Ctrl+Shift+S(名前を付けて保存→すべて保存)・Ctrl+L/Ctrl+Shift+L・Ctrl+Shift+G などVS Code標準を上書きする。コピー/貼り付け/Ctrl+S/Ctrl+Fは触らない。
+- **VS Codeはワークスペースの`.vscode/keybindings.json`を読まない(キーバインドはユーザー単位のみ)**。`.vscode/keybindings.json`は共有用テンプレートとして作成し、`.gitignore`に例外を追加。使うにはユーザーのkeybindings.jsonへ貼り付けが必要。
+- 割り当て: Ctrl+Shift+Alt+C=クラスの追加 / Ctrl+Shift+Alt+D=削除 / Ctrl+Shift+Alt+R=リネーム / Ctrl+Break=ビルド中止 / Ctrl+Shift+F10=次のステートメントの設定。VS Code 1.138の既定キー一覧とKeymap拡張の両方と突き合わせて衝突なしを確認。ビルドのCtrl+Shift+Bは既定のまま(既定ビルドタスク=MSBuild: Debug x64)。

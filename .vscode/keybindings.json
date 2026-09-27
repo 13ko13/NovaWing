@@ -1,0 +1,41 @@
+// NovaWing 用のキーバインド (Visual Studio 寄り)
+//
+// ※ VS Code はワークスペースの .vscode/keybindings.json を読み込まない (キーバインドはユーザー単位のみ)。
+//    このファイルは共有用のテンプレート。中身を「ユーザーの keybindings.json」に貼り付けて使う:
+//    Ctrl+Shift+P →「基本設定: キーボード ショートカットを開く (JSON)」
+//    (%APPDATA%\Code\User\keybindings.json)
+//
+// ・VS Code 標準 / Visual Studio Keymap 拡張 (ms-vscode.vs-keybindings) のどちらとも衝突しないキーを選んでいる
+// ・タスク名で呼び出すので、tasks.json のラベルを変えたらここも合わせること
+// ・ユーザー単位なので他のフォルダでも有効。該当タスクが無いフォルダではタスク選択画面が出るだけで害はない
+[
+    // クラスの追加 (Visual Studio の Shift+Alt+C に Ctrl を足したもの。Shift+Alt+C は VS Code では「パスのコピー」)
+    {
+        "key": "ctrl+shift+alt+c",
+        "command": "workbench.action.tasks.runTask",
+        "args": "NovaWing: クラスの追加"
+    },
+    // クラスの削除 (Delete)
+    {
+        "key": "ctrl+shift+alt+d",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Delete C++ Class"
+    },
+    // クラスのファイル名変更 (Rename)
+    {
+        "key": "ctrl+shift+alt+r",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Rename C++ Class (filename only)"
+    },
+    // ビルドの取り消し (Visual Studio の Ctrl+Break)
+    {
+        "key": "ctrl+break",
+        "command": "workbench.action.tasks.terminate"
+    },
+    // 次のステートメントの設定 (Visual Studio の Ctrl+Shift+F10)
+    {
+        "key": "ctrl+shift+f10",
+        "command": "debug.jumpToCursor",
+        "when": "inDebugMode && debugState == 'stopped' && editorTextFocus"
+    }
+]

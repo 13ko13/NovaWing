@@ -3,6 +3,7 @@
         "editorconfig.editorconfig",
         "ms-vscode.cpptools",
         "ms-vscode.cpptools-themes",
+        "ms-vscode.vs-keybindings",
         "timgjones.hlsltools"
     ]
 }
