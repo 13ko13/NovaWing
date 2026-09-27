@@ -20,6 +20,16 @@
                 "kind": "build",
                 "isDefault": true
             },
+            // options.statusbar は Tasks 拡張 (actboy168.tasks) 用。ステータスバーのボタンの見た目を決める
+            "options": {
+                "statusbar": {
+                    "label": "$(tools) ビルド",
+                    "detail": "Debug x64 をビルド (Ctrl+Shift+B)",
+                    "running": {
+                        "label": "$(sync~spin) ビルド中"
+                    }
+                }
+            },
             "problemMatcher": "$msCompile",
             "presentation": {
                 "reveal": "always",
@@ -41,6 +51,11 @@
                 "/v:minimal"
             ],
             "group": "build",
+            "options": {
+                "statusbar": {
+                    "hide": true
+                }
+            },
             "problemMatcher": "$msCompile",
             "presentation": {
                 "reveal": "always",
@@ -60,6 +75,11 @@
                 "/nologo"
             ],
             "group": "build",
+            "options": {
+                "statusbar": {
+                    "hide": true
+                }
+            },
             "problemMatcher": []
         },
         {
@@ -82,6 +102,12 @@
                 "-BaseHeader",
                 "${input:newClassBaseHeader}"
             ],
+            "options": {
+                "statusbar": {
+                    "label": "$(add) クラスの追加",
+                    "detail": ".h/.cpp を作って vcxproj に登録 (Ctrl+Shift+Alt+C)"
+                }
+            },
             "problemMatcher": [],
             "presentation": {
                 "reveal": "always",
@@ -105,6 +131,14 @@
                 "-CurrentFile",
                 "${file}"
             ],
+            // 今開いているファイルが対象になるので、.h/.cpp を開いているときだけボタンを出す
+            "options": {
+                "statusbar": {
+                    "label": "$(trash) クラスの削除",
+                    "detail": "開いている .h/.cpp のクラスを削除 (Ctrl+Shift+Alt+D)",
+                    "filePattern": "\\.(h|cpp)$"
+                }
+            },
             "problemMatcher": [],
             "presentation": {
                 "reveal": "always",
@@ -131,6 +165,13 @@
                 "-CurrentFile",
                 "${file}"
             ],
+            "options": {
+                "statusbar": {
+                    "label": "$(edit) ファイル名の変更",
+                    "detail": "開いている .h/.cpp のファイル名を変更 (Ctrl+Shift+Alt+R)",
+                    "filePattern": "\\.(h|cpp)$"
+                }
+            },
             "problemMatcher": [],
             "presentation": {
                 "reveal": "always",
