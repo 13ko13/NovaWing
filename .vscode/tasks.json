@@ -1,28 +1,179 @@
 {
+    "version": "2.0.0",
+    // vcxproj単体をビルドすると $(SolutionDir) がプロジェクトフォルダになり DxLib_h が見つからないため、
+    // Visual Studioと同じく .slnx 経由でビルドする (出力: NovaWing\x64\<Config>\NovaWing.exe)
     "tasks": [
         {
-            "type": "cppbuild",
-            "label": "C/C++: cl.exe アクティブなファイルのビルド",
-            "command": "cl.exe",
+            "label": "MSBuild: Debug x64",
+            "type": "process",
+            "command": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe",
             "args": [
-                "/Zi",
-                "/EHsc",
+                "${workspaceFolder}\\NovaWing\\NovaWing.slnx",
+                "/p:Configuration=Debug",
+                "/p:Platform=x64",
+                "/p:GenerateFullPaths=true",
+                "/m",
                 "/nologo",
-                "/Fe${fileDirname}\\${fileBasenameNoExtension}.exe",
-                "${file}"
-            ],
-            "options": {
-                "cwd": "${fileDirname}"
-            },
-            "problemMatcher": [
-                "$msCompile"
+                "/v:minimal"
             ],
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "デバッガーによって生成されたタスク。"
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        },
+        {
+            "label": "MSBuild: Release x64",
+            "type": "process",
+            "command": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe",
+            "args": [
+                "${workspaceFolder}\\NovaWing\\NovaWing.slnx",
+                "/p:Configuration=Release",
+                "/p:Platform=x64",
+                "/p:GenerateFullPaths=true",
+                "/m",
+                "/nologo",
+                "/v:minimal"
+            ],
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        },
+        {
+            "label": "MSBuild: Clean x64",
+            "type": "process",
+            "command": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe",
+            "args": [
+                "${workspaceFolder}\\NovaWing\\NovaWing.slnx",
+                "/t:Clean",
+                "/p:Configuration=Debug",
+                "/p:Platform=x64",
+                "/nologo"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            // Visual Studio の「クラスの追加」相当。.h/.cpp を生成し vcxproj/.filters に登録する
+            "label": "NovaWing: クラスの追加",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}\\.vscode\\scripts\\New-GameClass.ps1",
+                "-ClassName",
+                "${input:newClassName}",
+                "-BaseClass",
+                "${input:newClassBase}",
+                "-Folder",
+                "${input:newClassFolder}",
+                "-BaseHeader",
+                "${input:newClassBaseHeader}"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        },
+        {
+            // .h/.cpp を vcxproj/.filters から外してごみ箱へ。#include されていたら中断。実行前に y/N で確認する
+            "label": "Delete C++ Class",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}\\.vscode\\scripts\\Remove-GameClass.ps1",
+                "-Path",
+                "${input:targetClassPath}",
+                "-CurrentFile",
+                "${file}"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "clear": true
+            }
+        },
+        {
+            // .h/.cpp のファイル名だけを変更し vcxproj/.filters を更新。クラス名や #include 文は変えない
+            "label": "Rename C++ Class (filename only)",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}\\.vscode\\scripts\\Rename-GameClass.ps1",
+                "-Path",
+                "${input:targetClassPath}",
+                "-NewName",
+                "${input:renameClassNewName}",
+                "-CurrentFile",
+                "${file}"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "clear": true
+            }
         }
     ],
-    "version": "2.0.0"
+    "inputs": [
+        {
+            "id": "newClassName",
+            "type": "promptString",
+            "description": "クラス名 (例: ShieldEnemy)"
+        },
+        {
+            "id": "newClassBase",
+            "type": "promptString",
+            "description": "基底クラス名 (なければ空のままEnter)",
+            "default": ""
+        },
+        {
+            "id": "newClassFolder",
+            "type": "promptString",
+            "description": "配置先フォルダ (NovaWing\\NovaWing からの相対パス。例: Game/GameObjects/Actors/Charactor/Enemy)",
+            "default": "Game/"
+        },
+        {
+            "id": "newClassBaseHeader",
+            "type": "promptString",
+            "description": "基底クラスのヘッダー (例: Game/UI/UIBase.h)。空なら「基底クラス名.h」を自動検索",
+            "default": ""
+        },
+        {
+            "id": "targetClassPath",
+            "type": "promptString",
+            "description": "対象クラスの .h か .cpp (例: Game/UI/ReticleUI.h)。空のままEnterで今開いているファイル",
+            "default": ""
+        },
+        {
+            "id": "renameClassNewName",
+            "type": "promptString",
+            "description": "新しいファイル名 (拡張子なし。.h/.cpp 両方に使う)"
+        }
+    ]
 }

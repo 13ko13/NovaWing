@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    // exe は $(SolutionDir)x64\<Config> に出力される。
+    // cwd は Visual Studio の既定 (プロジェクトフォルダ) に合わせる。Data\ と *.pso/*.vso がここにあり、相対パスで読み込むため。
+    "configurations": [
+        {
+            "name": "NovaWing (Debug x64)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}\\NovaWing\\x64\\Debug\\NovaWing.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}\\NovaWing\\NovaWing",
+            "environment": [],
+            "console": "internalConsole",
+            "preLaunchTask": "MSBuild: Debug x64"
+        },
+        {
+            "name": "NovaWing (Release x64, no build)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}\\NovaWing\\x64\\Release\\NovaWing.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}\\NovaWing\\NovaWing",
+            "environment": [],
+            "console": "internalConsole"
+        }
+    ]
+}

@@ -746,3 +746,40 @@
 1. Debug構成・Release構成それぞれで実際にゲームを起動し、タイトル/クリア/ゲームオーバー/ポーズ画面のUIサイズが一致しているか目視確認する。
 2. もし他の画面(ゲームプレイ中のUI等)でも同様のサイズ差に気づいた場合、`GaugeUIBase`以外にまだ見つかっていない`scale`定数の使用箇所がないか再度洗い出す。
 4. 左回転(`m_pushLeftRollFrame`)側は今回まだ手をつけていない。右回転のロジックが固まってから同じパターンで実装する。
+
+### 進捗（2026-09-27・VS Code単体でビルド/実行/デバッグできるよう`.vscode/`を整備）
+
+**見つかった問題と修正（`.vscode/*.json`のみ変更、ソースは未変更）:**
+- `tasks.json`: vcxproj単体をビルドすると`$(SolutionDir)`がプロジェクトフォルダになり`DxLib_h`が見つからない → **`NovaWing\NovaWing.slnx`経由でビルド**するよう変更。`/p:GenerateFullPaths=true`を追加（問題パネルのエラーからファイルに飛べる）。
+- `launch.json`: exeの実際の出力先は`NovaWing\x64\Debug\NovaWing.exe`（`NovaWing\NovaWing\x64\Debug`は.objの中間フォルダ）→ `program`を修正。`cwd`はVSの既定と同じ**プロジェクトフォルダ`NovaWing\NovaWing`**に変更（`Data/...`と`*.pso/*.vso`を相対パスで読むため）。Release構成も同様に修正。
+- `c_cpp_properties.json`: include pathは全`#include`を確認して過不足なし（vcxprojの3パスと一致）。defineをvcxprojのDebug|x64に合わせ（`WIN32`を削除）、`/permissive-`・`/MTd`を追加。Release x64構成も追加（VS Codeの右下で切り替え）。compile_commands.jsonは全ファイル同一フラグのため不要と判断。
+- `settings.json`: 一部`.hlsl`（`DamagePS.hlsl`/`SkinnedLightingVS.hlsl`等）がShift-JISのため`files.autoGuessEncoding`を有効化。新規ファイルはBOM付きUTF-8で保存。
+- `extensions.json`: HLSL Tools（`timgjones.hlsltools`）を推奨に追加。
+- DxLib/Effekseerは静的リンクでDLL不要。コピー処理は不要。
+
+**検証:** タスクと同じコマンドでビルド成功（LNK4099はEffekseerのpdbが無いだけで無害）、launch.jsonと同じcwdで起動し10秒動作・`Log.txt`にエラーなしを確認。**VS CodeでF5→ブレークポイントで止まるかは未確認（手動で確認が必要）。**
+
+### 進捗（2026-09-27・VS Codeに「クラスの追加」タスクを作成）
+
+- `.vscode/scripts/New-GameClass.ps1` を作成。クラス名・基底クラス名(任意)・配置フォルダ・基底ヘッダー(任意、空なら`基底名.h`を自動検索)から`.h/.cpp`雛形(BOM付きUTF-8/CRLF/タブ)を生成し、`NovaWing.vcxproj`と`.vcxproj.filters`に登録する。
+- 登録はXmlDocument(PreserveWhitespace)経由。読み書きだけならバイト単位で完全一致することを確認済み。VSと同じくItemGroupの末尾に追加し、`.filters`は既存の「ソース ファイル」「ヘッダー ファイル」に入れる(フィルタ定義自体は変えない)。同名ファイルがある・既に登録済み・プロジェクト外のパス・不正な識別子はエラーで中断。途中で失敗したら生成ファイルとプロジェクトファイルを元に戻す。
+- `tasks.json`に「NovaWing: クラスの追加」タスクと入力用の`inputs`を追加。生成後は`code -r`で`.h`を開く。
+- 検証: テストクラス2つ(基底あり・なし+新規フォルダ)を生成→ビルド成功を確認後、ファイルと登録を削除(`git diff`で`.vcxproj`/`.filters`に差分なし)。
+- **注意: `.gitignore`の`.vscode/*`によりスクリプトがgit管理外。** 学校/家の両方で使うには`!.vscode/scripts/`の例外追加が必要(未対応・要判断)。
+
+### 進捗（2026-09-27・クラスの削除/ファイル名リネームのタスクを追加）
+
+- `.vscode/scripts/NovaWingProject.ps1`(共通処理)を新設し、`New-GameClass.ps1`もこれを使う形に整理。XMLの読み書き・登録/除去・対象ファイルの特定・`#include`参照検索(コンパイラと同じ順で解決するので、同名ファイルの取り違えなし)をまとめた。
+- `Remove-GameClass.ps1`(タスク「Delete C++ Class」): 他ファイルから`#include`されていたら参照元一覧を出して中断。なければ変更内容を表示→y/N確認→vcxproj/.filtersから除去→ファイルは**ごみ箱へ**移動。
+- `Rename-GameClass.ps1`(タスク「Rename C++ Class (filename only)」): `.h/.cpp`をまとめてリネームし、vcxproj/.filtersのパスを更新。クラス名・`#include`の中身は変えない。旧名を`#include`している箇所(リネームした.cpp自身も含む)を確認前と完了後に警告表示。
+- 対象は「空Enterで今開いているファイル」か、パス入力(.h/.cpp/拡張子なし)。
+- ハマった点: PowerShell 5.1では関数が1件だけ返すと配列でなくなり、XmlElement/pscustomobjectに`.Count`が無く`$null`になる → 参照ありを見逃してテストクラスを削除してしまった(ごみ箱行き)。呼び出し側を`@()`で包んで修正。
+- 検証: 参照ありで削除中断、n で中止時は無変更、既存名へのリネームはエラー、リネーム/削除の実行、を確認。追加→リネーム→削除後に`.vcxproj`/`.filters`がテスト前とバイト一致。最終ビルド成功。
+- テスト用ファイル(TestGenA/TestGenA2/TestGenB2)がごみ箱に残っている。
+- `.gitignore`に`!.vscode/scripts/`を追加し、スクリプト4本をgit管理対象にした(学校/家の両方でタスクが動くように)。`c_cpp_properties.json`はPCごとにコンパイラパスが違う可能性があるため、引き続き管理外。
+
+### 進捗（2026-09-27・VS Codeの配色をVisual Studio風に）
+
+- 公式拡張「C/C++ Themes」(`ms-vscode.cpptools-themes`、マーケットプレイスで実在確認済み・インストール済み)を`extensions.json`の推奨に追加し、`settings.json`で`"workbench.colorTheme": "Visual Studio Dark - C++"`(=VS2019/2022 Dark相当)をワークスペース既定にした。
+- テーマ定義を確認し、VSとずれていた「文字列(#CE9178→#D69D85)」「列挙型・列挙子(→#B8D7A3)」だけを、このテーマ限定で`tokenColorCustomizations`/`semanticTokenColorCustomizations`で上書き。
+- 型・関数・引数・メンバー・ローカル変数などの色分けはC/C++拡張のセマンティックハイライト頼み(IntelliSenseの解析が終わるまでは大まかな色)。
