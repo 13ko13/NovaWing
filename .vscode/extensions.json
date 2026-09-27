@@ -4,6 +4,7 @@
         "ms-vscode.cpptools",
         "ms-vscode.cpptools-themes",
         "ms-vscode.vs-keybindings",
+        "actboy168.tasks",
         "timgjones.hlsltools"
     ]
 }
