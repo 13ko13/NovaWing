@@ -7,7 +7,7 @@ namespace
 	constexpr float hit_col_radius = 32.0f;
 }
 
-ReflectedBullet::ReflectedBullet(ReflectBulletData& data) :
+ReflectedBullet::ReflectedBullet(const ReflectBulletData& data) :
 	BulletBase(data.pos,data.vel,data.attackPower,
 		hit_col_radius,data.pCamera,ColliderTag::PlayerBullet),
 	m_pTarget(data.pTarget),

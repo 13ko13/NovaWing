@@ -13,7 +13,7 @@ public:
         float homingStrength;
         std::weak_ptr<CameraBase> pCamera;
     };
-    ReflectedBullet(ReflectBulletData& data);
+    ReflectedBullet(const ReflectBulletData& data);
     virtual ~ReflectedBullet();
 
     void Update() override;
