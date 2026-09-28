@@ -854,3 +854,17 @@
 - **注意**: 拡張は`tasks.json`を`JSON.parse`で読むため、`tasks.json`/`launch.json`に`//`コメントを書くとDxLibプロジェクトと認識されなくなる。
 - DxLibパネルでSDK(3.24f)を指定し、F5でビルド・実行できることを確認。上の節にある「`.slnx`経由でビルド」「`NovaWing\x64\...`に出力」などの記述はこの移行で古くなった。
 - 学校PCでは：拡張を`install.bat`で入れる → DxLibパネルでSDKを指定 → `c_cpp_properties.json`を拡張と同じ内容に置き換える。
+
+### 進捗（2026-09-28・ボスの螺旋ビームのエフェクトを作成中、見た目の調整が残り）
+
+- 参考: スターフォックスのリメイクのボス。紫の電撃リングが螺旋状に連なり、先に行くほど広がるビーム。
+- Claudeが`Data/Effect/BossBeam/BossBeam_Spiral.efkproj`（1.80形式のXML）を書いた（コミット3eceb0cに含まれる）。ゲームが読んでいるのはまだ旧版の`BossBeam_2.efk`（`ResourceConstants.h`の`boss_beam_eff_patgh`）。**次回は、エディタで`BossBeam_Spiral.efkproj`を開いて見た目を調整 → `.efkefc`保存・`.efk`書き出し → パスを差し替え、から再開。**
+- **大きさの基準**: `.efk`書き出し時の拡大率が**50**（エディタ1単位＝ゲーム50単位）。ビーム先端は毎フレーム20進む＝エディタで0.4、当たり判定の半径70＝1.4。
+- **しくみ**: ゲーム側(`BossBeamState`)はエフェクトをビーム先端に置いて毎フレーム動かし、ローカル+Zをボス側に向ける。エフェクト内の粒子は親の影響を「生成時のみ」にして、その場に残ることで軌跡になる。
+  - `SpiralPivot`(null、Z軸まわりに30°/F回転) の子 `ThunderRingA/B`: 軸から0.5離れた位置に4Fごとにリング（Aと B は2Fずらし、テクスチャ違い）。寿命70〜90F、大きさ1.7→0.8で縮む（発射口側が細く先端側が太い）、X/Y±12°傾き、Z回転ランダム。
+  - `CoreTrail`: 軸上に毎F紫の光を残す。`TipGlow`: 先端でちらつく光（先端に追従）。`StrayBolts`: 周囲に`Thunder01`の小さな雷を散らす。
+  - 螺旋の巻き具合＝Pivotの回転速度、リングの間隔＝発生間隔、太さ＝リングの大きさと軸からの距離、軌跡の長さ＝寿命。
+- テクスチャ`SpiralThunderRing01/02.png`はClaudeがSystem.Drawingで自動生成したもの（ギザギザの輪＋紫のぼかし＋白い芯）。
+- `.efkefc`はバイナリだが、EDITチャンクはzlib圧縮のバイナリXML（名前表→値表→u16ルート数→ノード木: 要素ID u16／値有無 u32 [+値ID u16]／子有無 u32 [+子数 u16]）で、デコードすれば.efkprojと同じXMLになる。Claudeに調整を頼むときは、エディタで保存した`.efkefc`をデコードして現状を読んでもらえばよい。
+- 1.80形式の注意: 発生間隔は`CommonValues/Generation/GenerationTime`、色は`DrawingValues/ColorAll/Fixed`（1.7以前と場所が違う）。
+- 既存の`BossBeam.efkefc`などの古いエフェクトは、テクスチャをデスクトップの`Effekseer_Sample`から参照しており、他のPCでは見つからない。
