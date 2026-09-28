@@ -9,6 +9,7 @@
 #include "Constants/Game.h"
 #include "Manager/WaterRevealManager.h"
 #include "Constants/ShaderRegister.h"
+#include "Manager/DebugManager.h"
 
 namespace
 {
@@ -139,7 +140,10 @@ void WaterManager::Draw()
 	}
 
 #ifdef _DEBUG
-	DrawFormatString(0, 500, 0xff0000, L"frame : %f", m_pCBufferWaterData->time);
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
+	{
+		DrawFormatString(0, 500, 0xff0000, L"frame : %f", m_pCBufferWaterData->time);
+	}
 #endif
 }
 

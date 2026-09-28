@@ -129,7 +129,7 @@ namespace
 	constexpr float splash_effect_scale = 3.0f;
 	constexpr float summon_floating_eff_scale = 1.0f;
 	constexpr float summon_worm_eff_scale = 1.0f;
-	constexpr float boss_beam_eff_scale = 1.0f;
+	constexpr float boss_beam_eff_scale = 2.0f;
 	constexpr float boss_shield_eff_scale = 4.0f;
 	constexpr float hit_effect_scale = 2.0f;
 	constexpr float boss_death_eff_scale = 1.0f;

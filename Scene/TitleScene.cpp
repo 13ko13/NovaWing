@@ -5,6 +5,7 @@
 
 #include "TitleScene.h"
 #include "Manager/InputManager.h"
+#include "Manager/DebugManager.h"
 #include "SceneController.h"
 #include "GameScene.h"
 #include "Main/Application.h"
@@ -340,23 +341,26 @@ void TitleScene::Update()
 void TitleScene::Draw()
 {
 #ifdef _DEBUG
-	//直線の始点と終点
-	VECTOR startPos;
-	VECTOR endPos;
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
+	{
+		//直線の始点と終点
+		VECTOR startPos;
+		VECTOR endPos;
 
-	//ステージのサイズに合わせてグリッドを描画する
-	for (int z = static_cast<int>(-grid_size.z);
-		z <= static_cast<int>(grid_size.z); z += 100)
-	{
-		startPos = VGet(-grid_size.x, 0.0f, static_cast<float>(z));
-		endPos = VGet(grid_size.x, 0.0f, static_cast<float>(z));
-		DrawLine3D(startPos, endPos, 0xff0000);
-	}
-	for (int x = static_cast<int>(-grid_size.x); x <= static_cast<int>(grid_size.x); x += 100)
-	{
-		startPos = VGet(static_cast<float>(x), 0.0f, -grid_size.z);
-		endPos = VGet(static_cast<float>(x), 0.0f, grid_size.z);
-		DrawLine3D(startPos, endPos, 0x0000ff);
+		//ステージのサイズに合わせてグリッドを描画する
+		for (int z = static_cast<int>(-grid_size.z);
+			z <= static_cast<int>(grid_size.z); z += 100)
+		{
+			startPos = VGet(-grid_size.x, 0.0f, static_cast<float>(z));
+			endPos = VGet(grid_size.x, 0.0f, static_cast<float>(z));
+			DrawLine3D(startPos, endPos, 0xff0000);
+		}
+		for (int x = static_cast<int>(-grid_size.x); x <= static_cast<int>(grid_size.x); x += 100)
+		{
+			startPos = VGet(static_cast<float>(x), 0.0f, -grid_size.z);
+			endPos = VGet(static_cast<float>(x), 0.0f, grid_size.z);
+			DrawLine3D(startPos, endPos, 0x0000ff);
+		}
 	}
 #endif
 	//スカイボックスの描画

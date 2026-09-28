@@ -3,6 +3,7 @@
 #include "Manager/LightingManager.h"
 #include "Manager/ResourceLoader.h"
 #include "Constants/ShaderRegister.h"
+#include "Manager/DebugManager.h"
 
 namespace
 {
@@ -70,10 +71,13 @@ void Rock::Draw()
     DrawWithLighting(textures);
 
 #ifdef _DEBUG
-    //全ての球を描画
-    for (auto& sphere : m_collider.GetSpheres())
+    if (DebugManager::GetInstance().IsDebugDrawEnabled())
     {
-        sphere->Draw(0xff0000);
+        //全ての球を描画
+        for (auto& sphere : m_collider.GetSpheres())
+        {
+            sphere->Draw(0xff0000);
+        }
     }
 #endif // _DEBUG
 }

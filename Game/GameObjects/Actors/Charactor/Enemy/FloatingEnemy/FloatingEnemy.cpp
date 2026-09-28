@@ -7,6 +7,7 @@
 #include "Manager/LightingManager.h"
 #include "Constants/ShaderRegister.h"
 #include "Manager/SoundManager.h"
+#include "Manager/DebugManager.h"
 
 namespace
 {
@@ -118,12 +119,15 @@ void FloatingEnemy::Draw()
 
 
 #ifdef _DEBUG
-	//当たり判定の描画
-	m_colSphere->Draw(0xffffff);
-	//位置
-	DrawFormatString(0, 320, 0xffffff, L"EPosX:%f,Y:%f,Z:%f", m_pos.x, m_pos.y, m_pos.z);
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
+	{
+		//当たり判定の描画
+		m_colSphere->Draw(0xffffff);
+		//位置
+		DrawFormatString(0, 320, 0xffffff, L"EPosX:%f,Y:%f,Z:%f", m_pos.x, m_pos.y, m_pos.z);
 
-	DrawFormatString(0, 460, 0xffffff, L"ForwardX : %f,Y:%f,Z:%f", GetForward().x,GetForward().y,GetForward().z);
+		DrawFormatString(0, 460, 0xffffff, L"ForwardX : %f,Y:%f,Z:%f", GetForward().x,GetForward().y,GetForward().z);
+	}
 #endif
 }
 

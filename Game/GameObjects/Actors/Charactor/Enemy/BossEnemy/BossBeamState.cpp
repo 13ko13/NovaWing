@@ -9,6 +9,7 @@
 #include "BossEnemy.h"
 #include "Game/GameObjects/Actors/Charactor/Player/Player.h"
 #include "BossIdleState.h"
+#include "Manager/DebugManager.h"
 
 namespace
 {
@@ -258,19 +259,22 @@ void BossBeamState::Exit()
 void BossBeamState::Draw()
 {
 #ifdef _DEBUG
-	//球のデバッグ描画
-	for (std::shared_ptr<SphereShape>& col : m_beamSpheresL)
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
 	{
-		col->Draw(0x00ff00);
+		//球のデバッグ描画
+		for (std::shared_ptr<SphereShape>& col : m_beamSpheresL)
+		{
+			col->Draw(0x00ff00);
+		}
+		for (std::shared_ptr<SphereShape>& col : m_beamSpheresR)
+		{
+			col->Draw(0x00ff00);
+		}
+		m_targetSphereL->Draw(0x00ff00);
+		m_targetSphereR->Draw(0x00ff00);
+		/*m_beamTipSphereL->Draw(0x00ff00);
+		m_beamTipSphereR->Draw(0x00ff00);*/
 	}
-	for (std::shared_ptr<SphereShape>& col : m_beamSpheresR)
-	{
-		col->Draw(0x00ff00);
-	}
-	m_targetSphereL->Draw(0x00ff00);
-	m_targetSphereR->Draw(0x00ff00);
-	/*m_beamTipSphereL->Draw(0x00ff00);
-	m_beamTipSphereR->Draw(0x00ff00);*/
 #endif
 }
 

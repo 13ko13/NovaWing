@@ -59,10 +59,8 @@ InputManager::InputManager() :
 	m_inputTable[InputEvent::left_rolling] = { {PeripheralType::pad1, XINPUT_BUTTON_LEFT_SHOULDER } };//RBボタン
 
 #ifdef _DEBUG
-	m_inputTable[InputEvent::restart] = { {PeripheralType::pad1, XINPUT_BUTTON_START} };			// パッド:STARTボタン
 	m_inputTable[InputEvent::gaugeUp] = { {PeripheralType::keyboard, KEY_INPUT_UP} };		// キーボード:上
 	m_inputTable[InputEvent::gaugeDown] = { {PeripheralType::keyboard, KEY_INPUT_DOWN} }; // キーボード:下
-	m_inputTable[InputEvent::bossWarp] = { {PeripheralType::keyboard, KEY_INPUT_W} }; // キーボード:W
 	m_inputTable[InputEvent::killBoss] = { {PeripheralType::keyboard, KEY_INPUT_K} }; // キーボード:K
 	m_inputTable[InputEvent::upScanlineFrequency] =
 		{ {PeripheralType::keyboard, KEY_INPUT_Q} }; // キーボード:Q

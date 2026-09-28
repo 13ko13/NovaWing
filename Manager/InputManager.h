@@ -25,10 +25,8 @@ namespace InputEvent
 
 #ifdef _DEBUG
 	//デバッグ用
-	constexpr const char* restart = "restart";
 	constexpr const char* gaugeUp = "gaugeUp";
 	constexpr const char* gaugeDown = "gaugeDown";
-	constexpr const char* bossWarp = "bossWarp";
 	constexpr const char* killBoss = "killBoss";
 	constexpr const char* downScanlineFrequency = "downScanlineFrequency";
 	constexpr const char* upScanlineFrequency = "upScanlineFrequency";

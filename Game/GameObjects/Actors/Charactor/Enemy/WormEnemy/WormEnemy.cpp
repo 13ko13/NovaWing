@@ -7,6 +7,7 @@
 #include "Constants/ShaderRegister.h"
 #include "Manager/SoundManager.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
+#include "Manager/DebugManager.h"
 
 namespace
 {
@@ -278,12 +279,15 @@ void WormEnemy::Draw()
 	}
 
 #ifdef _DEBUG
-	//頭の当たり判定を描画
-	m_headSphere->Draw(0xff0000);
-	//胴体の当たり判定を描画
-	for (std::shared_ptr<SphereShape>& sphere : m_segmentSpheres)
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
 	{
-		sphere->Draw(0x00ff00);
+		//頭の当たり判定を描画
+		m_headSphere->Draw(0xff0000);
+		//胴体の当たり判定を描画
+		for (std::shared_ptr<SphereShape>& sphere : m_segmentSpheres)
+		{
+			sphere->Draw(0x00ff00);
+		}
 	}
 #endif
 }

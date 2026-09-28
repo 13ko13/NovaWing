@@ -3,6 +3,7 @@
 #include "BulletBase.h"
 #include "Manager/LightingManager.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
+#include "Manager/DebugManager.h"
 
 namespace
 {
@@ -68,8 +69,11 @@ void BulletBase::Update()
 void BulletBase::Draw()
 {
 #ifdef _DEBUG
-	//球を描画
-	m_sphere->Draw(0xffffff);
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
+	{
+		//球を描画
+		m_sphere->Draw(0xffffff);
+	}
 #endif
 }
 
