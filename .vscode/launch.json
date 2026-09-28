@@ -1,31 +1,32 @@
 {
     "version": "0.2.0",
-    // exe は $(SolutionDir)x64\<Config> に出力される。
-    // cwd は Visual Studio の既定 (プロジェクトフォルダ) に合わせる。Data\ と *.pso/*.vso がここにあり、相対パスで読み込むため。
+    // DxLib 拡張の「デバッグ実行」「リリース実行」・F5 で使う構成 (名前は拡張機能が作るものと同じ)。
+    // exe は MSBuild で NovaWing.vcxproj を直接ビルドしたときの出力先 x64\<Config>\NovaWing.exe。
+    // cwd はプロジェクトフォルダ。Data\ と *.pso/*.vso がここにあり、相対パスで読み込むため。
     "configurations": [
         {
-            "name": "NovaWing (Debug x64)",
+            "name": "DxLib: デバッグ実行 (Debug)",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}\\NovaWing\\x64\\Debug\\NovaWing.exe",
+            "program": "${workspaceFolder}/x64/Debug/NovaWing.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}\\NovaWing\\NovaWing",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "console": "internalConsole",
-            "preLaunchTask": "MSBuild: Debug x64"
+            "preLaunchTask": "DxLib: Debug ビルド"
         },
         {
-            "name": "NovaWing (Release x64)",
+            "name": "DxLib: 実行 (Release)",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}\\NovaWing\\x64\\Release\\NovaWing.exe",
+            "program": "${workspaceFolder}/x64/Release/NovaWing.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}\\NovaWing\\NovaWing",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "console": "internalConsole",
-            "preLaunchTask": "MSBuild: Release x64"
+            "preLaunchTask": "DxLib: Release ビルド"
         }
     ]
 }
