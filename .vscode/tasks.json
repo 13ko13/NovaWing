@@ -1,7 +1,5 @@
 {
     "version": "2.0.0",
-    // ビルドは DxLib 拡張 (type: dxlib) が行う。settings.json の dxlib.vsProject により
-    // MSBuild で NovaWing.vcxproj を直接ビルドする (出力: x64\<Config>\NovaWing.exe)
     "tasks": [
         {
             "type": "dxlib",
@@ -21,7 +19,6 @@
             "problemMatcher": []
         },
         {
-            // Visual Studio の「クラスの追加」相当。.h/.cpp を生成し vcxproj/.filters に登録する
             "label": "NovaWing: クラスの追加",
             "type": "process",
             "command": "powershell.exe",
@@ -54,7 +51,6 @@
             }
         },
         {
-            // .h/.cpp を vcxproj/.filters から外してごみ箱へ。#include されていたら中断。実行前に y/N で確認する
             "label": "Delete C++ Class",
             "type": "process",
             "command": "powershell.exe",
@@ -69,7 +65,6 @@
                 "-CurrentFile",
                 "${file}"
             ],
-            // 今開いているファイルが対象になるので、.h/.cpp を開いているときだけボタンを出す
             "options": {
                 "statusbar": {
                     "label": "$(trash) クラスの削除",
@@ -86,7 +81,6 @@
             }
         },
         {
-            // .h/.cpp のファイル名だけを変更し vcxproj/.filters を更新。クラス名や #include 文は変えない
             "label": "Rename C++ Class (filename only)",
             "type": "process",
             "command": "powershell.exe",
