@@ -1,8 +1,5 @@
 {
     "version": "0.2.0",
-    // DxLib 拡張の「デバッグ実行」「リリース実行」・F5 で使う構成 (名前は拡張機能が作るものと同じ)。
-    // exe は MSBuild で NovaWing.vcxproj を直接ビルドしたときの出力先 x64\<Config>\NovaWing.exe。
-    // cwd はプロジェクトフォルダ。Data\ と *.pso/*.vso がここにあり、相対パスで読み込むため。
     "configurations": [
         {
             "name": "DxLib: デバッグ実行 (Debug)",
