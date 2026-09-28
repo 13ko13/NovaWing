@@ -825,3 +825,22 @@
 - VSは「ClangFormatサポート」が有効(既定)→ リポジトリ直下の`.clang-format`で整形しており、`NovaWing/.editorconfig`の`cpp_*`書式設定は使われていない(Microsoftのドキュメントでも「ClangFormat有効時は個別設定を無視」)。VS Codeも同じ`.clang-format`を使うので整形ルールは同じ。
 - 違いは入力中の自動整形だけ: VSは`;`や`}`の入力時に整形する → `settings.json`の`[cpp]`/`[c]`で`editor.formatOnType`を有効化(C/C++拡張は`;` `}` 改行で整形)。貼り付け時の整形(VSの設定値`AutoFormatOnPaste2=1`)は意味を確定できず、オフのまま。- **訂正(同日):** VSは入力中の整形にclang-formatを使っていなかった(`ClangFormatExecution=1`は「手動の整形コマンドのときだけclang-format」の意味だった)。VS Codeで`if(...) return`の後に`;`を打つと、clang-format(Microsoftスタイル)が`return;`を次の行に分けてしまい、VSと違う動きになった。VSは入力中は自前の整形エンジン+`NovaWing/.editorconfig`で、その行を整えるだけ。
   → `C_Cpp.formatting`を`vcFormat`(Visual C++の整形エンジン。`.editorconfig`の`cpp_*`設定を使う)に変更。代わりにVS CodeのCtrl+K Ctrl+Dも`.editorconfig`基準になり、VSの手動整形(`.clang-format`基準)とは細部が違うことがある(C/C++拡張は整形エンジンを1つしか選べないため)。- `launch.json`のRelease構成を「NovaWing (Release x64)」に改名し、`preLaunchTask`で起動前に`MSBuild: Release x64`を実行するようにした(Debugと同じくF5でビルド→起動)。Releaseビルドが.slnx経由で通ることを確認。
+
+### 進捗（2026-09-28・学校PC(FIC-ADMIN)のVS Code環境を確認・整備）
+
+- 学校PCにもVS 2026(`C:\Program Files\Microsoft Visual Studio\18\Community`、家と同じパス)と推奨拡張6つが入っており、git管理下の`.vscode`(settings/tasks/launch/extensions/scripts)もそのまま使えた。タスクと同じMSBuildコマンドでDebug x64ビルド成功を確認。
+- git管理外の`c_cpp_properties.json`を学校PC用に作成（cl.exeは`MSVC\14.44.35207`(v143)、SDK `10.0.26100.0`、vcxprojと同じinclude 3つ、`_DEBUG/_WINDOWS/UNICODE/_UNICODE`、`/permissive-`、Debug/Release x64の2構成）。
+- ユーザー単位の`%APPDATA%\Code\User\keybindings.json`に、`.vscode/keybindings.json`テンプレートの5項目(Ctrl+Shift+Alt+C/D/R、Ctrl+Break、Ctrl+Shift+F10)を既存設定の末尾に追記。
+- 学校PCでは`git`コマンドにPATHが通っていない（GitHub Desktop等で操作）。
+- 上の「コマンドラインMSBuildは`C1083`で失敗する」という記述(ICollider節)は古い情報。`.slnx`経由なら成功する。
+- **未確認**: F5でのデバッグ実行・ブレークポイント停止（家・学校とも）。
+
+### 進捗（2026-09-28・DxLib開発環境拡張(dxlib-devenv)を本採用、フォルダ構成を平らにした）
+
+- 配布されたVS Code拡張「DxLib 開発環境」(mahirocreative.dxlib-devenv)を導入。拡張の「新規プロジェクト作成」はMultiByte固定・`src/`固定でvcxprojを毎回作り直すため、Unicode(`L"..."`)や独自includeを使うNovaWingでは使えない。代わりに「Visual Studio のプロジェクトを DxLib 拡張で使えるようにする」モード（`settings.json`の`dxlib.vsProject`）で、既存のvcxprojをそのまま使う。
+- 拡張は「開いたフォルダ直下の.vcxproj」しか見ないので、`NovaWing\NovaWing\*`と`NovaWing\DxLib_h`をリポジトリ直下へ移動（`NovaWing\`フォルダは廃止）。`.slnx`も直下。vcxprojは無変更（`$(SolutionDir)`も直下になるため`DxLib_h`のパスはそのまま通る）。
+- ビルドは拡張がMSBuildでvcxprojを直接ビルドする。exeは`x64\<Config>\NovaWing.exe`、作業フォルダはリポジトリ直下（`Data\`と`*.pso/*.vso`を相対パスで読む）。
+- `.vscode`：旧MSBuildタスク(`.slnx`経由)を`type: dxlib`のタスク(`DxLib: Debug ビルド`/`DxLib: Release ビルド`)に置き換え、launch構成も拡張と同名に。IntelliSenseは拡張のconfigurationProviderに任せる（`c_cpp_properties.json`は各PCで拡張と同じ内容にする）。クラス追加/削除/改名スクリプトは新構成のパスに修正。
+- **注意**: 拡張は`tasks.json`を`JSON.parse`で読むため、`tasks.json`/`launch.json`に`//`コメントを書くとDxLibプロジェクトと認識されなくなる。
+- DxLibパネルでSDK(3.24f)を指定し、F5でビルド・実行できることを確認。上の節にある「`.slnx`経由でビルド」「`NovaWing\x64\...`に出力」などの記述はこの移行で古くなった。
+- 学校PCでは：拡張を`install.bat`で入れる → DxLibパネルでSDKを指定 → `c_cpp_properties.json`を拡張と同じ内容に置き換える。
