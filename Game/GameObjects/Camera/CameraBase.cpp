@@ -7,7 +7,7 @@
 
 namespace
 {
-	constexpr float camera_near = 200.0f; // カメラのNear
+	constexpr float camera_near = 50.0f; // カメラのNear
 	constexpr float camera_far = 5500.0f; // カメラのFar
 
 	// カメラの視野角

@@ -13,7 +13,7 @@ public:
 	//ライトの方向ベクトルをセットする
 	void SetLightDirection(const Vector3& lightDir);
 	//シェーダーを適用&定数バッファに値を渡す
-	void ApplyShader(bool isSkinning = false);
+	void ApplyShader(bool isSkinning = false, float isDisolve = 1.0f);
 	//シェーダーを解除する
 	void ResetShader();
 	//光の情報を持ってる定数バッファのハンドルを返す
@@ -30,7 +30,7 @@ private:
 	struct LightBuffer
 	{
 		Vector3 lightDir;//光の方向ベクトル
-		float padding;//16バイトアライメント(16の倍数にそろえる)のため
+		float isDisolveShader;//ディゾルブ対象かどうか(0:false,1:true)
 	};
 	int m_cbufferLightInfo = -1;//バッファのハンドル
 	LightBuffer* m_pCBuffLightData = nullptr;//光の情報バッファへのポインタ

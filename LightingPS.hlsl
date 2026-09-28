@@ -21,6 +21,7 @@ struct PS_INPUT
 cbuffer LightingBuffer : register(b4)
 {
     float3 lightVec;//光の方向ベクトル
+	float isDisolve;//ディゾルブを行うか(0:false,1:true)
 };
 
 cbuffer CameraBuffer : register(b6)
@@ -38,19 +39,21 @@ static const float noise_uv_scale = 100.0f;//ノイズUVの縮小率
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    //物体がNearに近づくにつれてディゾルブで消えていくようにする
-    //カメラからピクセルまでの距離を求める
-    float cameraToPixelD = distance(cameraPos,input.worldPos);
-    //この距離がNearに近づくにつれてノイズの閾値をあげていく
-    float noise_threshold = 1.0f - smoothstep(near,start_disolve,cameraToPixelD);
-    
-    //ノイズをサンプリングする
-    //岩のuvが変なので、worldPosを使ったuvを作成する
-    float2 worldBaseUV = input.worldPos.xy / noise_uv_scale;
-    float3 noiseCol = noiseTex.Sample(smp,worldBaseUV).rgb;
+	if(isDisolve == 1.0f)
+	{
+		//物体がNearに近づくにつれてディゾルブで消えていくようにする
+		//カメラからピクセルまでの距離を求める
+		float cameraToPixelD = distance(cameraPos,input.worldPos);
+		//この距離がNearに近づくにつれてノイズの閾値をあげていく
+		float noise_threshold = 1.0f - smoothstep(near,start_disolve,cameraToPixelD);
+		//ノイズをサンプリングする
+		//岩のuvが変なので、worldPosを使ったuvを作成する
+		float2 worldBaseUV = input.worldPos.xy / noise_uv_scale;
+		float3 noiseCol = noiseTex.Sample(smp,worldBaseUV).rgb;
 
-    //ノイズのカラーの値が閾値よりも小さければそのピクセルの描画を行わない
-    if(noiseCol.r < noise_threshold) discard;
+		//ノイズのカラーの値が閾値よりも小さければそのピクセルの描画を行わない
+		if(noiseCol.r < noise_threshold) discard;
+	}
     
     //メタリックマップのカラーを取得
     float4 metCol = metalicTex.Sample(smp, input.uv);

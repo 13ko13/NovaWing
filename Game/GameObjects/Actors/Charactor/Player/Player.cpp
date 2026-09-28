@@ -31,7 +31,7 @@
 namespace
 {
 	// モデルのサイズ
-	const Vector3 model_scale = {0.3f, 0.3f, 0.3f};
+	const Vector3 model_scale = {0.25f, 0.25f, 0.25f};
 
 	// ゲージの毎フレームの回復量
 	constexpr float gauge_recovery_amount = 0.5f;
@@ -460,19 +460,6 @@ void Player::Draw()
 	{
 		m_pCounterCollider->GetSphere()->Draw(0x0000ff);
 	}
-
-	VECTOR leftWingPos = MV1GetFramePosition(m_modelHandle, MV1SearchFrame(
-		m_modelHandle, left_wing_bone_name));//左の羽の位置を取得
-	VECTOR leftWingScreenPos = ConvWorldPosToScreenPos(leftWingPos);//左羽の位置をスクリーン座標に変換
-	//左羽の位置に丸を表示
-	DrawCircle(
-		static_cast<int>(leftWingScreenPos.x),
-		static_cast<int>(leftWingScreenPos.y),
-		10, GetColor(255, 0, 0), true);
-
-	//再生ハンドル
-	printfDx(L"LeftWingSplashHandle : %d\n", m_leftWingEffectH);
-	printfDx(L"RightWingSplashHandle : %d\n", m_rightWingEffectH);
 #endif
 }
 
@@ -498,7 +485,7 @@ void Player::DrawPlayer()
 	// エミッションマップを渡す
 	SetUseTextureToShader(ShaderRegister::tex_emission, emissionGraphH);
 
-	LightingManager::GetInstance().ApplyShader();
+	LightingManager::GetInstance().ApplyShader(false,0.0f);
 	BindShaderBuffers();
 
 	if (m_isDamageEffect)
