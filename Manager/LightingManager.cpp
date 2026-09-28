@@ -25,11 +25,12 @@ void LightingManager::SetLightDirection(const Vector3& lightDir)
 	SetLightDifColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
-void LightingManager::ApplyShader(bool isSkinning)
+void LightingManager::ApplyShader(bool isSkinning,float isDisolve)
 {
 	MV1SetUseOrigShader(true);
 	//ライトの方向をセットする
 	m_pCBuffLightData->lightDir = m_lightDir;
+	m_pCBuffLightData->isDisolveShader = isDisolve;
 	//情報を入れたので定数バッファが変わったことをシェーダに知らせる
 	UpdateShaderConstantBuffer(m_cbufferLightInfo);
 

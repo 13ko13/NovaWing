@@ -476,15 +476,16 @@ void GameScene::Draw()
 	//水マネージャーの描画
 	m_pWaterManager->Draw();
 
-	//全てのUIを描画する
-	m_pUIManager->Draw();
-
+	
 	//レティクルよりプレイヤーが優先的に描画されてほしいので
 	//プレイヤーをもう一度描画する
 	m_pPlayer->Draw();
-
+	
 	//Effekseerのエフェクト描画
 	DrawEffekseer3D();
+	
+	//全てのUIを描画する
+	m_pUIManager->Draw();
 }
 
 void GameScene::DrawGrid()

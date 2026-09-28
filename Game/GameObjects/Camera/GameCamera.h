@@ -12,7 +12,6 @@ public:
 	/// </summary>
 	void Draw() override;
 
-
 	/// <summary>
 	/// カメラの揺れの開始
 	/// </summary>

@@ -99,7 +99,7 @@ namespace
 	//ワーム召喚
 	constexpr const wchar_t* summon_worm_eff_path = L"Data/Effect/SummonWormEnemy/SummonWorm.efk";
 	//ボスのビーム
-	constexpr const wchar_t* boss_beam_eff_patgh = L"Data/Effect/BossBeam/BossBeam.efk";
+	constexpr const wchar_t* boss_beam_eff_patgh = L"Data/Effect/BossBeam/BossBeam_2.efk";
 	//ボスの無敵エフェクト
 	constexpr const wchar_t* boss_shield_effect_path = L"Data/Effect/BossShield/BossShield.efk";
 	//ヒットエフェクト(敵味方共通)

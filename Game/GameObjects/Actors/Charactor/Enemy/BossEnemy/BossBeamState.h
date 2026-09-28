@@ -25,6 +25,14 @@ public:
 	int GetBeamDamage() const;
 
 private:
+	/// <summary>
+	/// エフェクトのZ軸をビームの進行方向に向ける
+	/// </summary>
+	/// <param name="playH">再生中のエフェクトハンドル</param>
+	/// <param name="dir">進行方向(正規化済み)</param>
+	void SetBeamEffectDir(int playH, const Vector3& dir);
+
+private:
 	//ビームのエフェクト再生ハンドル
 	int m_rightBeamEffectPlayH = -1;
 	int m_leftBeamEffectPlayH = -1;

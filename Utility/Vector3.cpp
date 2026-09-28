@@ -131,7 +131,7 @@ Vector3 Vector3::Lerp(const Vector3& start, const Vector3& end, float t)
 
 float Vector3::Dot(const Vector3& a, const Vector3& b)
 {
-	return a.x + b.x + a.y + b.y + a.z + b.z;
+	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
 Vector3 Vector3::FromWString(const std::wstring& x, const std::wstring& y, const std::wstring& z)

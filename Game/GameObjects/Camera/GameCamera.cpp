@@ -12,10 +12,10 @@ namespace
 	constexpr float camera_move_strength = 0.3f;
 
 	// カメラのYオフセット
-	constexpr float camera_offset_y = 200.0f;
+	constexpr float camera_offset_y = 250.0f;
 
 	// プレイヤーからどれぐらい離したZ位置にカメラを置くか
-	constexpr float camera_offset_z = 600.0f;
+	constexpr float camera_offset_z = 300.0f;
 
 	//ズーム時の距離判定閾値
 	constexpr float zoom_dist_thresould = 100.0f;

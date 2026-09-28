@@ -1,5 +1,6 @@
 ﻿#include <DxLib.h>
 #include <algorithm>
+#include <cmath>
 #include <EffekseerForDXLib.h>
 
 #include "BossBeamState.h"
@@ -40,6 +41,9 @@ namespace
 
 	//ボスのビームのダメージ
 	constexpr int beam_damage = 20;
+
+	//回転軸を求める際に0除算を避けるための閾値
+	constexpr float rot_axis_threshould = 0.0001f;
 }
 
 BossBeamState::BossBeamState(std::weak_ptr<BossEnemy> pBoss,
@@ -79,27 +83,6 @@ void BossBeamState::Enter()
 	//ビームの時間を初期化
 	m_beamFrame = 0;
 
-	int effectHandle = ResourceLoader::GetInstance().GetEffect(
-		ResourceLoader::EffectID::BossBeam);
-
-	//ビームのエフェクトを再生
-	//左
-	m_leftBeamEffectPlayH = PlayEffekseer3DEffect(effectHandle);
-	SetPosPlayingEffekseer3DEffect(
-		m_leftBeamEffectPlayH,
-		m_beamPosL.x,
-		m_beamPosL.y,
-		m_beamPosL.z
-	);
-	//右
-	m_rightBeamEffectPlayH = PlayEffekseer3DEffect(effectHandle);
-	SetPosPlayingEffekseer3DEffect(
-		m_rightBeamEffectPlayH,
-		m_beamPosR.x,
-		m_beamPosR.y,
-		m_beamPosR.z
-	);
-
 	//ビームの進む方向初期化　
 	//プレイヤーをshared_ptrに変換
 	std::shared_ptr<Player> pSharedPlayer = m_pPlayer.lock();
@@ -116,6 +99,29 @@ void BossBeamState::Enter()
 	//進む方向をメンバ変数にも保存しておく(Update()の追い越し判定で使うため)
 	m_beamMoveDirL = leftToTargetDir;
 	m_beamMoveDirR = rihgtToTargetDir;
+
+	int effectHandle = ResourceLoader::GetInstance().GetEffect(
+		ResourceLoader::EffectID::BossBeam);
+
+	//ビームのエフェクトを再生(発射口から)
+	//左
+	m_leftBeamEffectPlayH = PlayEffekseer3DEffect(effectHandle);
+	SetPosPlayingEffekseer3DEffect(
+		m_leftBeamEffectPlayH,
+		m_beamPosL.x,
+		m_beamPosL.y,
+		m_beamPosL.z
+	);
+	SetBeamEffectDir(m_leftBeamEffectPlayH, m_beamMoveDirL);
+	//右
+	m_rightBeamEffectPlayH = PlayEffekseer3DEffect(effectHandle);
+	SetPosPlayingEffekseer3DEffect(
+		m_rightBeamEffectPlayH,
+		m_beamPosR.x,
+		m_beamPosR.y,
+		m_beamPosR.z
+	);
+	SetBeamEffectDir(m_rightBeamEffectPlayH, m_beamMoveDirR);
 
 	//ビームの先端をターゲットに向けて一定速度で進ませる 
 	m_beamPosL += leftToTargetDir * beam_speed;
@@ -210,19 +216,22 @@ void BossBeamState::Update()
 		m_beamSpheresR.end()
 	);
 
-	//ビームエフェクトの位置更新
+	//ビームエフェクトの位置と向きの更新
 	SetPosPlayingEffekseer3DEffect(
 		m_leftBeamEffectPlayH,
 		m_beamPosL.x,
 		m_beamPosL.y,
 		m_beamPosL.z
 	);
+	SetBeamEffectDir(m_leftBeamEffectPlayH, m_beamMoveDirL);
+
 	SetPosPlayingEffekseer3DEffect(
 		m_rightBeamEffectPlayH,
 		m_beamPosR.x,
 		m_beamPosR.y,
 		m_beamPosR.z
 	);
+	SetBeamEffectDir(m_rightBeamEffectPlayH, m_beamMoveDirR);
 
 #ifdef _DEBUG
 	//ビームの目標地点の球の更新
@@ -269,3 +278,25 @@ int BossBeamState::GetBeamDamage() const
 {
 	return beam_damage;
 }
+
+void BossBeamState::SetBeamEffectDir(int playH, const Vector3& dir)
+{
+	//らせんは軸の向きの正負が関係ないのでZ成分を正にそろえる
+		//(180度回転の特異点も避けられる)
+		Vector3 d = (dir.z < 0.0f) ? dir * -1.0f : dir;
+
+		//(0,0,1)からdへの回転軸 = cross((0,0,1), d) = (-d.y, d.x, 0)
+		float s = std::sqrt(d.x * d.x + d.y * d.y);
+		if (s < rot_axis_threshould)
+		{
+			//ほぼZ軸方向なので回転なし
+			SetRotationPlayingEffekseer3DEffect(playH, 0.0f, 0.0f, 0.0f);
+			return;
+		}
+		Effekseer::Vector3D axis(-d.y / s, d.x / s, 0.0f);
+		float angle = std::acos(std::clamp(d.z, -1.0f, 1.0f));
+
+		//軸が逆に傾く場合はangleを-angleにする
+		GetEffekseer3DManager()->SetRotation(playH, axis, angle);
+}
+
