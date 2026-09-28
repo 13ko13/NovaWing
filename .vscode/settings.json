@@ -1,4 +1,20 @@
 {
+    // ===== DxLib 開発環境 (mahirocreative.dxlib-devenv) =====
+    // 「Visual Studio のプロジェクトを DxLib 拡張で使えるようにする」と同じ設定。
+    // ビルドは拡張機能が MSBuild で NovaWing.vcxproj を直接ビルドする (出力: x64\<Config>\NovaWing.exe)
+    "dxlib.vsProject": "NovaWing.vcxproj",
+    "dxlib.vsPlatform": "x64",
+    "C_Cpp.default.configurationProvider": "mahirocreative.dxlib-devenv",
+    // C/C++ 拡張がエディタ右上に出す ▶ を消す (DxLib 拡張のビルド・実行ボタンと紛らわしいため)
+    "C_Cpp.debugShortcut": false,
+    "files.associations": {
+        "*.fx": "hlsl",
+        "*.hlsli": "hlsl"
+    },
+    "[hlsl]": {
+        "editor.defaultFormatter": "mahirocreative.dxlib-devenv"
+    },
+
     "editor.insertSpaces": false,
     "editor.tabSize": 4,
     "editor.detectIndentation": false,
@@ -42,7 +58,7 @@
             }
         }
     },
-    // Visual Studio は入力中 (; や } を打ったとき) は自前の整形エンジンで NovaWing/.editorconfig の cpp_* 設定を使い、
+    // Visual Studio は入力中 (; や } を打ったとき) は自前の整形エンジンで .editorconfig の cpp_* 設定を使い、
     // clang-format (.clang-format) は Ctrl+K Ctrl+D などの手動整形のときだけ使う設定になっている。
     // VS Code はどちらか一方しか選べないため、普段の入力中の動きを合わせて Visual C++ の整形エンジン (vcFormat) にする。
     // (そのため VS Code の Ctrl+K Ctrl+D も .editorconfig 基準になり、VS の手動整形とは細部が違うことがある)

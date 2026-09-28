@@ -1,85 +1,23 @@
 {
     "version": "2.0.0",
-    // vcxproj単体をビルドすると $(SolutionDir) がプロジェクトフォルダになり DxLib_h が見つからないため、
-    // Visual Studioと同じく .slnx 経由でビルドする (出力: NovaWing\x64\<Config>\NovaWing.exe)
+    // ビルドは DxLib 拡張 (type: dxlib) が行う。settings.json の dxlib.vsProject により
+    // MSBuild で NovaWing.vcxproj を直接ビルドする (出力: x64\<Config>\NovaWing.exe)
     "tasks": [
         {
-            "label": "MSBuild: Debug x64",
-            "type": "process",
-            "command": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe",
-            "args": [
-                "${workspaceFolder}\\NovaWing\\NovaWing.slnx",
-                "/p:Configuration=Debug",
-                "/p:Platform=x64",
-                "/p:GenerateFullPaths=true",
-                "/m",
-                "/nologo",
-                "/v:minimal"
-            ],
+            "type": "dxlib",
+            "config": "debug",
+            "label": "DxLib: Debug ビルド",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            // options.statusbar は Tasks 拡張 (actboy168.tasks) 用。ステータスバーのボタンの見た目を決める
-            "options": {
-                "statusbar": {
-                    "label": "$(tools) ビルド",
-                    "detail": "Debug x64 をビルド (Ctrl+Shift+B)",
-                    "running": {
-                        "label": "$(sync~spin) ビルド中"
-                    }
-                }
-            },
-            "problemMatcher": "$msCompile",
-            "presentation": {
-                "reveal": "always",
-                "panel": "shared",
-                "clear": true
-            }
+            "problemMatcher": []
         },
         {
-            "label": "MSBuild: Release x64",
-            "type": "process",
-            "command": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe",
-            "args": [
-                "${workspaceFolder}\\NovaWing\\NovaWing.slnx",
-                "/p:Configuration=Release",
-                "/p:Platform=x64",
-                "/p:GenerateFullPaths=true",
-                "/m",
-                "/nologo",
-                "/v:minimal"
-            ],
+            "type": "dxlib",
+            "config": "release",
+            "label": "DxLib: Release ビルド",
             "group": "build",
-            "options": {
-                "statusbar": {
-                    "hide": true
-                }
-            },
-            "problemMatcher": "$msCompile",
-            "presentation": {
-                "reveal": "always",
-                "panel": "shared",
-                "clear": true
-            }
-        },
-        {
-            "label": "MSBuild: Clean x64",
-            "type": "process",
-            "command": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe",
-            "args": [
-                "${workspaceFolder}\\NovaWing\\NovaWing.slnx",
-                "/t:Clean",
-                "/p:Configuration=Debug",
-                "/p:Platform=x64",
-                "/nologo"
-            ],
-            "group": "build",
-            "options": {
-                "statusbar": {
-                    "hide": true
-                }
-            },
             "problemMatcher": []
         },
         {
@@ -196,7 +134,7 @@
         {
             "id": "newClassFolder",
             "type": "promptString",
-            "description": "配置先フォルダ (NovaWing\\NovaWing からの相対パス。例: Game/GameObjects/Actors/Charactor/Enemy)",
+            "description": "配置先フォルダ (プロジェクトフォルダからの相対パス。例: Game/GameObjects/Actors/Charactor/Enemy)",
             "default": "Game/"
         },
         {

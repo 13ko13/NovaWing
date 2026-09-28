@@ -6,14 +6,14 @@
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-$script:ProjectDir = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\..\NovaWing\NovaWing"))
+$script:ProjectDir = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\.."))
 $script:WorkspaceDir = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\.."))
 $script:VcxprojPath = Join-Path $ProjectDir "NovaWing.vcxproj"
 $script:FiltersPath = "$VcxprojPath.filters"
 $script:MsbuildNs = "http://schemas.microsoft.com/developer/msbuild/2003"
 # vcxproj の AdditionalIncludeDirectories と同じ順
 $script:IncludeDirs = @(
-    [IO.Path]::GetFullPath((Join-Path $ProjectDir "..\DxLib_h")),
+    [IO.Path]::GetFullPath((Join-Path $ProjectDir "DxLib_h")),
     $ProjectDir,
     (Join-Path $ProjectDir "Game\GameObjects\Actors")
 )

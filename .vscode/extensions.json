@@ -1,10 +1,14 @@
 {
     "recommendations": [
+        "mahirocreative.dxlib-devenv",
         "editorconfig.editorconfig",
         "ms-vscode.cpptools",
         "ms-vscode.cpptools-themes",
         "ms-vscode.vs-keybindings",
         "actboy168.tasks",
         "timgjones.hlsltools"
+    ],
+    "unwantedRecommendations": [
+        "ms-vscode.cpptools-extension-pack"
     ]
 }
