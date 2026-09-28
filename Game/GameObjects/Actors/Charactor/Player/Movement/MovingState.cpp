@@ -2,6 +2,7 @@
 
 #include "MovingState.h"
 #include "Manager/InputManager.h"
+#include "Manager/DebugManager.h"
 #include "Charactor/Player/Player.h"
 #include "IdleMovementState.h"
 
@@ -89,7 +90,10 @@ void MovingState::Update()
 	}
 
 #ifdef _DEBUG
-	DrawFormatString(0, 100, 0xffffff, L"stickX:%f,stickY:%f", stick.x, stick.y);
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
+	{
+		DrawFormatString(0, 100, 0xffffff, L"stickX:%f,stickY:%f", stick.x, stick.y);
+	}
 #endif
 }
 

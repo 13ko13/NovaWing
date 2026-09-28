@@ -7,6 +7,7 @@
 #include "Manager/BulletManager.h"
 #include "Manager/SoundManager.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
+#include "Manager/DebugManager.h"
 
 namespace
 {
@@ -58,7 +59,10 @@ void ActiveState::Update()
 	
 	pEnemy->SetVel(vel);
 #ifdef _DEBUG
-	DrawFormatString(0, 230, 0xffffff, L"velY : %f", vel.y);
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
+	{
+		DrawFormatString(0, 230, 0xffffff, L"velY : %f", vel.y);
+	}
 #endif
 
 	//弾の発射

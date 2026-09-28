@@ -10,6 +10,7 @@
 #include "Utility/GraphShaderDraw.h"
 #include "Utility/Vector2.h"
 #include "Manager/InputManager.h"
+#include "Manager/DebugManager.h"
 #include "Main/Application.h"
 
 namespace
@@ -81,6 +82,9 @@ void PlayerHPGaugeUI::Draw()
 		ratio);
 
 #ifdef _DEBUG
-	DrawFormatString(0, 115, 0xffffff, L"scanlineFrequency : %f", m_scanlineFrequency);
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
+	{
+		DrawFormatString(0, 115, 0xffffff, L"scanlineFrequency : %f", m_scanlineFrequency);
+	}
 #endif
 }

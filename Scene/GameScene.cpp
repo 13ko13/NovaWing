@@ -12,6 +12,7 @@
 #include "../Game/GameObjects/Actors/Charactor/Player/Player.h"
 #include "GameScene.h"
 #include "../Manager/InputManager.h"
+#include "../Manager/DebugManager.h"
 #include "SceneController.h"
 #include "../Main/Application.h"
 #include "../Manager/BulletManager.h"
@@ -430,16 +431,9 @@ void GameScene::Update()
 	{
 		//ポーズを開くときも決定音を鳴らす
 		m_pSoundManager->Play(SoundManager::SoundType::Decision);
-		m_controller.PushScene(std::make_shared<PauseScene>(m_controller, m_pSoundManager));
+		m_controller.PushScene(std::make_shared<PauseScene>(m_controller, m_pSoundManager, m_pPlayer));
 	}
 
-#ifdef _DEBUG
-	//Startボタンでリスタート
-	if (InputManager::GetInstance().IsTriggered(InputEvent::restart))
-	{
-		m_controller.ChangeScene(std::make_shared<GameScene>(m_controller), 0.0f);
-	}
-#endif
 }
 
 void GameScene::Draw()
@@ -466,8 +460,11 @@ void GameScene::Draw()
 	DrawGrid();
 
 #ifdef _DEBUG
-	DrawString(0, 0, L"GameScene", 0xffffff);
-	DrawFormatString(0, 16, 0xffffff, L"FRAME:%d", m_frame);
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
+	{
+		DrawString(0, 0, L"GameScene", 0xffffff);
+		DrawFormatString(0, 16, 0xffffff, L"FRAME:%d", m_frame);
+	}
 #endif //DEBUG
 
 	//全GameObjectのDrawを呼ぶ
@@ -491,6 +488,8 @@ void GameScene::Draw()
 void GameScene::DrawGrid()
 {
 #ifdef _DEBUG
+	if (!DebugManager::GetInstance().IsDebugDrawEnabled()) return;
+
 	//直線の始点と終点
 	VECTOR startPos;
 	VECTOR endPos;

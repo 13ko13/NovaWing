@@ -4,6 +4,7 @@
 #include "TitlePlayer.h"
 #include "Constants/ShaderRegister.h"
 #include "Manager/LightingManager.h"
+#include "Manager/DebugManager.h"
 
 namespace
 {
@@ -134,8 +135,11 @@ void TitlePlayer::Draw()
 	DrawWithLighting(textures);
 
 #ifdef _DEBUG
-	//プレイヤーの位置表示
-	DrawFormatString(0, 15, 0xffffff, L"playerPosZ : %f", m_pos.z);
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
+	{
+		//プレイヤーの位置表示
+		DrawFormatString(0, 15, 0xffffff, L"playerPosZ : %f", m_pos.z);
+	}
 #endif
 }
 

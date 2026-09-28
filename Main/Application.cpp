@@ -5,6 +5,7 @@
 
 #include "Application.h"
 #include "../Manager/InputManager.h"
+#include "../Manager/DebugManager.h"
 #include "../Scene/SceneController.h"
 #include "../Constants/Game.h"
 #include "../Manager/ResourceLoader.h"
@@ -97,8 +98,11 @@ void Application::Run()
 
 #ifdef _DEBUG
 		//FPSを表示
-		float fps = 1000000.0f / (GetNowHiPerformanceCount() - startTime);
-		DrawFormatString(600,15,0x0000ff,L"FPS:%f",fps);
+		if (DebugManager::GetInstance().IsDebugDrawEnabled())
+		{
+			float fps = 1000000.0f / (GetNowHiPerformanceCount() - startTime);
+			DrawFormatString(600,15,0x0000ff,L"FPS:%f",fps);
+		}
 #endif
 
 		ScreenFlip();

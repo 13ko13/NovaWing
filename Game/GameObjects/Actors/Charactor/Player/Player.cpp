@@ -13,6 +13,7 @@
 #include "Constants/ShaderRegister.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/InputManager.h"
+#include "Manager/DebugManager.h"
 #include "Manager/LightingManager.h"
 #include "Manager/ResourceLoader.h"
 #include "Manager/TargetManager.h"
@@ -247,11 +248,6 @@ void Player::Update()
 	{
 		m_health--;
 	}
-	//Wキーでボスまでワープ
-	if (input.IsPressed(InputEvent::bossWarp))
-	{
-		m_pos.z = 19000.0f;
-	}
 
 #endif
 	// HPのクランプを行う
@@ -449,16 +445,19 @@ void Player::Draw()
 	DrawPlayer();
 
 #ifdef _DEBUG
-	DrawFormatString(0, 300, 0xffffff, L"playerPosX:%f,Y : %f,Z:%f", m_pos.x, m_pos.y, m_pos.z);
-	DrawFormatString(0, 250, 0xffffff, L"Gauge : %f", m_gauge);
-	DrawFormatString(1080, 20, 0xffffff, L"Health : %d", m_health);
-	DrawFormatString(0, 365, 0xffffff, L"IsFocus : %d", IsFocus());
-
-	// 当たり判定の球を描画
-	m_pHitCollider->GetSphere()->Draw(0xff0000);
-	if (m_pCounterCollider->IsCollisionActive())
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
 	{
-		m_pCounterCollider->GetSphere()->Draw(0x0000ff);
+		DrawFormatString(0, 300, 0xffffff, L"playerPosX:%f,Y : %f,Z:%f", m_pos.x, m_pos.y, m_pos.z);
+		DrawFormatString(0, 250, 0xffffff, L"Gauge : %f", m_gauge);
+		DrawFormatString(1080, 20, 0xffffff, L"Health : %d", m_health);
+		DrawFormatString(0, 365, 0xffffff, L"IsFocus : %d", IsFocus());
+
+		// 当たり判定の球を描画
+		m_pHitCollider->GetSphere()->Draw(0xff0000);
+		if (m_pCounterCollider->IsCollisionActive())
+		{
+			m_pCounterCollider->GetSphere()->Draw(0x0000ff);
+		}
 	}
 #endif
 }

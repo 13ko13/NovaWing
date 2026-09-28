@@ -231,6 +231,7 @@
     <ClCompile Include="Main\main.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Player.cpp" />
     <ClCompile Include="Manager\InputManager.cpp" />
+    <ClCompile Include="Manager\DebugManager.cpp" />
     <ClCompile Include="Manager\ResourceLoader.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\MovingState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\NormalShootState.cpp" />
@@ -337,6 +338,7 @@
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IPlayerState.h" />
     <ClInclude Include="Main\Application.h" />
     <ClInclude Include="Manager\InputManager.h" />
+    <ClInclude Include="Manager\DebugManager.h" />
     <ClInclude Include="Manager\ResourceLoader.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\MovingState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\NormalShootState.h" />

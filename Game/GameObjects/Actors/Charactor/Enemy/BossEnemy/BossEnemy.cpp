@@ -6,6 +6,7 @@
 #include "Game/GameObjects/Actors/Charactor/Player/Player.h"
 #include "BossBeamState.h"
 #include "Manager/InputManager.h"
+#include "Manager/DebugManager.h"
 #include "Manager/SoundManager.h"
 
 namespace
@@ -301,13 +302,16 @@ void BossEnemy::Draw()
 	m_pState->Draw();
 
 #ifdef _DEBUG
-	//HP
-	DrawFormatString(800, 15, 0xff0000, L"BossHP : %d",m_health);
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
+	{
+		//HP
+		DrawFormatString(800, 15, 0xff0000, L"BossHP : %d",m_health);
 
-	//無敵判定球の描画
-	m_invincibleHitCol->Draw(0xff0000);
-	//ダメージ判定球の描画
-	m_damageCol->Draw(0xff00ff);
+		//無敵判定球の描画
+		m_invincibleHitCol->Draw(0xff0000);
+		//ダメージ判定球の描画
+		m_damageCol->Draw(0xff00ff);
+	}
 #endif
 }
 

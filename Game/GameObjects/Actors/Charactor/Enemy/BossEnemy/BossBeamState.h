@@ -32,6 +32,11 @@ private:
 	/// <param name="dir">進行方向(正規化済み)</param>
 	void SetBeamEffectDir(int playH, const Vector3& dir);
 
+	//ビームの反射が開始されたときの関数
+	void OnReflectLeft(const Vector3& hitPos);
+	//ビームの反射が開始されたときの関数
+	void OnReflectRight(const Vector3& hitPos);
+
 private:
 	//ビームのエフェクト再生ハンドル
 	int m_rightBeamEffectPlayH = -1;
@@ -61,6 +66,11 @@ private:
 	//ビームがプレイヤーを越えた後の進む方向
 	Vector3 m_beamMoveDirR;
 	Vector3 m_beamMoveDirL;
+
+	//左のビームが反射されたか
+	bool m_isReflectedL = false;
+	//右のビームが反射されたか
+	bool m_isReflectedR = false;
 
 #ifdef _DEBUG
 	//ビームの目標地点

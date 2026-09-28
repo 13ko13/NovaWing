@@ -5,12 +5,17 @@
 #include "Scene.h"
 
 class SoundManager;
+class Player;
 
 class PauseScene : public Scene
 {
 public:
-	//pSoundManagerはGameSceneから渡す(ポーズ中も鳴り続けさせるため、PauseScene破棄の影響を受けない)
-	PauseScene(SceneController& controller, std::weak_ptr<SoundManager> pSoundManager);
+	//pSoundManagerとpPlayerはGameSceneから渡す
+	//(ポーズ中も鳴り続けさせるため、PauseScene破棄の影響を受けないようweak_ptrで借りる)
+	PauseScene(
+		SceneController& controller,
+		std::weak_ptr<SoundManager> pSoundManager,
+		std::weak_ptr<Player> pPlayer);
 	~PauseScene();
 
 	void Init() override;
@@ -23,6 +28,11 @@ private:
 	{
 		BackGame,//ゲームに戻る
 		BackTitle,//タイトルに戻る
+#ifdef _DEBUG
+		ToggleDebugDraw,//デバッグ表示のON/OFF切り替え(_DEBUGビルドのみ表示)
+		Restart,//ゲームを最初からやり直す(_DEBUGビルドのみ表示)
+		WarpPlayer,//プレイヤーを指定位置に移動する(_DEBUGビルドのみ表示)
+#endif
 
 		Max,//最大
 	};
@@ -44,4 +54,24 @@ private:
 
 	//サウンドマネージャーへのポインタ(GameSceneが所有するものを借りている)
 	std::weak_ptr<SoundManager> m_pSoundManager;
+
+#ifdef _DEBUG
+	//プレイヤーへのポインタ(GameSceneが所有するものを借りている、位置ワープ機能でのみ使用)
+	std::weak_ptr<Player> m_pPlayer;
+
+	//プレイヤー位置ワープ画面を開いているか
+	bool m_isPlayerWarpMode = false;
+	//物差し上で選んでいる位置の割合(0.0=初期位置,1.0=ボス出現位置)
+	float m_warpCursorRatio = 0.0f;
+
+	/// <summary>
+	/// プレイヤー位置ワープ画面の更新
+	/// </summary>
+	void UpdatePlayerWarpMode();
+
+	/// <summary>
+	/// プレイヤー位置ワープ画面の描画
+	/// </summary>
+	void DrawPlayerWarpMode();
+#endif
 };
