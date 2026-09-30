@@ -45,6 +45,9 @@ namespace
 
 	//回転軸を求める際に0除算を避けるための閾値
 	constexpr float rot_axis_threshould = 0.0001f;
+
+	//ビーム反射後の1フレームあたりの最大旋回角
+	constexpr float one_frame_turn_angle = 0.2f;
 }
 
 BossBeamState::BossBeamState(std::weak_ptr<BossEnemy> pBoss,
@@ -135,6 +138,10 @@ void BossBeamState::Enter()
 
 void BossBeamState::Update()
 {
+	//先端の球の更新
+	// m_beamTipSphereL->Update(m_beamPosL, beam_sphere_radius);
+	// m_beamTipSphereR->Update(m_beamPosR,beam_sphere_radius);
+
 	//前フレームのビームの先端位置を保存
 	m_prevBeamPosL = m_beamPosL;
 	m_prevBeamPosR = m_beamPosR;
@@ -281,6 +288,52 @@ void BossBeamState::Draw()
 int BossBeamState::GetBeamDamage() const
 {
 	return beam_damage;
+}
+
+void BossBeamState::OnReflectLeft(const Vector3& hitPos)
+{
+	//ビームの先端位置
+	Vector3 beamTipPos = m_beamTipSphereL->GetPos();
+	
+	//法線(ビームの先端からビームが当たった位置へのベクトル)
+	Vector3 normal = (beamTipPos - hitPos).Normalized();
+
+	//反射方向を計算
+	m_beamMoveDirL = m_beamMoveDirL - normal * (2 * Vector3::Dot(m_beamMoveDirL, normal));
+	//反射したことを記録
+	m_isReflectedL = true;
+}
+
+void BossBeamState::OnReflectRight(const Vector3& hitPos)
+{
+	Vector3 beamTipPos = m_beamTipSphereR->GetPos();
+	//法線(ビームの先端からビームが当たった位置へのベクトル)
+	Vector3 normal = (beamTipPos - hitPos).Normalized();
+
+	//反射方向を計算
+	m_beamMoveDirR = m_beamMoveDirR - normal * (2 * Vector3::Dot(m_beamMoveDirR, normal));
+	//反射したことを記録
+	m_isReflectedR = true;
+}
+
+std::shared_ptr<SphereShape> BossBeamState::GetTipSphereL() const
+{
+	return  m_beamTipSphereL;
+}
+
+std::shared_ptr<SphereShape> BossBeamState::GetTipSphereR() const
+{
+	return m_beamTipSphereR;
+}
+
+bool BossBeamState::IsReflectedL() const
+{
+	return false;
+}
+
+bool BossBeamState::IsReflectedR() const
+{
+	return false;
 }
 
 void BossBeamState::SetBeamEffectDir(int playH, const Vector3& dir)

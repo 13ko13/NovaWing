@@ -209,7 +209,7 @@ void ClearScene::Update()
 		m_currentScore = std::lerp(
 			m_currentScore,
 			static_cast<float>(m_score),
-			score_count_lerp_speed
+			score_count_lerp_speed 
 		);
 
 		//lerpはぴったり止まらない可能性があるので、

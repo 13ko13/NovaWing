@@ -33,6 +33,10 @@ public:
 	std::shared_ptr<SphereShape> GetTipSphereL() const;
 	std::shared_ptr<SphereShape> GetTipSphereR() const;
 
+	//カウンターでビームが跳ね返されたかを取得する
+	bool IsReflectedL() const;
+	bool IsReflectedR() const;
+
 private:
 	/// <summary>
 	/// エフェクトのZ軸をビームの進行方向に向ける
@@ -76,7 +80,7 @@ private:
 	//右のビームが反射されたか
 	bool m_isReflectedR = false;
 
-	//ビームの先端位置
+	//ビームの先端球
 	std::shared_ptr<SphereShape> m_beamTipSphereL = std::make_shared<SphereShape>();
 	std::shared_ptr<SphereShape> m_beamTipSphereR = std::make_shared<SphereShape>();
 
