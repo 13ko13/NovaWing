@@ -24,6 +24,15 @@ public:
 	//ビームを受けたときのダメージ取得
 	int GetBeamDamage() const;
 
+	//ビームの反射が開始されたときの関数
+	void OnReflectLeft(const Vector3& hitPos);
+	//ビームの反射が開始されたときの関数
+	void OnReflectRight(const Vector3& hitPos);
+
+	//先端の球を返す
+	std::shared_ptr<SphereShape> GetTipSphereL() const;
+	std::shared_ptr<SphereShape> GetTipSphereR() const;
+
 private:
 	/// <summary>
 	/// エフェクトのZ軸をビームの進行方向に向ける
@@ -31,11 +40,6 @@ private:
 	/// <param name="playH">再生中のエフェクトハンドル</param>
 	/// <param name="dir">進行方向(正規化済み)</param>
 	void SetBeamEffectDir(int playH, const Vector3& dir);
-
-	//ビームの反射が開始されたときの関数
-	void OnReflectLeft(const Vector3& hitPos);
-	//ビームの反射が開始されたときの関数
-	void OnReflectRight(const Vector3& hitPos);
 
 private:
 	//ビームのエフェクト再生ハンドル
@@ -72,13 +76,14 @@ private:
 	//右のビームが反射されたか
 	bool m_isReflectedR = false;
 
+	//ビームの先端位置
+	std::shared_ptr<SphereShape> m_beamTipSphereL = std::make_shared<SphereShape>();
+	std::shared_ptr<SphereShape> m_beamTipSphereR = std::make_shared<SphereShape>();
+
 #ifdef _DEBUG
 	//ビームの目標地点
 	std::shared_ptr<SphereShape> m_targetSphereL = std::make_shared<SphereShape>();
 	std::shared_ptr<SphereShape> m_targetSphereR = std::make_shared<SphereShape>();
-	//ビームの先端位置
-	std::shared_ptr<SphereShape> m_beamTipSphereL = std::make_shared<SphereShape>();
-	std::shared_ptr<SphereShape> m_beamTipSphereR = std::make_shared<SphereShape>();
 #endif
 };
 

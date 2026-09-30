@@ -769,6 +769,10 @@
 
 **次回やること:** 上記1〜4を順にコードとして実装していく（ユーザーが自分で書く、Claudeはレビュー役）。
 
+**追加決定(2026-09-30):** 先端用のコライダーは**クラス1つ（例: `BossBeamTipCollider`、タグ`BossBeamTip`）を左右で2個作る**。コンストラクタで左右を受け取り、自分がどちらの先端かを覚える。理由: 当たったコライダー自身が左右を知っているので`OnReflectLeft/Right`のどちらを呼ぶかがそのまま決まる（1つにまとめると当たった後に左右を判定し直す必要がある）。`IsCollisionActive()`は「ビーム中かつ自分の側がまだ反射していない」でtrue。
+
+**コードの進み具合(2026-09-30確認):** `BossBeamState.h`に`m_isReflectedL/R`と`OnReflectLeft/Right(const Vector3& hitPos)`の宣言だけ入っている。残り: `OnReflectLeft/Right`を`public:`へ移す（`CollisionManager`から呼ぶため）、非デバッグの先端球`m_tipSphereL/R`（今ある`m_beamTipSphereL/R`は`#ifdef _DEBUG`内のデバッグ表示用）、`GetTipSphereL/R()`/`IsReflectedL/R()`、`.cpp`の定義すべて。
+
 ### 保留タスク（2026-09-27相談・未着手）: ほぼ全エフェクトが見づらい問題
 
 **原因はユーザーが特定済み: エフェクトを加算合成(Additive Blend)で作っているため、背景が明るい/近い色だと確実に馴染んで埋もれる。** Effekseer側のブレンド設定だけではこの性質自体はどうにもならない（加算特有の「重なるほど輝く」表現を保ったまま視認性だけ上げたい）ので、シェーダー側での対処方法を相談された。
