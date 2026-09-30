@@ -959,3 +959,20 @@
   - 既存の`bossWarp`チートを削除：`Manager/InputManager.h/.cpp`から`InputEvent::bossWarp`定義とテーブル登録を削除、`Player.cpp`の`if (input.IsPressed(InputEvent::bossWarp)) { m_pos.z = 19000.0f; }`ブロックを削除。
 - Debug/Release両構成でビルド成功を確認済み。Releaseビルドでは`WarpPlayer`選択肢自体が存在しない。
 - **ゲーム内での動作確認（実際にポーズ→プレイヤーを移動→物差し操作→ワープ）は未実施。次回起動時に確認予定。** 特に物差しの見た目の座標比率(`warp_ruler_ratio_left/right/y`)や、左スティックの移動速度(`warp_cursor_move_speed`)は実機で触ってみて微調整が要る可能性がある。
+
+### 進捗（2026-09-30・ボスのビーム跳ね返し、実装着手）
+
+- 反射の状態は`BossBeamState`に持たせる(A案)で確定。反射後の`Update()`は、プレイヤー追跡・Z越え判定・判定球生成をやめ、ボスへ向けて**1フレームの最大旋回角以内**で`m_beamMoveDir`を寄せる方式(「距離の上限」ではなく「角度の上限」)。
+- **完了(コード確認済み):**
+  - `BossBeamState.h`: `OnReflectLeft/Right`(public)・`GetTipSphereL/R`・`IsReflectedL/R`の宣言、`m_isReflectedL/R`、非デバッグの先端球`m_beamTipSphereL/R`。
+  - `BossBeamState.cpp`: `OnReflectLeft/Right`が左右とも実装済み(先端位置と`hitPos`から法線を求め、`m_beamMoveDir = v - normal * (2 * Dot(v, normal))`で反射、`m_isReflected`を`true`に)。反射式の`float * Vector3`問題(`Vector3`は`Vector3 * float`のみ)は`normal * (2 * Dot(...))`の形で修正済み。`GetTipSphereL/R()`も定義済み。
+- **未完成・未着手(2026-09-30時点):**
+  - `IsReflectedL/R()`が仮実装の`return false`のまま(`m_isReflectedL/R`を返すようにする)。
+  - 先端球の更新が`Update()`内でコメントアウトのまま(142〜143行目、`#ifdef _DEBUG`内の248〜249行目も)。先端球は`m_beamPosL/R`が動いた後に更新すること。デバッグ描画(282〜283行目)もコメントアウト。
+  - `Enter()`で`m_isReflectedL/R`を`false`にリセットしていない(ビームが2回目以降に前回の反射状態を引きずる)。
+  - `hitPos`にはカウンター球の**中心**を渡す取り決め(法線が球の外向きになるように)を`CollisionManager`側で守る必要がある。
+  - `Update()`の反射後の分岐(プレイヤー追跡・判定球生成をやめ、ボスへ最大旋回角で寄せる。反射前から残っている判定球の扱いも決める)。
+  - `BossBeamTipCollider`(タグ`BossBeamTip`、左右2個)の新規作成、`ColliderTag`に`BossBeamTip`/`BossBeamReflected`追加、`BossEnemy::GetColliders()`への登録、`BossBeamCollider`の左右別タグ化。
+  - `CollisionManager`の`hit_pairs`に`{BossBeamTip, Counter}`(プレイヤー本体より上)と`{BossBeamReflected, BossDamage}`、`OnHit`の反射トリガー、反射ビームがボスに当たったときの大ダメージ。
+- 作業順のおすすめ: `IsReflectedL/R`と`Enter()`のリセット → 先端球の更新 → コライダーと`hit_pairs`(まず反射のトリガーだけ) → `Update()`の反射後の動き → 実機確認。
+- 運用: 手順が合意済みのタスクでは、質問を重ねず箇条書きでやることを出す(ユーザー要望、2026-09-30)。**NOTES.mdに進捗を書くときは、書く前にコードを読んで実際の進み具合を確認すること。**
