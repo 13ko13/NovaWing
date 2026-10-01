@@ -1,5 +1,5 @@
 ﻿#include "TitleCamera.h"
-#include "Game/GameObjects/Actors/Charactor/Player/TitlePlayer.h"
+#include "Game/GameObjects/Actors/Character/Player/TitlePlayer.h"
 
 namespace
 {

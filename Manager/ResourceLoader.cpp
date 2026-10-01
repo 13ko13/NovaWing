@@ -501,10 +501,15 @@ void ResourceLoader::KeepEffect()
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::Boost] = handle;
 
-	//羽の水しぶきエフェクト
-	handle = LoadEffekseerEffect(wing_splash_effect_path, wing_splash_effect_scale);
+	//左羽の水しぶきエフェクト
+	handle = LoadEffekseerEffect(left_wing_splash_effect_path, left_wing_splash_effect_scale);
 	assert(handle >= 0);
-	m_effectHandles[ResourceLoader::EffectID::WingSplash] = handle;
+	m_effectHandles[ResourceLoader::EffectID::LeftWingSplash] = handle;
+
+	//右羽の水しぶきエフェクト
+	handle = LoadEffekseerEffect(right_wing_splash_effect_path, right_wing_splash_effect_scale);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::RightWingSplash] = handle;
 }
 
 void ResourceLoader::KeepSound()

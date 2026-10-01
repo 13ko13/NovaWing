@@ -3,7 +3,7 @@
 
 #include "UIBase.h"
 
-class Charactor;
+class Character;
 struct Vector2;
 class GaugeUIBase : public UIBase
 {

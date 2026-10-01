@@ -61,9 +61,12 @@
 
 **2026-08-08、コードを確認して完了済みのタスクを削除しました**（BossEnemyのボーン行列コード整理・model_scale復元、Splashエフェクトの空白対応、CSV化はすべて確認済み・完了）。
 
-1. **`FloatingEnemy`だけライティングが不自然に暗い問題（未解決、再開時期未定）**
-   - `Rock`/`Player`は正常なのに`FloatingEnemy`だけ暗い。diffuse/法線/lightVecは個別に確認して正常、`Actor::BindShaderBuffers()`も共通処理で特別な差異なし。180度回転を疑った仮説は否定済み（さらに暗くなった）。
-   - 次に確認すべき方向性: `Rock::Draw()`と`FloatingEnemy::DrawEnemy()`はどちらも`Actor::DrawWithLighting()`経由のはずだが、書き方・呼び出し方の違いをコードレベルで洗い出す必要がある。
+1. **`FloatingEnemy`だけライティングが不自然に暗い問題（2026-10-01、素材側の調整で対応）**
+   - 否定済みの仮説: 180度回転、スキニング設定(`DrawWithLighting(..., true)`にすると消える＝Drone_fix.mv1はスキンメッシュではなく`false`が正しい)、法線マップ(`normalTS=(0,0,1)`にしても暗いまま)。FBXのメッシュノード(Cylinder001)は回転なし・スケール2.54のみで、向きの問題でもない。
+   - 原因: `Drone_Albedo.png`自体が暗い(平均RGB 76,49,14)。Unityの Standard(Specular setup) 前提の素材で、Unityでは`Drone_Specular.tga`(アルファ=滑らかさ平均0.78)による艶・スカイボックスの環境光/映り込みで明るく見えていたが、自前シェーダーにはそれらが無い。加えてライト`(1,-1,0.6)`は上から当たるため、カメラ向きの正面はdiffuse約0.38しか受けない。
+   - 対処: ゲームが読んでいる`Data/Model/Drone.fbm/Drone_Albedo.png`(mv1内の参照パス。`Drone_fix.fbm`側ではない)を、色相・彩度を保ったまま明度(HSVのV)だけガンマ0.45で持ち上げた(平均RGB 132,92,44)。正面は屋根状パーツの下で法線が下向き気味のため、ユーザー判断で「かなり明るく」に。元画像はgit履歴から復元可能。
+   - それでも左側の敵・正面が暗い(ライトが左上手前から当たり、右側の敵は左側面が見えるので明るい)。Albedoの黄色は明度上限に張り付いていてこれ以上上げられないため、`Drone.fbm/Drone_Emission.png`に`Albedo×0.4`を加算した(光の向きに関係なく底上げされる、FloatingEnemyだけに効く)。足りなければ係数を上げて作り直す。
+   - シェーダー側でUnityの見た目に寄せるなら、`Drone_Specular.tga`を`tex_metalic`に渡す(ただし今のシェーダーは滑らかさを`.r`から読むので、アルファとの慣習差の調整が要る)のが次の候補。
 
 2. **`near_clip`/`far_clip`が`CapturePS.hlsl`/`WaterPS.hlsl`の2ファイルに重複定義**されている（`LightingPS.hlsl`は既に対象外と確認）。共通`.hlsli`への切り出しが未着手。
 
@@ -80,9 +83,23 @@
 
 7. **`CameraBase`のGameCamera/TitleCamera分割、GameCamera側は完了（2026-08-21）。** 詳細は下記「進捗（2026-08-21・タイトルシーン着手）」参照。`TitleCamera`はまだ空の骨格のみ、これから中身を実装する。
 
-8. **リプレイ等で2回目のGameSceneに入ったとき、前回のEffekseerエフェクトが残っていることがある。** シーン終了時にエフェクトを明示的に停止・クリアする処理が必要（未着手）。
+8. ~~リプレイ等で2回目のGameSceneに入ったとき、前回のEffekseerエフェクトが残る問題~~ → **完了（2026-10-01確認）。** `SceneController::ResetScene()`で`m_scenes.clear()`の直前に`GameObjectManager::ClearAll()`を呼ぶ修正済み(詳細は下記「Boostエフェクト追加、シーン切り替え時のEffekseerエフェクト残留バグ修正」)。番号は他の記述から参照されているため欠番にせず残す。
 
 9. **シングルトンクラスが増えすぎている件、いずれ集約用クラス(例: GameServices)への移行を検討したい（2026-09-28・ユーザー提起、未着手）。** 現状`Application`/`InputManager`/`ResourceLoader`/`DebugManager`等が個別に`GetInstance()`を持つ素朴なMeyer'sシングルトン。今回`DebugManager`を追加する際、影響範囲を絞るためいったん同じパターンで作ったが、根本対応としては全マネージャーを1箇所で保持・提供する集約クラスへの置き換えが候補。既存コードへの影響が大きいため別タスクとして着手予定。
+
+10. **影の追加（2026-10-01・方針のみ決定、未着手）。** DxLibのシャドウマップ(`MakeShadowMap`/`ShadowMap_DrawSetup`等)を使う方針。
+   - 影を落とす側: オブジェクト全部（プレイヤー・敵・ボス・岩）。受ける側: 理想は海面・ステージ・オブジェクト同士の全部。
+   - 前提: 3D描画は全て独自シェーダー（LightingPS/VS・StagePS・WaterPS）なので、`SetUseShadowMap`だけでは影は出ない。受ける処理（シャドウマップを読んで暗くする）は自前のシェーダーに書く必要がある（参考: [Shader/MV1Default_PixelLighting_PS.hlsl](Shader/MV1Default_PixelLighting_PS.hlsl)の242〜307行目、`t8`〜`t10`・`g_ShadowMap`）。シャドウマップ作成中に独自シェーダーが有効のままだと、深度ではなく色が書き込まれる点にも注意。
+   - 負荷: 主な増加はシャドウマップ作成で`DrawAll()`相当がもう1回増えること（今は水の透過キャプチャで2回→3回に）。受ける面の数はほぼ影響しない。ただし影の縁を何回も読んでぼかす場合は、画面を広く占める海面が一番重くなる。
+   - 手間: ステージ(小) < オブジェクト同士(中、通常/スキニングのVS2本、シャドウアクネの調整) < 海面(大、MV1でないためシャドウマップ・行列が自動で渡らない可能性が高い、要確認)。
+   - ステージはZ方向に長い(1200〜27000)ので、影を描く範囲はプレイヤー周辺に限定する必要がある。
+   - 進める順の案: ステージかオブジェクト同士で動く形を作る → 海面は最後。
+
+11. **EffectManagerの新設（2026-10-01・方針のみ相談、未着手）。** 現状はEffekseerのAPI(`PlayEffekseer3DEffect`/`SetPos...`/`Stop...`等)を17ファイル・83箇所で直接呼び、再生ハンドルも各クラスが保持して自前で`Stop`している。`Sync3DSetting`/`UpdateEffekseer3D`/`DrawEffekseer3D`も各シーンが直接呼んでいる。ロード側(`ResourceLoader::EffectID`)は一元化済みなのでそのまま使う。
+   - 所有: `SoundManager`/`BulletManager`と同じく、シーンが`shared_ptr<EffectManager>`を持ち、各オブジェクト・ステートには`weak_ptr`で渡す。
+   - 機能案: `Update()`/`Draw()`(Sync3DSetting込み)、`Play(EffectID, pos)`→ハンドル(Play+SetPosの2行セットを1つに)、`PlayOneShot(EffectID, pos)`(被弾・死亡・召喚など撃ちっぱなし用、ハンドル不要)、`SetPos`/`SetRotation`/`SetScale`/`SetColor`/`IsPlaying`/`Stop`、`StopAll()`(シーン遷移・リトライ時の残留対策)。
+   - 検討点: 再生ハンドルを`int`のまま返すか、RAIIのハンドル型(中身は`int`1つ、破棄時に自動`Stop`、ムーブのみ)にするか。Claudeの推奨はRAII(止め忘れが原理的になくなり、デストラクタの`Stop`群が消える)。
+   - 移行順の案: ①シーンのUpdate/Drawを置き換え → ②撃ちっぱなし系を`PlayOneShot`へ → ③追従系(弾・ブースト・チャージ・ビーム・Player.cppの水しぶき)を移行。
 
 ## 進捗（2026-08-21・タイトルシーン着手：CameraBase分割、TitlePlayer/TitleCamera新設）
 
@@ -128,9 +145,9 @@
 - `m_isFollowing`(初期値`true`)で追従状態を管理。`UpdatePosition()`は追従中のみ`m_targetPos`をプレイヤー位置に更新、`StopFollowing()`が呼ばれた後は`m_pos`/`m_targetPos`とも一切更新しない（＝最後に追従していた向きで固定される）方針。カメラ位置(`m_pos`)自体は追従中も固定のまま動かさない設計（合意済み）。
 
 **`TitlePlayer`（前進・宙返り・描画まで完了、ブーストは未実装）:**
-- `Actor`を直接継承（`Charactor`は継承しない）。フェーズ管理は`enum class Phase { Forward, Somersault, Boost }`。フェーズ切り替えは`TitleScene`から`StartSomersault()`/`StartBoost()`を呼ぶ（合意方針通り）。
-- **ハマった点: `SetVel`で速度をセットしても、`Actor`には速度を位置に反映する処理が無く、何も動かなかった。** `m_pos += m_velocity`は`Charactor::Update()`に実装されている処理だが、`TitlePlayer`は`Charactor`を継承していないため自動的には効かない。`TitlePlayer::Update()`内に同じ処理を自前で追加して解決。
-- **ハマった点2: 位置反映(`m_pos += m_velocity`)と速度計算(`SetVel`)の順序を最初逆にしてしまい、1フレーム遅れの状態になっていた。** `BossEnemy::Update()`を参考に「先に`SetVel`で今フレームの速度を決めてから、後で`Charactor::Update()`相当の位置反映をする」正しい順序に修正。
+- `Actor`を直接継承（`Character`は継承しない）。フェーズ管理は`enum class Phase { Forward, Somersault, Boost }`。フェーズ切り替えは`TitleScene`から`StartSomersault()`/`StartBoost()`を呼ぶ（合意方針通り）。
+- **ハマった点: `SetVel`で速度をセットしても、`Actor`には速度を位置に反映する処理が無く、何も動かなかった。** `m_pos += m_velocity`は`Character::Update()`に実装されている処理だが、`TitlePlayer`は`Character`を継承していないため自動的には効かない。`TitlePlayer::Update()`内に同じ処理を自前で追加して解決。
+- **ハマった点2: 位置反映(`m_pos += m_velocity`)と速度計算(`SetVel`)の順序を最初逆にしてしまい、1フレーム遅れの状態になっていた。** `BossEnemy::Update()`を参考に「先に`SetVel`で今フレームの速度を決めてから、後で`Character::Update()`相当の位置反映をする」正しい順序に修正。
 - 描画(`Draw()`)は`Rock::Draw()`のパターン（`ApplyMatrix`→`UpdateShaderMatrixData`→テクスチャ取得→`DrawWithLighting`）をそのまま踏襲、プレイヤーの法線マップ等（`GraphicID::PlayerNormalMap`等）とスケール(`{0.3f,0.3f,0.3f}`、`Player`と同じ値)を使用。
 - **宙返り実装**: 既存`SomersaultState::Update()`のロジック（進行度計算→X軸回転角→`sin`/`cos`で縦一回転する速度ベクトルを作る）を、`Player`固有機能(ゲージ消費・`LerpToAngleX`)を除いて移植。回転は`Quaternion(Vector3(1,0,0), -angle)`で`m_rotation`に直接代入する方式（合意通り、角度変数は持たない）。終了判定は`IsSomersaultEnd()`（`TitleScene`側が監視して次フェーズへ進める設計、合意方針通り）。
 - **重大なハマりどころ: `TitlePlayer::OnInit()`の実装漏れでクラッシュ（`m_pCbufferMatrixData`がnullptrのまま`Draw()`が呼ばれアクセス違反）。** `Rock`等が`OnInit()`で`CreateShaderBuffers()`を呼んでいたのに、`TitlePlayer`にはそもそも`OnInit()`のオーバーライドが存在しなかった。追加して解決。
@@ -438,12 +455,12 @@
 
 - **対象とする攻撃源**: `Rock`（岩）・`WormEnemy`（頭+胴体セグメントは同一個体ならまとめて1つ扱う）・`BossBeam`（左右2本のビームは同一ボス個体なのでまとめて1つ扱う）の3種類。`EnemyBullet`（敵弾）は命中した瞬間に消滅し多段ヒットが構造上起こらないため対象外。
 - **個体の識別方法**: `GameObject`に一意なID（`m_id`、`GetID()`）を追加。コンストラクタで`static int s_nextId`をインクリメントしながら払い出す方式（**この部分は既にユーザーが自力で実装済み**、`GameObject.h/.cpp`確認済み）。
-- **`DamageSource`構造体**: 新規ファイル`Game/GameObjects/Actors/Charactor/DamageSource.h`をユーザーが作成（ソリューションエクスプローラー経由）。中身は`enum class DamageSourceType { Rock, Worm, Beam }`と、`type`+`id`を持つ`DamageSource`構造体、`std::set`で使うための`operator<`（まず`type`で比較し、同じ`type`なら`id`で比較する2段階比較）。**この`operator<`の実装意図をユーザーに解説済み、DamageSource.hへの実装はこれから。**
-- **API配置場所**: 多段ヒット防止のAPI（`IsTakingDamageFrom`/`StartTakingDamage`/`OnLeaveDamaging`想定）は、`Player`単体ではなく`Charactor`基底クラスに置く方針（将来敵側の多段ヒット防止にも使い回せるように、という判断）。
+- **`DamageSource`構造体**: 新規ファイル`Game/GameObjects/Actors/Character/DamageSource.h`をユーザーが作成（ソリューションエクスプローラー経由）。中身は`enum class DamageSourceType { Rock, Worm, Beam }`と、`type`+`id`を持つ`DamageSource`構造体、`std::set`で使うための`operator<`（まず`type`で比較し、同じ`type`なら`id`で比較する2段階比較）。**この`operator<`の実装意図をユーザーに解説済み、DamageSource.hへの実装はこれから。**
+- **API配置場所**: 多段ヒット防止のAPI（`IsTakingDamageFrom`/`StartTakingDamage`/`OnLeaveDamaging`想定）は、`Player`単体ではなく`Character`基底クラスに置く方針（将来敵側の多段ヒット防止にも使い回せるように、という判断）。
 
 **次回やること:**
 1. `DamageSource.h`の中身を実装する（enum + struct + operator<）。
-2. `Charactor`に`std::set<DamageSource> m_takingDamageSources`と`IsTakingDamageFrom`/`StartTakingDamage`/`OnLeaveDamaging`を追加する。
+2. `Character`に`std::set<DamageSource> m_takingDamageSources`と`IsTakingDamageFrom`/`StartTakingDamage`/`OnLeaveDamaging`を追加する。
 3. `CollisionManager::Update()`のRock/WormEnemy/BossBeamの3箇所のループに、ループ外の`isHitXxx`フラグ＋ループ内での`IsTakingDamageFrom`確認＋ループ後の`OnLeaveDamaging`呼び出しを組み込む（NOTES.md過去の教訓：`OnLeaveDamaging`をどこで呼ぶかが以前つまずいたポイントなので注意）。
 4. `Brake`もBoostと同じ「Exit()での音の停止」が必要か確認する。
 5. リプレイ等でEffekseerエフェクトが残留する問題（旧タスク8）はまだ未着手のまま。
@@ -541,7 +558,7 @@
 
 **次回やること:**
 1. `TargetManager.cpp`の未使用`vector`宣言の削除（軽微、未対応のまま）。
-2. 多段ヒット防止の実装（`DamageSource.h`〜、`Charactor`基底へのAPI追加、`CollisionManager`への組み込み）は引き続き未着手。
+2. 多段ヒット防止の実装（`DamageSource.h`〜、`Character`基底へのAPI追加、`CollisionManager`への組み込み）は引き続き未着手。
 3. `Brake`もBoostと同じ「Exit()での音の停止」が必要か確認する（未確認のまま）。
 4. リプレイ等でEffekseerエフェクトが残留する問題（旧タスク8）はまだ未着手のまま。
 
@@ -550,7 +567,7 @@
 **多段ヒット防止(`DamageSource`)を完成させた。** 前回の設計（`DamageSourceType` enum + `id`のペア、`std::set`で管理）通りに実装。
 
 - `DamageSource.h`（新規、ユーザー作成）: `enum class DamageSourceType { Rock, Worm, Beam }`と、`type`+`id`を持つ`DamageSource`構造体、`std::set`用の`operator<`（`type`→`id`の2段階比較）。`operator<`の実装意図（`std::set`が要素の重複判定・整列に使う裏方の仕組みであり、ゲームロジック上の優先順位とは無関係であること）をユーザーに詳しく解説し、正しく理解した上で自力で実装。
-- `Charactor`基底に`std::set<DamageSource> m_damageSources`と`IsTakingDamageFrom`/`StartTakingDamage`/`OnLeaveDamaging`を追加（Player単体ではなく基底に置き、将来敵側でも使えるようにする方針）。
+- `Character`基底に`std::set<DamageSource> m_damageSources`と`IsTakingDamageFrom`/`StartTakingDamage`/`OnLeaveDamaging`を追加（Player単体ではなく基底に置き、将来敵側でも使えるようにする方針）。
 - `CollisionManager::Update()`のRock/WormEnemy/BossBeam(左右共通の1つのDamageSourceとして扱う)の3箇所に、「ループ外でヒットフラグとDamageSourceを用意→ループ内で`IsTakingDamageFrom`確認しつつダメージ処理→ループ後`isHitXxx`を見て`OnLeaveDamaging`」というパターンを適用。全てユーザーが自力で実装し、一発で正しく動作。
 
 **プレイヤー効果音の仕上げ**: `SoundManager::Play`に`isOnce`引数を追加した際の副作用（時間的に重複した別々の被弾を巻き添えで消してしまう）を、多段ヒット防止の完成によって根本的に解消（`isOnce`はもう使わなくてよくなった）。ブースト音がフェードアウト中に鳴らし直すと音量が下がったままになる問題は、`Play()`内で`fadeState`リセット＋`ChangeVolumeSoundMem`で音量を明示的に戻す処理を追加して解決。
@@ -966,13 +983,84 @@
 - **完了(コード確認済み):**
   - `BossBeamState.h`: `OnReflectLeft/Right`(public)・`GetTipSphereL/R`・`IsReflectedL/R`の宣言、`m_isReflectedL/R`、非デバッグの先端球`m_beamTipSphereL/R`。
   - `BossBeamState.cpp`: `OnReflectLeft/Right`が左右とも実装済み(先端位置と`hitPos`から法線を求め、`m_beamMoveDir = v - normal * (2 * Dot(v, normal))`で反射、`m_isReflected`を`true`に)。反射式の`float * Vector3`問題(`Vector3`は`Vector3 * float`のみ)は`normal * (2 * Dot(...))`の形で修正済み。`GetTipSphereL/R()`も定義済み。
-- **未完成・未着手(2026-09-30時点):**
-  - `IsReflectedL/R()`が仮実装の`return false`のまま(`m_isReflectedL/R`を返すようにする)。
-  - 先端球の更新が`Update()`内でコメントアウトのまま(142〜143行目、`#ifdef _DEBUG`内の248〜249行目も)。先端球は`m_beamPosL/R`が動いた後に更新すること。デバッグ描画(282〜283行目)もコメントアウト。
-  - `Enter()`で`m_isReflectedL/R`を`false`にリセットしていない(ビームが2回目以降に前回の反射状態を引きずる)。
-  - `hitPos`にはカウンター球の**中心**を渡す取り決め(法線が球の外向きになるように)を`CollisionManager`側で守る必要がある。
-  - `Update()`の反射後の分岐(プレイヤー追跡・判定球生成をやめ、ボスへ最大旋回角で寄せる。反射前から残っている判定球の扱いも決める)。
-  - `BossBeamTipCollider`(タグ`BossBeamTip`、左右2個)の新規作成、`ColliderTag`に`BossBeamTip`/`BossBeamReflected`追加、`BossEnemy::GetColliders()`への登録、`BossBeamCollider`の左右別タグ化。
-  - `CollisionManager`の`hit_pairs`に`{BossBeamTip, Counter}`(プレイヤー本体より上)と`{BossBeamReflected, BossDamage}`、`OnHit`の反射トリガー、反射ビームがボスに当たったときの大ダメージ。
-- 作業順のおすすめ: `IsReflectedL/R`と`Enter()`のリセット → 先端球の更新 → コライダーと`hit_pairs`(まず反射のトリガーだけ) → `Update()`の反射後の動き → 実機確認。
+- **完了(2026-10-01コード確認済み):** `IsReflectedL/R()`が`m_isReflectedL/R`を返す、`Enter()`で反射状態をリセット、先端球の更新を先端を動かした後(`Update()`内)に移して有効化、先端球のデバッグ描画を有効化、法線のコメントを「当たった位置→先端」に修正。
+- **完了(2026-10-01コード確認済み):** `ColliderTag::BossBeamTip`追加。`BossBeamTipCollider`(`Game/Collision/`、vcxproj登録済み)を作成: コンストラクタで`BossEnemy&`と`isRight`を受け取る。`IsCollisionActive()`=ボス生存・ステートが`BossBeamState`・自分の側が未反射。`GetCollision()`=自分の側の`GetTipSphereL/R()`。`OnCollision()`=相手が`Counter`ならカウンター球の中心を`hitPos`として`OnReflectLeft/Right`を呼ぶ（反射のきっかけは`CollisionManager::OnHit`ではなく先端コライダー自身の`OnCollision`に置くことにした）。
+  - ハマった点: `IsCollisionActive()`で、ビームのステートか調べた結果に関係なく`dynamic_pointer_cast(...)->IsReflectedR()`を呼んでおり、ビーム以外のステートで`nullptr`アクセスになるところだった → `nullptr`なら先に`return false`。
+- **未完成・未着手(2026-10-01時点):**
+  - ~~`BossEnemy`への登録、`hit_pairs`への追加~~ → **完了・実機確認済み(2026-10-01)**: `BossEnemy`が`BossBeamTipCollider`を右(`true`)・左(`false`)の2つ値で持つ（他のボスのコライダーに合わせて`BossEnemy.h`に`#include`）。`hit_pairs`の`{BossBeamTip, Counter}`は`{BossBeam, Player}`より上。パリィで`OnCollision`が呼ばれ反射のきっかけが動くことをユーザーが確認。
+  - パリィした瞬間、プレイヤーの近くに残っている通り道の判定球で、同じフレームに本体がビームのダメージを受ける可能性がある（ローリング中も本体の判定は有効なため）。
+    → **決定(2026-10-01)**: 反射した側の通り道の判定球は消さずに残し、**パリィ成功時にプレイヤーを短い間だけ無敵にする**。実装方針: Playerに`m_invincibleFrame`/`StartInvincible(int)`/`IsInvincible()`を追加し`Update()`で減らす、`PlayerCollider::IsCollisionActive()`に「無敵中でない」を追加、`CounterCollider::OnCollision`で相手が`BossBeamTip`なら`StartInvincible`（無敵フレームは`CounterCollider.cpp`の定数、まず30F）。`{BossBeamTip, Counter}`が`{BossBeam, Player}`より上なので、同じフレームのダメージも防げる。
+    → **実装済み(2026-10-01コード確認)**: `Player::OnInvincibleStart(int)`/`IsInvincible()`/`OnInvincibleEnd()`、`m_invincibleFrame`を`Player::Update()`で減算、`PlayerCollider::IsCollisionActive()`に`!IsInvincible()`、`CounterCollider::OnCollision`で相手が`BossBeamTip`なら`OnInvincibleStart(counter_invincible_frame=30)`。無敵中にもう一度パリィしたら数え直す（左右続けてパリィしたときに早く切れないように）。実機確認はまだ。
+  - **反射後の動き、実装済み(2026-10-01コード確認、実機確認はまだ)**: `Vector3::Cross`を追加。`BossBeamState::Update()`で、反射していない側だけプレイヤー追跡と通り道の判定球の生成を行い、反射した側はボスのダメージ判定球へ`one_frame_turn_angle`(=`DX_PI_F/90`、2度)を上限に向きを寄せる。ハマった点: 右の`else`を内側の`if(プレイヤーZ<先端Z)`に付けてしまい、反射していないビームがボスへ戻る逆の動きになっていた／右だけ角度判定が無く向き切った後に揺れる／かっこ不足。
+  - 次: 反射したビームがボスのダメージ判定に当たったら大ダメージ。**方針決定(2026-10-01)**: 反射した側は通り道の球を作らないので、ボスに届くのは先端の球。`BossBeamTipCollider`の`GetTag()`を「反射済みなら`BossBeamReflected`、まだなら`BossBeamTip`」に切り替えて使い回す（`CollisionManager`は毎フレーム`GetTag()`で振り分け直すので、次のフレームから判定相手が変わる）。`hit_pairs`に`{BossBeamReflected, BossDamage}`、`BossDamageCollider::OnCollision`で相手が`BossBeamReflected`なら大きめの固定ダメージ。**当たった後は、先端をその場で止め、`SetColorPlayingEffekseer3DEffect`でアルファを徐々に下げ、0になったら`StopEffekseer3DEffect`**（止めたハンドルは-1にして以後触らない）。軌跡に残った粒子までちゃんと薄くなるかは実機で確認する。
+
+**現状のまとめ（2026-10-01、学校で作業終了時にコードを読んで確認）**
+
+- **完了済み**
+  - 反射のきっかけ（先端×カウンター→`OnReflectLeft/Right`）、パリィ成功時の無敵、反射後にボスへ曲がる動き（上記のとおり）。
+  - `ColliderTag::BossBeamReflect`を追加（ノート上の仮名`BossBeamReflected`ではなく、**実際の名前は`BossBeamReflect`**）。
+  - `BossBeamTipCollider::GetTag()`: 自分の側が反射済みなら`BossBeamReflect`、まだなら`BossBeamTip`を返す。一度、右が`IsReflectedL()`・左が`IsReflectedR()`を見る左右逆のバグがあったが修正済み。
+  - `BossBeamState`: `m_isHitBossL/R`、`OnHitBossL()`/`OnHitBossR()`、`IsHitBossL()`/`IsHitBossR()`（.hにインライン）、`Enter()`でリセット。
+- **未完了（家でここから再開）**
+  1. `BossBeamTipCollider::IsCollisionActive()`: まだ「反射したら`false`」のまま。**「ボスが生きていて、ステートが`BossBeamState`で、自分の側がまだボスに当たっていない（`IsHitBossL/R()`）」**に書き換える。反射前・反射後どちらも有効で、ボスに当たったら無効（先端がボスの中で止まるので、無効にしないと毎フレーム大ダメージになる）。
+  2. `BossBeamTipCollider::OnCollision()`: 今は「相手が`Counter`以外なら`return`」しているので、相手が`BossDamage`のとき自分の側の`OnHitBossL()`/`OnHitBossR()`を呼ぶ分岐を追加する。
+  3. `CollisionManager.cpp`の`hit_pairs`に`{ BossBeamReflect, BossDamage }`を追加。
+  4. `BossDamageCollider::OnCollision()`: 相手が`BossBeamReflect`なら大きめの固定ダメージ（定数は`namespace`に）で`TakeDamage`。
+  5. `BossBeamState::Update()`: ボスに当たった側は先端をその場で止め（向きの更新・移動をしない）、フェードの経過フレームを数えて`SetColorPlayingEffekseer3DEffect(ハンドル,255,255,255,アルファ)`でアルファを下げ、0で`StopEffekseer3DEffect`してハンドルを-1に。-1のハンドルには位置・向きを設定しない。
+  6. 実機確認: パリィ→ボスへ曲がる→命中で1回だけ大ダメージ→軌跡ごと薄くなって消える。曲がり具合は`one_frame_turn_angle`で調整。
 - 運用: 手順が合意済みのタスクでは、質問を重ねず箇条書きでやることを出す(ユーザー要望、2026-09-30)。**NOTES.mdに進捗を書くときは、書く前にコードを読んで実際の進み具合を確認すること。**
+
+### 進捗（2026-10-01・海面の水しぶき`WingSpray`のリアル版をv2に改修）
+
+- 指摘: 「霧が強すぎて、ただ生まれているように見える。切り裂いている感じがほしい」。
+- **原因（描画して確認）**: ゲームのカメラ(機体の300後方+追従遅れ、海面から約200上、視野角90°、水平に前を見る)に対し、発生点は翼の250後方なので**画面の下端ぎりぎり**。後ろへ流れる粒子はすぐカメラの後ろへ消え、見えるのは下端から湧き上がる霧だけだった。さらにv1の筋テクスチャ(`SprayStreak.png`)はアルファが0/255の二値になっていて、筋が長方形に見えていた(生成スクリプトの不具合)。
+- **v2の構成**: 海面の白い切り口線(`CutLine`) + 外側へ開くV字の引き波(`WakeV`、Y回転した親ノードの子) + 高速で細長く斜め上へ飛ぶ水の刃(`Blade`) + 筋・水滴(動きの向きに伸びる) + 後方に薄く残る霧(`MistTrail`、発生点より後ろから出す) + 薄い泡。新テクスチャ`SprayStreak2.png`/`SprayDrop2.png`/`CutLine.png`。
+- ファイル: `WingSprayReal_L/R`＝v2a(控えめ、ゲームが読んでいる名前のまま)、`WingSprayReal_v2b_L/R`＝v2b(大胆: 霧ほぼ無し・刃が多く長い)、`WingSprayReal_v1_L/R`＝前回の版の退避。トゥーン版(`WingSprayToon_*`)は未変更。
+- 未確認: ゲーム内での見え方(ユーザー確認待ち)。カメラ位置は翼ボーン位置を推定して再現したもの。現状`wing_splash_effect_path`は`_L`を両翼に使っているので、右翼も内側(左)へ吹く。
+- 2026-10-01続き: 「v2aはもう少し霧の主張があっていい」→ 後方の霧(`MistTrail`)を濃く大きく・発生点寄りから立ち上がるようにし、さらに水の筋(`SprayJet`)の子ノード`JetVapor`で筋の軌跡から霧が膨らむようにした(筋1本あたり最大4個)。切り口線・V字の引き波・水の刃は維持。`WingSprayReal_L/R`をこの版に更新し、直前のv2aは`WingSprayReal_v2a_L/R`に退避。
+- 2026-10-01続き2: 「霧はv1よりちょっと少ないぐらいでいい」→ 霧を発生点寄り(後方0.1〜0.5)から小さく出して膨らませ、後ろへ流れる速さを落として画面内に長く残すようにした(濃さ62、筋から出る霧85)。ゲームカメラ再現での明るさの合計がv1の約8割(79%、広がり96%)になるよう数値で合わせた。発生点では細いくさび形なので塊がいきなり出る見え方にはしていない。`WingSprayReal_L/R`を更新、直前の版は`WingSprayReal_v2c_L/R`に退避。
+- 学び: ゲームカメラだと後方の霧はすぐ画面外に出るので、霧の「量」より「出す位置と後ろへ流れる速さ」の方が画面上の霧の多さに効く(位置を前に寄せただけで画面上の霧が2.5倍になった)。
+- 2026-10-01続き3: **海に近いほど強くなるよう、動的パラメーター(入力0)に対応。** 入力0＝高度の比率(海面で0、`sea_splash_height_threshold`で1)。入力0が0のときは直前の版と完全に同じ見た目(画面上の明るさ一致を確認)なので、コード側で値を渡さなくても壊れない。式6本: 水の刃・筋・水滴・泡の発生間隔×(1+3h²)、霧の発生間隔×(1+5h²)、飛ぶ速さ(xyz×(1-0.4h/0.6h/0.35h))、霧の大きさ×(1-0.7h)、筋から出る霧の個数×(1-h²)、刃の長さ×(1-0.4h)。切り口線とV字の引き波は高度に関係なく常に出る。ゲームカメラ再現での明るさ: 高度0→100%、50→75%、100→37%、150→19%、200→15%。直前の版(動的パラメーターなし)は`WingSprayReal_v2d_L/R`に退避。
+- 左右の読み分けはユーザーが対応済み(`EffectID::LeftWingSplash/RightWingSplash`、パスは`WingSprayReal_L.efk`/`_R.efk`、`UpdateWingSplash`の引数にEffectID)。上の「`_L`を両翼に使っている」は解消済み。
+- **コード側は未対応(ユーザーが実装する)**: `Player::UpdateWingSplash`で毎フレーム`SetDynamicInput3DEffect(splashHandle, 0, 高度の比率)`を呼ぶ。式では`min/max/clamp`が使えないので、0〜1への切り詰めはコード側で行う。
+- Effekseerの動的パラメーターのメモ: 式の変数は`@In0〜@In3`(外部入力)、`@P.x〜w`(適用前の値)、`@O.x〜w`(出力)、`@GTime`/`@PTime`。関数は`sin/cos/rand/step`のみ。動かせるのは発生間隔・寿命・位置/速度/加速度・大きさなどの数値で、**色(アルファ)は動かせない**。.efkprojでは値の中に`<DynamicEquationMin>番号</DynamicEquationMin><DynamicEquationMax>番号</DynamicEquationMax>`(最大発生数は`<DynamicEquation>番号</DynamicEquation>`)、式本体は`<Dynamic><Equations><DynamicEquation><Name/><Code/>`。有効フラグは保存されず、番号があれば読み込み時に有効になる。
+### 進捗（2026-10-01・敵弾`EnemyBullet`の軌跡を延長）
+
+- 依頼: 「敵の弾の軌跡が短いので長めに。ただし処理は重くしない」。
+- 変更(`Data/Effect/EnemyBullet/EnemyBullet.efkefc`/`.efk`を上書き。元の版はgit履歴にある): 軌跡`Kiseki`(Track)の寿命9→30F、発生間隔1→3F、スプライン分割3→8。電気`Denki`(Track)の寿命11→20F、発生間隔1.4→2.2F。どちらも色をFixed→Easing(アルファ255→0、StartSlowly2)にして、尾が自然に消えるようにした(発生間隔を空けたことによる尾の段差を隠す)。
+- 負荷: 弾1発あたりのインスタンス数は 9+約8 → 10+約9 でほぼ同じ。増えたのはスプライン分割の頂点数だけ(GPU側で軽い)。軌跡の長さは約3.3倍(弾速8で約70→約240ゲーム単位)。
+- 反射弾(速さ5.5倍)は軌跡がかなり長くなる。発生間隔3Fのため、弾の球と軌跡の先頭に少し隙間が出ることがある。
+- 未確認: ゲーム内での見え方(ユーザー確認待ち)。
+- 2026-10-01続き: **「ゲーム内だと見づらく、遠近感がわからない」→ v3に作り直し**（参考: スターフォックスのリメイク版の敵弾＝明るい芯＋太い彗星の尾）。原因はゲームカメラ再現で確認した。敵は機体の2500前方から撃ってくるので、弾はほぼ正面から近づいてくる。このため細いTrackの尾は弾の後ろに隠れ、弾は小さな点のままだった。
+  - 構成: `Tail`(太い尾、Track、新テクスチャ`EB_Trail.png`、寿命30F/発生3F) + `Streak`(白い芯の筋、寿命12F/発生2F) + `Ring`(通った道に残る薄いリング、寿命22F/発生5F、1.0→1.7倍に広がりながら消える) + `Glow`(大きい光、2.4) + `Core`(白い芯、0.9)。電気`Denki`は外した（ゲーム内ではほぼ見えなかった）。インスタンス数は約23（v2は約20）。
+  - リングは、正面から来る弾では同心円に、斜めの弾では敵の方へ伸びる筒に見える。これで向きと距離が読める。
+  - ファイル: `EnemyBullet.efk/.efkefc`＝v3b(リングあり、ゲームが読む)、`EnemyBullet_v3a_NoRing.*`＝リングなし版、`EnemyBullet_v2.*`＝直前の版の退避。
+  - 学び: TrackはUがはば方向、Vが長さ方向（全体に伸びる）。`TrackSizeFor`は**尾の先(古い側)**、`Back`が弾の側。`SplineDivision`を2以上にすると、色が分割の中で補間されず縞模様になる。まっすぐ飛ぶ弾なら1でよい（軽くもなる）。
+  - 未確認: ゲーム内での見え方。もっと効く奥行きの手がかりとして、海面に弾の影・映り込みを落とす方法がある（コード側で弾の高さを渡す必要あり、未提案の段階）。
+- 2026-10-01続き2: **「奥行きがかなりわかりづらい」→ v4で海面に光を落とすようにした。** 動的パラメーター入力0＝弾の海面からの高さ（ゲーム単位そのまま。式の中で/75している）。`SeaGlow`（真下の海面に平らな光だまり）と`SeaTrail`（海面に残る通り道、Track）を追加。光だまりは弾との縦の距離で高さを、海面上の位置で距離を示す。通り道は、弾がどこを通ってくるかを示す。入力が1未満（コード未対応）のときは、式で1000下へ逃がして見えなくしているので、今のコードのままでもv3bと同じ見た目になる。
+  - 確認: 動的パラメーターの位置の出力には、エフェクトの倍率（書き出し50×読み込み1.5）が掛かる（倍率1と50で静止値と一致することを描画して確認）。`step(edge, x)`はGLSLと同じ順番。
+  - **コード側は未対応（ユーザーが実装する）**: `EnemyBullet::Update`（と、同じエフェクトを使う`ReflectedBullet`）で、毎フレーム`SetDynamicInput3DEffect(m_effectPlayHandle, 0, GetPos().y - 海面の高さ)`を呼ぶ。海面の高さ`sea_height = 100`は今`Player.cpp`の無名名前空間にある。
+  - `enemy_bullet_effect_scale`(1.5)を変えたら、式の`/75`も（50×倍率に）合わせて変える必要がある。
+  - ファイル: `EnemyBullet.*`＝v4（リング＋海面の光）。`EnemyBullet_v3a_NoRing.*`と`EnemyBullet_v2.*`は前回のまま。
+
+### 進捗（2026-10-01・ヒットエフェクト`HitEffect`をリアル調で作り直し）
+
+- 依頼: 「当たっているかわかりづらい」。敵味方共通のまま、リアル調で、元のエフェクトにこだわらず新規に作る。
+- 元の版の問題（ゲームカメラ再現で確認）: 白い玉が出るだけで「弾が光った」のか「当たった」のか区別しにくい。火花は1フレームに1個ずつ15F間かけて出る（寿命100F）ため、当たった瞬間の勢いがない。前方の敵に当たったときは小さな白い点になる。
+- 新構成（`HitEffect`親ノードの下、描画順）: `Smoke`（暗い煙、αブレンド、4個、22〜30F）→`Bloom`（オレンジの火球、2.4→5.0、13F）→`Ring`（衝撃波、0.5→5.0、10F）→`StreakH`/`StreakV`（十字の光条、横9・縦4.5、7F/5F）→`Sparks`（火花32本を一斉に出す、進行方向に伸びる、白→橙、12〜22F、重力あり）→`Embers`（残り火12個、18〜28F）→`Core`（白い閃光、3.2→1.8、9F）。インスタンスは1回あたり約55。
+- 親ノードを毎フレーム-Z（前方）に0.08（＝ゲームの8/F、機体と`FloatingEnemy`の前進速度）動かしている。当たった相手に張り付いて見えるようにするため。止まっている物に当たったときは、少し前へずれていく。
+- 新テクスチャ（`Texture/HE_*.png`、自作）: `HE_Flash`（芯の広い閃光）、`HE_Glow`（柔らかい光）、`HE_Spark`/`HE_SparkH`（縦/横の針）、`HE_Ring`、`HE_Smoke`。古い`Particle01.png`/`Ring.png`は使わなくなったが残してある。元の版はgit履歴にある。
+- 確認: ゲームカメラ再現（1280×720、自機被弾＝4.25前方／敵に命中＝26前方）で、海の背景と明るい空の背景の両方を確認した。明るい空では加算の光が埋もれるが、煙の暗い塊が後に残るので当たった場所がわかる。
+- 学び: Effekseerのスプライトで、固定回転のZ=90が描画に効かなかった（原因未調査）。横長の光条は、横向きのテクスチャで作った。縮小したサムネイルだけで遠くの見え方を判断しない。実際の解像度で1:1に切り出して確認する。
+- 未確認: ゲーム内での見え方（ユーザー確認待ち）。
+
+### 進捗（2026-10-01・バレルロールのエフェクト`BarrelRoll`をリアル調で新規作成、v1）
+
+- 依頼: プレイヤーのバレルロール（RB/LB二回押し、20Fで1回転、ロール中はカウンター判定が有効）のエフェクト。リアル調、ほかはおまかせ。らしさの核は「翼端の飛行機雲の螺旋で回転を見せる＋空気の膜で防御中を見せる」。
+- ファイル: `Data/Effect/BarrelRoll/BarrelRoll_v1_R.*`（右ロール用）/`_L.*`（左ロール用、回転方向だけ逆）。テクスチャは`Texture/BR_*.png`（自作: Trail/Puff/Cone/Ring/Dot）。ループなし、全体で約55F。
+- 構成（描画順）: `AirRipple`（回り始めの空気の波紋、0.8→4.2倍、14F、加算）→`Spin`（20Fで360°回る親。R=+18°/F、L=-18°/F）の下に `TipR`/`TipL`（翼端、x=±1.6・z=+0.3、寿命20F）→ 各翼端に `Contrail`（Track、毎フレーム生成、生成時のみ親の影響＝空間に取り残されて螺旋になる、寿命34F）＋`Mist`（ふくらんで消える煙）＋`Droplet`（細かな水滴、加算）。`VaporSheath`（機体を包む円錐の筒の膜、Ring、内半径0.7→外半径1.6・後ろに1.8、ロール中だけ）。
+- **仮定（要確認）**: 翼端の位置 x=±1.6（ゲーム単位で±80）は推定。`Player.mv1`はバイナリで翼幅を測れなかった。ずれていたら`TipX`を変えて作り直す。
+- **回転方向**: R版は描画ツールで「後ろから見て右翼端が上に回る（反時計回り）」ことを確認した。コードの右ロール（`m_rotationZ`が増える）でワールドの右翼が上がる向き、と推定して合わせた。ゲームで逆だったら`_R`と`_L`を入れ替える。
+- **コード側は未対応（ユーザーが実装する）**: ロール開始時（`DefaultRotationState`で`m_isStartRolling = true`にするところ）に、`m_rollDir`に応じて`_R`/`_L`を再生する。毎フレーム、位置を機体の位置に合わせる（回転は水しぶきと同じく`GetRotationY()+π`だけ。Zの回転はエフェクトの中でしているので渡さない）。飛行機雲は生成時のみ親の影響を受けるので、位置を追従させても空間に残る。
+- 生成スクリプトは scratchpad の`make_br.ps1`（パラメーターで帯の太さ・α・膜の大きさなどを変えられる、`-Dummy`で検証用のダミー機体付き）。
+- 未確認: ゲーム内での見え方、実際の機体の大きさとの釣り合い。

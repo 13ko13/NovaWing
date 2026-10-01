@@ -1,5 +1,5 @@
 ﻿#include "BossHPGaugeUI.h"
-#include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossEnemy.h"
+#include "Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.h"
 #include "Manager/ResourceLoader.h"
 #include "Utility/SizeF.h"
 #include "Constants/ShaderRegister.h"

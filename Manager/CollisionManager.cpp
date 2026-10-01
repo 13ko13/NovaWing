@@ -6,11 +6,11 @@
 #include "Game/GameObjects/Bullet/PlayerBullet.h"
 #include "Game/GameObjects/Bullet/ChargeBullet.h"
 #include "Game/GameObjects/Bullet/EnemyBullet.h"
-#include "Charactor/Player/Player.h"
-#include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
+#include "Character/Player/Player.h"
+#include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
 #include "Game/GameObjects/Actors/Rock/Rock.h"
 #include "Game/GameObjects/Camera/GameCamera.h"
-#include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossEnemy.h"
+#include "Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.h"
 #include "Game/Collision/ICollider.h"
 #include "Game/Collision/SphereShape.h"
 #include "Game/Collision/EnemyCollider.h"
@@ -43,6 +43,7 @@ namespace
 		{ ColliderTag::PlayerBullet, ColliderTag::BossDamage },
 		{ ColliderTag::PlayerBullet, ColliderTag::BossShield },
 		{ ColliderTag::BossBeam, ColliderTag::Counter },
+		{ ColliderTag::BossBeamTip, ColliderTag::Counter },
 		{ ColliderTag::BossBeam, ColliderTag::Player },
 		{ ColliderTag::Worm, ColliderTag::Player },
 		{ ColliderTag::Rock, ColliderTag::Player },

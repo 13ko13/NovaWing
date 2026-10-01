@@ -12,7 +12,7 @@
 #include "Utility/GraphShaderDraw.h"
 #include "Manager/SoundManager.h"
 #include "Manager/DebugManager.h"
-#include "Game/GameObjects/Actors/Charactor/Player/Player.h"
+#include "Game/GameObjects/Actors/Character/Player/Player.h"
 
 namespace
 {

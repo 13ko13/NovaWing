@@ -1,6 +1,6 @@
 ﻿#include "EnemyCollider.h"
 #include "BulletCollider.h"
-#include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
+#include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
 
 EnemyCollider::EnemyCollider(EnemyBase& owner, ColliderTag tag) :
 	m_owner(owner),

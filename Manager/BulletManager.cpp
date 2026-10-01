@@ -3,7 +3,7 @@
 #include "Game/GameObjects/Bullet/EnemyBullet.h"
 #include "Game/GameObjects/Bullet/ChargeBullet.h"
 #include "Game/GameObjects/GameObject.h"
-#include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
+#include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
 
 

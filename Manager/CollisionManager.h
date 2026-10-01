@@ -3,7 +3,7 @@
 #include <vector>
 #include <set>
 
-#include "Game/GameObjects/Actors/Charactor/DamageSource.h"
+#include "Game/GameObjects/Actors/Character/DamageSource.h"
 
 class Player;
 class BulletManager;
