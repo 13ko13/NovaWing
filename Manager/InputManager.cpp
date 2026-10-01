@@ -42,10 +42,12 @@ InputManager::InputManager() :
 									   {PeripheralType::pad1, XINPUT_BUTTON_A} };	// パッド:Aボタン
 
 	m_inputTable[InputEvent::up] = { {PeripheralType::keyboard, KEY_INPUT_UP}, // キーボード:上矢印
-									{PeripheralType::pad1_lstick_up, 0} };	  // パッド:左スティック上
+									{ PeripheralType::pad1_lstick_up, 0 },
+									{ PeripheralType::pad1,XINPUT_BUTTON_DPAD_UP} };	  // パッド:左スティック上
 
 	m_inputTable[InputEvent::down] = { {PeripheralType::keyboard, KEY_INPUT_DOWN}, // キーボード:下矢印
-									  {PeripheralType::pad1_lstick_down, 0} };	  // パッド:左スティック下
+									  {PeripheralType::pad1_lstick_down, 0} ,
+									{ PeripheralType::pad1,XINPUT_BUTTON_DPAD_DOWN} };	  // パッド:左スティック下
 
 	m_inputTable[InputEvent::next] = { {PeripheralType::keyboard, KEY_INPUT_A}, // キーボード:A
 									  {PeripheralType::pad1, XINPUT_BUTTON_A} };	  // パッド:Aボタン
