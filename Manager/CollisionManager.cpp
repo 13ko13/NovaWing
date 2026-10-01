@@ -45,6 +45,7 @@ namespace
 		{ ColliderTag::BossBeam, ColliderTag::Counter },
 		{ ColliderTag::BossBeamTip, ColliderTag::Counter },
 		{ ColliderTag::BossBeam, ColliderTag::Player },
+		{ ColliderTag::BossBeamReflect, ColliderTag::BossDamage },
 		{ ColliderTag::Worm, ColliderTag::Player },
 		{ ColliderTag::Rock, ColliderTag::Player },
 	};

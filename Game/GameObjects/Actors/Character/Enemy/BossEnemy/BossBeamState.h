@@ -53,6 +53,13 @@ private:
 	/// <param name="dir">進行方向(正規化済み)</param>
 	void SetBeamEffectDir(int playH, const Vector3& dir);
 
+	/// <summary>
+	/// ボスに当たったビームのエフェクトを薄くして、消えたらエフェクトを止める
+	/// </summary>
+	/// <param name="playH">再生中のエフェクトハンドル(止めたら-1になる)</param>
+	/// <param name="fadeFrame">ボスに当たってからの経過フレーム</param>
+	void FadeOutHitBeam(int& playH, int& fadeFrame);
+
 private:
 	//ビームのエフェクト再生ハンドル
 	int m_rightBeamEffectPlayH = -1;
@@ -95,6 +102,10 @@ private:
 	//ボスに当たったか
 	bool m_isHitBossL = false;
 	bool m_isHitBossR = false;
+
+	//ボスに当たってからの経過フレーム(エフェクトを薄くするのに使う)
+	int m_hitBossFrameL = 0;
+	int m_hitBossFrameR = 0;
 
 #ifdef _DEBUG
 	//ビームの目標地点

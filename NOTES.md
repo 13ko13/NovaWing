@@ -1064,3 +1064,29 @@
 - **コード側は未対応（ユーザーが実装する）**: ロール開始時（`DefaultRotationState`で`m_isStartRolling = true`にするところ）に、`m_rollDir`に応じて`_R`/`_L`を再生する。毎フレーム、位置を機体の位置に合わせる（回転は水しぶきと同じく`GetRotationY()+π`だけ。Zの回転はエフェクトの中でしているので渡さない）。飛行機雲は生成時のみ親の影響を受けるので、位置を追従させても空間に残る。
 - 生成スクリプトは scratchpad の`make_br.ps1`（パラメーターで帯の太さ・α・膜の大きさなどを変えられる、`-Dummy`で検証用のダミー機体付き）。
 - 未確認: ゲーム内での見え方、実際の機体の大きさとの釣り合い。
+
+### 進捗（2026-10-01・バレルロールのエフェクトをゲームに組み込み、ビルド未確認）
+
+- ユーザーの依頼でClaudeが直接編集（通常はユーザーが打つ方針だが今回は明示的に許可）。
+- `ResourceConstants.h`に`left/right_barrel_roll_effect_path`と`_scale`(1.0f)、`ResourceLoader`の`EffectID`に`LeftBarrelRoll`/`RightBarrelRoll`と読み込みを追加。
+- `DefaultRotationState`: ロール開始の2か所で`PlayRollEffect()`（`m_rollDir`でL/R選択、ハンドルは`m_rollEffectPlayH`）。`Update()`末尾で再生中は毎フレーム位置を機体に、回転は`(0, GetRotationY()+π, 0)`に合わせ、再生終了でハンドルを-1に戻す。
+- 未確認: ビルド（VS上で）、ゲーム内の見え方、翼端位置(x=±80推定)と回転方向が合っているか（逆なら`_R`/`_L`を入れ替え）。
+- 気になる点: ステートが切り替わる（`Exit`）とエフェクトは止まらず追従だけ止まる。必要なら`Exit`で`StopEffekseer3DEffect`する。
+
+### 進捗（2026-10-01・ボスのビーム跳ね返し、ボス命中まで完成）
+
+- **完成・実機確認済み(左右とも)**: パリィ → 反射 → ボスへ曲がる → 命中で大ダメージ(`BossDamageCollider`の`reflect_beam_damage=200`) → 命中した側の先端が止まり、30Fでアルファが下がって消える。
+- 実装(コード確認済み): `BossBeamTipCollider::OnCollision`が相手`BossDamage`のとき`OnHitBossL/R`を呼ぶ、`IsCollisionActive()`は自分の側が`IsHitBossL/R`でなければ有効、`hit_pairs`に`{BossBeamReflect, BossDamage}`、`BossDamageCollider::OnCollision`で`BossBeamReflect`なら`TakeDamage`。`BossBeamState`は`FadeOutHitBeam(int& playH, int& fadeFrame)`(経過に応じて`SetColorPlayingEffekseer3DEffect`でアルファを下げ、30Fで`StopEffekseer3DEffect`＆ハンドル-1)、`m_hitBossFrameL/R`、命中した側は向きの更新・先端の移動をしない、ハンドル-1なら位置・向きを設定しない、デストラクタも-1を除いて停止。**この`BossBeamState`のフェード部分は、ユーザーの依頼でClaudeが直接編集した(直接編集禁止ルールの例外)。**
+- ハマった点: `IsCollisionActive()`の左だけ`IsHitBossL()`ではなく`IsReflectedL()`を見ていて、左ビームだけボスに当たらなかった。左右が対のコードは片方だけ直し忘れ・取り違えが起きやすい(以前の`GetTag()`の左右逆と同じパターン)。
+- 残り: 反射したビームの曲がり具合(`one_frame_turn_angle`)・大ダメージの値・フェード時間(`hit_boss_fade_frame`)は、遊んで調整する。
+### 進捗（2026-10-01・スカイボックスを夜空に）
+
+- 依頼: ゲーム全体が明るいので、スカイボックスを夜にしたい。
+- `Data/Image/SkyBoxNight/`に夜版6枚を新規作成(昼の`Data/Image/SkyBox/`は残してある)。昼の画像の「赤さ」(雲ほど高い)をグラデーションで夜の色に変換して雲の形を保ち、水平線の薄い青緑のにじみ、星(上ほど多く、雲の明るいところでは隠れる)、月(正面の右上、半径38px、にじみ付き)を足した。昼の太陽(左面)のにじみは抑えた。生成スクリプトは scratchpad の`make_night_sky.ps1`(C#をAdd-Typeで埋め込み、UTF-8 BOM付きで保存しないと日本語コメントが文字化けしてコンパイルエラーになる)。
+- **コード側は未対応(ユーザーが実装する)**: `Constants/ResourceConstants.h`の`skybox_*_path`6本を`Data/Image/SkyBox/`→`Data/Image/SkyBoxNight/`に変える。`SkyBox_`(末尾`_`)は以前の暗い試作版で青が強すぎるため使っていない。
+- 未確認: ゲーム内での見え方。海(`WaterPS.hlsl`)は空を映すので夜空に変わるはず。ただ、ライティング(`LightingManager`の光の向き・色・環境光)や海の色は昼のままなので、機体や岩が明るすぎる場合は次の候補。
+- 2026-10-01続き: **「画像の切れ目が感じられる」→ 夜版を作り直した。** 昼の元画像は全12辺の画素がほぼ一致していた(辺の平均差0.1〜1.0)のに、夜版は`up|left`=38.9、`up|front`=12.4、`front|right`=6.9と食い違っていた。原因は、太陽のにじみの抑制(左面だけ)・月のにじみ(正面だけ)・星(面ごとにばらばらに撒いた)を面の画素座標で処理していたこと。**対処: 面をまたぐ処理(太陽の抑制・月のにじみ・星)はすべて、画素ごとの3D方向から計算する形にした。** 星は方向として1回だけ置き、届くすべての面に投影してぼかす(境目の星が両方の面に出る)。作り直し後は全辺が昼の元画像と同じ水準(平均0.0〜1.5)。月の円盘だけは、ゲームのカメラが見る正面の面の上で丸くなるよう、面の画素で描く(角度で作ると画面の端寄りで楕円に伸びた)。面の対応づけ(どの辺がどの辺につながるか)は`SkyBox.cpp`の頂点定義から導き、昼の画像で一致を確認した。スクリプトは scratchpad の`make_night_sky2.ps1`(生成)と`seam_check.ps1`(12辺の食い違いを数値で出す)。
+- それでも細い線が見える場合の次の手(コード側、ユーザーが実装): `SkyBox::Draw()`でバイリニア補間が面の端で反対側の画素を混ぜている可能性がある。描画前に`SetTextureAddressMode(DX_TEXADDRESS_CLAMP)`、描画後に元に戻す。
+- 2026-10-01続き: **ライトの向きを月の方向に合わせた。** 月は正面(+Z)の面の(720,215)にあり、その方向は(0.332, 0.473, 0.816)。光は月から差すので逆向きの`(-0.332, -0.473, -0.816)`にした。`GameScene.cpp`と`TitleScene.cpp`に重複していた`light_direction`を、`Constants/Game.h`の`Game::light_direction`1つにまとめた(`Game.h`は`Utility/Vector3.h`をincludeするようにした)。月の位置を変えたらここも合わせること。この3ファイルの編集はユーザーの依頼でClaudeが直接行った(直接編集禁止ルールの例外)。Debug x64ビルド成功を確認(MSBuildで`NovaWing.vcxproj`を直接ビルド)。
+- 見え方の注意: 月が前方なので、プレイヤーの方を向いた面(敵・岩の手前側)は逆光で暗くなる。暗すぎれば`LightingCommon.hlsli`の`ambient_light`(0.35)を上げる。光の色は、シェーダーが強さ(スカラー)しか使わないので、青白くはならない。
+- 未確認: ゲーム内での見え方(ユーザー確認待ち)。

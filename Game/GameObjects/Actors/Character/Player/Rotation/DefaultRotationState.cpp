@@ -1,4 +1,5 @@
 ﻿#include <cmath>
+#include <EffekseerForDXLib.h>
 
 #include "DefaultRotationState.h"
 #include "Manager/InputManager.h"
@@ -97,6 +98,7 @@ void DefaultRotationState::Update()
 				m_rollSumAngle = 0.0f;
 				//回転方向を記録
 				m_rollDir = 1;
+				PlayRollEffect();
 			}
 		}
 		else m_pushRightRollFrame = 0;
@@ -118,6 +120,7 @@ void DefaultRotationState::Update()
 				m_rollSumAngle = 0.0f;
 				//回転方向を記録
 				m_rollDir = -1;
+				PlayRollEffect();
 			}
 		}
 		else m_pushLeftRollFrame = 0;
@@ -182,6 +185,38 @@ void DefaultRotationState::Update()
 		targetAngle = 0.0f;
 		pPlayer->LerpToAngleZ(targetAngle, rot_lerp_t);
 	}
+
+	//バレルロールのエフェクトを機体に追従させる
+	if (m_rollEffectPlayH != -1)
+	{
+		if (IsEffekseer3DEffectPlaying(m_rollEffectPlayH) == -1)
+		{
+			//再生が終わった
+			m_rollEffectPlayH = -1;
+		}
+		else
+		{
+			VECTOR pos = pPlayer->GetPos().ToDxLib();
+			SetPosPlayingEffekseer3DEffect(m_rollEffectPlayH, pos.x, pos.y, pos.z);
+			//Z回転はエフェクト内で回しているので渡さない
+			//プレイヤーモデルは逆向きに作られているので+DX_PI_Fで補正
+			SetRotationPlayingEffekseer3DEffect(
+				m_rollEffectPlayH,
+				0.0f,
+				pPlayer->GetRotationY() + DX_PI_F,
+				0.0f);
+		}
+	}
+}
+
+void DefaultRotationState::PlayRollEffect()
+{
+	//ロール方向に合わせて左右どちらのエフェクトを出すか決める
+	ResourceLoader::EffectID effectID = (m_rollDir > 0) ?
+		ResourceLoader::EffectID::RightBarrelRoll :
+		ResourceLoader::EffectID::LeftBarrelRoll;
+	int effectHandle = ResourceLoader::GetInstance().GetEffect(effectID);
+	m_rollEffectPlayH = PlayEffekseer3DEffect(effectHandle);
 }
 
 void DefaultRotationState::Exit()

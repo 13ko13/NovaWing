@@ -42,6 +42,7 @@
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyFactory.h"
 #include "Game/UI/BossHPGaugeUI.h"
 #include "Manager/LightingManager.h"
+#include "Constants/Game.h"
 #include "Manager/SoundManager.h"
 #include "Game/UI/SpecialGaugeUI.h"
 #include "PauseScene.h"
@@ -81,9 +82,6 @@ namespace
 	const float boss_appear_zoom_limit = 1000.0f;
 	//ボス死亡のズーム時に保たせる最低限の距離
 	const float boss_death_zoom_limit = 2500.0f;
-
-	//ライトの方向
-	const Vector3 light_direction = Vector3(1.0f, -1.0f, 0.6f);
 
 	//地震音のフェードアウトにかける時間
 	constexpr float boss_quake_fade_out_time = 30.0f;
@@ -263,7 +261,7 @@ void GameScene::Init()
 	m_pStage->Init();
 
 	// ライトの方向ベクトルをセットする
-	LightingManager::GetInstance().SetLightDirection(light_direction);
+	LightingManager::GetInstance().SetLightDirection(Game::light_direction);
 }
 
 void GameScene::Update()

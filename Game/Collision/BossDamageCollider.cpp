@@ -2,6 +2,12 @@
 #include "BulletCollider.h"
 #include "Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.h"
 
+namespace
+{
+	//反射されたビームを食らった時のダメージ
+	constexpr int reflect_beam_damage = 200;
+}
+
 BossDamageCollider::BossDamageCollider(BossEnemy& owner) :
 	m_owner(owner)
 {
@@ -19,6 +25,10 @@ void BossDamageCollider::OnCollision(const ICollider& other)
 	{
 		const BulletCollider& bullet = static_cast<const BulletCollider&>(other);
 		m_owner.TakeDamage(bullet.GetAttackPower());
+	}
+	else if (other.GetTag() == ColliderTag::BossBeamReflect)
+	{
+		m_owner.TakeDamage(reflect_beam_damage);
 	}
 }
 
