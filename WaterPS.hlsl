@@ -146,7 +146,7 @@ static const float near_clip = 200.0f;
 static const float far_clip = 5500.0f;
 
 //海の色(ベースの色)
-static const float3 shallow_color = float3(0.0f, 0.5f, 0.9f);
+static const float3 shallow_color = float3(0.0f, 0.3f, 0.6f);
 static const float3 deep_color  = float3(0.0f, 0.05f, 0.2f);
 
 //泡

@@ -112,8 +112,8 @@ namespace
 	constexpr const wchar_t* left_wing_splash_effect_path = L"Data/Effect/WingSpray/WingSprayReal_L.efk";//左用
 	constexpr const wchar_t* right_wing_splash_effect_path = L"Data/Effect/WingSpray/WingSprayReal_R.efk";//右用
 	//バレルロールのエフェクト
-	constexpr const wchar_t* left_barrel_roll_effect_path = L"Data/Effect/BarrelRoll/BarrelRoll_v1_L.efk";//左ロール用
-	constexpr const wchar_t* right_barrel_roll_effect_path = L"Data/Effect/BarrelRoll/BarrelRoll_v1_R.efk";//右ロール用
+	constexpr const wchar_t* left_barrel_roll_effect_path = L"Data/Effect/BarrelRoll/BarrelRoll_v2_R.efk";//左ロール用
+	constexpr const wchar_t* right_barrel_roll_effect_path = L"Data/Effect/BarrelRoll/BarrelRoll_v2_L.efk";//右ロール用
 
 	//---------- CSV上でのモデル識別文字列 ----------
 	constexpr const wchar_t* rock1_csv_name = L"Rock1";

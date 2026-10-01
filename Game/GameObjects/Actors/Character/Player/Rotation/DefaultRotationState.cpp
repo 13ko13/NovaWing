@@ -171,6 +171,7 @@ void DefaultRotationState::Update()
 		//Z軸回転
 		//回転を行う
 		targetAngle = DX_PI_F / 2;
+		if (pPlayer->IsNearSea()) targetAngle = 0.0f;
 		pPlayer->LerpToAngleZ(targetAngle, rot_lerp_t);
 	}
 	else if (input.IsPressed(InputEvent::left_rolling))
@@ -178,6 +179,7 @@ void DefaultRotationState::Update()
 		//Z軸回転
 		//回転を行う
 		targetAngle = -DX_PI_F / 2;
+		if (pPlayer->IsNearSea()) targetAngle = 0.0f;
 		pPlayer->LerpToAngleZ(targetAngle, rot_lerp_t);
 	}
 	else

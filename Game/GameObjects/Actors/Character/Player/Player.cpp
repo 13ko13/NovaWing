@@ -77,19 +77,22 @@ namespace
 	constexpr float somersoult_use_gauge = 50.0f;
 
 	//海の高さ
-	constexpr float sea_height = 100.0f;
+	constexpr float sea_height = 30.0f;
 	//海面に水しぶきのエフェクトを出す高さ
-	constexpr float sea_splash_height_threshold = 300.0f;
+	constexpr float sea_splash_height_threshold = 200.0f;
 	//水しぶきのエフェクトのオフセットX
-	constexpr float sea_splash_offset_x = 0.0f;
+	constexpr float sea_splash_offset_x = 50.0f;
 	//水しぶきのエフェクトのオフセットZ
-	constexpr float sea_splash_offset_z = 0.0f;
+	constexpr float sea_splash_offset_z = -50.0f;
 	
 	//カウンター用の球の半径
 	constexpr float counter_col_radius = 100.0f;
 
 	//水しぶきのフェードの倍率（大きいほど、しきい値ぎりぎりまで濃いまま急に薄くなる）
 	constexpr float sea_splash_fade_scale = 0.75f;
+
+	//海からこの距離以内であれば回転を不可能にする
+	constexpr float sea_roll_limit_height = 150.0f;
 } // namespace
 
 Player::Player(
@@ -443,6 +446,13 @@ void Player::UpdateWingSplash(int& splashHandle, const VECTOR& wingPos, Resource
 			splashHandle = -1;
 		}
 	}
+}
+
+bool Player::IsNearSea() const
+{
+	//機体の中心と海面の距離
+	float distance = m_pos.y - sea_height;
+	return distance < sea_roll_limit_height;
 }
 
 void Player::Draw()

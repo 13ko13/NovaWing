@@ -129,6 +129,9 @@ public:
 	//無敵時間を終了する
 	void OnInvincibleEnd() { m_invincibleFrame = 0; }
 
+	//海に近すぎるかを返す(プレイヤーが海に近いと海に埋まってしまうため)
+	bool IsNearSea() const;
+
 private:
 	//回転の更新
 	void UpdateRotation();
@@ -153,7 +156,7 @@ private:
 
 	//羽のボーンのy座標以外を使用して海面に
 	//水しぶきエフェクトをループ再生させる
-	void UpdateWingSplash(int& splashHandle,const VECTOR& wingPos,ResourceLoader::EffectID effectID);
+	void UpdateWingSplash(int& splashHandle, const VECTOR& wingPos, ResourceLoader::EffectID effectID);
 
 	//ステートの更新
 	//テンプレート関数なのでヘッダに実装をかく
