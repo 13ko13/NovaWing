@@ -48,7 +48,12 @@ namespace
 
 	//ビーム反射後の1フレームあたりの最大旋回角
 	constexpr float one_frame_turn_angle = DX_PI_F / 130.0f;
-	
+
+	//ボスに当たったビームが消えるまでのフレーム数
+	constexpr int hit_boss_fade_frame = 30;
+
+	//エフェクトの色の最大値(アルファのフェードの基準)
+	constexpr int color_max = 255;
 }
 
 BossBeamState::BossBeamState(std::weak_ptr<BossEnemy> pBoss,
@@ -61,8 +66,15 @@ BossBeamState::BossBeamState(std::weak_ptr<BossEnemy> pBoss,
 BossBeamState::~BossBeamState()
 {
 	//エフェクトを止める
-	StopEffekseer3DEffect(m_leftBeamEffectPlayH);
-	StopEffekseer3DEffect(m_rightBeamEffectPlayH);
+	//(ボスに当たって薄くなったビームは既に止めてあり、ハンドルが-1になっている)
+	if (m_leftBeamEffectPlayH != -1)
+	{
+		StopEffekseer3DEffect(m_leftBeamEffectPlayH);
+	}
+	if (m_rightBeamEffectPlayH != -1)
+	{
+		StopEffekseer3DEffect(m_rightBeamEffectPlayH);
+	}
 }
 
 void BossBeamState::Enter()
@@ -143,6 +155,8 @@ void BossBeamState::Enter()
 	//ボスに当たったかの情報を初期化
 	m_isHitBossL = false;
 	m_isHitBossR = false;
+	m_hitBossFrameL = 0;
+	m_hitBossFrameR = 0;
 }
 
 void BossBeamState::Update()
@@ -172,9 +186,10 @@ void BossBeamState::Update()
 			m_beamMoveDirL = leftToTargetDir;
 		}
 	}
-	else
+	else if (!m_isHitBossL)
 	{
 		//反射した側はボスへのダメージ球へ曲げる
+		//(ボスに当たった後は向きを変えない)
 		//ボスへのベクトルをもとめる
 		Vector3 toBossDir = (m_pBoss.lock()->GetDamageSphere()->GetPos() - m_beamPosL).Normalized();
 		//角度を求める
@@ -204,9 +219,10 @@ void BossBeamState::Update()
 			m_beamMoveDirR = rightToTargetDir;
 		}
 	}
-	else
+	else if (!m_isHitBossR)
 	{
 		//反射した側はボスへのダメージ球へ曲げる
+		//(ボスに当たった後は向きを変えない)
 		//ボスへのベクトルをもとめる
 		Vector3 toBossDir = (m_pBoss.lock()->GetDamageSphere()->GetPos() - m_beamPosR).Normalized();
 		//角度を求める
@@ -229,8 +245,15 @@ void BossBeamState::Update()
 	//ビームの先端をターゲットに向けて一定速度で進ませる 
 	//越えている場合はターゲットまでの方向が更新されないので
 	//越える前までの方向が入る
-	m_beamPosL += m_beamMoveDirL * beam_speed;
-	m_beamPosR += m_beamMoveDirR * beam_speed;
+	//ボスに当たった側は先端をその場で止める
+	if (!m_isHitBossL)
+	{
+		m_beamPosL += m_beamMoveDirL * beam_speed;
+	}
+	if (!m_isHitBossR)
+	{
+		m_beamPosR += m_beamMoveDirR * beam_speed;
+	}
 
 	//先端の球の更新
 	m_beamTipSphereL->Update(m_beamPosL, beam_sphere_radius);
@@ -292,21 +315,38 @@ void BossBeamState::Update()
 	);
 
 	//ビームエフェクトの位置と向きの更新
-	SetPosPlayingEffekseer3DEffect(
-		m_leftBeamEffectPlayH,
-		m_beamPosL.x,
-		m_beamPosL.y,
-		m_beamPosL.z
-	);
-	SetBeamEffectDir(m_leftBeamEffectPlayH, m_beamMoveDirL);
+	//(薄くなって止めたエフェクトのハンドルは-1なので触らない)
+	if (m_leftBeamEffectPlayH != -1)
+	{
+		SetPosPlayingEffekseer3DEffect(
+			m_leftBeamEffectPlayH,
+			m_beamPosL.x,
+			m_beamPosL.y,
+			m_beamPosL.z
+		);
+		SetBeamEffectDir(m_leftBeamEffectPlayH, m_beamMoveDirL);
+	}
 
-	SetPosPlayingEffekseer3DEffect(
-		m_rightBeamEffectPlayH,
-		m_beamPosR.x,
-		m_beamPosR.y,
-		m_beamPosR.z
-	);
-	SetBeamEffectDir(m_rightBeamEffectPlayH, m_beamMoveDirR);
+	if (m_rightBeamEffectPlayH != -1)
+	{
+		SetPosPlayingEffekseer3DEffect(
+			m_rightBeamEffectPlayH,
+			m_beamPosR.x,
+			m_beamPosR.y,
+			m_beamPosR.z
+		);
+		SetBeamEffectDir(m_rightBeamEffectPlayH, m_beamMoveDirR);
+	}
+
+	//ボスに当たったビームのエフェクトを薄くしていく
+	if (m_isHitBossL)
+	{
+		FadeOutHitBeam(m_leftBeamEffectPlayH, m_hitBossFrameL);
+	}
+	if (m_isHitBossR)
+	{
+		FadeOutHitBeam(m_rightBeamEffectPlayH, m_hitBossFrameR);
+	}
 
 #ifdef _DEBUG
 	//ビームの目標地点の球の更新
@@ -399,6 +439,26 @@ bool BossBeamState::IsReflectedL() const
 bool BossBeamState::IsReflectedR() const
 {
 	return m_isReflectedR;
+}
+
+void BossBeamState::FadeOutHitBeam(int& playH, int& fadeFrame)
+{
+	//既に止めている場合は何もしない
+	if (playH == -1) return;
+
+	fadeFrame++;
+
+	//経過に応じてアルファを下げる(0〜color_max)
+	float remainRate = 1.0f - static_cast<float>(fadeFrame) / hit_boss_fade_frame;
+	int alpha = static_cast<int>(color_max * std::clamp(remainRate, 0.0f, 1.0f));
+	SetColorPlayingEffekseer3DEffect(playH, color_max, color_max, color_max, alpha);
+
+	//完全に消えたらエフェクトを止める
+	if (fadeFrame >= hit_boss_fade_frame)
+	{
+		StopEffekseer3DEffect(playH);
+		playH = -1;
+	}
 }
 
 void BossBeamState::SetBeamEffectDir(int playH, const Vector3& dir)

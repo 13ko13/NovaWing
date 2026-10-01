@@ -13,6 +13,7 @@
 #include "Utility/SizeF.h"
 #include "Utility/GraphShaderDraw.h"
 #include "Constants/ShaderRegister.h"
+#include "Constants/Game.h"
 #include "Game/GameObjects/Actors/Character/Player/TitlePlayer.h"
 #include "Manager/GameObjectManager.h"
 #include "Game/GameObjects/Camera/TitleCamera.h"
@@ -70,9 +71,6 @@ namespace
 
 	//選択肢出現にかけるフレーム
 	constexpr int select_max_frame = 50;
-
-	//ライトの方向
-	const Vector3 light_direction = Vector3(1.0f, -1.0f, 0.6f);
 
 	//タイトルロゴ出現時の衝撃音を鳴らすフレーム
 	constexpr int frame_of_title_impact = 5;
@@ -157,7 +155,7 @@ void TitleScene::Init()
 	);
 
 	// ライトの方向ベクトルをセットする
-	LightingManager::GetInstance().SetLightDirection(light_direction);
+	LightingManager::GetInstance().SetLightDirection(Game::light_direction);
 
 	//サウンドマネージャー初期化
 	m_pSoundManager = std::make_shared<SoundManager>();

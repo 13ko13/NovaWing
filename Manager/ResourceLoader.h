@@ -103,6 +103,8 @@ public:
 		Boost,//ブーストエフェクト
 		LeftWingSplash,//左羽の水しぶきエフェクト
 		RightWingSplash,//右羽の水しぶきエフェクト
+		LeftBarrelRoll,//左バレルロールのエフェクト
+		RightBarrelRoll,//右バレルロールのエフェクト
 	};
 
 	//音の種類

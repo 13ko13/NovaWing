@@ -69,20 +69,28 @@ void BossBeamTipCollider::OnCollision(const ICollider& other)
 	if (!pBeamState) return;
 
 	//相手のタグがカウンターの時だけ処理
-	if (other.GetTag() != ColliderTag::Counter) return;
+	if (other.GetTag() == ColliderTag::Counter)
+	{
+		//カウンター球の中心を取得
+		Vector3 counterPos = static_cast<const CounterCollider&>(other).GetSphere()->GetPos();
 	
-	//カウンター球の中心を取得
-	Vector3 counterPos = static_cast<const CounterCollider&>(other).GetSphere()->GetPos();
-
-	//ボスビームステートに右/左のビームが反射されたことを通知する
-	if(m_isRight)
-	{
-		pBeamState->OnReflectRight(counterPos);
+		//ボスビームステートに右/左のビームが反射されたことを通知する
+		if(m_isRight)
+		{
+			pBeamState->OnReflectRight(counterPos);
+		}
+		else
+		{
+			pBeamState->OnReflectLeft(counterPos);
+		}
 	}
-	else
+	if (other.GetTag() == ColliderTag::BossDamage)
 	{
-		pBeamState->OnReflectLeft(counterPos);
+		//右/左のビームに当たったことを知らせる
+		if (m_isRight) pBeamState->OnHitBossR();
+		if (!m_isRight) pBeamState->OnHitBossL();
 	}
+	
 }
 
 bool BossBeamTipCollider::IsCollisionActive() const
@@ -97,16 +105,15 @@ bool BossBeamTipCollider::IsCollisionActive() const
 	if (!isBeamState) return false;
 	
 	//まだ右/左側のビームが反射されていないか
-	bool isReflectedR = false;
-	bool isReflectedL = false;
+	bool isHitBoss = false;
 	if (m_isRight)
 	{
-		isReflectedR = pBeamState->IsReflectedR();
+		isHitBoss = pBeamState->IsHitBossR();
 	}
 	else
 	{
-		isReflectedL = pBeamState->IsReflectedL();
+		isHitBoss = pBeamState->IsHitBossL();
 	}
 
-	return isAlive && isBeamState && !isReflectedR && !isReflectedL;
+	return isAlive && isBeamState && !isHitBoss;
 }

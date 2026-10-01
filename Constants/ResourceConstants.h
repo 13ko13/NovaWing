@@ -30,12 +30,12 @@ namespace
 	constexpr const wchar_t* normal_reticle_path = L"Data/Image/NormalReticle.png";
 	constexpr const wchar_t* charge_reticle_path = L"Data/Image/ChargeReticle.png";
 	//スカイボックス
-	constexpr const wchar_t* skybox_front_path = L"Data/Image/SkyBox/skybox_front.png";
-	constexpr const wchar_t* skybox_back_path = L"Data/Image/SkyBox/skybox_back.png";
-	constexpr const wchar_t* skybox_right_path = L"Data/Image/SkyBox/skybox_right.png";
-	constexpr const wchar_t* skybox_left_path = L"Data/Image/SkyBox/skybox_left.png";
-	constexpr const wchar_t* skybox_up_path = L"Data/Image/SkyBox/skybox_up.png";
-	constexpr const wchar_t* skybox_bottom_path = L"Data/Image/SkyBox/skybox_bottom.png";
+	constexpr const wchar_t* skybox_front_path = L"Data/Image/SkyBoxNight/skybox_front.png";
+	constexpr const wchar_t* skybox_back_path = L"Data/Image/SkyBoxNight/skybox_back.png";
+	constexpr const wchar_t* skybox_right_path = L"Data/Image/SkyBoxNight/skybox_right.png";
+	constexpr const wchar_t* skybox_left_path = L"Data/Image/SkyBoxNight/skybox_left.png";
+	constexpr const wchar_t* skybox_up_path = L"Data/Image/SkyBoxNight/skybox_up.png";
+	constexpr const wchar_t* skybox_bottom_path = L"Data/Image/SkyBoxNight/skybox_bottom.png";
 	//岩
 	constexpr const wchar_t* rock_normal_map_path = L"Data/Model/Rock.fbm/rocks_nm_new.png";
 	//タイトル
@@ -111,6 +111,9 @@ namespace
 	//羽の水しぶきのエフェクト	
 	constexpr const wchar_t* left_wing_splash_effect_path = L"Data/Effect/WingSpray/WingSprayReal_L.efk";//左用
 	constexpr const wchar_t* right_wing_splash_effect_path = L"Data/Effect/WingSpray/WingSprayReal_R.efk";//右用
+	//バレルロールのエフェクト
+	constexpr const wchar_t* left_barrel_roll_effect_path = L"Data/Effect/BarrelRoll/BarrelRoll_v1_L.efk";//左ロール用
+	constexpr const wchar_t* right_barrel_roll_effect_path = L"Data/Effect/BarrelRoll/BarrelRoll_v1_R.efk";//右ロール用
 
 	//---------- CSV上でのモデル識別文字列 ----------
 	constexpr const wchar_t* rock1_csv_name = L"Rock1";
@@ -137,6 +140,8 @@ namespace
 	constexpr float boost_effect_scale = 1.0f;
 	constexpr float left_wing_splash_effect_scale = 1.0f;
 	constexpr float right_wing_splash_effect_scale = 1.0f;
+	constexpr float left_barrel_roll_effect_scale = 1.0f;
+	constexpr float right_barrel_roll_effect_scale = 1.0f;
 
 	//----------フォント系-----------------
 	//ファイル場所

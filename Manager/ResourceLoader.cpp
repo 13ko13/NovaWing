@@ -510,6 +510,16 @@ void ResourceLoader::KeepEffect()
 	handle = LoadEffekseerEffect(right_wing_splash_effect_path, right_wing_splash_effect_scale);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::RightWingSplash] = handle;
+
+	//左バレルロールのエフェクト
+	handle = LoadEffekseerEffect(left_barrel_roll_effect_path, left_barrel_roll_effect_scale);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::LeftBarrelRoll] = handle;
+
+	//右バレルロールのエフェクト
+	handle = LoadEffekseerEffect(right_barrel_roll_effect_path, right_barrel_roll_effect_scale);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::RightBarrelRoll] = handle;
 }
 
 void ResourceLoader::KeepSound()
