@@ -19,6 +19,8 @@ enum class ColliderTag
 	EnemyBullet,//敵弾
 	PlayerBullet,//プレイヤーの弾
 	Counter,//カウンター
+	BossBeamTip,//ボスのビームの先端(カウンターで反射するため)
+	BossBeamReflect,//ボスのビームの反射後の判定(ボスにダメージを与えるため)
 };
 
 /// <summary>

@@ -35,6 +35,8 @@ public:
 	static Vector3 Lerp(const Vector3& start, const Vector3& end, float t);//線形補間
 	//2つのベクトルを内積した結果を返す
 	static float Dot(const Vector3& a, const Vector3& b);
+	//2つのベクトルを外積した結果を返す
+	static Vector3 Cross(const Vector3& a, const Vector3& b);
 
 	//文字列(x,y,z)からVector3を生成する(CSV読み込みなどで使用する)
 	static Vector3 FromWString(

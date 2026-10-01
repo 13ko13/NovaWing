@@ -1,6 +1,6 @@
 ﻿#include "BossBeamCollider.h"
-#include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossEnemy.h"
-#include "Game/GameObjects/Actors/Charactor/Enemy/BossEnemy/BossBeamState.h"
+#include "Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.h"
+#include "Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossBeamState.h"
 
 BossBeamCollider::BossBeamCollider(BossEnemy& owner) :
 	m_owner(owner)

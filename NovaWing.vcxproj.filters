@@ -36,10 +36,10 @@
     <ClCompile Include="Utility\Quaternion.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Charactor.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Character.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Player.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Main\Application.cpp">
@@ -81,31 +81,31 @@
     <ClCompile Include="Manager\LightingManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\IMovementState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Movement\IMovementState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\IdleMovementState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Movement\IdleMovementState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\MovingState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Movement\MovingState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Rotation\IRotationState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Rotation\IRotationState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DefaultRotationState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Rotation\DefaultRotationState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\IShootState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Shoot\IShootState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\NormalShootState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Shoot\NormalShootState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\ChargeShootState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Shoot\ChargeShootState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\ChargeReadyState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Shoot\ChargeReadyState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Bullet\BulletBase.cpp">
@@ -117,43 +117,43 @@
     <ClCompile Include="Game\GameObjects\Bullet\PlayerBullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\SomersaultState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\SpecialAction\SomersaultState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\ISpecialActionState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\SpecialAction\ISpecialActionState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\NoneState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\SpecialAction\NoneState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\DisabledMovementState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Movement\DisabledMovementState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DisabledRotState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Rotation\DisabledRotState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\GaugeActionStateBase.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Movement\GaugeActionStateBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\BoostState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Movement\BoostState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Movement\BrakeState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Movement\BrakeState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\IFloatingEnemyState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\IFloatingEnemyState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemy.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\FloatingEnemy.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\HideState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\HideState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\ActiveState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\ActiveState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\LeaveState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\LeaveState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Bullet\EnemyBullet.cpp">
@@ -162,7 +162,7 @@
     <ClCompile Include="Manager\CollisionManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\WormEnemy\WormEnemy.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Scene\GameoverScene.cpp">
@@ -213,10 +213,10 @@
     <ClCompile Include="Game\GameObjects\Actors\Stage\Stage.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemyDataSetter.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\FloatingEnemyDataSetter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemyDataSetter.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\WormEnemy\WormEnemyDataSetter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Scene\ClearScene.cpp">
@@ -228,31 +228,31 @@
     <ClCompile Include="Utility\GraphShaderDraw.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemy.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossEnemy.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemyDataSetter.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossEnemyDataSetter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\IBossEnemyState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\IBossEnemyState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\SummonState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\SummonState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\EnemyFactory.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\EnemyFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\EnemyBase.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\EnemyBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossIdleState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossIdleState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossBeamState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossBeamState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\Shoot\DisabledShootState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\Shoot\DisabledShootState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\UI\GaugeUIBase.cpp">
@@ -264,7 +264,7 @@
     <ClCompile Include="Game\GameObjects\Camera\TitleCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Charactor\Player\TitlePlayer.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Player\TitlePlayer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Camera\GameCamera.cpp">
@@ -312,7 +312,9 @@
     <ClCompile Include="Game\GameObjects\Bullet\ReflectedBullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-  </ItemGroup>
+    <ClCompile Include="Game\Collision\BossBeamTipCollider.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants\Game.h">
       <Filter>ヘッダー ファイル</Filter>
@@ -335,10 +337,10 @@
     <ClInclude Include="Utility\Quaternion.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Charactor.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Character.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Player.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Main\Application.h">
@@ -356,7 +358,7 @@
     <ClInclude Include="Manager\ResourceLoader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\IPlayerState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\IPlayerState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Utility\Fade.h">
@@ -386,31 +388,31 @@
     <ClInclude Include="Manager\LightingManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\IMovementState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Movement\IMovementState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\IdleMovementState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Movement\IdleMovementState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\MovingState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Movement\MovingState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Rotation\IRotationState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Rotation\IRotationState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DefaultRotationState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Rotation\DefaultRotationState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\IShootState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Shoot\IShootState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\NormalShootState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Shoot\NormalShootState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\ChargeShootState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Shoot\ChargeShootState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\ChargeReadyState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Shoot\ChargeReadyState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Bullet\BulletBase.h">
@@ -422,43 +424,43 @@
     <ClInclude Include="Game\GameObjects\Bullet\PlayerBullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\SomersaultState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\SpecialAction\SomersaultState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\ISpecialActionState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\SpecialAction\ISpecialActionState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\SpecialAction\NoneState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\SpecialAction\NoneState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\DisabledMovementState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Movement\DisabledMovementState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Rotation\DisabledRotState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Rotation\DisabledRotState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\GaugeActionStateBase.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Movement\GaugeActionStateBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\BoostState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Movement\BoostState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Movement\BrakeState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Movement\BrakeState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\IFloatingEnemyState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\IFloatingEnemyState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemy.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\FloatingEnemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\HideState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\HideState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\ActiveState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\ActiveState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\LeaveState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\LeaveState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Bullet\EnemyBullet.h">
@@ -467,7 +469,7 @@
     <ClInclude Include="Manager\CollisionManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemy.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\WormEnemy\WormEnemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Scene\GameoverScene.h">
@@ -518,10 +520,10 @@
     <ClInclude Include="Game\GameObjects\Actors\Stage\Stage.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\FloatingEnemy\FloatingEnemyDataSetter.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\FloatingEnemyDataSetter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\WormEnemy\WormEnemyDataSetter.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\WormEnemy\WormEnemyDataSetter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Constants\ShaderRegister.h">
@@ -539,31 +541,31 @@
     <ClInclude Include="Utility\GraphShaderDraw.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemy.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossEnemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossEnemyDataSetter.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossEnemyDataSetter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\IBossEnemyState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\IBossEnemyState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\SummonState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\SummonState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\EnemyFactory.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\EnemyFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\EnemyBase.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\EnemyBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossIdleState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossIdleState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Enemy\BossEnemy\BossBeamState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossBeamState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\Shoot\DisabledShootState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\Shoot\DisabledShootState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Constants\ResourceConstants.h">
@@ -578,7 +580,7 @@
     <ClInclude Include="Game\GameObjects\Camera\TitleCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\Player\TitlePlayer.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Player\TitlePlayer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Camera\GameCamera.h">
@@ -587,7 +589,7 @@
     <ClInclude Include="Manager\SoundManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Charactor\DamageSource.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\DamageSource.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\UI\SpecialGaugeUI.h">
@@ -635,7 +637,9 @@
     <ClInclude Include="Game\GameObjects\Bullet\ReflectedBullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-  </ItemGroup>
+    <ClInclude Include="Game\Collision\BossBeamTipCollider.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="LightingPS.hlsl" />
     <FxCompile Include="LightingVS.hlsl" />

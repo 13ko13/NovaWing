@@ -8,7 +8,7 @@
 #include "Utility/Size.h"
 #include "Utility/GraphShaderDraw.h"
 #include "Utility/Vector2.h"
-#include "Game/GameObjects/Actors/Charactor/Charactor.h"
+#include "Game/GameObjects/Actors/Character/Character.h"
 #include "Main/Application.h"
 
 namespace

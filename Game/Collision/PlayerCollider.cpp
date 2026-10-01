@@ -1,7 +1,7 @@
 ﻿#include "PlayerCollider.h"
 #include "BulletCollider.h"
 #include "BossBeamCollider.h"
-#include "Game/GameObjects/Actors/Charactor/Player/Player.h"
+#include "Game/GameObjects/Actors/Character/Player/Player.h"
 
 namespace
 {
@@ -46,7 +46,7 @@ void PlayerCollider::OnCollision(const ICollider& other)
 
 bool PlayerCollider::IsCollisionActive() const
 {
-	return !m_owner.IsDead();
+	return !m_owner.IsDead() && !m_owner.IsInvincible();
 }
 
 void PlayerCollider::UpdateShape(const Vector3& pos, float radius)

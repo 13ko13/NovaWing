@@ -1,8 +1,8 @@
 ﻿#define NOMINMAX
 
 #include "TargetManager.h"
-#include "Charactor/Player/Player.h"
-#include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
+#include "Character/Player/Player.h"
+#include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
 #include "Main/Application.h"
 
 namespace

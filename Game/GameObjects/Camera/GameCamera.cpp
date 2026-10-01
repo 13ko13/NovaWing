@@ -1,7 +1,7 @@
 ﻿#define NOMINMAX
 
 #include "GameCamera.h"
-#include "Game/GameObjects/Actors/Charactor/Player/Player.h"
+#include "Game/GameObjects/Actors/Character/Player/Player.h"
 #include "Constants/Game.h"
 
 namespace

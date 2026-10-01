@@ -128,7 +128,7 @@
         {
             "id": "newClassFolder",
             "type": "promptString",
-            "description": "配置先フォルダ (プロジェクトフォルダからの相対パス。例: Game/GameObjects/Actors/Charactor/Enemy)",
+            "description": "配置先フォルダ (プロジェクトフォルダからの相対パス。例: Game/GameObjects/Actors/Character/Enemy)",
             "default": "Game/"
         },
         {

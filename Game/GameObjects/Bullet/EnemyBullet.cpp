@@ -1,6 +1,7 @@
 ﻿#include <EffekseerForDXLib.h>
 
 #include "EnemyBullet.h"
+#include "Constants/Game.h"
 
 namespace
 {
@@ -41,6 +42,8 @@ void EnemyBullet::Update()
 	SetPosPlayingEffekseer3DEffect(
 		m_effectPlayHandle, GetPos().x, GetPos().y, GetPos().z
 	);
+	//
+	SetDynamicInput3DEffect(m_effectPlayHandle, 0, GetPos().y - 50.0f);
 }
 
 void EnemyBullet::Draw()

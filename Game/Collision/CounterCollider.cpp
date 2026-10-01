@@ -1,7 +1,13 @@
 ﻿#include "CounterCollider.h"
-#include "Game/GameObjects/Actors/Charactor/Player/Player.h"
+#include "Game/GameObjects/Actors/Character/Player/Player.h"
 
-CounterCollider::CounterCollider(Player& owner):
+namespace
+{
+	//カウンター後の無敵時間
+	constexpr int counter_invincible_frame = 30;
+}
+
+CounterCollider::CounterCollider(Player& owner) :
 	m_owner(owner)
 {
 	m_sphere = std::make_shared<SphereShape>();
@@ -18,7 +24,11 @@ std::vector<std::shared_ptr<ColliderShape>> CounterCollider::GetCollision() cons
 
 void CounterCollider::OnCollision(const ICollider& other)
 {
+	//相手のタグがボスビームの先端の時だけ処理
+	if (other.GetTag() != ColliderTag::BossBeamTip) return;
 
+	//無敵時間を開始する
+	m_owner.OnInvincibleStart(counter_invincible_frame);
 }
 
 void CounterCollider::UpdateShape(const Vector3& pos, float radius)

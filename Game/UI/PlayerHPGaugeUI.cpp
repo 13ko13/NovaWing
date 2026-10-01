@@ -2,7 +2,7 @@
 #include <cassert>
 
 #include "PlayerHPGaugeUI.h"
-#include "Game/GameObjects/Actors/Charactor/Player/Player.h"
+#include "Game/GameObjects/Actors/Character/Player/Player.h"
 #include "Manager/ResourceLoader.h"
 #include "Utility/SizeF.h"
 #include "Constants/ShaderRegister.h"

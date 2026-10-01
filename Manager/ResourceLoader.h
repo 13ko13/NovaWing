@@ -101,7 +101,8 @@ public:
 		HitEffect,//被弾時エフェクト(敵味方共通)
 		BossDeath,//ボスの死亡エフェクト
 		Boost,//ブーストエフェクト
-		WingSplash,//羽の水しぶきエフェクト
+		LeftWingSplash,//左羽の水しぶきエフェクト
+		RightWingSplash,//右羽の水しぶきエフェクト
 	};
 
 	//音の種類

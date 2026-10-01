@@ -21,7 +21,7 @@ namespace Game
 	constexpr int color_bit_num = 32;
 
 	//海面からどれぐらい離れたところにプレイヤーを押し戻すか
-	constexpr float sea_player_margin = 100.0f;
+	constexpr float sea_player_margin = 200.0f;
 	//海面からどれぐらい離れたところにカメラを押し戻すか
 	constexpr float sea_camera_margin = 300.0f;
 }

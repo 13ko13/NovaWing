@@ -1,11 +1,11 @@
 ﻿#define NOMINMAX
 
 #include "ReticleUI.h"
-#include "Charactor/Player/Player.h"
+#include "Character/Player/Player.h"
 #include "Game/GameObjects/GameObject.h"
 #include "Manager/ResourceLoader.h"
 #include "Manager/TargetManager.h"
-#include "Game/GameObjects/Actors/Charactor/Enemy/EnemyBase.h"
+#include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
 
 namespace
 {

@@ -13,7 +13,7 @@
 #include "Utility/SizeF.h"
 #include "Utility/GraphShaderDraw.h"
 #include "Constants/ShaderRegister.h"
-#include "Game/GameObjects/Actors/Charactor/Player/TitlePlayer.h"
+#include "Game/GameObjects/Actors/Character/Player/TitlePlayer.h"
 #include "Manager/GameObjectManager.h"
 #include "Game/GameObjects/Camera/TitleCamera.h"
 #include "Game/GameObjects/Camera/CameraBase.h"

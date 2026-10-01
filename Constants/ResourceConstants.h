@@ -109,7 +109,8 @@ namespace
 	//ブーストのエフェクト
 	constexpr const wchar_t* boost_effect_path = L"Data/Effect/Boost/Boost.efk";
 	//羽の水しぶきのエフェクト	
-	constexpr const wchar_t* wing_splash_effect_path = L"Data/Effect/WingSplash/WingSplash.efk";
+	constexpr const wchar_t* left_wing_splash_effect_path = L"Data/Effect/WingSpray/WingSprayReal_L.efk";//左用
+	constexpr const wchar_t* right_wing_splash_effect_path = L"Data/Effect/WingSpray/WingSprayReal_R.efk";//右用
 
 	//---------- CSV上でのモデル識別文字列 ----------
 	constexpr const wchar_t* rock1_csv_name = L"Rock1";
@@ -134,7 +135,8 @@ namespace
 	constexpr float hit_effect_scale = 2.0f;
 	constexpr float boss_death_eff_scale = 1.0f;
 	constexpr float boost_effect_scale = 1.0f;
-	constexpr float wing_splash_effect_scale = 1.0f;
+	constexpr float left_wing_splash_effect_scale = 1.0f;
+	constexpr float right_wing_splash_effect_scale = 1.0f;
 
 	//----------フォント系-----------------
 	//ファイル場所
