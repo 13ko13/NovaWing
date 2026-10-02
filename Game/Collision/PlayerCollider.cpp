@@ -46,7 +46,8 @@ void PlayerCollider::OnCollision(const ICollider& other)
 
 bool PlayerCollider::IsCollisionActive() const
 {
-	return !m_owner.IsDead() && !m_owner.IsInvincible();
+	//演出などで操作できない間も当たり判定を切る
+	return !m_owner.IsDead() && !m_owner.IsInvincible() && !m_owner.IsDisabled();
 }
 
 void PlayerCollider::UpdateShape(const Vector3& pos, float radius)

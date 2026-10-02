@@ -4,6 +4,7 @@
 #include <EffekseerForDXLib.h>
 
 #include "TitleScene.h"
+#include "SceneID.h"
 #include "Manager/InputManager.h"
 #include "Manager/DebugManager.h"
 #include "SceneController.h"
@@ -473,4 +474,9 @@ void TitleScene::Draw()
 
 	SetUsePixelShader(-1);
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
+}
+
+SceneID TitleScene::GetSceneID() const
+{
+	return SceneID::Title;
 }

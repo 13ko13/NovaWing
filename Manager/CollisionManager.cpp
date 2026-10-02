@@ -43,9 +43,9 @@ namespace
 		{ ColliderTag::PlayerBullet, ColliderTag::BossDamage },
 		{ ColliderTag::PlayerBullet, ColliderTag::BossShield },
 		{ ColliderTag::BossBeam, ColliderTag::Counter },
+		{ ColliderTag::BossBeamReflect, ColliderTag::BossDamage },
 		{ ColliderTag::BossBeamTip, ColliderTag::Counter },
 		{ ColliderTag::BossBeam, ColliderTag::Player },
-		{ ColliderTag::BossBeamReflect, ColliderTag::BossDamage },
 		{ ColliderTag::Worm, ColliderTag::Player },
 		{ ColliderTag::Rock, ColliderTag::Player },
 	};

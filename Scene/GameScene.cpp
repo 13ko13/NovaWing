@@ -11,6 +11,7 @@
 #include "../Game/GameObjects/Actors/Character/Character.h"
 #include "../Game/GameObjects/Actors/Character/Player/Player.h"
 #include "GameScene.h"
+#include "SceneID.h"
 #include "../Manager/InputManager.h"
 #include "../Manager/DebugManager.h"
 #include "SceneController.h"
@@ -45,6 +46,7 @@
 #include "Constants/Game.h"
 #include "Manager/SoundManager.h"
 #include "Game/UI/SpecialGaugeUI.h"
+#include "Game/UI/WarningUI.h"
 #include "PauseScene.h"
 
 namespace
@@ -61,25 +63,23 @@ namespace
 	//地震のような強く長い揺れ
 	//ボス登場時のカメラを揺らす力
 	constexpr float boss_appear_shake_power = 7.0f;
-	//ボス登場時のカメラを揺らす時間
-	constexpr int boss_appear_shake_frame = 60 * 2;
+	//ボス登場時のカメラを揺らす時間(この間WARNINGを出す)
+	constexpr int boss_appear_shake_frame = 60 * 3;
 
-	//衝撃のような短く少し強い揺れ
-	//ボスが着地した時の揺らす力
-	constexpr float boss_landing_shake_power = 55.0f;
-	//ボスが着地した時の揺らすフレーム
-	constexpr int boss_landing_shake_frame = 20;
-
-	//ボスを落下させるときの速度
-	constexpr float boss_fall_speed = 4.0f;
+	//ムービー終了後にボスを立たせる高さ(海面)
+	constexpr float boss_stand_y = 0.0f;
 
 	//ボスへのズームの速度
 	constexpr float boss_zoom_speed = 0.04f;
 	//ボスへのターゲットオフセットY
 	constexpr float boss_target_offset_y = 1500.0f;
 
-	//ボス登場のズーム時に保たせる最低限の距離
-	const float boss_appear_zoom_limit = 1000.0f;
+	//ボス登場ムービーの最後のカメラ位置(ボスの正面からの距離と高さ)
+	//ムービー明けはこの位置から始めて、そこからプレイヤーの位置へ引いて戻る
+	constexpr float boss_appear_camera_dist = 2700.0f;
+	constexpr float boss_appear_camera_height = 1020.0f;
+	//ムービーの最後の位置へ1フレームで移すためのズーム速度
+	constexpr float boss_appear_zoom_speed = 1.0f;
 	//ボス死亡のズーム時に保たせる最低限の距離
 	const float boss_death_zoom_limit = 2500.0f;
 
@@ -88,18 +88,6 @@ namespace
 
 	//ボス死亡待機状態になった時のBGMのフェードアウトにかける時間
 	constexpr float boss_death_bgm_fade_out_time = 30.0f;
-
-	//操作説明を隠している状態の位置（画面比率、画面外の左下）
-	const Vector2 hide_how_to_ratio = Vector2(-0.30f, 0.7f);
-	//操作説明が完全に出現した状態の位置（画面比率）
-	const Vector2 appear_how_to_ratio = Vector2(0.065f, 0.7f);
-	//操作説明画像の拡大率
-	constexpr double how_to_graph_scale = 0.65;
-
-	//操作説明のスライド演出の補間係数(大きいほど早く開閉)
-	constexpr float how_to_open_lerp_rate = 0.15f;
-	//操作説明の進行度をこの値未満まで戻ったら完全に閉じたとみなす閾値
-	constexpr float how_to_open_close_threshold = 0.005f;
 }
 
 GameScene::GameScene(SceneController& controller) :
@@ -230,6 +218,9 @@ void GameScene::Init()
 	m_pUIManager->Register(std::make_shared<PlayerHPGaugeUI>(m_pPlayer));
 	m_pUIManager->Register(std::make_shared<BossHPGaugeUI>(m_pBoss));
 	m_pUIManager->Register(std::make_shared<SpecialGaugeUI>(m_pPlayer));
+	//ボス登場前のWARNINGは、GameSceneから表示を開始するのでポインタを持っておく
+	m_pWarningUI = std::make_shared<WarningUI>();
+	m_pUIManager->Register(m_pWarningUI);
 
 	//水マネージャーの初期化
 	m_pWaterManager = std::make_shared<WaterManager>(m_pCamera);
@@ -316,51 +307,57 @@ void GameScene::Update()
 				m_pCamera->OnShake(boss_appear_shake_power, boss_appear_shake_frame);
 				//地震音を鳴らす
 				m_pSoundManager->Play(SoundManager::SoundType::BossQuake);
-				//出現ステートに遷移
-				m_bossApearState = BossApearState::Apear;
+				//揺れている間WARNINGを出す
+				m_pWarningUI->Start(boss_appear_shake_frame);
+				//WARNINGステートに遷移
+				m_bossApearState = BossApearState::Warning;
 				break;
 
-			case BossApearState::Apear:
-			{
-				//揺れが止まっていれば出現させる
-				if (!m_pCamera->IsShake())
+			case BossApearState::Warning:
+				//揺れとWARNINGが終わったらムービーを再生する
+				if (!m_pCamera->IsShake() && !m_pWarningUI->IsPlaying())
 				{
-					//ボスを登場させる
-					//重力を加える
-					Vector3 currentVec = m_pBoss->GetVel();
-					currentVec.y -= boss_fall_speed;
+					int movieH = ResourceLoader::GetInstance().GetGraphic(
+						ResourceLoader::GraphicID::BossAppearMovie);
+					//リトライで2回目以降に再生することもあるので、頭に戻してから再生する
+					SeekMovieToGraph(movieH, 0);
+					PlayMovieToGraph(movieH);
+					m_isDrawBossMovie = true;
+					//ムービーステートに遷移
+					m_bossApearState = BossApearState::Movie;
+				}
+				break;
 
-					m_pBoss->SetVel(currentVec);
-
-					//ボスの最初の着地が完了していたら
-					if (m_pBoss->IsFirstLanding())
-					{
-						//揺れのステートを抜けるので、地震音が鳴っていればフェードアウトする
-						m_pSoundManager->FadeOut(SoundManager::SoundType::BossQuake, boss_quake_fade_out_time);
-						m_bossApearState = BossApearState::Landing;
-					}
+			case BossApearState::Movie:
+			{
+				//ムービーの再生が終わったら
+				int movieH = ResourceLoader::GetInstance().GetGraphic(
+					ResourceLoader::GraphicID::BossAppearMovie);
+				if (GetMovieStateToGraph(movieH) == 0)
+				{
+					//ムービーの最後と同じく、ボスを海面に立たせる
+					Position3 bossPos = m_pBoss->GetPos();
+					bossPos.y = boss_stand_y;
+					m_pBoss->SetPos(bossPos);
+					//地震音が鳴っていればフェードアウトする
+					m_pSoundManager->FadeOut(SoundManager::SoundType::BossQuake, boss_quake_fade_out_time);
+					//ステートをカメラズームに遷移
+					m_bossApearState = BossApearState::CameraZoom;
 				}
 			}
-
 			break;
-
-			case BossApearState::Landing:
-				//カメラを揺らす(衝撃)
-				m_pCamera->OnShake(boss_landing_shake_power, boss_landing_shake_frame);
-				//ステートをカメラズームに遷移
-				m_bossApearState = BossApearState::CameraZoom;
-				break;
 
 			case BossApearState::CameraZoom:
 				//カメラが揺れていないのを確認してから
-				//カメラをズームさせる
+				//カメラをムービーの最後と同じ位置へ移す
+				//(ズームが終わるとプレイヤー追従に戻るので、そのままプレイヤーの位置へ引いて戻る)
 				if (!m_pCamera->IsShake())
 				{
 					m_pCamera->OnZoomUp(
-						boss_zoom_speed, 
+						boss_appear_zoom_speed,
 						m_pBoss,
-						boss_appear_zoom_limit,
-						boss_target_offset_y);
+						boss_appear_camera_dist,
+						boss_appear_camera_height);
 					//ボス出現フラグを立てる
 					m_isApearBoss = true;
 					//ボスの行動を許可する
@@ -370,6 +367,12 @@ void GameScene::Update()
 				}
 				break;
 			}
+		}
+
+		//カメラがムービーの最後の位置へ移り終わったら、ムービーの描画をやめる
+		if (m_isDrawBossMovie && m_isApearBoss && !m_pCamera->IsZoom())
+		{
+			m_isDrawBossMovie = false;
 		}
 
 		//ボスが出現していて、まだボスBGMに切り替えていない場合
@@ -425,7 +428,9 @@ void GameScene::Update()
 	}
 
 	//pauseをsceneに上乗せする
-	if (InputManager::GetInstance().IsTriggered(InputEvent::pause))
+	//ムービーはポーズ中も再生が進んでしまうので、ムービー中はポーズさせない
+	if (InputManager::GetInstance().IsTriggered(InputEvent::pause) &&
+		m_bossApearState != BossApearState::Movie)
 	{
 		//ポーズを開くときも決定音を鳴らす
 		m_pSoundManager->Play(SoundManager::SoundType::Decision);
@@ -481,6 +486,15 @@ void GameScene::Draw()
 	
 	//全てのUIを描画する
 	m_pUIManager->Draw();
+
+	//ボス登場ムービーの再生中は、画面全体にムービーを描画する
+	if (m_isDrawBossMovie)
+	{
+		const Size& wsize = Application::GetInstance().GetWindowSize();
+		DrawExtendGraph(0, 0, wsize.width, wsize.height,
+			ResourceLoader::GetInstance().GetGraphic(ResourceLoader::GraphicID::BossAppearMovie),
+			FALSE);
+	}
 }
 
 void GameScene::DrawGrid()
@@ -507,4 +521,9 @@ void GameScene::DrawGrid()
 		DrawLine3D(startPos, endPos, 0x0000ff);
 	}
 #endif
+}
+
+SceneID GameScene::GetSceneID() const
+{
+	return SceneID::Game;
 }

@@ -18,6 +18,7 @@ class Stage;
 class BossEnemy;
 class EnemyFactory;
 class SoundManager;
+class WarningUI;
 class GameScene :public Scene
 {
 public:
@@ -27,6 +28,7 @@ public:
 	void Init() override;
 	void Update() override;
 	void Draw() override;
+	SceneID GetSceneID() const override;//自身のシーンIDを返す
 
 private:
 	/// <summary>
@@ -44,17 +46,17 @@ private:
 	bool m_isChangedToBossBGM = false;
 	//ボス死亡時のBGMフェードアウト済みか
 	bool m_isBossDeathBGMFadeOut = false;
-
-	//操作説明の出てくる演出の進行度
-	float m_howToControllOpenProgress = 0.0f;
+	//ボス登場ムービーを描画するか
+	//(ムービー終了後もカメラが最後の位置へ移り終わるまでは最後のコマを出し続ける)
+	bool m_isDrawBossMovie = false;
 
 	//ボス登場時の演出ステート
 	enum class BossApearState
 	{
 		None,//通常
 		Start,//開始時
-		Apear,//出現
-		Landing,//着地
+		Warning,//揺れている間WARNINGを出す
+		Movie,//海から浮上するムービーを再生
 		CameraZoom,//カメラをズームアップ
 	};
 	BossApearState m_bossApearState = BossApearState::None;
@@ -87,4 +89,6 @@ private:
 	std::shared_ptr<EnemyFactory> m_pEnemyFactory;
 	//サウンドマネージャーへのポインタ
 	std::shared_ptr<SoundManager> m_pSoundManager;
+	//ボス登場前のWARNINGへのポインタ
+	std::shared_ptr<WarningUI> m_pWarningUI;
 };

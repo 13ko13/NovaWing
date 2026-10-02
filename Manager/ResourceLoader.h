@@ -81,7 +81,13 @@ public:
 		BackGame,//ゲームに戻る
 		BackGameOnCursor,//カーソルが乗っているときのゲームに戻る
 
-		HowToPlay,//操作説明の画像
+		WarningFrame,//WARNINGの枠
+		WarningText,//WARNINGの文字
+		WarningSubText,//WARNINGの下の小さい文字
+		WarningIcon,//WARNINGの左右のアイコン
+		WarningEdge,//WARNING中に画面の縁を赤くする画像
+
+		BossAppearMovie,//ボス登場ムービー(動画もLoadGraphで読み込む)
 	};
 
 	//エフェクトの種類
@@ -180,7 +186,7 @@ public:
 	int GetFont(FontID id) const;
 
 	//wstringをModelIDに変換する
-    static ResourceLoader::ModelID WStringToModelID(const std::wstring id);
+	static ResourceLoader::ModelID WStringToModelID(const std::wstring id);
 
 private:
 	//=defaultでデフォルトコンストラクタを生成する
@@ -202,6 +208,11 @@ private:
 	void KeepSound();
 	//フォントのハンドルをすべて保存する
 	void KeepFont();
+
+	//画像をロード
+	void LoadGraphic(GraphicID id);
+	//画像を開放
+	void ReleaseGraphic(GraphicID id);
 
 private:
 	//IDをいれて直感的にアクセスできるようにするためのマップ

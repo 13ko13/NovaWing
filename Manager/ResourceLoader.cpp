@@ -1,9 +1,194 @@
 ﻿#include <cassert>
 #include <EffekseerForDXLib.h>
 #include <unordered_map>
+#include <cassert>
 
 #include "ResourceLoader.h"
 #include "Constants/ResourceConstants.h"
+
+namespace
+{
+	//GraphicIDとパスの対応表を作成
+	const std::unordered_map<ResourceLoader::GraphicID, const wchar_t*> graphic_paths =
+	{
+		//プレイヤー
+		{ ResourceLoader::GraphicID::PlayerNormalMap, player_normal_map_path },//法線マップ
+		{ ResourceLoader::GraphicID::PlayerMetalicMap, player_metalic_map_path },//メタリックマップ
+		{ ResourceLoader::GraphicID::PlayerEmissionMap, player_emission_map_path },//エミッションマップ
+
+		//浮遊敵
+		{ ResourceLoader::GraphicID::EnemyNormalMap, enemy_normal_map_path },//法線マップ
+		{ ResourceLoader::GraphicID::EnemyEmissionMap, enemy_emission_map_path },//エミッションマップ
+
+		//ワーム
+		{ ResourceLoader::GraphicID::WormHeadNormalMap, worm_head_normal_map_path },//頭の法線マップ
+		{ ResourceLoader::GraphicID::WormHeadMetalicMap, worm_head_metalic_map_path },//頭のメタリックマップ
+		{ ResourceLoader::GraphicID::WormHeadEmissionMap, worm_head_emission_map_path },//頭のエミッションマップ
+		{ ResourceLoader::GraphicID::WormBodyDiffuseMap, worm_body_diffuse_map_path },//胴体のディフューズマップ
+
+		//レティクル
+		{ ResourceLoader::GraphicID::NormalReticle, normal_reticle_path },//ノーマルレティクル
+		{ ResourceLoader::GraphicID::ChargeReticle, charge_reticle_path },//チャージレティクル
+
+		//スカイボックス
+		{ ResourceLoader::GraphicID::SkyBoxFront, skybox_front_path },//前
+		{ ResourceLoader::GraphicID::SkyBoxBack, skybox_back_path },//後
+		{ ResourceLoader::GraphicID::SkyBoxRight, skybox_right_path },//右
+		{ ResourceLoader::GraphicID::SkyBoxLeft, skybox_left_path },//左
+		{ ResourceLoader::GraphicID::SkyBoxUp, skybox_up_path },//上
+		{ ResourceLoader::GraphicID::SkyBoxBottom, skybox_bottom_path },//下
+
+		//岩
+		{ ResourceLoader::GraphicID::RockNorm, rock_normal_map_path },//法線マップ
+
+		//タイトル
+		{ ResourceLoader::GraphicID::TitleLogo, title_logo_path },//タイトルロゴ
+		{ ResourceLoader::GraphicID::GameStart, game_start_path },//ゲーム開始選択肢
+		{ ResourceLoader::GraphicID::GameEnd, game_end_path },//ゲーム終了選択肢
+		{ ResourceLoader::GraphicID::GameStartOnCursor, game_start_on_cursor_path },//カーソルが乗っているときのゲーム開始選択肢
+		{ ResourceLoader::GraphicID::GameEndOnCursor, game_end_on_cursor_path },//カーソルが乗っているときのゲーム終了選択肢
+		{ ResourceLoader::GraphicID::SelectBackGround, select_background_path },//選択肢の背景
+
+		//シェーダー用
+		{ ResourceLoader::GraphicID::Caustics, caustics_path },//コースティクス効果用のテクスチャ
+		{ ResourceLoader::GraphicID::DissolveNoise, dissolve_noise_path },//ディゾルブ用のノイズテクスチャ
+
+		//プレイヤーのHP
+		{ ResourceLoader::GraphicID::PlayerHPFrame, player_hp_frame_path },//HPの枠
+		{ ResourceLoader::GraphicID::PlayerHPGauge, player_hp_gauge_path },//HPゲージ
+
+		//ボス
+		{ ResourceLoader::GraphicID::BossEmission, boss_emission_path },//エミッションマップ
+		{ ResourceLoader::GraphicID::BossNormal, boss_normal_path },//法線マップ
+		{ ResourceLoader::GraphicID::BossHPFrame, boss_hp_frame_path },//HPの枠
+		{ ResourceLoader::GraphicID::BossHPGauge, boss_hp_gauge_path },//HPゲージ
+
+		//リザルト・ゲームオーバー
+		{ ResourceLoader::GraphicID::ResultTemplete, result_templete_path },//リザルトテンプレート画像
+		{ ResourceLoader::GraphicID::ButtonA, a_button_path },//Aボタンの画像
+		{ ResourceLoader::GraphicID::DecideText, decide_text_path },//決定のテキスト画像
+		{ ResourceLoader::GraphicID::NextText, next_text_path },//次へのテキスト画像
+		{ ResourceLoader::GraphicID::ReTry, retry_path },//リトライ選択肢画像
+		{ ResourceLoader::GraphicID::ReTryOnCursor, retry_on_cursor_path },//カーソルが乗っているときのリトライ選択肢画像
+		{ ResourceLoader::GraphicID::BackTitle, back_title_path },//タイトルに戻る選択肢画像
+		{ ResourceLoader::GraphicID::BackTitleOnCursor, back_title_on_cursor_path },//カーソルが乗っているときのタイトルに戻る選択肢画像
+
+		//スペシャルゲージ
+		{ ResourceLoader::GraphicID::SpecialGaugeFrame, special_gauge_frame_path },//枠
+		{ ResourceLoader::GraphicID::SpecialGauge, special_gauge_path },//ゲージ
+
+		//ポーズ
+		{ ResourceLoader::GraphicID::BackGame, back_game_path },//ゲームに戻る選択肢の画像
+		{ ResourceLoader::GraphicID::BackGameOnCursor, back_game_on_cursor_path },//カーソルが乗っているときのゲームに戻る選択肢の画像
+
+		//WARNING演出
+		{ ResourceLoader::GraphicID::WarningFrame, warning_frame_path },//WARNINGの枠
+		{ ResourceLoader::GraphicID::WarningText, warning_text_path },//WARNINGの文字
+		{ ResourceLoader::GraphicID::WarningSubText, warning_sub_text_path },//WARNINGの下の小さい文字
+		{ ResourceLoader::GraphicID::WarningIcon, warning_icon_path },//WARNINGの左右のアイコン
+		{ ResourceLoader::GraphicID::WarningEdge, warning_edge_path },//WARNING中に画面の縁を赤くする画像
+
+		//ボス登場ムービー(動画もLoadGraphで読み込み、PlayMovieToGraphで再生する)
+		{ ResourceLoader::GraphicID::BossAppearMovie, boss_appear_movie_path },
+	};
+
+	//モデルIDとパスの対応表
+	const std::unordered_map<ResourceLoader::ModelID, const wchar_t*> model_paths =
+	{
+		{ ResourceLoader::ModelID::Player, player_model_path },//プレイヤー
+		{ ResourceLoader::ModelID::FloatingEnemy, floating_enemy_model_path },//浮遊する敵
+		{ ResourceLoader::ModelID::WormHead, worm_head_model_path },//ワーム
+		{ ResourceLoader::ModelID::Rock1, rock1_model_path },//岩1
+		{ ResourceLoader::ModelID::Rock2, rock2_model_path },//岩2
+		{ ResourceLoader::ModelID::Rock3, rock3_model_path },//岩3
+		{ ResourceLoader::ModelID::Stage, stage_model_path },//ステージ
+		{ ResourceLoader::ModelID::Boss, boss_model_path },//ボス
+	};
+
+	//音IDとパスの対応表
+	const std::unordered_map<ResourceLoader::SoundID, const wchar_t*> sound_paths =
+	{
+		//タイトル
+		{ ResourceLoader::SoundID::TitleBoost, title_boost_sound_path },//タイトルのブースト音
+		{ ResourceLoader::SoundID::Decision, decision_sound_path },//決定音
+		{ ResourceLoader::SoundID::OnCursor, on_cursor_sound_path },//選択音
+		{ ResourceLoader::SoundID::TitleLogoImpact, title_logo_impact_sound_path },//タイトルロゴ出現時の衝撃音
+		{ ResourceLoader::SoundID::TitleBGM, title_bgm_sound_path },//タイトルBGM
+
+		//プレイヤー
+		{ ResourceLoader::SoundID::NormalShoot, player_normal_shoot_se_path },//通常ショット
+		{ ResourceLoader::SoundID::PlayerDeath, player_death_se_path },//死亡
+		{ ResourceLoader::SoundID::PlayerDamage, player_damage_se_path },//ダメージ
+		{ ResourceLoader::SoundID::ChargeShoot, player_charge_shoot_se_path },//チャージショット
+		{ ResourceLoader::SoundID::Brake, brake_se_path },//ブレーキ
+		{ ResourceLoader::SoundID::Boost, boost_se_path },//ブースト
+		{ ResourceLoader::SoundID::ChargeComplete, charge_complete_se_path },//チャージ完了
+		{ ResourceLoader::SoundID::Charging, charging_se_path },//チャージ中
+		{ ResourceLoader::SoundID::Somersoult, somersoult_se_path },//宙返り
+
+		//ボス
+		{ ResourceLoader::SoundID::BossMove, boss_move_se_path },//着地音
+		{ ResourceLoader::SoundID::BossBeam, boss_beam_se_path },//ビーム発射音
+		{ ResourceLoader::SoundID::BossSummon, boss_summon_se_path },//雑魚召喚音
+		{ ResourceLoader::SoundID::BossRecovery, boss_recovery_se_path },//無敵シールド被弾音
+		{ ResourceLoader::SoundID::BossDamage, boss_damage_se_path },//被弾音
+		{ ResourceLoader::SoundID::BossDeath, boss_death_se_path },//死亡音
+		{ ResourceLoader::SoundID::BossQuake, boss_quake_se_path },//出現前の地震音
+
+		//浮遊敵・ワームエネミー
+		{ ResourceLoader::SoundID::EnemyDeath, enemy_death_se_path },//共通の死亡音
+		{ ResourceLoader::SoundID::EnemyShoot, enemy_shoot_se_path },//共通の弾発射音
+		{ ResourceLoader::SoundID::EnemyBoot, enemy_boot_se_path },//浮遊敵がactiveになるときの音
+		{ ResourceLoader::SoundID::WormMove, worm_move_se_path },//ワームの移動音
+
+		//BGM
+		{ ResourceLoader::SoundID::GameBGM, game_bgm_path },//ゲームBGM
+		{ ResourceLoader::SoundID::BossBGM, boss_bgm_path },//ボスBGM
+		{ ResourceLoader::SoundID::ResultBGM, result_bgm_path },//リザルトBGM
+		{ ResourceLoader::SoundID::GameoverBGM, gameover_bgm_path },//ゲームオーバーBGM
+
+		//リザルト
+		{ ResourceLoader::SoundID::DataAppear, data_appear_se_path },//カーテン演出音
+		{ ResourceLoader::SoundID::ScoreCount, score_count_se_path },//スコア加算音
+	};
+
+	//エフェクトの読み込みに必要な情報
+	struct EffectInfo
+	{
+		const wchar_t* path;//パス
+		float scale;//拡大率
+	};
+
+	//EffectIDと読み込み情報の対応表
+	const std::unordered_map<ResourceLoader::EffectID, EffectInfo> effect_infos =
+	{
+		//プレイヤー
+		{ ResourceLoader::EffectID::PlayerBullet, { player_bullet_effect_path, player_bullet_effect_scale } },//弾
+		{ ResourceLoader::EffectID::PlayerChargeBullet, { player_charge_bullet_effect_path, player_charge_bullet_effect_scale } },//チャージ弾
+		{ ResourceLoader::EffectID::Charging, { charging_effect_path, charging_effect_scale } },//チャージ中
+		{ ResourceLoader::EffectID::Boost, { boost_effect_path, boost_effect_scale } },//ブースト
+		{ ResourceLoader::EffectID::LeftWingSplash, { left_wing_splash_effect_path, left_wing_splash_effect_scale } },//左羽の水しぶき
+		{ ResourceLoader::EffectID::RightWingSplash, { right_wing_splash_effect_path, right_wing_splash_effect_scale } },//右羽の水しぶき
+		{ ResourceLoader::EffectID::LeftBarrelRoll, { left_barrel_roll_effect_path, left_barrel_roll_effect_scale } },//左バレルロール
+		{ ResourceLoader::EffectID::RightBarrelRoll, { right_barrel_roll_effect_path, right_barrel_roll_effect_scale } },//右バレルロール
+
+		//敵
+		{ ResourceLoader::EffectID::EnemyBullet, { enemy_bullet_effect_path, enemy_bullet_effect_scale } },//敵の弾
+		{ ResourceLoader::EffectID::WormDeath, { worm_death_effect_path, worm_death_effect_scale } },//ワームの死亡
+		{ ResourceLoader::EffectID::FloatingDeath, { floating_death_effect_path, floating_death_effect_scale } },//浮遊敵の死亡
+
+		//ボス
+		{ ResourceLoader::EffectID::Splash, { splash_effect_path, splash_effect_scale } },//水しぶき
+		{ ResourceLoader::EffectID::SummonFloating, { summon_floating_eff_path, summon_floating_eff_scale } },//浮遊敵召喚
+		{ ResourceLoader::EffectID::SummonWorm, { summon_worm_eff_path, summon_worm_eff_scale } },//ワーム召喚
+		{ ResourceLoader::EffectID::BossBeam, { boss_beam_eff_patgh, boss_beam_eff_scale } },//ビーム
+		{ ResourceLoader::EffectID::BossShield, { boss_shield_effect_path, boss_shield_eff_scale } },//無敵シールド
+		{ ResourceLoader::EffectID::BossDeath, { boss_death_eff_path, boss_death_eff_scale } },//死亡
+
+		//共通
+		{ ResourceLoader::EffectID::HitEffect, { hit_effect_path, hit_effect_scale } },//被弾(敵味方共通)
+	};
+}
 
 
 ResourceLoader& ResourceLoader::GetInstance()
@@ -29,6 +214,28 @@ void ResourceLoader::LoadAll()
 
 	//サウンドを読み込んでハンドルを保存
 	KeepSound();
+}
+
+void ResourceLoader::LoadGraphic(GraphicID id)
+{
+	//m_graphicHandlesにidが存在するか確認
+	if(m_graphicHandles.find(id) != m_graphicHandles.end())
+	{
+		//すでに読み込まれている場合は何もしない
+		return;
+	}
+
+	//読み込み
+	auto it = graphic_paths.find(id);
+	if(it == graphic_paths.end())
+	{
+		assert(false && "グラフィックIDが見つかりません");
+		return;
+	}
+
+	int handle = LoadGraph(it->second);
+	assert(handle >= 0 && "グラフィックの読み込みに失敗しました");
+	m_graphicHandles[id] = handle;
 }
 
 void ResourceLoader::ReleaseAll()
@@ -60,6 +267,83 @@ void ResourceLoader::ReleaseAll()
 	{
 		DeleteSoundMem(soundH.second);
 	}
+}
+
+void ResourceLoader::ReleaseGraphic(GraphicID id)
+{
+	auto it = m_graphicHandles.find(id);
+	if (it != m_graphicHandles.end())
+	{
+		DeleteGraph(it->second);
+		m_graphicHandles.erase(it);
+	}
+}
+
+void ResourceLoader::LoadModel(ModelID id)
+{
+	//m_modelHandlesにidが存在するか確認
+	if (m_modelHandles.find(id) != m_modelHandles.end())
+	{
+		//すでに読み込まれている場合は何もしない
+		return;
+	}
+
+	//読み込みを行う
+	auto it = model_paths.find(id);
+	if(it == model_paths.end())
+	{
+		assert(false && "モデルIDが見つかりません");
+		return;
+	}
+
+	//モデルを読み込む
+	int handle = MV1LoadModel(it->second);
+	assert(handle >= 0 && "モデルの読み込みに失敗しました");
+	m_modelHandles[id] = handle;//格納
+}
+
+void ResourceLoader::ReleaseModel(ModelID id)
+{
+	auto it = m_modelHandles.find(id);
+	if (it != m_modelHandles.end())
+	{
+		MV1DeleteModel(it->second);
+		m_modelHandles.erase(it);
+	}
+}
+
+void ResourceLoader::LoadEffect(EffectID id)
+{
+	//m_effectHandlesにidが存在するか確認
+	if (m_effectHandles.find(id) != m_effectHandles.end())
+	{
+		//すでに読み込まれている場合は何もしない
+		return;
+	}
+
+	auto it = effect_infos.find(id);
+	if (it == effect_infos.end())
+	{
+		assert(false && "エフェクトIDが見つかりません");
+		return;
+	}
+	//エフェクトを読み込む
+	int handle = LoadEffekseerEffect(it->second.path, it->second.scale);
+	assert(handle >= 0 && "エフェクトの読み込みに失敗しました");
+	//ハンドルを登録
+	m_effectHandles[id] = handle;
+}
+
+void ResourceLoader::ReleaseEffect(EffectID id)
+{
+}
+
+void ResourceLoader::LoadSound(SoundID id)
+{
+}
+
+void ResourceLoader::ReleaseSound(SoundID id)
+{
 }
 
 int ResourceLoader::GetModel(ResourceLoader::ModelID id) const
@@ -168,6 +452,11 @@ ResourceLoader::ModelID ResourceLoader::WStringToModelID(const std::wstring id)
 	}
 }
 
+bool ResourceLoader::IsSoundLoaded(SoundID id) const
+{
+	return false;
+}
+
 void ResourceLoader::KeepModel()
 {
 	int handle = -1;
@@ -206,226 +495,11 @@ void ResourceLoader::KeepModel()
 
 void ResourceLoader::KeepGraph()
 {
-	int handle = -1;
-	//法線マップ
-	handle = LoadGraph(player_normal_map_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::PlayerNormalMap] = handle;
-
-	//メタリックマップ
-	handle = LoadGraph(player_metalic_map_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::PlayerMetalicMap] = handle;
-
-	//エミッションマップ
-	handle = LoadGraph(player_emission_map_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::PlayerEmissionMap] = handle;
-
-	//法線マップ
-	handle = LoadGraph(enemy_normal_map_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::EnemyNormalMap] = handle;
-
-	//エミッションマップ
-	handle = LoadGraph(enemy_emission_map_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::EnemyEmissionMap] = handle;
-
-	//ワームの頭の法線マップ
-	handle = LoadGraph(worm_head_normal_map_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::WormHeadNormalMap] = handle;
-
-	//ワームの頭のメタリックマップ
-	handle = LoadGraph(worm_head_metalic_map_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::WormHeadMetalicMap] = handle;
-
-	//ワームの頭のエミッションマップ
-	handle = LoadGraph(worm_head_emission_map_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::WormHeadEmissionMap] = handle;
-
-	//ワームの胴体のディフューズマップ
-	handle = LoadGraph(worm_body_diffuse_map_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::WormBodyDiffuseMap] = handle;
-
-	//ノーマルレティクル
-	handle = LoadGraph(normal_reticle_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::NormalReticle] = handle;
-
-	//チャージレティクル
-	handle = LoadGraph(charge_reticle_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::ChargeReticle] = handle;
-
-	//スカイボックス前
-	handle = LoadGraph(skybox_front_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::SkyBoxFront] = handle;
-	//スカイボックス後
-	handle = LoadGraph(skybox_back_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::SkyBoxBack] = handle;
-	//スカイボックス右
-	handle = LoadGraph(skybox_right_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::SkyBoxRight] = handle;
-	//スカイボックス左
-	handle = LoadGraph(skybox_left_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::SkyBoxLeft] = handle;
-	//スカイボックス上
-	handle = LoadGraph(skybox_up_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::SkyBoxUp] = handle;
-	//スカイボックス下
-	handle = LoadGraph(skybox_bottom_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::SkyBoxBottom] = handle;
-
-	//岩の法線マップテクスチャ
-	handle = LoadGraph(rock_normal_map_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::RockNorm] = handle;
-
-	//タイトルロゴ
-	handle = LoadGraph(title_logo_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::TitleLogo] = handle;
-
-	//ゲーム開始選択肢
-	handle = LoadGraph(game_start_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::GameStart] = handle;
-
-	//ゲーム終了選択肢
-	handle = LoadGraph(game_end_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::GameEnd] = handle;
-
-	//カーソルが乗っているときのゲーム開始選択肢
-	handle = LoadGraph(game_start_on_cursor_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::GameStartOnCursor] = handle;
-
-	//カーソルが乗っているときのゲーム終了選択肢
-	handle = LoadGraph(game_end_on_cursor_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::GameEndOnCursor] = handle;
-
-	//選択肢の背景
-	handle = LoadGraph(select_background_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::SelectBackGround] = handle;
-
-	//コースティクス効果用のテクスチャ
-	handle = LoadGraph(caustics_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::Caustics] = handle;
-
-	//ディゾルブ用のノイズテクスチャ
-	handle = LoadGraph(dissolve_noise_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::DissolveNoise] = handle;
-
-	//HPの枠
-	handle = LoadGraph(player_hp_frame_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::PlayerHPFrame] = handle;
-
-	//HPゲージ
-	handle = LoadGraph(player_hp_gauge_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::PlayerHPGauge] = handle;
-
-	//ボスのエミッションマップ
-	handle = LoadGraph(boss_emission_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::BossEmission] = handle;
-
-	//ボスの法線マップ
-	handle = LoadGraph(boss_normal_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::BossNormal] = handle;
-
-	//ボスのHPの枠
-	handle = LoadGraph(boss_hp_frame_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::BossHPFrame] = handle;
-
-	//ボスのHPゲージ
-	handle = LoadGraph(boss_hp_gauge_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::BossHPGauge] = handle;
-
-	//リザルトテンプレート画像
-	handle = LoadGraph(result_templete_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::ResultTemplete] = handle;
-
-	//Aボタンの画像
-	handle = LoadGraph(a_button_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::ButtonA] = handle;
-
-	//決定のテキスト画像
-	handle = LoadGraph(decide_text_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::DecideText] = handle;
-
-	//決定のテキスト画像
-	handle = LoadGraph(next_text_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::NextText] = handle;
-
-	//リトライ選択肢画像
-	handle = LoadGraph(retry_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::ReTry] = handle;
-
-	//カーソルが乗っているときのリトライ選択肢画像
-	handle = LoadGraph(retry_on_cursor_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::ReTryOnCursor] = handle;
-
-	//タイトルに戻る選択肢画像
-	handle = LoadGraph(back_title_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::BackTitle] = handle;
-
-	//カーソルが乗っているときのタイトルに戻る選択肢画像
-	handle = LoadGraph(back_title_on_cursor_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::BackTitleOnCursor] = handle;
-
-	//スペシャルゲージの枠画像
-	handle = LoadGraph(special_gauge_frame_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::SpecialGaugeFrame] = handle;
-
-	//スペシャルゲージの画像
-	handle = LoadGraph(special_gauge_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::SpecialGauge] = handle;
-
-	//ゲームに戻る選択肢の画像
-	handle = LoadGraph(back_game_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::BackGame] = handle;
-
-	//カーソルが乗っているときのゲームに戻る選択肢の画像
-	handle = LoadGraph(back_game_on_cursor_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::BackGameOnCursor] = handle;
-
-	//操作説明の画像
-	handle = LoadGraph(how_to_play_path);
-	assert(handle >= 0);
-	m_graphicHandles[ResourceLoader::GraphicID::HowToPlay] = handle;
+	//試しに、対応表をループしてLoadGraphを呼び出す
+	for (auto& [id,path] : graphic_paths)
+	{
+		LoadGraphic(id);
+	}
 }
 
 void ResourceLoader::KeepEffect()

@@ -22,6 +22,7 @@ public:
     void Init() override;
 	void Update() override;
 	void Draw() override;
+	SceneID GetSceneID() const override;//自身のシーンIDを返す
 
 private:
 	//現在のLerp値でテキストオフスクリーンを書き直す

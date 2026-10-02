@@ -99,6 +99,8 @@ public:
 	void ChangeAllStateToDisabled();
 	//全てのステートを通常のステートに変更
 	void ChangeAllStateToNormal();
+	//演出などで操作できない状態か(この間は被弾しない)
+	bool IsDisabled() const { return m_isDisabled; }
 
 	//被弾回数を取得
 	int GetHitCount() const { return m_hitCount; }
@@ -252,4 +254,6 @@ private:
 
 	//無敵時間
 	int m_invincibleFrame = 0;
+	//演出などで操作できない状態か
+	bool m_isDisabled = false;
 };
