@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include "PauseScene.h"
+#include "SceneID.h"
 #include "SceneController.h"
 #include "Manager/InputManager.h"
 #include "Main/Application.h"
@@ -475,3 +476,8 @@ void PauseScene::DrawPlayerWarpMode()
 		L"左スティック:移動　Aボタン:決定　Bボタン:キャンセル");
 }
 #endif
+
+SceneID PauseScene::GetSceneID() const
+{
+	return SceneID::Pause;
+}

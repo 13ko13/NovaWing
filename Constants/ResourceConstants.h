@@ -82,8 +82,20 @@ namespace
 	constexpr const wchar_t* back_game_path = L"Data/Image/SelectFrame/Back_Game.png";
 	//カーソルが乗っているときのゲームに戻る選択肢の画像
 	constexpr const wchar_t* back_game_on_cursor_path = L"Data/Image/SelectFrame/Back_Game_OnCursor.png";
-	//操作説明の画像
-	constexpr const wchar_t* how_to_play_path = L"Data/Image/Button/HowTo.png";
+	//WARNINGの枠
+	constexpr const wchar_t* warning_frame_path = L"Data/Image/Warning/Warning_Frame.png";
+	//WARNINGの文字
+	constexpr const wchar_t* warning_text_path = L"Data/Image/Warning/Warning_Text.png";
+	//WARNINGの下の小さい文字
+	constexpr const wchar_t* warning_sub_text_path = L"Data/Image/Warning/Warning_SubText.png";
+	//WARNINGの左右のアイコン
+	constexpr const wchar_t* warning_icon_path = L"Data/Image/Warning/Warning_Icon.png";
+	//WARNING中に画面の縁を赤くする画像
+	constexpr const wchar_t* warning_edge_path = L"Data/Image/Warning/Warning_Edge.png";
+
+	//---------- 動画のパス ----------
+	//ボス登場ムービー
+	constexpr const wchar_t* boss_appear_movie_path = L"Data/Movie/BossAppear.ogv";
 
 	//---------- エフェクトのパス ----------
 	constexpr const wchar_t* player_bullet_effect_path = L"Data/Effect/PlayerBullet/PlayerBullet.efk";

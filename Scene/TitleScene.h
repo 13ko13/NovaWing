@@ -19,6 +19,7 @@ public:
 	void Init() override;//初期化処理
 	void Update() override;//更新処理
 	void Draw() override;//描画処理
+	SceneID GetSceneID() const override;//自身のシーンIDを返す
 
 private:
 	enum class TitleSelect

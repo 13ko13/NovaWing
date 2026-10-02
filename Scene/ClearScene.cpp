@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include "ClearScene.h"
+#include "SceneID.h"
 #include "GameScene.h"
 #include "Manager/InputManager.h"
 #include "Scene/TitleScene.h"
@@ -671,4 +672,9 @@ void ClearScene::DrawResultText(int fontHandle)
 		DX_GRAPH_FILTER_GAUSS,
 		blur_range, blur_strength
 	);
+}
+
+SceneID ClearScene::GetSceneID() const
+{
+	return SceneID::Clear;
 }

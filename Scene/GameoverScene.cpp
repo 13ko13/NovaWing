@@ -1,6 +1,7 @@
 ﻿#include <algorithm>
 
 #include "GameoverScene.h"
+#include "SceneID.h"
 #include "Manager/InputManager.h"
 #include "SceneController.h"
 #include "GameScene.h"
@@ -328,4 +329,9 @@ void GameoverScene::Draw()
 		static_cast<int>(decideDrawPos.y),
 		decide_graph_scale * uiScale, 0.0, decideHandle, true
 	);
+}
+
+SceneID GameoverScene::GetSceneID() const
+{
+	return SceneID::Gameover;
 }

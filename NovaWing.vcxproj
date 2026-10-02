@@ -258,7 +258,8 @@
     <ClCompile Include="Manager\WaterManager.cpp" />
     <ClCompile Include="Manager\WaterRevealManager.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\WormEnemy\WormEnemyDataSetter.cpp" />
-    <ClCompile Include="Game\Collision\BossBeamTipCollider.cpp" />  </ItemGroup>
+    <ClCompile Include="Game\Collision\BossBeamTipCollider.cpp" />
+    <ClCompile Include="Game\UI\WarningUI.cpp" />  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
     <ClInclude Include="Game\Collision\CounterCollider.h" />
@@ -367,7 +368,9 @@
     <ClInclude Include="Manager\WaterManager.h" />
     <ClInclude Include="Manager\WaterRevealManager.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\WormEnemy\WormEnemyDataSetter.h" />
-    <ClInclude Include="Game\Collision\BossBeamTipCollider.h" />  </ItemGroup>
+    <ClInclude Include="Game\Collision\BossBeamTipCollider.h" />
+    <ClInclude Include="Scene\SceneID.h" />
+    <ClInclude Include="Game\UI\WarningUI.h" />  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

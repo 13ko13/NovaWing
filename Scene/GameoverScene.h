@@ -14,6 +14,7 @@ public:
 	void Init() override;
 	void Update() override;
 	void Draw() override;
+	SceneID GetSceneID() const override;//自身のシーンIDを返す
 
 private:
 	//ゲームオーバーシーンの選択肢

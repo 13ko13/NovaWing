@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <vector>
 
+enum class SceneID : int;//シーンIDのプロトタイプ宣言
 class InputManager;
 class SceneController;	//シーンコントローラーのプロトタイプ宣言
 class PlayerBullet;
@@ -28,4 +29,7 @@ public:
 	/// シーンの描画
 	/// </summary>
 	virtual void Draw() abstract;
+
+	//自身のシーンIDを返す
+	virtual SceneID GetSceneID() const abstract;
 };

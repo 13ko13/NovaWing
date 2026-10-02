@@ -650,6 +650,8 @@
 - **ハマった点2**: `Select` enumに`HowToControll`という3番目の選択肢を用意していたが、`Draw()`の`switch(m_select)`に対応する`case`を書き忘れており、`HowToControll`を経由した際に選択肢画像が両方消える不具合が発生。最終的に`HowToControll`は使わない方針となり`Select` enumから削除、`BackGame`/`BackTitle`の2択に整理して解決。
 - **ハマった点3**: `Bボタンでポーズを閉じる`機能(`InputEvent::close`)を追加した際、`if (input.IsTriggered(InputEvent::close))`のブロックを誤って`if (... && input.IsTriggered(InputEvent::ok))`の**内側**に書いてしまい、「OKボタンとBボタンを同時押ししたときだけ閉じる」という意図しない動作になっていた。外側の独立したif文に出して解決。
 
+**→ 2026-10-02、操作説明UIは不要になり全削除（ユーザー依頼でClaudeが削除）:** `GraphicID::HowToPlay`、`how_to_play_path`、`KeepGraph`の読み込み、`GameScene.h`の`m_howToControllOpenProgress`、`GameScene.cpp`の`how_to_*`定数、画像`Data/Image/Button/HowTo.png`・`Data/Image/SelectFrame/How_To_Controll(_OnCursor).png`（ごみ箱へ）。以下の記述は経緯として残す。
+
 **操作説明UI（LBボタン長押しで左下からスライドイン、離すとスライドアウト）に着手・実装場所の認識違いあり、次回続き。**
 - 当初`PauseScene`側で実装しようとしていたが、正しくは**`GameScene`側（ポーズを開かなくてもゲームプレイ中に使える機能）**という認識のズレが発覚。`GameScene.h`には既に`m_howToControllOpenProgress`(0〜1の進行度)が用意されており、`GameScene.cpp`の`Update()`にも`InputEvent::how_to`(LBボタン、`InputManager`に新規登録済み)の押下判定・進行度の増減処理が実装されていた。
 - **発覚した未修正のバグ**: `m_howToControllOpenProgress++`/`--`が**1フレームあたり1.0**の増減になっており、0〜1のクランプと合わさって「ボタンを押した瞬間に一気に全開、離した瞬間に一気に全閉」という動作になってしまう（「にょきっとスライドする」演出になっていない）。`1.0f / 何らかのフレーム数`という緩やかな係数（他の`wipeProgress`と同じ考え方）に直す必要がある。**次回作業再開時、この修正がまだ反映されていないか確認すること。**
@@ -1118,3 +1120,63 @@
 - **コスト表(`NovaWing_詳細.xlsx`)の確認結果:** 期間は、プロト 9/18〜10/24、アルファ 10/25〜11/24、ベータ 11/25〜12/23、マスター 12/24〜12/30(色なし)、提出 12/31、ポートフォリオ 1月。合計112.5h・残100.5h(プロト57/残45、アルファ19、ベータ36.5)。必要ペース1.08h/日に対して、現在の平均は0.92h/日で遅れ気味。
 - 雨のステージに関係するコスト表の項目: ステージ>配置(7h、S)、シェーダ>カメラレンズの水滴(8h、S)、シェーダ>海のリアル化(6h、S)、SE>雨の音(0.5h、B)、SE>ステージ変更(0.5h、A)、BGM>ステージセレクト(0.5h)、ゲームループ(ステージセレクト→ステージ1/2など)、バグ修正>ローディングを最初に全部ではなくその都度にする(3h、S)、バグ修正>エフェクトが見づらい(5h、S)。
 - **コスト表の状態が古い項目(要更新):** 敵の種類(蝶・固定砲台・突進)は実装(浮遊敵・ワーム・ボス)と一致しない。「エフェクトが消えていない」はシーン切り替え時の残留を修正済み(ノート上は完了)。「横回転」「当たり判定」「敵の弾の反射」まわりも、実装済みの内容に合わせて更新が必要。更新はユーザーの了承を得てから行う。
+
+### 設計中（2026-10-02・リソースをシーンごとにロードする、非同期ロードも検討）
+
+- **順番の変更:** 雨のステージの前に、起動時の長い待ち時間を解消する（今は`Application.cpp`で`ResourceLoader::LoadAll()`が全部を読む）。
+- **非同期ロードの理解（説明済み）:** `SetUseASyncLoadFlag(TRUE)`でDxLibのロード関数がすぐ戻り、裏で読む。読み込み自体は速くならず、待っている間も画面を動かせるようにする技術。完了確認は`GetASyncLoadNum()`/`CheckHandleASyncLoad()`。`LoadEffekseerEffect`は対象外（同期のまま）。完了前のハンドルを使わない設計が要る（`Actor`の`MV1DuplicateModel`など）。
+- **重さの見立て:** `.mv1`自体は小さく、`Data/Model`の156MBはほぼ`.fbm`のテクスチャ。4096×4096が`Rock.fbm/rocks_diff_spec.png`(47MB)、`Boss.fbm/T_Mech_LOD2_M/B/N.png`。どれもゲームシーン専用。解像度を下げる手もある。計測(`GetNowHiPerformanceCount`)はまだ。
+- **シーンごとの必要リソースは洗い出し済み**（タイトル/ゲーム/ポーズ/クリア/ゲームオーバー）。共有: Playerモデル＋マップ3枚・SkyBox×6・Caustics・Boost（タイトルとゲーム）、SelectBackGround・OnCursor・Decision（ほぼ全部）、ReTry系・BackTitle系・GameEnd系・ButtonA・DecideText。`GraphicID::HowToPlay`はどこからも使われていない。
+- **決まった設計:**
+  - シーンごとに必要なリソースを構造体でまとめ、一覧は**ResourceLoaderが持つ**。切り替え時に「今あって次に無い→解放」「次にあって今無い→読む」「両方にある→残す」（タイトル→ゲームのPlayerモデル、リトライ時のゲームのリソースは残る）。
+  - 伝えるのは**SceneController**。位置は`Update()`の切り替え処理の`ResetScene`の後・`Init()`の前（古いオブジェクト・再生中のエフェクトが消えてから、新しいシーンが使う前）。
+  - 次のシーンの種類は、`Scene`基底の**純粋仮想関数**で各シーンが答える（`ICollider::GetTag()`と同じ考え方、`dynamic_cast`の分岐は使わない）。戻り値のenumは`DamageSource.h`と同じく**専用の小さなヘッダ(`Scene/SceneID.h`の予定)**に置き、`Scene`とResourceLoaderの両方からincludeする。
+  - 一覧の構造体は**シーンごとに別の型にせず、1種類だけ**（`SceneResources`、メンバは`std::vector<ModelID>`/`<GraphicID>`/`<EffectID>`/`<SoundID>`/`<FontID>`）。別々の構造体（`TitleResource`/`GameResource`）だと、共通かどうかの比較を遷移の組み合わせごと（タイトル⇔ゲーム、ゲーム⇔クリア、ゲーム⇔ゲームオーバー、クリア⇔タイトル）に手で書くことになるため。同じ型なら比較は1つで済む。「入っているか」は`std::find`で十分（数十個、切り替え時だけ）。
+  - ResourceLoaderは`std::unordered_map<SceneID, SceneResources>`で一覧を持つ（中身は`WStringToModelID`の`table`のように初期化時にまとめて書く）。
+  - **ポーズ:** `PushScene`で切り替えを通らないので、ポーズの画像・音は**ゲームの一覧に含める**。`PauseScene`は`SceneID::Pause`を返す（「ゲーム」と答えると関数の意味とずれるため）が、`Pause`はマップに登録しない。登録されていないIDが渡されたら`GetModel`等と同じく`assert`。
+  - **SoundManager:** 既に`loaded`フラグがあり`Play`/`PlayFadeIn`は未ロードならスキップする。`InitData`で「読み込まれていなければ`GetSound`を呼ばず`loaded = false`」にするだけでよい（ResourceLoaderに`IsSoundLoaded`のような確認関数を追加）。
+- **実装手順（合意済み、ユーザーが実装）:** ①`Scene/SceneID.h`（Title/Game/Pause/Clear/Gameover） ②`Scene`に`virtual SceneID GetSceneID() const = 0;`、5シーンでoverride ③ResourceLoaderの`Keep*`を「ID→パス(+エフェクト倍率・フォントパス)の対応表」と「IDを1つ読む関数」に分ける ④`SceneResources`構造体・`unordered_map<SceneID, SceneResources>`(Title/Game/Clear/Gameover、Gameにポーズ分を含む)・切り替え関数（読み込み済みマップにあって次に無い→解放してマップから消す、次にあってマップに無い→読む、未登録IDは`assert`）・`IsSoundLoaded` ⑤`SoundManager::InitData`の修正 ⑥`SceneController`の2か所（`Update()`の`ResetScene`と`Init()`の間、`ChangeScene()`の起動直後の分岐の`ResetScene`と`Init()`の間）で呼ぶ ⑦`Application.cpp`の`LoadAll()`を削除（`ReleaseAll()`は残す） ⑧9種類の遷移を確認（入れ忘れは`Get*`の`assert`で分かる）。
+- **非同期ロードは同期版が動いてから**上に足す（ロード中の画面と、`Init()`の前に読み込み完了を待つ段階が必要）。
+- 運用メモ: この設計中、質問を1つずつ重ねすぎて「実装に進めない」と言われた。設計の大筋が決まったら、細部はClaudeが決めて手順にまとめる。
+- **未決定:** 非同期ロードの詳細（ロード中の画面、`Init()`の前に読み込み完了を待つ段階、`LoadEffekseerEffect`は同期のまま）。
+### 進捗（2026-10-02・ボス登場演出を「WARNING→海から浮上ムービー」に変更する素材を作成）
+
+- **ユーザー要望:** 地震で揺れている間にWARNINGを出し、その後「海の下からボスが盛り上がってくる」ムービーを再生。ムービー後の着地の衝撃揺れ→カメラズームは今まで通り。現在の「上から落ちてくる」部分を置き換える。ムービーは動画ファイル方式(Blender制作)をユーザーが選択(ゲーム内リアルタイム案もあったが不採用)。
+- **作成した素材(Claude作成):**
+  - `Data/Image/Warning/`: `Warning_Text.png`(1600x300、WARNINGの文字)、`Warning_SubText.png`(1600x90、A HUGE ENEMY IS APPROACHING)、`Warning_Stripe.png`(1920x72、警告ストライプ。縞の周期96pxで横にループ可能)、`Warning_Back.png`(1920x420、上下にフェードする赤い帯)。フォントはOrbitron Black。1920x1080基準での配置見本: 帯は中心y=540、ストライプ上y=330/下y=680、文字は左上(160,355)、サブ文字は(160,590)。
+  - 動き方の見本: 帯が縦に開く(約0.25秒)→ストライプが左右から入ってきて横スクロールし続ける→WARNINGが0.6秒周期で点滅→サブ文字が遅れて出る→最後に帯が閉じる。
+  - `Data/Movie/BossAppear.mp4`(H.264)と`BossAppear.ogv`(Theora)。1920x1080・30fps・180フレーム(6秒)、音なし。流れ: 海面が赤く光りながら盛り上がる(〜72F)→ボスが突き破って水柱(73F〜)→浮上・水が流れ落ちる→146F付近で目が強く光る→停止。ボスは最後に海面に立った状態。
+  - Blender制作スクリプトはscratchpad(一時フォルダ)にあり、リポジトリには入れていない。Boss.fbxは親Emptyで回転させる必要あり(FBXのアクションがアーマチュア自身の回転をキーしているため)。正面はZ回転90度。
+- **コード側(ユーザーが実装、未着手):** `BossApearState`の`Apear`(落下)をWARNING表示・ムービー再生に置き換え、ムービー終了時にボスを海面(y=0)へ`SetPos`して`Landing`へ進む想定。DxLibは`LoadGraph`で動画を読み込み、`PlayMovieToGraph`/`GetMovieStateToGraph`で再生・終了判定。
+- **2026-10-02続き・ムービーを「ゲーム内の質感」で作り直し(v2)。** v1(Blenderの写実レンダー: AgX・Ocean・光る玉の水しぶき)はユーザーから「AI感が強い」との評価。原因はゲームのシェーダーと見た目の系統が違うこと。v2では以下をゲームと同じにした:
+  - 空: `SkyBox::Draw`と同じ面・UV対応で6面を正距円筒画像に計算(numpy)。海の反射も同じ画像。
+  - 海: `WaterVS.hlsl`のsin波5本をジオメトリノードで再現、色は`WaterPS.hlsl`の式(フレネル^20・霧800〜2000・コースティクス・泡の高さ50〜130)をノードで再現。
+  - ボス: `LightingPS`/`LightingCommon`の式(ambient 0.35、法線マップ強度1.5、メタリック未設定なのでsmoothness=1)を再現。ライト方向は`Game::light_direction`。
+  - 色変換なし(ViewTransform=Raw)、モーションブラー・ブルームなし。カメラはボス出現時のゲームカメラ位置(ボスの3800手前、高さ300、縦FOV90°)に固定、揺れもゲームと同じランダム方向×power(地震7、突き破り55)。
+  - しぶきはゲームのEffekseer素材(SprayStreak2/SprayDrop2/Smoke/Ring)をスプライトで使用。EEVEEではParticle InfoのAge/Lifetimeが0になるので寿命フェードは使えない。
+  - 1m=300ユニット換算。ボスは親EmptyのZ回転0でカメラ(-Y)を向く。60fps・360フレーム。
+- **2026-10-02続き2・「赤く光って膜が盛り上がり、破れる」のをやめた(v3)。** ユーザー指摘「普通はそんな膜が破壊されるようにはならない」。海の赤い発光を0にし、盛り上がりは高さ0.45m・半径6mの低く広いうねりに変更。浮上前は泡・小さなしぶき、浮上時は爆発的な水柱ではなく、押しのけられた水があふれる程度にして、体から流れ落ちる水を増やした。水面のRingスプライトは縁がギザギザで不自然だったため削除。ボス位置は霧で空色になる距離なので、ムービー用の泡は霧の後に重ねている。カメラが低い(約1m)ため、浮上前の海面の変化は水平線上で細くしか見えない。
+- **2026-10-02続き3・WARNING画像を作り直し(v2)。** 旧版(縞模様・金属グラデーション・Orbitron)は定番テンプレートの寄せ集めでゲームのUIと系統が違ったため廃止し、`Warning_Stripe.png`/`Warning_Back.png`は削除。新版はリザルトのテンプレート(`Result_Templete.png`)と同じ構成(中央の黒パネル+六角形の張り出し、左右の暗い側面パネル+アイコン、上下の太いアクセント、区切り線)を赤にしたもの。色はリザルトのDAMAGE COUNTの赤(224,64,64)、側面パネルは(72,20,22)。文字はリザルトの面取りした一筆書き風の書体に似せて、線で組んだ自作グリフ。光彩は線だけをぼかして重ねている。動画ではなく、ゲーム側で動かす前提のパーツ画像:
+  - `Warning_Frame.png` 1720x480(余白込み、枠本体は1600x360)、`Warning_Text.png` 1100x240、`Warning_SubText.png` 1000x90(HUGE ENEMY APPROACHING)、`Warning_Icon.png` 180x180(左右に2回描く)、`Warning_Edge.png` 1920x1080(画面の縁を赤くする)。
+  - 1920x1080基準の配置(左上座標): Frame(100,300)、Icon(165,450)と(1575,450)、Text(410,371)、SubText(460,626)、Edge(0,0)。
+- **2026-10-02続き4・ボス登場演出のコード実装(ユーザーの依頼によりClaudeが実装)。** Debug/Releaseともビルド成功。起動してDxLibのLog.txtで読み込みエラーがないことも確認済み。ただし、ボス地点まで実際にプレイしての動作確認はまだ。
+  - 新規`Game/UI/WarningUI`(`UIBase`継承、`New-GameClass.ps1`で追加・vcxproj登録)。`Start(totalFrame)`で表示を開始し、`IsPlaying()`で終了を判定する。GlitchPS(scanline 280)を通して描画する。演出: 画面の縁が赤く脈打つ／枠が中心から左右に開く(14F、閉じるのも同じ)／開ききったらWARNINGが素早く点滅してから40F周期で暗くなる／アイコンが脈打つ／サブテキストは22Fから左→右へワイプ。
+  - `ResourceLoader::GraphicID`に`WarningFrame/Text/SubText/Icon/Edge`と`BossAppearMovie`を追加(動画もLoadGraphで読む)。パスは`ResourceConstants.h`。ムービーは`.ogv`を使用し、DxLibの「音声データのオープンに失敗」ログが出ないよう無音のvorbisトラックを付けた。
+  - `GameScene`の`BossApearState`: None→Start(揺れ・地震音・WARNING開始)→Warning(揺れとWARNINGの終了待ち→`SeekMovieToGraph(0)`+`PlayMovieToGraph`)→Movie(`GetMovieStateToGraph==0`でボスをy=0に`SetPos`、地震音フェードアウト)→CameraZoom(従来通り)。`Apear`/`Landing`と、落下・着地の揺れの定数は削除。揺れの長さは2秒→3秒(`boss_appear_shake_frame = 60*3`)。ムービーは`Draw()`の最後に`DrawExtendGraph`で全画面描画。ムービー中はポーズ不可(ポーズ中も動画の再生が進むため)。
+  - `BossEnemy`の初回着地判定(`m_isFirstLanding`、着地音)は落下がなくなったため使われなくなったが、コードは残している。
+- **2026-10-02続き5・演出中にプレイヤーが被弾して死ぬ不具合を修正。** 演出が「揺れ2秒+落下約1秒」から「WARNING3秒+ムービー6秒」に延びたため、操作できないまま撃たれ続け、ムービーの裏でゲームオーバーになっていた(ユーザー確認済み: 被弾が原因)。`Player`に`m_isDisabled`/`IsDisabled()`を追加し、`ChangeAllStateToDisabled()`でtrue、`ChangeAllStateToNormal()`でfalseにする。`PlayerCollider::IsCollisionActive()`でdisabled中は判定を切る。ボス撃破後のズーム中も同じ扱いになり、被弾しない。
+- **2026-10-02続き6・ムービーにカメラワークを追加(ユーザー要望「もっと近く、迫力を」「カメラワークがあるとかっこいい」)。** 6秒のまま6カット構成: ①0〜1.5s 海面近くから泡立つ海へ寄る ②1.5〜2.35s 少し上から泡立つ中心を見下ろす(ロール-3°) ③2.35〜3.7s 突き破り、正面の低い位置から頭をあおりで追う(衝撃の揺れ) ④3.7〜4.65s 斜め(-40°→-15°)から回り込んで全身 ⑤4.65〜5.3s 目のアップ(目が光る) ⑥5.3〜5.95s ゲームのカメラ位置・縦FOV90°まで引いて、そのままゲームにつなぐ。目の位置はボス中心から(0,-3.5,3.45)m。揺れはnoiseによる滑らかな揺れで、最後の0.5秒は揺らさない。
+  - ハマった点: 低いカメラ(0.35m)が盛り上がりや波紋の山の下に潜っていた → 海面に近いカットは1m以上に置く。泡の煙スプライトは寄りのカットで浮いた綿や板のように見えたので廃止し、泡は海面シェーダー側だけで出す。
+- **2026-10-02続き7・カメラの「2回引き」を解消。** ユーザー指摘: ムービー最後にゲームのカメラ位置まで引くと、ゲームのCameraZoomでもう一度寄り、さらにズーム終了後(GameCameraはズームが終わるとプレイヤー追従に戻る)プレイヤーへ引くので、寄る→引く→寄る→引くになっていた。対応:
+  - ムービーの最後のカットは、目のアップから「ボス正面・ボス位置+(0,1020,-2700)ユニット(=9m手前、高さ3.4m)・水平・縦FOV90°」まで画角を広げて終わる。
+  - `GameScene`のCameraZoomは`OnZoomUp(boss_appear_zoom_speed=1.0f, boss, boss_appear_camera_dist=2700, boss_appear_camera_height=1020)`で、ムービーの最後と同じ位置へ1フレームで移す。そこから既存の追従(lerp 0.06)でプレイヤーへ1回だけ引いて戻る。`boss_appear_zoom_limit`は削除。死亡時のズーム(`boss_zoom_speed`/`boss_target_offset_y`/`boss_death_zoom_limit`)はそのまま。
+  - カメラが移り終わるまでの数フレーム、遠いゲーム画面がちらつかないよう、`m_isDrawBossMovie`でムービーの最後のコマを出し続け、`m_isApearBoss && !IsZoom()`になったら描画をやめる。
+- **2026-10-02続き8・水しぶきを3Dの水滴に変更。** ユーザー指摘「水滴がしょぼい、縦長のテクスチャに見える」(SprayStreak2/SprayDrop2の板スプライトだったため)。UV球の粒(丸い粒と、進行方向に6倍伸ばした粒)に変更。マテリアルは空の映り込み(下向きの反射は暗い海を拾うのでzを折り返して常に空)+ライト方向のハイライト+縁の明るさ、中心を少し透かす(BLENDED)。サイズは半径0.025〜0.035m。煙(Smoke.png)のスプライトはそのまま。
+  - ハマった点1: 粒の向きはパーティクルが生まれた瞬間の速度で決まり、その後は変わらない → 流れ落ちる水は最初から下向きの速度(object_align_factor z=-2.5)で出す。
+  - ハマった点2: パーティクルの回転はX軸を速度に合わせるが、インスタンスとして描かれるときはオブジェクトの**Y軸**が速度方向になる → 粒はY方向に伸ばす。
+  - ogvは約50MBになった(水滴の細かさのため)。
+- **2026-10-02続き9・流れ落ちる水を「水流の帯」に作り直し。** ユーザー指摘「ボックスの中に縦長の楕円がいっぱいあるみたいでしょぼい」(箱の範囲から粒を均一に降らせていたため)。ユーザーの提案で参考作品を調査(メタルギア ライジングのMetal Gear RAY、エースコンバット7のアリコーン浮上。ゲームVFXでは、体から落ちる水は粒ではなく水の幕・水流メッシュ+流れるノイズの筋+下に泡としぶき、が定番)。
+  - 浮上しきった姿勢でボスのメッシュから下向きの面(法線z<-0.6、高さ0.8m以上)を0.7m升目で拾い、各升目の一番低い点を水が落ちる点にする(134点→高い所を優先して48点)。
+  - 各点から十字に組んだ2枚の板(長さ12m、下へ行くほど広がる)を垂らし、海面で下を隠す。BossRootの子なので一緒に浮上する。
+  - マテリアル: UVのVを上端からの距離(m)にして、sqrt(距離)で加速して見えるよう下へ流すノイズの筋(太い筋+細かい泡の筋)。左右の端と上端はぼかす。drain値で水量を減らし(3.6sまで最大→5.6sでほぼ0)、だんだん細くなって途切れる。
+  - 水滴は水が落ちる点から少しだけ(1500個)。箱のエミッター(PourEmitter/PourEmitterLegs)は削除。

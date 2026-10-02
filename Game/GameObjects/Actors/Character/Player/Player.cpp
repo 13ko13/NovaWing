@@ -653,6 +653,9 @@ bool Player::IsSomersault() const
 
 void Player::ChangeAllStateToDisabled()
 {
+	//操作できない間に撃たれ続けて死なないよう、被弾しない状態にする
+	m_isDisabled = true;
+
 	// 全ての入った時の処理も呼ぶ
 	// 何もしないステート
 	std::shared_ptr<IMovementState> newMoveState =
@@ -675,6 +678,9 @@ void Player::ChangeAllStateToDisabled()
 
 void Player::ChangeAllStateToNormal()
 {
+	//被弾する状態に戻す
+	m_isDisabled = false;
+
 	// 全ての入った時の処理も呼ぶ
 	// 通常ステート
 	std::shared_ptr<IMovementState> newMoveState =
