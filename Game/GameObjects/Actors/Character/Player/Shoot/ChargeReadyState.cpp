@@ -22,6 +22,9 @@ namespace
 
 	// エフェクトの最初の大きさ
 	const Vector3 first_effect_scale = Vector3(1.0f, 1.0f, 1.0f);
+
+	//発射位置オフセット
+	const Vector3 shoot_pos_offset = Vector3(0.0f, 0.0f, 200.0f);
 } // namespace
 
 ChargeReadyState::ChargeReadyState(
@@ -83,7 +86,7 @@ void ChargeReadyState::Update()
 			// BulletManagerにチャージ弾発射を依頼する
 			std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock(); // 一時的にshared_ptrに変換
 			std::shared_ptr<Player> pPlayer = m_pPlayer.lock();						 // 一時的にshared_ptrに変換
-			const Vector3 pos = pPlayer->GetPos();									 // プレイヤーの位置
+			const Vector3 pos = pPlayer->GetPos() + shoot_pos_offset;				 //発射位置
 			const Vector3 vel = -pPlayer->GetForward() * move_speed;				 // 速度
 
 			// プレイヤーからターゲットを受け取る

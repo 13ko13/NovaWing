@@ -43,9 +43,6 @@ public:
 		//浮遊敵
 		EnemyBoot,//activeになるときの音
 
-		//ワームエネミー
-		WormMove,//移動音
-
 		//BGM
 		GameBGM,//ゲームBGM
 		BossBGM,//ボスBGM

@@ -53,8 +53,6 @@ namespace
 	constexpr int enemy_shoot_volume = 70;
 	//浮遊敵がactiveになるときの音
 	constexpr int enemy_boot_volume = 125;
-	//ワームエネミーの移動音
-	constexpr int worm_move_volume = 100;
 
 	//ゲームBGM
 	constexpr int game_bgm_volume = 150;
@@ -188,10 +186,6 @@ void SoundManager::Init()
 	InitData(SoundType::EnemyBoot,
 		ResourceLoader::SoundID::EnemyBoot,
 		true, enemy_boot_volume, false);
-	//ワームエネミーの移動音(ループ)
-	InitData(SoundType::WormMove,
-		ResourceLoader::SoundID::WormMove,
-		true, worm_move_volume, true);
 
 	//ゲームBGM(ループ)
 	InitData(SoundType::GameBGM,
@@ -367,15 +361,24 @@ void SoundManager::InitData(
 	ResourceLoader::SoundID soundID,
 	bool isLoaded, int volume, bool isLoop)
 {
-	//リソースローダーのインスタンスを取得
+	//インスタンスを取得
 	auto& loader = ResourceLoader::GetInstance();
 
-	//それぞれのハンドルを取得して設定する
-	//タイトルでのプレイヤーのブースト音
+	//引数にサウンドの種類を渡して、サウンドの情報を受け取る
 	auto& soundData = m_sounds[type];
+    soundData.volume = volume;//音量を設定
+    soundData.isLoop = isLoop;//ループするかを設定
+
+    //そのシーンでまだ読み込まれていないサウンドは、ハンドルを取得せず未ロード扱いにする
+    if (!loader.IsSoundLoaded(soundID))
+    {
+        soundData.loaded = false;
+        soundData.handle = -1;
+        return;
+    }
+
+	//IDを渡してローダーからサウンドのハンドルを受け取る
 	soundData.handle = loader.GetSound(soundID);
-	soundData.loaded = isLoaded;//ロード済みフラグを立てる
-	soundData.volume = volume;
-	soundData.isLoop = isLoop;//ループしない
-	ChangeVolumeSoundMem(soundData.volume, soundData.handle);//音量を変更する
+    soundData.loaded = isLoaded;//ロード済みフラグを立てる
+    ChangeVolumeSoundMem(soundData.volume, soundData.handle);//音量を変更する
 }

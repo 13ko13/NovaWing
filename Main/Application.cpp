@@ -61,11 +61,6 @@ bool Application::Init()
 		return false;
 	}
 
-	//Effekseer_Initの後に呼ばないとエフェクトロードに失敗する
-	//リソースローダーのインスタンスを作成して
-	//リソースをロードする
-	ResourceLoader::GetInstance().LoadAll();
-
 	// Zバッファを有効にする。
 	SetUseZBuffer3D(TRUE);
 	// Zバッファへの書き込みを有効にする。

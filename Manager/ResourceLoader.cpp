@@ -139,7 +139,6 @@ namespace
 		{ ResourceLoader::SoundID::EnemyDeath, enemy_death_se_path },//共通の死亡音
 		{ ResourceLoader::SoundID::EnemyShoot, enemy_shoot_se_path },//共通の弾発射音
 		{ ResourceLoader::SoundID::EnemyBoot, enemy_boot_se_path },//浮遊敵がactiveになるときの音
-		{ ResourceLoader::SoundID::WormMove, worm_move_se_path },//ワームの移動音
 
 		//BGM
 		{ ResourceLoader::SoundID::GameBGM, game_bgm_path },//ゲームBGM
@@ -188,14 +187,36 @@ namespace
 		//共通
 		{ ResourceLoader::EffectID::HitEffect, { hit_effect_path, hit_effect_scale } },//被弾(敵味方共通)
 	};
-}
 
+	//フォントの読み込みに必要な情報
+	struct FontInfo
+	{
+		const wchar_t* path;//ttfのパス
+		LPCWSTR name;//フォント名
+		int size;//サイズ
+		int thick;//太さ
+		int type;//フォントタイプ
+		int space;//文字間隔
+	};
+
+	//FontIDと読み込み情報の対応表
+	const std::unordered_map<ResourceLoader::FontID, FontInfo> font_infos =
+	{
+		{ ResourceLoader::FontID::Result, { result_font_path, result_font_name, result_font_size, result_font_thick, result_font_type, font_space } },//リザルト用
+	};
+}
 
 ResourceLoader& ResourceLoader::GetInstance()
 {
 	//staticでインスタンスを宣言してそれを返す
 	static ResourceLoader instance;
 	return instance;
+}
+
+ResourceLoader::ResourceLoader()
+{
+	//シーンごとのリソースを先に一覧としてまとめる
+	InitSceneResources();
 }
 
 void ResourceLoader::LoadAll()
@@ -336,14 +357,137 @@ void ResourceLoader::LoadEffect(EffectID id)
 
 void ResourceLoader::ReleaseEffect(EffectID id)
 {
+	auto it = m_effectHandles.find(id);
+	if (it != m_effectHandles.end())
+	{
+		DeleteEffekseerEffect(it->second);
+		m_effectHandles.erase(it);
+	}
 }
 
 void ResourceLoader::LoadSound(SoundID id)
 {
+	//m_soundHandlesにidが存在するか確認
+	if (m_soundHandles.find(id) != m_soundHandles.end())
+	{
+		//すでに読み込まれている場合は何もしない
+		return;
+	}
+
+	//読み込みを行う
+	auto it = sound_paths.find(id);
+	if(it == sound_paths.end())
+	{
+		assert(false && "サウンドIDが見つかりません");
+		return;
+	}
+
+	//サウンドを読み込む
+	int handle = LoadSoundMem(it->second);
+	assert(handle >= 0 && "サウンドの読み込みに失敗しました");
+	m_soundHandles[id] = handle;//格納
 }
 
 void ResourceLoader::ReleaseSound(SoundID id)
 {
+	auto it = m_soundHandles.find(id);
+	if (it != m_soundHandles.end())
+	{
+		DeleteSoundMem(it->second);
+		m_soundHandles.erase(it);
+	}
+}
+
+void ResourceLoader::InitSceneResources()
+{
+	//シーンが何もない状態はリソースを持たない
+	m_sceneResources[SceneID::None] = SceneResources();
+
+	//タイトルのリソース
+	SceneResources title;
+	title.models = { ModelID::Player };
+	title.graphics = {
+		GraphicID::TitleLogo,GraphicID::GameStart,GraphicID::GameEnd,
+		GraphicID::GameStartOnCursor,GraphicID::GameEndOnCursor,GraphicID::SelectBackGround,
+		GraphicID::SkyBoxFront,GraphicID::SkyBoxBack,GraphicID::SkyBoxLeft,
+		GraphicID::SkyBoxRight,GraphicID::SkyBoxUp,GraphicID::SkyBoxBottom,
+		GraphicID::Caustics, GraphicID::PlayerNormalMap, GraphicID::PlayerMetalicMap,
+		GraphicID::PlayerEmissionMap
+	};
+	title.effects = { EffectID::Boost };
+    title.sounds = {
+        SoundID::TitleBoost, SoundID::TitleBGM, SoundID::TitleLogoImpact,
+        SoundID::OnCursor, SoundID::Decision
+    };
+    m_sceneResources[SceneID::Title] = title;
+
+    //ゲーム(ポーズ分を含む)
+    SceneResources game;
+    game.models = {
+        ModelID::Player, ModelID::Stage, ModelID::Rock1, ModelID::Rock2,
+        ModelID::Rock3, ModelID::FloatingEnemy, ModelID::WormHead, ModelID::Boss
+    };
+    game.graphics = {
+        GraphicID::SkyBoxFront, GraphicID::SkyBoxBack, GraphicID::SkyBoxLeft,
+        GraphicID::SkyBoxRight, GraphicID::SkyBoxUp, GraphicID::SkyBoxBottom,
+        GraphicID::Caustics, GraphicID::RockNorm, GraphicID::DissolveNoise,
+        GraphicID::PlayerNormalMap, GraphicID::PlayerMetalicMap, GraphicID::PlayerEmissionMap,
+        GraphicID::EnemyNormalMap, GraphicID::EnemyEmissionMap,
+        GraphicID::WormHeadNormalMap, GraphicID::WormHeadMetalicMap, GraphicID::WormHeadEmissionMap,
+        GraphicID::WormBodyDiffuseMap, GraphicID::BossNormal, GraphicID::BossEmission,
+        GraphicID::NormalReticle, GraphicID::ChargeReticle,
+        GraphicID::PlayerHPFrame, GraphicID::PlayerHPGauge,
+        GraphicID::BossHPFrame, GraphicID::BossHPGauge,
+        GraphicID::SpecialGaugeFrame, GraphicID::SpecialGauge,
+        GraphicID::WarningFrame, GraphicID::WarningText, GraphicID::WarningSubText,
+        GraphicID::WarningIcon, GraphicID::WarningEdge, GraphicID::BossAppearMovie,
+        GraphicID::SelectBackGround, GraphicID::BackGame, GraphicID::BackGameOnCursor,
+        GraphicID::BackTitle, GraphicID::BackTitleOnCursor
+    };
+    game.effects = {
+        EffectID::PlayerBullet, EffectID::PlayerChargeBullet, EffectID::Charging,
+        EffectID::EnemyBullet, EffectID::HitEffect, EffectID::Boost,
+        EffectID::LeftWingSplash, EffectID::RightWingSplash,
+        EffectID::LeftBarrelRoll, EffectID::RightBarrelRoll,
+        EffectID::FloatingDeath, EffectID::WormDeath,
+        EffectID::SummonFloating, EffectID::SummonWorm,
+        EffectID::BossBeam, EffectID::BossShield, EffectID::BossDeath, EffectID::Splash
+    };
+    game.sounds = {
+        SoundID::GameBGM, SoundID::BossQuake, SoundID::BossBGM, SoundID::Decision,
+        SoundID::PlayerDamage, SoundID::PlayerDeath, SoundID::ChargeShoot,
+        SoundID::Somersoult, SoundID::Charging, SoundID::ChargeComplete,
+        SoundID::NormalShoot, SoundID::Brake, SoundID::Boost,
+        SoundID::BossMove, SoundID::BossDeath, SoundID::BossDamage, SoundID::BossRecovery,
+        SoundID::BossBeam, SoundID::BossSummon, SoundID::EnemyShoot,
+        SoundID::EnemyBoot, SoundID::EnemyDeath, SoundID::OnCursor
+    };
+    m_sceneResources[SceneID::Game] = game;
+
+    //クリア
+    SceneResources clear;
+    clear.graphics = {
+        GraphicID::ResultTemplete, GraphicID::SelectBackGround,
+        GraphicID::ReTry, GraphicID::ReTryOnCursor,
+        GraphicID::BackTitle, GraphicID::BackTitleOnCursor,
+        GraphicID::ButtonA, GraphicID::DecideText, GraphicID::NextText
+    };
+    clear.sounds = {
+        SoundID::ResultBGM, SoundID::DataAppear, SoundID::ScoreCount,
+        SoundID::Decision, SoundID::OnCursor
+    };
+    clear.fonts = { FontID::Result };
+    m_sceneResources[SceneID::Clear] = clear;
+
+    //ゲームオーバー
+    SceneResources gameover;
+    gameover.graphics = {
+        GraphicID::SelectBackGround, GraphicID::ReTry, GraphicID::ReTryOnCursor,
+        GraphicID::GameEnd, GraphicID::GameEndOnCursor,
+        GraphicID::ButtonA, GraphicID::DecideText
+    };
+    gameover.sounds = { SoundID::GameoverBGM, SoundID::OnCursor, SoundID::Decision };
+    m_sceneResources[SceneID::Gameover] = gameover;
 }
 
 int ResourceLoader::GetModel(ResourceLoader::ModelID id) const
@@ -425,6 +569,29 @@ int ResourceLoader::GetFont(FontID id) const
 	}
 }
 
+void ResourceLoader::OnSceneChange(SceneID prev, SceneID next)
+{
+	//テンプレート関数に引数を渡して、リソースを入れ替えてもらう
+	const SceneResources& prevResources = m_sceneResources[prev];
+	const SceneResources& nextResources = m_sceneResources[next];
+
+	//モデルを入れ替え
+	ChangeResources(prevResources.models, nextResources.models,
+		&ResourceLoader::LoadModel, &ResourceLoader::ReleaseModel);
+	//画像を入れ替え
+	ChangeResources(prevResources.graphics, nextResources.graphics,
+		&ResourceLoader::LoadGraphic, &ResourceLoader::ReleaseGraphic);
+	//エフェクトを入れ替え
+	ChangeResources(prevResources.effects, nextResources.effects,
+		&ResourceLoader::LoadEffect, &ResourceLoader::ReleaseEffect);
+	//音を入れ替え
+	ChangeResources(prevResources.sounds, nextResources.sounds,
+		&ResourceLoader::LoadSound, &ResourceLoader::ReleaseSound);
+	//フォントを入れ替え
+	ChangeResources(prevResources.fonts, nextResources.fonts,
+		&ResourceLoader::LoadFont, &ResourceLoader::ReleaseFont);
+}
+
 ResourceLoader::ModelID ResourceLoader::WStringToModelID(const std::wstring id)
 {
 	//wstringとmodelIDの対応表を作成
@@ -454,7 +621,8 @@ ResourceLoader::ModelID ResourceLoader::WStringToModelID(const std::wstring id)
 
 bool ResourceLoader::IsSoundLoaded(SoundID id) const
 {
-	return false;
+	//サウンドがロードされていればtrueを返す
+	return m_soundHandles.find(id) != m_soundHandles.end();
 }
 
 void ResourceLoader::KeepModel()
@@ -697,11 +865,6 @@ void ResourceLoader::KeepSound()
 	handle = LoadSoundMem(enemy_boot_se_path);
 	assert(handle >= 0);
 	m_soundHandles[ResourceLoader::SoundID::EnemyBoot] = handle;
-	//ワームエネミーの移動音
-	handle = LoadSoundMem(worm_move_se_path);
-	assert(handle >= 0);
-	m_soundHandles[ResourceLoader::SoundID::WormMove] = handle;
-
 	//ゲームBGM
 	handle = LoadSoundMem(game_bgm_path);
 	assert(handle >= 0);
@@ -732,17 +895,48 @@ void ResourceLoader::KeepSound()
 void ResourceLoader::KeepFont()
 {
 	//リザルト時のフォント
+	LoadFont(FontID::Result);
+}
+
+void ResourceLoader::LoadFont(FontID id)
+{
+	//m_fontHandlesにidが存在するか確認
+	if (m_fontHandles.find(id) != m_fontHandles.end())
+	{
+		//すでに読み込まれている場合は何もしない
+		return;
+	}
+
+	auto it = font_infos.find(id);
+	if (it == font_infos.end())
+	{
+		assert(false && "フォントIDが見つかりません");
+		return;
+	}
+
 	//フォントをPC内に一時的に追加
-	AddFontResourceEx(result_font_path, FR_PRIVATE, NULL);
+	AddFontResourceEx(it->second.path, FR_PRIVATE, NULL);
 	int handle = CreateFontToHandle(
-		result_font_name,
-		result_font_size,
-		result_font_thick,
-		result_font_type
+		it->second.name,
+		it->second.size,
+		it->second.thick,
+		it->second.type
 	);
-	assert(handle >= 0);
-	SetFontSpaceToHandle(font_space, handle);
+	assert(handle >= 0 && "フォントの読み込みに失敗しました");
+	SetFontSpaceToHandle(it->second.space, handle);
+
 	//ttfのパスとハンドルを同時に保存
-	m_fontHandles[ResourceLoader::FontID::Result].handle = handle;
-	m_fontHandles[ResourceLoader::FontID::Result].path = result_font_path;
+	m_fontHandles[id].handle = handle;
+	m_fontHandles[id].path = it->second.path;
+}
+
+void ResourceLoader::ReleaseFont(FontID id)
+{
+	auto it = m_fontHandles.find(id);
+	if (it != m_fontHandles.end())
+	{
+		DeleteFontToHandle(it->second.handle);
+		RemoveFontResourceEx(it->second.path, FR_PRIVATE, NULL);
+		m_fontHandles.erase(it);
+	}
 }

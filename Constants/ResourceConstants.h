@@ -99,8 +99,9 @@ namespace
 
 	//---------- エフェクトのパス ----------
 	constexpr const wchar_t* player_bullet_effect_path = L"Data/Effect/PlayerBullet/PlayerBullet.efk";
-	constexpr const wchar_t* worm_death_effect_path = L"Data/Effect/Exprosion/Exprosion.efk";
-	constexpr const wchar_t* floating_death_effect_path = L"Data/Effect/Exprosion2/Exprosion2.efk";
+	//敵の死亡エフェクト(ワーム・浮遊敵で共通。大きさはスケールで調整)
+	constexpr const wchar_t* worm_death_effect_path = L"Data/Effect/EnemyDeath/EnemyDeath.efk";
+	constexpr const wchar_t* floating_death_effect_path = L"Data/Effect/EnemyDeath/EnemyDeath.efk";
 	constexpr const wchar_t* player_charge_bullet_effect_path = L"Data/Effect/PlayerChargeBullet/PlayerChargeBullet.efk";
 	constexpr const wchar_t* charging_effect_path = L"Data/Effect/Charging/Charging.efk";
 	constexpr const wchar_t* enemy_bullet_effect_path = L"Data/Effect/EnemyBullet/EnemyBullet.efk";
@@ -137,7 +138,7 @@ namespace
 
 	//---------- エフェクトの再生スケール ----------
 	constexpr float player_bullet_effect_scale = 2.0f;
-	constexpr float worm_death_effect_scale = 3.0f;
+	constexpr float worm_death_effect_scale = 1.0f;
 	constexpr float floating_death_effect_scale = 1.5f;
 	constexpr float player_charge_bullet_effect_scale = 1.0f;
 	constexpr float charging_effect_scale = 1.0f;
@@ -220,8 +221,6 @@ namespace
 	constexpr const wchar_t* enemy_shoot_se_path = L"Data/Sounds/Game/EnemyShoot.mp3";
 	//浮遊敵がactiveになるときの音
 	constexpr const wchar_t* enemy_boot_se_path = L"Data/Sounds/Game/Floating/EnemyBoot.mp3";
-	//ワームエネミーの移動音
-	constexpr const wchar_t* worm_move_se_path = L"Data/Sounds/Game/Worm/WormMove.mp3";
 
 	//ゲームBGM
 	constexpr const wchar_t* game_bgm_path = L"Data/Sounds/Game/GameBGM.mp3";

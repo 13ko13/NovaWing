@@ -2,6 +2,10 @@
 #include <unordered_map>
 #include <string>
 #include <Windows.h>
+#include <vector>
+#include <algorithm>
+
+#include "Scene/SceneID.h"
 
 class ResourceLoader
 {
@@ -150,9 +154,6 @@ public:
 		//浮遊敵
 		EnemyBoot,//activeになるときの音
 
-		//ワームエネミー
-		WormMove,//移動音
-
 		//BGM
 		GameBGM,//ゲームBGM
 		BossBGM,//ボスBGM
@@ -170,6 +171,16 @@ public:
 		Result,//リザルト用のフォント
 	};
 
+	//シーンそれぞれが使うリソースの一覧
+	struct SceneResources
+	{
+		std::vector<ModelID> models;
+		std::vector<GraphicID> graphics;
+		std::vector<EffectID> effects;
+		std::vector<SoundID> sounds;
+		std::vector<FontID> fonts;
+	};
+
 public:
 	static ResourceLoader& GetInstance();
 
@@ -185,13 +196,20 @@ public:
 	int GetSound(SoundID id) const;
 	int GetFont(FontID id) const;
 
+	//サウンドが読み込まれているか
+	bool IsSoundLoaded(SoundID id) const;
+
+	//シーン切り替え時のリソースの入れ替え
+	//prevにあってnextにないものは解放、nextにしかないものは読み込む
+	void OnSceneChange(SceneID prev, SceneID next);
+
 	//wstringをModelIDに変換する
 	static ResourceLoader::ModelID WStringToModelID(const std::wstring id);
 
 private:
-	//=defaultでデフォルトコンストラクタを生成する
-	ResourceLoader() = default;
-	//デストラクタも同様
+	//コンストラクタ
+	ResourceLoader();
+	//=defaultでデフォルトデストラクタを生成する
 	~ResourceLoader() = default;
 
 	//コピーコンストラクタとコピー代入演算子は削除する
@@ -209,10 +227,68 @@ private:
 	//フォントのハンドルをすべて保存する
 	void KeepFont();
 
+	//モデルをロード
+	void LoadModel(ModelID id);
+	//モデルを解放
+	void ReleaseModel(ModelID id);
+
 	//画像をロード
 	void LoadGraphic(GraphicID id);
 	//画像を開放
 	void ReleaseGraphic(GraphicID id);
+
+	//エフェクトをロード
+	void LoadEffect(EffectID id);
+	//エフェクトを解放
+	void ReleaseEffect(EffectID id);
+
+	//サウンドをロード
+	void LoadSound(SoundID id);
+	//サウンドを解放
+	void ReleaseSound(SoundID id);
+
+	//フォントをロード
+	void LoadFont(FontID id);
+	//フォントを解放
+	void ReleaseFont(FontID id);
+
+	//シーンごとのリソース一覧を組み立てる
+	void InitSceneResources();
+
+	//シーンが切り替わる際のリソースを変更
+	//前のシーンにあって次のシーンに必要ないものは削除
+	//前のシーンにあって次のシーンにないものは読み込む
+	template<typename IDType>
+	void ChangeResources(
+		const std::vector<IDType>& prevList,
+		const std::vector<IDType>& nextList,
+		void(ResourceLoader::* loadFunc)(IDType),
+		void(ResourceLoader::*releaseFunc)(IDType)
+	)
+	{
+		//prevにあってnextにないものは解放
+		for(const IDType& id : prevList)
+		{
+			//idをnextListから探して、なかったら解放
+			if (std::find(nextList.begin(), nextList.end(), id) == nextList.end())
+			{
+				//引数として受け取ったリソース解放の関数ポインタに
+				//idを渡して、解放させる
+				(this->*releaseFunc)(id);
+			}
+		}
+		//nextにあってprevにないものは読み込み
+		for(const IDType& id : nextList)
+		{
+			//idをprevListから探して、なかったら読み込み
+			if(std::find(prevList.begin(),prevList.end(),id) == prevList.end())
+			{
+				//引数として受け取ったリソース読み込みの関数ポインタに
+				//idを渡して、読み込みさせる
+				(this->*loadFunc)(id);
+			}
+		}
+	}
 
 private:
 	//IDをいれて直感的にアクセスできるようにするためのマップ
@@ -227,6 +303,9 @@ private:
 		int handle;
 		LPCWSTR path;//RemoveFontResourceEXで必要
 	};
+	//フォントのハンドルを保存するマップ
+	std::unordered_map<FontID, FontData> m_fontHandles;
 
-	std::unordered_map<FontID, FontData> m_fontHandles;//フォントのハンドルを保存するマップ
+	//シーンごとに使うリソースの一覧(初期化時にまとめて書く)
+	std::unordered_map<SceneID, SceneResources> m_sceneResources;
 };

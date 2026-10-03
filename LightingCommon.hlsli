@@ -8,7 +8,7 @@ struct LightingResult
 };
 
 //環境光
-static const float ambient_light = 0.35f;//環境光の強さ
+static const float ambient_light = 0.5f;//環境光の強さ
 
 //法線マップの強調度
 static const float normal_map_strength = 1.5f;

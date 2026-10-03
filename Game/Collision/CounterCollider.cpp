@@ -4,7 +4,7 @@
 namespace
 {
 	//カウンター後の無敵時間
-	constexpr int counter_invincible_frame = 30;
+	constexpr int counter_invincible_frame = 60;
 }
 
 CounterCollider::CounterCollider(Player& owner) :

@@ -1,4 +1,5 @@
 ﻿#include <EffekseerForDXLib.h>
+#include <algorithm>
 
 #include "ChargeBullet.h"
 
@@ -8,6 +9,13 @@ namespace
 	constexpr float homing_lerp_t = 0.8f;
 	//当たり判定の球の半径
 	constexpr float radius = 32.0f;
+
+	//エフェクトの分身が集まり始めるターゲットまでの距離(弾速25なので約24フレーム前)
+	constexpr float gather_start_dist = 600.0f;
+	//分身が本体に重なりきる距離(敵の当たり半径+弾の半径くらい)
+	constexpr float gather_end_dist = 160.0f;
+	//分身の集まり具合を渡す動的パラメーターの番号
+	constexpr int gather_input_index = 0;
 }
 
 ChargeBullet::ChargeBullet(
@@ -45,6 +53,9 @@ void ChargeBullet::Update()
 
 	std::shared_ptr<GameObject> pTarget = m_pTarget.lock();
 
+	//分身の集まり具合(0:散っている、1:本体に重なる)
+	float gatherRate = 0.0f;
+
 	//Nullじゃなければ、ターゲットが生きているかを取得して、
 	//生きていればターゲットの方向に少しずつ向きを変える
 	if (pTarget && !pTarget->IsDead())
@@ -53,6 +64,12 @@ void ChargeBullet::Update()
 		Vector3 targetPos = pTarget->GetPos();
 		//ターゲットへの方向を計算
 		Vector3 toTargetDir = targetPos - m_pos;
+
+		//ターゲットに近づくほど分身を集める
+		float toTargetDist = toTargetDir.Length();
+		gatherRate = (gather_start_dist - toTargetDist) / (gather_start_dist - gather_end_dist);
+		gatherRate = std::clamp(gatherRate, 0.0f, 1.0f);
+
 		toTargetDir.Normalize();//正規化
 
 		//現在の進行方向と
@@ -68,6 +85,9 @@ void ChargeBullet::Update()
 	SetPosPlayingEffekseer3DEffect(
 		m_effectPlayHandle, GetPos().x, GetPos().y, GetPos().z
 	);
+
+	//エフェクトに分身の集まり具合を渡す
+	SetDynamicInput3DEffect(m_effectPlayHandle, gather_input_index, gatherRate);
 }
 
 void ChargeBullet::Draw()
