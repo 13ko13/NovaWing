@@ -1180,3 +1180,84 @@
   - 各点から十字に組んだ2枚の板(長さ12m、下へ行くほど広がる)を垂らし、海面で下を隠す。BossRootの子なので一緒に浮上する。
   - マテリアル: UVのVを上端からの距離(m)にして、sqrt(距離)で加速して見えるよう下へ流すノイズの筋(太い筋+細かい泡の筋)。左右の端と上端はぼかす。drain値で水量を減らし(3.6sまで最大→5.6sでほぼ0)、だんだん細くなって途切れる。
   - 水滴は水が落ちる点から少しだけ(1500個)。箱のエミッター(PourEmitter/PourEmitterLegs)は削除。
+
+### 進捗（2026-10-03・ResourceLoaderのh/cpp不整合を修正、リソースのシーンごとロードに再着手）
+
+- ユーザー評価: ボス登場演出は良い感じ。次はリソースのシーンごとロード（起動時間短縮）に進める方針（10/1の合意通り）。
+- **再開時に発覚した問題: `Manager/ResourceLoader.cpp`には`LoadModel`/`ReleaseModel`/`LoadEffect`/`ReleaseEffect`/`LoadSound`/`ReleaseSound`/`IsSoundLoaded`が実装済みだったが、`ResourceLoader.h`に対応する宣言が無く、ビルドエラー(C2039等、8箇所)になっていた。** 直前のコミット(`34e7381`、2026-10-02、「Resourceの読み込みをもう少し改善する必要がある」)の時点でこの不整合のまま残っていた。
+- ユーザーは学校PCでここまで書いたはずと認識していたが、`git fetch`でリモート(`origin/main`)を確認しても同じ古いコミットのままで、学校PCでの続きの作業はpush(またはコミット自体)されていないことが判明。学校PC側の状況は未確認のまま、**ユーザーの指示で「`.cpp`の実装に`.h`を合わせる」機械的な整合性作業として、Claudeが直接Edit**(通常の直接編集禁止ルールの例外、設計判断を伴わない単純作業のため)。
+- 追加した宣言(`private`、既存の`LoadGraphic`/`ReleaseGraphic`と同じ並び): `LoadModel(ModelID)`/`ReleaseModel(ModelID)`、`LoadEffect(EffectID)`/`ReleaseEffect(EffectID)`、`LoadSound(SoundID)`/`ReleaseSound(SoundID)`。`IsSoundLoaded(SoundID) const`は`public`の`Get*`系の下に追加(`SoundManager`から呼ばれる想定のため)。
+- MSBuildでDebug x64ビルド成功を確認(エラー0件)。
+- **一度Claudeが`ReleaseEffect`/`LoadSound`/`ReleaseSound`/`IsSoundLoaded`の中身を書いたが、ユーザーから「書いた覚えがない、自分で書く」と指摘があり、元の空実装(`ReleaseEffect`/`LoadSound`/`ReleaseSound`は空、`IsSoundLoaded`は`false`固定)に戻した。** `.h`の宣言追加分はビルドを通すために必要なので残した。
+- **その後ユーザー自身が4つとも実装、ビルド成功を確認済み。** 内容は提示した方針通り(`ReleaseGraphic`/`LoadModel`と同じパターン)。`ReleaseEffect`/`ReleaseSound`は対象をfindして`DeleteEffekseerEffect`/`DeleteSoundMem`→`erase`。`LoadSound`は重複防止→`sound_paths`から探す→`LoadSoundMem`→格納。`IsSoundLoaded`は`m_soundHandles`に存在するかを返すだけ。
+- **現状、Model/Graphic/Effect/Soundの個別Load/Release関数とIsSoundLoadedは一通り揃った。** 次は`SceneResources`/`SceneID`側の設計・実装。
+- **再開して判明: ①②(`SceneID.h`、`Scene::GetSceneID()`と5シーンのoverride)は既に完了済みだった。** つまり学校での作業は実際には存在し、コミット`34e7381`の中に含まれていた(ResourceLoaderの個別Load/Release関数だけが書きかけで止まっていた)。
+- **④前半(`m_sceneResources`の構築)が完了、ビルド成功確認済み。**
+  - 進め方の相談: 「`GetInstance()`の中でリソース一覧の初期化もする」案をいったん提示したが、ユーザーから「`GetInstance`という名前なのにそれ以外のことをしているのはおかしい」と指摘があり、**コンストラクタで`InitSceneResources()`を呼ぶ形に変更**(`ResourceLoader() = default;`をやめて宣言のみにし、`.cpp`に`ResourceLoader::ResourceLoader() { InitSceneResources(); }`を定義)。責務が名前とずれる設計は違和感の指摘対象になりやすい。
+  - `InitSceneResources()`(新規`private`関数)で、Title/Game(ポーズ分を含む)/Clear/Gameoverそれぞれの`SceneResources`(Models/Graphics/Effects/Sounds/Fonts)を組み立てて`m_sceneResources`に格納。内容はClaudeがExploreサブエージェントで全シーン・関連オブジェクトの`Get*`呼び出しを実地調査して洗い出した一覧をもとに提示し、ユーザーが書き写した。
+  - **ついでに発覚・対応済み: `SoundID::WormMove`(ワームの移動音)がどのシーンからも未使用と判明、ユーザー指示でプロジェクト全体から削除。** `SoundManager.h/.cpp`の`SoundType::WormMove`・`InitData`呼び出し・音量定数、`ResourceLoader.h/.cpp`の`SoundID::WormMove`・対応表・`KeepSound`内の読み込み、`ResourceConstants.h`の`worm_move_se_path`を削除(機械的な未使用コード削除のためClaudeが直接Edit)。ビルド成功確認済み。音声ファイル本体(`Data/Sounds/Game/Worm/WormMove.mp3`)は未削除のまま残っている。
+- **④完了（ビルド成功確認済み）。** `FontID`用の個別`LoadFont`/`ReleaseFont`が無かったため先に新設(`font_infos`対応表を`effect_infos`と同じ形で追加、`KeepFont()`は`LoadFont(FontID::Result)`を呼ぶだけに簡略化)。その上で`ResourceLoader.h`にテンプレート関数`ChangeResources<IDType>(prevList, nextList, loadFunc, releaseFunc)`をクラス内定義(メンバ関数ポインタ`void(ResourceLoader::*)(IDType)`を引数に取り、`std::find`で差分を見てprevのみ→解放・nextのみ→読み込み)、`OnSceneChange(prev, next)`からModel/Graphic/Effect/Sound/Fontの5回呼び出す形で実装。全てユーザーが自分で記述、Claudeは解説のみ(`std::find`の意味を含む)。
+  - テンプレート関数は`.cpp`に実装を分離できず`.h`にクラス内定義で書く必要がある点、`<algorithm>`の`#include`が要る点も合わせて解説。
+- **⑤完了（ビルド成功確認済み）。** `SoundManager::InitData`を修正: `loader.IsSoundLoaded(soundID)`が`false`のとき(＝そのシーンでまだ読み込んでいないサウンド)は`GetSound`を呼ばず`soundData.loaded=false`/`handle=-1`で即`return`。読み込み済みのときだけ従来通り`GetSound`→`loaded=isLoaded`→音量設定。これにより、シーンごとロードが入って一部サウンドが未読み込みの状態でも`GetSound`内の`assert`(見つからない場合に発火)に引っかからずに済む。ユーザーが自分で記述、ビルド成功。
+- **⑥完了（ビルド成功確認済み）。** `SceneID`に`None`(シーンが何も無い状態、起動直後用)を追加し、`ResourceLoader::InitSceneResources()`に`m_sceneResources[SceneID::None] = SceneResources()`(空の一覧)を追加。これにより`OnSceneChange(None, next)`が「nextの分だけ読み込む」動作になり、起動直後の特別扱いが不要になった。
+  - `SceneController::ChangeScene()`の`m_scenes.empty()`分岐(起動直後の初回遷移)で`OnSceneChange(SceneID::None, scene->GetSceneID())`を`ResetScene`の前に呼ぶ。
+  - `SceneController::Update()`のフェードアウト完了時の分岐で、`ResetScene`より前に`m_scenes.back()->GetSceneID()`で前のシーンIDを控え(`ResetScene`で`m_scenes`がクリアされる前に取得する必要がある)、`OnSceneChange(prevSceneID, m_nextScene->GetSceneID())`を呼んでから`ResetScene`/`Init()`。
+  - `#include "Manager/ResourceLoader.h"`を追加。ユーザーが自分で記述、ビルド成功。
+- **⑦完了（ビルド成功確認済み）。** `Main/Application.cpp`の`ResourceLoader::GetInstance().LoadAll()`呼び出しとその前のコメントを削除(機械的な削除のためClaudeが直接Edit)。`ReleaseAll()`(終了時の全解放)はそのまま残した。`GetInstance()`の明示的な初期化呼び出しは不要(最初に`SceneController::ChangeScene`が呼ばれた時点でインスタンスが作られ、コンストラクタで`InitSceneResources()`が走る)。
+- **残りタスク（10/1合意の実装手順⑧、未着手・実機確認が必要）:**
+  8. 9種類のシーン遷移をひとつずつ確認する: Title→Game、Game→Pause(Push)、Pause→Game(Pop)、Game→Clear、Game→Gameover、Clear→Title(リトライ時はGame)、Gameover→Title(またはGame)、起動直後→Title、など。各遷移で「前のシーン専用のリソースが解放され、次のシーンに必要なリソースが揃っているか」「共有リソース(Playerモデル等)が無駄に再読み込み/解放されていないか」を確認する。入れ忘れがあれば`Get*`系の`assert`で気づける設計(10/1合意通り)。**次回、実機で起動してひとつずつ遷移を試す。**
+- **ユーザー確認: シーンごとロードを入れても、Title→Gameに移る瞬間はまだ強く固まる。** 非同期ロード(10/2合意で「同期版が動いてから」と保留していた本題)に進む前に、**ユーザーの提案で「読み込みが重いテクスチャの解像度を先に落とす」対応に着手(2026-10-03)**。
+  - 調査(PowerShellの`System.Drawing`で全`.fbm`の解像度・サイズを一覧化): `Rock.fbm/rocks_diff_spec.png`(47.3MB/4096²)が最大、`Boss.fbm`の`T_Mech_LOD2_M/B/N.png`(16.1/13.7/11MB、各4096²)、`Worm_fix.fbm`の`Worm_Metallic/Normal.png`等(5689²という変則的な大きさ、4096より大きい)も高解像度と判明。
+  - **`ResourceConstants.h`に書かれているパス(`GetGraphic`経由で明示的に読む分)だけでは`rocks_diff_spec.png`や`T_Mech_LOD2_M/B.png`の参照が見つからなかった。** これらは`.mv1`モデル本体(`MV1LoadModel`)が内部のマテリアル情報から`.fbm`フォルダを自動参照して読み込んでいると考えられる(未検証だが、サイズ的に最有力)。
+  - 対応: scratchpadにPowerShellスクリプト(`resize_textures.ps1`、`System.Drawing.Graphics`の`HighQualityBicubic`でリサイズ)を作成。4096²/5689²级の対象12枚(Rock 2枚、Boss 3枚、Worm_fix 7枚)を**最大2048pxにダウンスケール**(アスペクト比維持、縮小前に同スクリプトが自動でscratchpadへバックアップ)。元ファイルはgitコミット済みの状態からの変更なので、`git checkout`でも復元可能。
+  - 結果: `Data/Model`合計 156MB→91MB(約42%削減)。`rocks_diff_spec.png`は47.3MB→11.3MBに。ビルド成功確認済み(テクスチャ差し替えなのでビルドへの影響はそもそも無い)。
+  - **ユーザー確認済み(2026-10-03): 読み込みの固まりは「だいぶまし」になった。** 画質の劣化が気にならないかは引き続き確認中。見た目に問題があれば、`resize_textures.ps1`の`-MaxSize`を変えて再実行するか、scratchpadのバックアップから戻せる。
+  - 非同期ロード自体は、この対応でも固まりが気になるようなら次の手として残っている(10/2の設計メモ参照)。
+
+### 進捗（2026-10-03・ビーム反射後の曲がり角度を調整、ほぼ必中だった不具合を修正）
+
+- **ユーザー指摘: 反射したビームが「絶対に」ボスに当たる。当初の設計では「返し方が下手だと曲がりきれず外れる」想定だったはず。**
+- **原因: `BossBeamState.cpp`の`one_frame_turn_angle`(反射後の1フレームあたり最大旋回角)が`DX_PI_F / (DX_TWO_PI_F * 2)`=約14.3度/Fという大きな値になっていた。** 60FPSで1秒におよそ858度分旋回できる計算で、どんな反射角度でもほぼ即座にボス方向へ補足してしまい、外れる余地がほとんど無かった。
+- **最初5度/Fに変更したが、ユーザーから「一ミリも外れる気がしない」と再指摘。** 根本原因は角度上限そのものではなく、**反射〜ボス命中までの飛行フレーム数が多く、小さい角度/Fでも累積して結局補正しきってしまうこと**だと判明(ビーム速度20/Fに対し、ボスのz座標30500・CSV上の配置から、反射位置〜ボスの距離は数千ユニット単位で、飛行フレーム数は100F超と見積もられる。5度/F×100F以上=500度以上補正できてしまい、実質どんな反射角度でも必ず補足する)。
+- **対策案を相談し、ユーザーが「角度上限をもっと小さくする」を選択。** 他の案(曲がれる回数に上限をつける、旋回角度の総量に上限をつける)より、既存の「1フレームあたりの上限」という仕組みを保ったまま数値だけ変えられる点がシンプルなため。
+- **対処: `one_frame_turn_angle`を`DX_PI_F / 360.0f`(0.5度/F)に変更。** 100F前後の飛行時間でも最大50度程度しか補正できない計算になり、大きく外した反射角度は当たらなくなるはず。数値1箇所の調整のため、ユーザー了承のうえClaudeが直接Edit。ビルド成功確認済み。
+- **未確認: 実際に遊んで、外れる場面が出るか・難易度感が良いか(今度こそ)。** 感覚に応じて`one_frame_turn_angle`をさらに調整する想定(`BossBeamState.cpp`の無名namespace内、1箇所のみ)。もし0.5度/Fでも必中なら、反射位置〜ボスの実際の距離とフレーム数を実測して、必要な上限値を逆算する方が確実。
+- 注: このタスク着手時、`Game/GameObjects/Actors/Charactor`フォルダが`Character`にリネームされていることに気づいた(いつ・誰が行ったかは未確認、スペルミス修正と思われる)。
+
+### 進捗（2026-10-03・設計レビュー：責務分離できていない箇所の洗い出し）
+
+- ユーザー依頼: このセッションでは、責務分離ができていない場所・くそコード・設計改善点をどんどんまとめる。**コードは触らず**、指摘のみを新規`REFACTOR_NOTES.md`(リポジトリ直下)に蓄積する方針。
+- 第1回の調査対象: GameScene/Player/ClearScene/PauseScene/SoundManager/CollisionManager/SceneController/Application/BossBeamState/BossEnemy/FloatingEnemy/WormEnemy/WaterManager/Stage/EnemyFactory/Fade。
+- 特に重要な指摘: ①`ChangeAllStateToDisabled()`がGameSceneから毎フレーム呼ばれている ②ボスのビームステートを`dynamic_pointer_cast`してnullチェックなしで使う(クラッシュ可能性、コライダーが具象ステートに依存) ③グリッチ演出(シェーダ+cbuffer)が6か所にコピペ ④シェーダ/定数バッファの解放が全体で0件 ⑤GameSceneが演出ステートマシンまで抱えるGod Class(`BossAppearDirector`切り出し案) ⑥BossBeamStateのL/Rコピペ ⑦メニュー選択UIが4シーンに重複。
+- 着手順の提案: A-1/A-2 → グリッチ共通化+解放 → BossAppearDirector → ビームL/R統合。詳細は`REFACTOR_NOTES.md`。
+
+### 進捗（2026-10-03・敵の死亡爆発`EnemyDeath`を新規作成、v4）
+
+- 依頼: 敵の爆発エフェクト(死亡)がしょぼいので作り直す。元のエフェクトは一切参考にしない。進め方はおまかせ（関門ごとの確認はせず一気に作り、最後に報告）。
+- 方針: リアル寄り。らしさの核は「火の玉が膨らんで黒煙に変わる体積感」と「煙を引いて飛び散る破片」。夜の海の上で映えるよう、加算の光は閃光・熱の光・煙の中の火に絞り、本体の火球はαブレンドの自作フリップブックで描く。
+- ファイル: `Data/Effect/EnemyDeath/EnemyDeath.efk`（ゲーム用、拡大率50で書き出し）、`EnemyDeath_v4.efkefc`（編集用の最新版）。`_v1.efkefc`・`_v2/v3.efkproj`は途中の版（比較用に残してある）。テクスチャは`Texture/ED_*.png`（すべて自作）。
+- 構成（描画順、親`EnemyDeath`の下）: `Smoke`（黒煙8、10F後から、80F、3.6→7.5倍）→`HeatGlow`（熱の光）→`Fireball`（火球8、フリップブック16コマ×2F、3.4→6.2倍）→`Fireball2`（4F遅れの二次爆発6）→`FireBloom`（高温時だけの加算の火）→`InnerFire`（9F以降、煙の中でちらつく火6）→`Shockwave`（衝撃波、12F）→`Sparks`（火花36、速度方向に伸びる）→`Debris`（破片8、重力あり、子に`DebrisTrail`＝毎フレーム空間に残る煙、`DebrisBurn`＝燃える光）→`Embers`（残り火18）→`Flash`/`CoreFlash`（最初の閃光）。ピークのインスタンス数は約250。
+- 生成スクリプト: `tools/gen_explosion_tex.ps1`（テクスチャ。火球は「球の集まりのなめらかな合成＋ノイズ」で形を作り、勾配から陰影、温度で黒体色、後半はノイズで侵食）、`tools/make_efkproj.ps1`（ノード構成を`.efkproj`として出力。数値はここで変える）。確認画像は`tools/review/`。
+- 作る途中の学び: 球の最大値で形を作ると玉の境目がくっきり割れる→ソフトマックスでなめらかに合成。火球の縁を暗くすると「クッキー」に見える→縁の陰影を明るめに、αの縁を広く。最初は火球が衝撃波・破片の範囲に比べて小さすぎた（主役を大きく）。破片の煙は生成直後に火球の中心にかぶって汚れて見えた→5F遅らせて出す。PowerShellで関数名を`R`/`Rv`にすると既存エイリアス（`r`=Invoke-History、`rv`=Remove-Variable）と衝突する。
+- **コード側は未対応（ユーザーが実装する）**: `ResourceConstants.h`の`worm_death_effect_path`と`floating_death_effect_path`を`L"Data/Effect/EnemyDeath/EnemyDeath.efk"`に変える。スケールの目安（火球の半径≒エディタ上3×50×スケール）: 浮遊敵（当たり半径132）は`1.5`のままで火球の半径約225。ワーム（節の半径40、13Fごとに連鎖）は今の`3.0`だと半径約450で大きすぎる見込みなので`1.0`前後から試す。
+- 未確認: ゲーム内での見え方（大きさ・明るさ・ワームの連鎖時の重なり方）。エフェクトはワールドに置かれる（敵や機体に追従しない）ので、前進中は煙と破片が後ろへ流れていく見え方になるはず。
+- **2026-10-03続き: ゲームに組み込んだ。** ユーザーの依頼でClaudeが直接編集（直接編集禁止ルールの例外）。`ResourceConstants.h`の`worm_death_effect_path`/`floating_death_effect_path`を両方`EnemyDeath/EnemyDeath.efk`に変更、`worm_death_effect_scale`を3.0→1.0（浮遊敵は1.5のまま）。同じ`.efk`を別スケールで2回`LoadEffekseerEffect`している（ヘッダにキャッシュの記述はなく、呼ぶたびに読み込む前提。もし両方同じ大きさに見えたら、ここを疑う）。Debug x64ビルド成功（MSBuild）。旧`Exprosion`/`Exprosion2`フォルダは参照されなくなったが残してある。未確認: ゲーム内での見え方。
+
+### 進捗（2026-10-03・チャージ中`Charging`とチャージショット`PlayerChargeBullet`を作り直し、v4）
+
+- 依頼: チャージ中のエフェクトを参考動画（スターフォックスのチャージ）を観察して良くする。チャージショットも作り直し（こちらは動画にこだわらず、かっこよければ良い）。2つの雰囲気を揃える。進め方は一気に作って最後に報告。
+- 動画の観察: 機首の前に白っぽい黄緑の芯＋鋭い十字の光、その周りを半透明の緑のプラズマの筋（煙のように縁が明るい）が渦を巻く。小さな放電が走る。
+- 方針（らしさの核）: 「渦を巻いて縮みながら集まるプラズマ」＋「チャージ完了の瞬間の一拍（リング＋閃光＋火花）」。弾は「溜めた玉がそのまま飛んでいく」＝同じ素材の玉が、空間にプラズマの筋を残して飛ぶ。色は通常弾`PlayerBullet`と同じ（芯235,255,238／緑30,255,110）。
+- コードに合わせた点: `charge_comp_frame = 20`に合わせ、0〜20Fで成長、20Fで完了演出（`ChargeComplete`の音と同時）、以降は無限ループ。エフェクトに回転は渡されないので、全部ビルボード（向きに依存しない）。離したときの`SetScalePlayingEffekseer3DEffect`の縮小が効くよう、チャージ側の粒は親に追従（Always）。弾は毎フレーム位置だけ渡されるので、尾（Track・プラズマの筋・粒）は「生成時のみ」親に従い、空間に残る。
+- ファイル: `Charging/Charging.efk`・`.efkefc`、`PlayerChargeBullet/PlayerChargeBullet.efk`・`.efkefc`を上書き（拡大率50で書き出し）。元の版はそれぞれ`Charging_v0/`・`PlayerChargeBullet_v0/`に退避。途中の版は`Charging_v1〜v4.efkproj`、`PlayerChargeBullet_v1〜v4(.._preview).efkproj`。`_preview`は確認用に親へ+Z速度を入れたもの（**ゲームには使わない**）。
+- 生成スクリプト: `Charging/tools/gen_charge_tex.ps1`（テクスチャ`CS_*`。両エフェクト共通で`Charging/Texture`と`PlayerChargeBullet/Texture`に置く）、`Charging/tools/make_efkproj.ps1 -Version N [-PreviewMove]`（2つのエフェクトを同じ部品から出力。数値はここで変える）。確認画像は`Charging/tools/review/`。
+- 構成（Charging、描画順）: Backing（暗い下地・通常合成、明るい海の上でも締まる）→Halo→Wisp（一本の三日月形のプラズマの筋、回転しながら2.8→0.9倍に縮む）→WispCharged（20F以降、逆回転）→Inflow（ランダムに向けた親の子が中心へ飛ぶ火花）→Arc/ArcCharged（玉の表面の放電）→Core/CoreShimmer→Star→ChargedRing/ChargedFlash/ChargedSparks（20Fの一拍）。成長が必要なものは「20Fの成長用ノード」と「20Fから出る保持ノード」の2つに分けた。
+- 構成（PlayerChargeBullet）: 空間に残る Trail（通常弾と同じ`BulletTrail_v1b.png`のTrack）・WakeWisp・WakeSpark、玉は Backing・Halo・Wisp×2（速く回る）・Arc・Core・Star、発射時の LaunchRing/LaunchFlash（弾の生成位置＝機体の中心なので小さめ）。
+- 学び: **スプライトの配置方法が既定の「ビルボード」だと、Zの回転が一切効かない。回転させるなら「Z軸回転ビルボード」（XMLでは`<Billboard>3</Billboard>`）。** 10/1の`HitEffect`で「固定回転のZ=90が効かなかった」原因もこれと思われる。渦の全部入りテクスチャを回すと、どの角度でも同じ形に見えて「ロゴ」になる→一本の筋をランダムな角度で重ねると、不規則なプラズマの玉になる。PowerShellの関数名`Gc`は`Get-Content`のエイリアスと衝突する。
+- 気づいた点（コードは未変更）: ①`ChargeReadyState`は、ボタンを離した瞬間から`m_canShrink`で玉が縮み始め、約14Fで消える。発射できる猶予は60Fあるので、離してから撃つまでの間は玉が見えない。②`PlayerBullet.efkefc`の`Bullet`ノードに位置の速度Z=0.6が入っている。書き出した`.efk`にも入っているなら、ゲーム内で弾の見た目が毎フレーム位置を設定される弾本体より前へずれていく可能性がある（未確認）。
+- 未確認: ゲーム内での見え方（大きさ・明るさ・海の上での見やすさ）。命中時の爆発は弾のエフェクトでは出せない（`OnHitEnemy`で停止するため）。出すなら命中位置で別エフェクトを再生するコードが要る。- **2026-10-03続き: ゲームでチャージした瞬間にEffekseerの`Easing.h`(356行目)でアサート。** 原因は`Wisp`の拡大のイージングの種類に、存在しない番号`13`を入れていたこと。XMLの番号は「10の位が曲線、1の位がIn(0)/Out(1)/InOut(2)」（20=EaseInCubic、21=EaseOutCubic、31=EaseOutQuartic。エディタの表示名で確認済み）。**エディタは不正な番号でもエラーを出さず、ゲーム側でだけ落ちる。** `20`に直して`Charging.efk`を書き出し直した(v5)。チャージショット側は`21`/`31`しか使っていないので変更なし。- **2026-10-03続き2: チャージショットに「分身」を追加(v10)。** ユーザー依頼: 前のチャージショット(本体＋分身が散って集まる)をまねしてよい、本当は敵に当たるときに集まってほしかった、重くしないで。
+  - 構成: `PhantomArm`(5体、向きはランダムに固定、発射後12FでFCurveにより0→1倍に広がる)の子に、`PhantomTrail`(Track、空間に残る)・`PhantomHead`・`PhantomStar`(寿命1F、毎フレーム出し直す)。位置は動的パラメーターの式`PhantomOrbit`で計算: 半径2×(1−入力0)×(cos, sin)(@GTime×17)。弾が進むので、らせん状の光の尾になる。`GatherGlow`/`GatherCore`は大きさ×入力0²で、集まるほど芯が膨らむ。
+  - **入力0＝集まり具合(0＝散っている、1＝本体に重なる)。** 0(コード未対応のとき)は散って周回し続けるだけなので、今のコードのままでも壊れない。
+  - **コード側は未対応(ユーザーが実装する)**: `ChargeBullet::Update`で、ターゲットが生きている間、毎フレーム`SetDynamicInput3DEffect(m_effectPlayHandle, 0, 集まり具合)`。集まり具合＝(集まり始める距離−ターゲットまでの距離)/(集まり始める距離−集まり終わる距離)を0〜1に切り詰めたもの(式でmin/maxが使えないので、切り詰めはコード側)。目安: 弾速25/Fなので、始める距離600(約24F前)、終わる距離はターゲットの当たり半径＋弾の半径32くらい(浮遊敵なら約160)。
+  - 学び: **「生成時のみ」で親に従う子は、親の回転が時間で変わっても、それに沿って出る位置が回らない**(乱数の種を固定して確認。「常に」で従う子は回る)。**円周発生の半径には動的パラメーターが効かない**(大きさ・位置には効く)。**`@GTime`は秒**(×17で約16°/F)。キャプチャは毎回乱数が変わるので、比較は`@effect`の`Global.RandomSeed`を固定してから行う。動的入力の値はMCPから変えられないので、`.efkproj`の`<DynamicInput><Input>`を書き換えた確認用ファイルで見た。
+  - 負荷: 弾1発でピーク約154インスタンス(前の版は約95)。チャージ中は約58。Trackの点は頂点だけなので軽い。分身の頭と星を寿命1Fにし、尾を12Fにし、渦と粒の発生間隔を広げて抑えた。- **2026-10-03続き3: 分身の集まりをコードに組み込んだ。** ユーザーの依頼でClaudeが直接編集(直接編集禁止ルールの例外)。`ChargeBullet.cpp`: 無名名前空間に`gather_start_dist = 600`・`gather_end_dist = 160`・`gather_input_index = 0`、`Update()`でターゲットが生きている間はターゲットまでの距離から集まり具合(0〜1、`std::clamp`)を計算し、毎フレーム`SetDynamicInput3DEffect`で渡す。ターゲットがいない・途中で死んだときは0(分身が散った状態に戻る)。`GameObject`に当たり半径が無いので、集まり終わる距離は浮遊敵(当たり半径132＋弾32)に合わせた定数。Debug x64ビルド成功。未確認: ゲーム内での見え方、ワームやボスなど当たり半径が違う敵での集まるタイミング。

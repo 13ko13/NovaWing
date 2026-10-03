@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "../Manager/InputManager.h"
 #include "Manager/GameObjectManager.h"
+#include "Manager/ResourceLoader.h"
 
 void SceneController::ResetScene(std::shared_ptr<Scene> scene)
 {
@@ -16,6 +17,9 @@ void SceneController::ChangeScene(std::shared_ptr<Scene> scene, float fadeFrame)
 	//シーンが積まれていないときはResetSceneする
 	if(m_scenes.empty())
 	{
+		ResourceLoader::GetInstance().OnSceneChange(
+			SceneID::None, scene->GetSceneID()
+		);
 		ResetScene(scene);
 		Init();
 		m_fade.StartFadeIn(fadeFrame);
@@ -58,6 +62,12 @@ void SceneController::Update()
 	{
 		//フェードインを開始する
 		m_fade.StartFadeIn(m_fade.GetFadeFrame());
+
+		//切り替え前に前のシーンIDを控えておく(ResetSceneでクリアされる前に)
+		SceneID prevSceneID = m_scenes.back()->GetSceneID();
+		ResourceLoader::GetInstance().OnSceneChange(
+			prevSceneID, m_nextScene->GetSceneID()
+		);
 
 		//次のシーンに切り替える
 		ResetScene(m_nextScene);

@@ -46,8 +46,8 @@ namespace
 	//回転軸を求める際に0除算を避けるための閾値
 	constexpr float rot_axis_threshould = 0.0001f;
 
-	//ビーム反射後の1フレームあたりの最大旋回角
-	constexpr float one_frame_turn_angle = DX_PI_F / 130.0f;
+	//ビーム反射後の1フレームあたりの最大旋回角(0.5度)
+	constexpr float one_frame_turn_angle = DX_PI_F / 360.0f;
 
 	//ボスに当たったビームが消えるまでのフレーム数
 	constexpr int hit_boss_fade_frame = 30;
