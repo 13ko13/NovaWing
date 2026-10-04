@@ -1,5 +1,4 @@
-﻿#include <EffekseerForDXLib.h>
-#include <algorithm>
+﻿#include <algorithm>
 
 #include "Character/Player/Player.h"
 #include "ChargeReadyState.h"
@@ -7,6 +6,7 @@
 #include "Manager/BulletManager.h"
 #include "Manager/InputManager.h"
 #include "Manager/SoundManager.h"
+#include "Manager/EffectManager.h"
 #include "NormalShootState.h"
 #include "Manager/TargetManager.h"
 
@@ -47,7 +47,7 @@ void ChargeShootState::Exit()
 	// もしチャージ未完了であればエフェクトは停止する
 	if (m_chargeFrame < charge_comp_frame)
 	{
-		StopEffekseer3DEffect(m_chargingPlayEffectH);
+		m_pPlayer.lock()->GetEffectManager().lock()->Stop(m_chargingPlayEffectH);
 	}
 
 	// チャージ中の音を止める
@@ -69,11 +69,7 @@ void ChargeShootState::Update()
 	Vector3 effectPos = playerPos + playerForward * effect_offset_z;
 
 	// エフェクトの位置をプレイヤーの位置に設定する
-	SetPosPlayingEffekseer3DEffect(
-		m_chargingPlayEffectH,
-		effectPos.x,
-		effectPos.y,
-		effectPos.z);
+	pPlayer->GetEffectManager().lock()->SetPos(m_chargingPlayEffectH, effectPos);
 
 	InputManager& input = InputManager::GetInstance();
 
@@ -100,11 +96,7 @@ void ChargeShootState::Update()
 		m_effectScale.z = std::clamp(m_effectScale.z, 0.0f, m_effectScale.z);
 
 		// 大きさをセットする
-		SetScalePlayingEffekseer3DEffect(
-			m_chargingPlayEffectH,
-			m_effectScale.x,
-			m_effectScale.y,
-			m_effectScale.z);
+		pPlayer->GetEffectManager().lock()->SetScale(m_chargingPlayEffectH, m_effectScale);
 
 		// もし大きさが0になったらノーマルステートに戻す
 		if (m_effectScale.x == 0.0f)
@@ -158,16 +150,6 @@ void ChargeShootState::Enter()
 
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 
-	// チャージ中のエフェクトの再生を行い、そのハンドルをプレイヤーに渡す
-	m_chargingPlayEffectH = PlayEffekseer3DEffect(
-		ResourceLoader::GetInstance().GetEffect(
-			ResourceLoader::EffectID::Charging));
-
-	pPlayer->SetChargingEffectHandle(m_chargingPlayEffectH);
-
-	// チャージ中の音を鳴らす
-	m_pSoundManager.lock()->Play(SoundManager::SoundType::Charging, false);
-
 	// 位置を設定(プレイヤーの位置)
 	Vector3 playerPos = pPlayer->GetPos();
 	// プレイヤーの前方向
@@ -176,10 +158,12 @@ void ChargeShootState::Enter()
 	// エフェクトを出す位置
 	Vector3 effectPos = playerPos + playerForward * effect_offset_z;
 
-	// エフェクトの位置をプレイヤーの位置に設定する
-	SetPosPlayingEffekseer3DEffect(
-		m_chargingPlayEffectH,
-		effectPos.x,
-		effectPos.y,
-		effectPos.z);
+	// チャージ中のエフェクトを再生し、そのハンドルをプレイヤーに渡す
+	m_chargingPlayEffectH = pPlayer->GetEffectManager().lock()->Play(
+		ResourceLoader::EffectID::Charging, effectPos);
+
+	pPlayer->SetChargingEffectHandle(m_chargingPlayEffectH);
+
+	// チャージ中の音を鳴らす
+	m_pSoundManager.lock()->Play(SoundManager::SoundType::Charging, false);
 }

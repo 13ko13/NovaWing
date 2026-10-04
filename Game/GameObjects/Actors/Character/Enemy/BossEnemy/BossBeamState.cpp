@@ -1,11 +1,11 @@
 ﻿#include <DxLib.h>
 #include <algorithm>
 #include <cmath>
-#include <EffekseerForDXLib.h>
 
 #include "BossBeamState.h"
 #include "Manager/ResourceLoader.h"
 #include "Manager/SoundManager.h"
+#include "Manager/EffectManager.h"
 #include "BossEnemy.h"
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
 #include "BossIdleState.h"
@@ -67,18 +67,25 @@ BossBeamState::~BossBeamState()
 {
 	//エフェクトを止める
 	//(ボスに当たって薄くなったビームは既に止めてあり、ハンドルが-1になっている)
-	if (m_leftBeamEffectPlayH != -1)
+	//(シーン終了でマネージャーが先に消えている場合は止める必要がない)
+	if (std::shared_ptr<EffectManager> pEffectManager = m_pEffectManager.lock())
 	{
-		StopEffekseer3DEffect(m_leftBeamEffectPlayH);
-	}
-	if (m_rightBeamEffectPlayH != -1)
-	{
-		StopEffekseer3DEffect(m_rightBeamEffectPlayH);
+		if (m_leftBeamEffectPlayH != -1)
+		{
+			pEffectManager->Stop(m_leftBeamEffectPlayH);
+		}
+		if (m_rightBeamEffectPlayH != -1)
+		{
+			pEffectManager->Stop(m_rightBeamEffectPlayH);
+		}
 	}
 }
 
 void BossBeamState::Enter()
 {
+	//エフェクトのマネージャーを保持しておく
+	m_pEffectManager = m_pBoss.lock()->GetEffectManager();
+
 	//ビーム発射音を鳴らす
 	m_pBoss.lock()->GetSoundManager().lock()->Play(SoundManager::SoundType::BossBeam);
 
@@ -117,27 +124,16 @@ void BossBeamState::Enter()
 	m_beamMoveDirL = leftToTargetDir;
 	m_beamMoveDirR = rightToTargetDir;
 
-	int effectHandle = ResourceLoader::GetInstance().GetEffect(
-		ResourceLoader::EffectID::BossBeam);
+	std::shared_ptr<EffectManager> pEffectManager = m_pEffectManager.lock();
 
 	//ビームのエフェクトを再生(発射口から)
 	//左
-	m_leftBeamEffectPlayH = PlayEffekseer3DEffect(effectHandle);
-	SetPosPlayingEffekseer3DEffect(
-		m_leftBeamEffectPlayH,
-		m_beamPosL.x,
-		m_beamPosL.y,
-		m_beamPosL.z
-	);
+	m_leftBeamEffectPlayH = pEffectManager->Play(
+		ResourceLoader::EffectID::BossBeam, m_beamPosL);
 	SetBeamEffectDir(m_leftBeamEffectPlayH, m_beamMoveDirL);
 	//右
-	m_rightBeamEffectPlayH = PlayEffekseer3DEffect(effectHandle);
-	SetPosPlayingEffekseer3DEffect(
-		m_rightBeamEffectPlayH,
-		m_beamPosR.x,
-		m_beamPosR.y,
-		m_beamPosR.z
-	);
+	m_rightBeamEffectPlayH = pEffectManager->Play(
+		ResourceLoader::EffectID::BossBeam, m_beamPosR);
 	SetBeamEffectDir(m_rightBeamEffectPlayH, m_beamMoveDirR);
 
 	//ビームの先端をターゲットに向けて一定速度で進ませる 
@@ -318,23 +314,13 @@ void BossBeamState::Update()
 	//(薄くなって止めたエフェクトのハンドルは-1なので触らない)
 	if (m_leftBeamEffectPlayH != -1)
 	{
-		SetPosPlayingEffekseer3DEffect(
-			m_leftBeamEffectPlayH,
-			m_beamPosL.x,
-			m_beamPosL.y,
-			m_beamPosL.z
-		);
+		m_pEffectManager.lock()->SetPos(m_leftBeamEffectPlayH, m_beamPosL);
 		SetBeamEffectDir(m_leftBeamEffectPlayH, m_beamMoveDirL);
 	}
 
 	if (m_rightBeamEffectPlayH != -1)
 	{
-		SetPosPlayingEffekseer3DEffect(
-			m_rightBeamEffectPlayH,
-			m_beamPosR.x,
-			m_beamPosR.y,
-			m_beamPosR.z
-		);
+		m_pEffectManager.lock()->SetPos(m_rightBeamEffectPlayH, m_beamPosR);
 		SetBeamEffectDir(m_rightBeamEffectPlayH, m_beamMoveDirR);
 	}
 
@@ -451,12 +437,13 @@ void BossBeamState::FadeOutHitBeam(int& playH, int& fadeFrame)
 	//経過に応じてアルファを下げる(0〜color_max)
 	float remainRate = 1.0f - static_cast<float>(fadeFrame) / hit_boss_fade_frame;
 	int alpha = static_cast<int>(color_max * std::clamp(remainRate, 0.0f, 1.0f));
-	SetColorPlayingEffekseer3DEffect(playH, color_max, color_max, color_max, alpha);
+	std::shared_ptr<EffectManager> pEffectManager = m_pEffectManager.lock();
+	pEffectManager->SetColor(playH, color_max, color_max, color_max, alpha);
 
 	//完全に消えたらエフェクトを止める
 	if (fadeFrame >= hit_boss_fade_frame)
 	{
-		StopEffekseer3DEffect(playH);
+		pEffectManager->Stop(playH);
 		playH = -1;
 	}
 }
@@ -472,13 +459,13 @@ void BossBeamState::SetBeamEffectDir(int playH, const Vector3& dir)
 		if (s < rot_axis_threshould)
 		{
 			//ほぼZ軸方向なので回転なし
-			SetRotationPlayingEffekseer3DEffect(playH, 0.0f, 0.0f, 0.0f);
+			m_pEffectManager.lock()->SetRotation(playH, Vector3(0.0f, 0.0f, 0.0f));
 			return;
 		}
-		Effekseer::Vector3D axis(-d.y / s, d.x / s, 0.0f);
+		Vector3 axis(-d.y / s, d.x / s, 0.0f);
 		float angle = std::acos(std::clamp(d.z, -1.0f, 1.0f));
 
 		//軸が逆に傾く場合はangleを-angleにする
-		GetEffekseer3DManager()->SetRotation(playH, axis, angle);
+		m_pEffectManager.lock()->SetRotationAxis(playH, axis, angle);
 }
 

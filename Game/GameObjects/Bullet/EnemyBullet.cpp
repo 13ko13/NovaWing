@@ -1,6 +1,5 @@
-﻿#include <EffekseerForDXLib.h>
-
-#include "EnemyBullet.h"
+﻿#include "EnemyBullet.h"
+#include "Manager/EffectManager.h"
 #include "Constants/Game.h"
 
 namespace
@@ -12,25 +11,23 @@ namespace
 EnemyBullet::EnemyBullet(
 	const Vector3& pos, const Vector3& vel,
 	const int attackPower, std::weak_ptr<CameraBase> pCamera,
-	std::shared_ptr<EnemyBase> pShooter):
-	BulletBase(pos,vel,attackPower, radius,pCamera,ColliderTag::EnemyBullet),
+	std::shared_ptr<EnemyBase> pShooter,
+	std::weak_ptr<EffectManager> pEffectManager):
+	BulletBase(pos,vel,attackPower, radius,pCamera,ColliderTag::EnemyBullet,pEffectManager),
 	m_pShooter(pShooter)
 {
-	//Effekseerのエフェクト再生を呼ぶ
-	m_effectPlayHandle = PlayEffekseer3DEffect(
-		ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::EnemyBullet)
-	);
-
-	//再生直後に正しい位置へ即座にセットする(1フレーム目のワープ軌跡を防ぐ)
-	SetPosPlayingEffekseer3DEffect(
-		m_effectPlayHandle, pos.x, pos.y, pos.z
-	);
+	//エフェクトの再生を依頼する
+	m_effectPlayHandle = m_pEffectManager.lock()->Play(ResourceLoader::EffectID::EnemyBullet, pos);
 }
 
 EnemyBullet::~EnemyBullet()
 {
 	//エフェクトを止める
-	StopEffekseer3DEffect(m_effectPlayHandle);
+	//(シーン終了でマネージャーが先に消えている場合は止める必要がない)
+	if (std::shared_ptr<EffectManager> pEffectManager = m_pEffectManager.lock())
+	{
+		pEffectManager->Stop(m_effectPlayHandle);
+	}
 }
 
 void EnemyBullet::Update()
@@ -39,11 +36,10 @@ void EnemyBullet::Update()
 	BulletBase::Update();
 
 	//エフェクトの位置の調整する
-	SetPosPlayingEffekseer3DEffect(
-		m_effectPlayHandle, GetPos().x, GetPos().y, GetPos().z
-	);
+	std::shared_ptr<EffectManager> pEffectManager = m_pEffectManager.lock();
+	pEffectManager->SetPos(m_effectPlayHandle, GetPos());
 	//
-	SetDynamicInput3DEffect(m_effectPlayHandle, 0, GetPos().y - 50.0f);
+	pEffectManager->SetDynamicInput(m_effectPlayHandle, 0, GetPos().y - 50.0f);
 }
 
 void EnemyBullet::Draw()
@@ -58,7 +54,7 @@ void EnemyBullet::OnHitEnemy()
 	BulletBase::OnHitEnemy();
 
 	//エフェクトを止める
-	StopEffekseer3DEffect(m_effectPlayHandle);
+	m_pEffectManager.lock()->Stop(m_effectPlayHandle);
 
 	//消す処理
 	OnDead();

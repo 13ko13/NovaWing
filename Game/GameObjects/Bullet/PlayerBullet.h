@@ -6,7 +6,8 @@ class PlayerBullet : public BulletBase
 {
 public:
 	PlayerBullet(const Vector3& pos,const Vector3& vel,
-		const int attackPower,std::weak_ptr<CameraBase> pCamera);
+		const int attackPower,std::weak_ptr<CameraBase> pCamera,
+		std::weak_ptr<EffectManager> pEffectManager);
 	~PlayerBullet();
 
 	void Update() override;//更新処理

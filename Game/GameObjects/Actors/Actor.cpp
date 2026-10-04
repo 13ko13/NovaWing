@@ -26,7 +26,8 @@ Actor::Actor(ResourceLoader::ModelID modelID,
 
 Actor::~Actor()
 {
-	//処理なし
+	//コンストラクタでMV1DuplicateModelした複製モデルを解放する
+	MV1DeleteModel(m_modelHandle);
 }
 
 void Actor::ApplyMatrix(const Vector3& scale, const Vector3& pos,

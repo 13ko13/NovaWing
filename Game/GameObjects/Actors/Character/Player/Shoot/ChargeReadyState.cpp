@@ -1,5 +1,4 @@
-﻿#include <EffekseerForDXLib.h>
-#include <algorithm>
+﻿#include <algorithm>
 
 #include "Character/Player/Player.h"
 #include "ChargeReadyState.h"
@@ -7,6 +6,7 @@
 #include "Manager/InputManager.h"
 #include "Manager/ResourceLoader.h"
 #include "Manager/SoundManager.h"
+#include "Manager/EffectManager.h"
 #include "NormalShootState.h"
 
 namespace
@@ -44,7 +44,7 @@ ChargeReadyState::~ChargeReadyState()
 void ChargeReadyState::Exit()
 {
 	// エフェクトを停止する
-	StopEffekseer3DEffect(m_chargingPlayEffectH);
+	m_pPlayer.lock()->GetEffectManager().lock()->Stop(m_chargingPlayEffectH);
 }
 
 void ChargeReadyState::Update()
@@ -60,11 +60,7 @@ void ChargeReadyState::Update()
 	Vector3 effectPos = playerPos + playerForward * effect_offset_z;
 
 	// エフェクトの位置をプレイヤーの位置に設定する
-	SetPosPlayingEffekseer3DEffect(
-		m_chargingPlayEffectH,
-		effectPos.x,
-		effectPos.y,
-		effectPos.z);
+	pPlayer->GetEffectManager().lock()->SetPos(m_chargingPlayEffectH, effectPos);
 
 	InputManager& input = InputManager::GetInstance();
 
@@ -114,11 +110,7 @@ void ChargeReadyState::Update()
 		m_effectScale.z = std::clamp(m_effectScale.z, 0.0f, first_effect_scale.z);
 
 		// 大きさをセットする
-		SetScalePlayingEffekseer3DEffect(
-			m_chargingPlayEffectH,
-			m_effectScale.x,
-			m_effectScale.y,
-			m_effectScale.z);
+		pPlayer->GetEffectManager().lock()->SetScale(m_chargingPlayEffectH, m_effectScale);
 
 		// もし大きさが0になったらノーマルステートに戻す
 		if (m_effectScale.x == 0.0f)
@@ -144,9 +136,5 @@ void ChargeReadyState::Enter()
 	Vector3 effectPos = playerPos + playerForward * effect_offset_z;
 
 	// エフェクトの位置をプレイヤーの位置に設定する
-	SetPosPlayingEffekseer3DEffect(
-		m_chargingPlayEffectH,
-		effectPos.x,
-		effectPos.y,
-		effectPos.z);
+	pPlayer->GetEffectManager().lock()->SetPos(m_chargingPlayEffectH, effectPos);
 }

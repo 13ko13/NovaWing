@@ -1,7 +1,7 @@
 ﻿#include <cmath>
-#include <EffekseerForDXLib.h>
 
 #include "DefaultRotationState.h"
+#include "Manager/EffectManager.h"
 #include "Manager/InputManager.h"
 #include "Character/Player/Player.h"
 
@@ -29,6 +29,17 @@ DefaultRotationState::DefaultRotationState(const std::weak_ptr<Player> pPlayer) 
 
 DefaultRotationState::~DefaultRotationState()
 {
+	//再生中のバレルロールエフェクトが残っていたら止める
+	if (m_rollEffectPlayH == -1) return;
+
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+	if (!pPlayer) return;
+
+	std::shared_ptr<EffectManager> pEffectManager = pPlayer->GetEffectManager().lock();
+	if (pEffectManager)
+	{
+		pEffectManager->Stop(m_rollEffectPlayH);
+	}
 }
 
 void DefaultRotationState::Enter()
@@ -191,22 +202,20 @@ void DefaultRotationState::Update()
 	//バレルロールのエフェクトを機体に追従させる
 	if (m_rollEffectPlayH != -1)
 	{
-		if (IsEffekseer3DEffectPlaying(m_rollEffectPlayH) == -1)
+		std::shared_ptr<EffectManager> pEffectManager = pPlayer->GetEffectManager().lock();
+		if (!pEffectManager->IsPlaying(m_rollEffectPlayH))
 		{
 			//再生が終わった
 			m_rollEffectPlayH = -1;
 		}
 		else
 		{
-			VECTOR pos = pPlayer->GetPos().ToDxLib();
-			SetPosPlayingEffekseer3DEffect(m_rollEffectPlayH, pos.x, pos.y, pos.z);
+			pEffectManager->SetPos(m_rollEffectPlayH, pPlayer->GetPos());
 			//Z回転はエフェクト内で回しているので渡さない
 			//プレイヤーモデルは逆向きに作られているので+DX_PI_Fで補正
-			SetRotationPlayingEffekseer3DEffect(
+			pEffectManager->SetRotation(
 				m_rollEffectPlayH,
-				0.0f,
-				pPlayer->GetRotationY() + DX_PI_F,
-				0.0f);
+				Vector3(0.0f, pPlayer->GetRotationY() + DX_PI_F, 0.0f));
 		}
 	}
 }
@@ -217,8 +226,8 @@ void DefaultRotationState::PlayRollEffect()
 	ResourceLoader::EffectID effectID = (m_rollDir > 0) ?
 		ResourceLoader::EffectID::RightBarrelRoll :
 		ResourceLoader::EffectID::LeftBarrelRoll;
-	int effectHandle = ResourceLoader::GetInstance().GetEffect(effectID);
-	m_rollEffectPlayH = PlayEffekseer3DEffect(effectHandle);
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+	m_rollEffectPlayH = pPlayer->GetEffectManager().lock()->Play(effectID, pPlayer->GetPos());
 }
 
 void DefaultRotationState::Exit()

@@ -261,6 +261,11 @@ void ResourceLoader::LoadGraphic(GraphicID id)
 
 void ResourceLoader::ReleaseAll()
 {
+	//進行中の非同期読み込みが残っていると
+	//解放時にクラッシュするため、完了を待ってから同期に戻す
+		WaitHandleASyncLoadAll();
+	EndAsyncLoad();
+
 	//すべてのリソースを解放する
 	//モデル
 	for (auto& modelH : m_modelHandles)
@@ -590,6 +595,25 @@ void ResourceLoader::OnSceneChange(SceneID prev, SceneID next)
 	//フォントを入れ替え
 	ChangeResources(prevResources.fonts, nextResources.fonts,
 		&ResourceLoader::LoadFont, &ResourceLoader::ReleaseFont);
+}
+
+void ResourceLoader::BeginAsyncLoad()
+{
+	//DxLibの非同期ロード開始関数を呼ぶ(TRUEをセットする)
+	SetUseASyncLoadFlag(TRUE);
+}
+
+void ResourceLoader::EndAsyncLoad()
+{
+	//DxLibの非同期ロード終了関数を呼ぶ(FALSEをセットする)
+	SetUseASyncLoadFlag(FALSE);
+}
+
+bool ResourceLoader::IsAsyncLoading() const
+{
+	//非同期ロード中の数を取得
+	//0以上ならまだ非同期ロード中
+	return GetASyncLoadNum() > 0;
 }
 
 ResourceLoader::ModelID ResourceLoader::WStringToModelID(const std::wstring id)

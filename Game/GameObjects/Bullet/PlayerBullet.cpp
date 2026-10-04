@@ -1,6 +1,5 @@
-﻿#include <EffekseerForDXLib.h>
-
-#include "PlayerBullet.h"
+﻿#include "PlayerBullet.h"
+#include "Manager/EffectManager.h"
 
 namespace
 {
@@ -10,24 +9,22 @@ namespace
 
 PlayerBullet::PlayerBullet(
 	const Vector3& pos, const Vector3& vel,const int attackPower,
-	std::weak_ptr<CameraBase> pCamera) :
-	BulletBase(pos,vel,attackPower, radius,pCamera,ColliderTag::PlayerBullet)
+	std::weak_ptr<CameraBase> pCamera,
+	std::weak_ptr<EffectManager> pEffectManager) :
+	BulletBase(pos,vel,attackPower, radius,pCamera,ColliderTag::PlayerBullet,pEffectManager)
 {
-	//Effekseerのエフェクト再生を呼ぶ
-	m_effectPlayHandle = PlayEffekseer3DEffect(
-		ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::PlayerBullet)
-	);
-
-	//再生直後に正しい位置へ即座にセットする(1フレーム目のワープ軌跡を防ぐ)
-	SetPosPlayingEffekseer3DEffect(
-		m_effectPlayHandle, pos.x, pos.y, pos.z
-	);
+	//エフェクトの再生を依頼する
+	m_effectPlayHandle = m_pEffectManager.lock()->Play(ResourceLoader::EffectID::PlayerBullet, pos);
 }
 
 PlayerBullet::~PlayerBullet()
 {
 	//エフェクトを止める
-	StopEffekseer3DEffect(m_effectPlayHandle);
+	//(シーン終了でマネージャーが先に消えている場合は止める必要がない)
+	if (std::shared_ptr<EffectManager> pEffectManager = m_pEffectManager.lock())
+	{
+		pEffectManager->Stop(m_effectPlayHandle);
+	}
 }
 
 void PlayerBullet::Update()
@@ -36,9 +33,7 @@ void PlayerBullet::Update()
 	BulletBase::Update();
 
 	//エフェクトの位置の調整する
-	SetPosPlayingEffekseer3DEffect(
-		m_effectPlayHandle, GetPos().x, GetPos().y, GetPos().z
-	);
+	m_pEffectManager.lock()->SetPos(m_effectPlayHandle, GetPos());
 }
 
 void PlayerBullet::Draw()
@@ -53,7 +48,7 @@ void PlayerBullet::OnHitEnemy()
 	BulletBase::OnHitEnemy();
 
 	//エフェクトを止める
-	StopEffekseer3DEffect(m_effectPlayHandle);
+	m_pEffectManager.lock()->Stop(m_effectPlayHandle);
 	//消す処理
 	OnDead();
 }

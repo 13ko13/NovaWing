@@ -5,7 +5,6 @@
 #include <string>
 #include <cmath>
 #include <algorithm>
-#include <EffekseerForDXLib.h>
 
 #include "../Game/GameObjects/Actors/Actor.h"
 #include "../Game/GameObjects/Actors/Character/Character.h"
@@ -45,6 +44,7 @@
 #include "Manager/LightingManager.h"
 #include "Constants/Game.h"
 #include "Manager/SoundManager.h"
+#include "Manager/EffectManager.h"
 #include "Game/UI/SpecialGaugeUI.h"
 #include "Game/UI/WarningUI.h"
 #include "PauseScene.h"
@@ -96,7 +96,9 @@ GameScene::GameScene(SceneController& controller) :
 {
 	//BulletManagerは先に生成しておかないとプレイヤーが生成できないので
 	//コンストラクタで生成しておく
-	m_pBulletManager = std::make_shared<BulletManager>();
+	//BulletManagerにEffectManagerを渡すので、EffectManagerはBulletManagerより先に生成する
+	m_pEffectManager = std::make_shared<EffectManager>();
+	m_pBulletManager = std::make_shared<BulletManager>(m_pEffectManager);
 
 	//SoundManagerも同様にプレイヤーより先に生成しておく
 	m_pSoundManager = std::make_shared<SoundManager>();
@@ -128,7 +130,8 @@ void GameScene::Init()
 	m_pPlayer = std::make_shared<Player>(
 		m_pBulletManager, ResourceLoader::ModelID::Player,
 		std::weak_ptr<CameraBase>(),//カメラがまだ生成されていないので空のweak_ptrを渡す
-		m_pSoundManager);
+		m_pSoundManager,
+		m_pEffectManager);
 
 	//Initでターゲットマネージャーを必要とするので先に生成しておく
 	//ターゲットマネージャーの初期化
@@ -152,7 +155,8 @@ void GameScene::Init()
 		m_pPlayer,
 		m_pCamera,
 		m_pBulletManager,
-		m_pSoundManager);
+		m_pSoundManager,
+		m_pEffectManager);
 	m_pBoss->Init();
 
 	//衝突判定マネージャーの初期化
@@ -169,7 +173,8 @@ void GameScene::Init()
 		m_pCamera,
 		m_pTargetManager,
 		m_pCollisionManager,
-		m_pSoundManager
+		m_pSoundManager,
+		m_pEffectManager
 	);
 	//ボスに工場をセットする
 	m_pBoss->SetEnemyFactory(m_pEnemyFactory);
@@ -180,7 +185,8 @@ void GameScene::Init()
 		m_pPlayer,
 		m_pCamera,
 		m_pBulletManager,
-		m_pSoundManager
+		m_pSoundManager,
+		m_pEffectManager
 	);
 	//それぞれの初期化
 	for (std::shared_ptr<EnemyBase> pEnemy : floatingEnemies)
@@ -199,7 +205,8 @@ void GameScene::Init()
 		m_pPlayer,
 		m_pCamera,
 		m_pBulletManager,
-		m_pSoundManager
+		m_pSoundManager,
+		m_pEffectManager
 	);
 	for (std::shared_ptr<EnemyBase> pEnemy : wormEnemies)
 	{
@@ -263,9 +270,8 @@ void GameScene::Update()
 	//全GameObjectのUpdateを呼ぶ
 	GameObjectManager::GetInstance().UpdateAll();
 
-	//Effekseerのエフェクト更新
-	Effekseer_Sync3DSetting();
-	UpdateEffekseer3D();
+	//エフェクトマネージャーの更新
+	m_pEffectManager->Update();
 
 	//衝突判定マネージャーの更新
 	m_pCollisionManager->Update();
@@ -481,8 +487,8 @@ void GameScene::Draw()
 	//プレイヤーをもう一度描画する
 	m_pPlayer->Draw();
 	
-	//Effekseerのエフェクト描画
-	DrawEffekseer3D();
+	//エフェクトの描画
+	m_pEffectManager->Draw();
 	
 	//全てのUIを描画する
 	m_pUIManager->Draw();

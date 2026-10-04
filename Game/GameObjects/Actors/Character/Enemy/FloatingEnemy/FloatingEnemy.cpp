@@ -1,12 +1,11 @@
-﻿#include <EffekseerForDXLib.h>
-
-#include "FloatingEnemy.h"
+﻿#include "FloatingEnemy.h"
 #include "IFloatingEnemyState.h"
 #include "Character/Player/Player.h"
 #include "HideState.h"
 #include "Manager/LightingManager.h"
 #include "Constants/ShaderRegister.h"
 #include "Manager/SoundManager.h"
+#include "Manager/EffectManager.h"
 #include "Manager/DebugManager.h"
 
 namespace
@@ -25,10 +24,12 @@ FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 	std::weak_ptr<CameraBase> camera,
 	const Vector3& pos,
 	int health,
-	std::weak_ptr<SoundManager> pSoundManager) :
+	std::weak_ptr<SoundManager> pSoundManager,
+	std::weak_ptr<EffectManager> pEffectManager) :
 	EnemyBase(Id,camera,pPlayer,pBulletManager,health),
 	m_colSphere(std::make_shared<SphereShape>(pos, 0.0f)),
 	m_pSoundManager(pSoundManager),
+	m_pEffectManager(pEffectManager),
 	m_collider(*this, ColliderTag::Enemy)
 {
 	//位置を反映
@@ -38,7 +39,11 @@ FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 FloatingEnemy::~FloatingEnemy()
 {
 	//エフェクトを止める
-	StopEffekseer3DEffect(m_effectPlayHandle);
+	//(シーン終了でマネージャーが先に消えている場合は止める必要がない)
+	if (std::shared_ptr<EffectManager> pEffectManager = m_pEffectManager.lock())
+	{
+		pEffectManager->Stop(m_effectPlayHandle);
+	}
 }
 
 void FloatingEnemy::OnInit()
@@ -101,9 +106,7 @@ void FloatingEnemy::Update()
 	}
 
 	//エフェクトの位置の調整する
-	SetPosPlayingEffekseer3DEffect(
-		m_effectPlayHandle, GetPos().x, GetPos().y, GetPos().z
-	);
+	m_pEffectManager.lock()->SetPos(m_effectPlayHandle, GetPos());
 }
 
 void FloatingEnemy::Draw()
@@ -171,15 +174,9 @@ void FloatingEnemy::TakeDamage(int damage)
 		//死亡音を鳴らす
 		m_pSoundManager.lock()->Play(SoundManager::SoundType::EnemyDeath);
 
-		//Effekseerのエフェクト再生を呼ぶ
-		m_effectPlayHandle = PlayEffekseer3DEffect(
-			ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::FloatingDeath)
-		);
-
-		//再生直後に正しい位置へ即座にセットする(1フレーム目のワープ軌跡を防ぐ)
-		SetPosPlayingEffekseer3DEffect(
-			m_effectPlayHandle, m_pos.x, m_pos.y, m_pos.z
-		);
+		//死亡エフェクトの再生を依頼する
+		m_effectPlayHandle = m_pEffectManager.lock()->Play(
+			ResourceLoader::EffectID::FloatingDeath, m_pos);
 	}
 }
 

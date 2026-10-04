@@ -10,6 +10,7 @@ class IFloatingEnemyState;
 class BulletManager;
 class CameraBase;
 class SoundManager;
+class EffectManager;
 class FloatingEnemy : public EnemyBase
 {
 public:
@@ -19,7 +20,8 @@ public:
 		std::weak_ptr<CameraBase> camera,
 		const Vector3& pos,
 		int health,
-		std::weak_ptr<SoundManager> pSoundManager);
+		std::weak_ptr<SoundManager> pSoundManager,
+		std::weak_ptr<EffectManager> pEffectManager);
 	~FloatingEnemy();
 
 	void OnInit() override;//初期化処理
@@ -75,6 +77,8 @@ private:
 
 	//音のマネージャー
 	std::weak_ptr<SoundManager> m_pSoundManager;
+	//エフェクトのマネージャー
+	std::weak_ptr<EffectManager> m_pEffectManager;
 
 	//当たり判定インターフェース
 	EnemyCollider m_collider;

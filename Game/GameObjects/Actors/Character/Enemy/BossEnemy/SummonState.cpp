@@ -1,10 +1,9 @@
-﻿#include <EffekseerForDXLib.h>
-
-#include "SummonState.h"
+﻿#include "SummonState.h"
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyFactory.h"
 #include "BossIdleState.h"
 #include "Manager/ResourceLoader.h"
 #include "Manager/SoundManager.h"
+#include "Manager/EffectManager.h"
 #include "BossEnemy.h"
 
 namespace
@@ -44,50 +43,18 @@ void SummonState::Enter()
 	Vector3 rightSummonPos = m_summonPos + summon_effect_offset;
 
 	//生成した敵に応じて再生するエフェクトを変える
-	int handle = -1;
+	std::shared_ptr<EffectManager> pEffectManager = m_pBoss.lock()->GetEffectManager().lock();
 	switch (static_cast<EnemyFactory::EnemyType>(rand))
 	{
 	case EnemyFactory::EnemyType::FloatingEnemy:
-		//ハンドルを取得
-		handle = ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::SummonFloating);
-
-		//エフェクトを再生
-		m_floatingEffRightPlayH = PlayEffekseer3DEffect(handle);
-		m_floatingEffLeftPlayH = PlayEffekseer3DEffect(handle);
-		//位置を設定
-		SetPosPlayingEffekseer3DEffect(
-			m_floatingEffRightPlayH,
-			leftSummonPos.x, 
-			leftSummonPos.y,
-			leftSummonPos.z
-		);
-		SetPosPlayingEffekseer3DEffect(
-			m_floatingEffLeftPlayH,
-			rightSummonPos.x, 
-			rightSummonPos.y,
-			rightSummonPos.z
-		);
+		//左右2か所にエフェクトを再生
+		pEffectManager->PlayOneShot(ResourceLoader::EffectID::SummonFloating, leftSummonPos);
+		pEffectManager->PlayOneShot(ResourceLoader::EffectID::SummonFloating, rightSummonPos);
 		break;
 	case EnemyFactory::EnemyType::WormEnemy:
-		//ハンドルを取得
-		handle = ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::SummonWorm);
-
-		//エフェクトを再生
-		m_wormEffLeftPlayH = PlayEffekseer3DEffect(handle);
-		m_wormEffRightPlayH = PlayEffekseer3DEffect(handle);
-		//位置を設定
-		SetPosPlayingEffekseer3DEffect(
-			m_wormEffLeftPlayH,
-			leftSummonPos.x,
-			leftSummonPos.y,
-			leftSummonPos.z
-		);
-		SetPosPlayingEffekseer3DEffect(
-			m_wormEffRightPlayH,
-			rightSummonPos.x,
-			rightSummonPos.y,
-			rightSummonPos.z
-		);
+		//左右2か所にエフェクトを再生
+		pEffectManager->PlayOneShot(ResourceLoader::EffectID::SummonWorm, leftSummonPos);
+		pEffectManager->PlayOneShot(ResourceLoader::EffectID::SummonWorm, rightSummonPos);
 		break;
 	}
 

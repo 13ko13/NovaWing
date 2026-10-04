@@ -8,7 +8,8 @@ class EnemyBullet : public BulletBase
 public:
 	EnemyBullet(const Vector3& pos, const Vector3& vel,
 		const int attackPower,std::weak_ptr<CameraBase> pCamera,
-		std::shared_ptr<EnemyBase> pShooter);
+		std::shared_ptr<EnemyBase> pShooter,
+		std::weak_ptr<EffectManager> pEffectManager);
 	~EnemyBullet();
 
 	void Update() override;//更新処理

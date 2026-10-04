@@ -13,10 +13,11 @@ struct Vector3;
 class BulletBase;
 class EnemyBase;
 class CameraBase;
+class EffectManager;
 class BulletManager
 {
 public:
-	BulletManager();
+	BulletManager(std::weak_ptr<EffectManager> pEffectManager);
 	~BulletManager();
 
 	//更新処理
@@ -68,4 +69,7 @@ private:
 
 	//弾全ての配列
 	std::vector<std::weak_ptr<BulletBase>> m_pAllBullets;
+
+	//弾が使うエフェクトのマネージャー
+	std::weak_ptr<EffectManager> m_pEffectManager;
 };

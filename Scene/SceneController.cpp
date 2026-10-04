@@ -3,6 +3,7 @@
 #include "../Manager/InputManager.h"
 #include "Manager/GameObjectManager.h"
 #include "Manager/ResourceLoader.h"
+#include "LoadingScene.h"
 
 void SceneController::ResetScene(std::shared_ptr<Scene> scene)
 {
@@ -15,19 +16,24 @@ void SceneController::ResetScene(std::shared_ptr<Scene> scene)
 void SceneController::ChangeScene(std::shared_ptr<Scene> scene, float fadeFrame)
 {
 	//シーンが積まれていないときはResetSceneする
-	if(m_scenes.empty())
+	//起動直後は直接遷移、ロード画面は挟まないようにする
+	if (m_scenes.empty())
 	{
 		ResourceLoader::GetInstance().OnSceneChange(
 			SceneID::None, scene->GetSceneID()
-		);
+		); 
 		ResetScene(scene);
 		Init();
 		m_fade.StartFadeIn(fadeFrame);
 		return;
 	}
 
-	//m_nextSceneに次のシーンを保存します
-	m_nextScene = scene;
+	//前のシーンIDを持っておく
+	SceneID prevSceneID = m_scenes.back()->GetSceneID();
+
+	//本来の遷移先をLoadingSceneで包み、次のシーンとして予約
+	m_nextScene = std::make_shared<LoadingScene>(
+		*this, prevSceneID, scene, fadeFrame);
 
 	//フェードマネージャーにフェードアウトを開始させます
 	m_fade.StartFadeOut(fadeFrame);
@@ -63,13 +69,8 @@ void SceneController::Update()
 		//フェードインを開始する
 		m_fade.StartFadeIn(m_fade.GetFadeFrame());
 
-		//切り替え前に前のシーンIDを控えておく(ResetSceneでクリアされる前に)
-		SceneID prevSceneID = m_scenes.back()->GetSceneID();
-		ResourceLoader::GetInstance().OnSceneChange(
-			prevSceneID, m_nextScene->GetSceneID()
-		);
-
 		//次のシーンに切り替える
+		//LoadingSceneなのでOnSceneChangeはLoadingSceneに行わせる
 		ResetScene(m_nextScene);
 		//次のシーンの初期化
 		Init();
@@ -93,4 +94,11 @@ void SceneController::Draw()
 	}
 	//フェードマネージャーの描画
 	m_fade.Draw();
+}
+
+void SceneController::ChangeSceneDirect(std::shared_ptr<Scene> scene, float fadeFrame)
+{
+	ResetScene(scene);
+	Init();
+	m_fade.StartFadeIn(fadeFrame);
 }

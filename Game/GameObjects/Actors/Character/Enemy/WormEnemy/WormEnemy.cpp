@@ -1,11 +1,10 @@
-﻿#include <EffekseerForDXLib.h>
-
-#include "WormEnemy.h"
+﻿#include "WormEnemy.h"
 #include "Character/Player/Player.h"
 #include "Manager/BulletManager.h"
 #include "Manager/LightingManager.h"
 #include "Constants/ShaderRegister.h"
 #include "Manager/SoundManager.h"
+#include "Manager/EffectManager.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/DebugManager.h"
 
@@ -41,13 +40,15 @@ WormEnemy::WormEnemy(
 	const std::weak_ptr<BulletManager> pBulletManager,//バレットマネージャー
 	std::weak_ptr<CameraBase> camera,//カメラ
 	const WormEnemyData& data,//ワームエネミーに必要なデータ
-	std::weak_ptr<SoundManager> pSoundManager) :
+	std::weak_ptr<SoundManager> pSoundManager,
+	std::weak_ptr<EffectManager> pEffectManager) :
 	EnemyBase(data.modelID,camera,pPlayer,pBulletManager),
 	m_segmentCount(data.segmentCount),
 	m_headSphere(std::make_shared<SphereShape>(data.pos, 0.0f)),
 	m_moveDirection(data.direction),
 	m_activatePlayerZ(data.activatePlayerZ),
 	m_pSoundManager(pSoundManager),
+	m_pEffectManager(pEffectManager),
 	m_collider(*this, ColliderTag::Worm)
 {
 	//位置を反映
@@ -59,8 +60,6 @@ WormEnemy::WormEnemy(
 
 WormEnemy::~WormEnemy()
 {
-	//エフェクトを止める
-	StopEffekseer3DEffect(m_deathPlayHandle);
 }
 
 void WormEnemy::OnInit()
@@ -203,28 +202,16 @@ void WormEnemy::Update()
 				//死亡エフェクトが未発動であれば頭の位置にエフェクトを出す
 				if (m_deathEffectNum == 0)
 				{
-					//エフェクト再生を呼ぶ
-					m_deathPlayHandle = PlayEffekseer3DEffect(
-						ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::WormDeath)
-					);
-					//再生直後に正しい位置へ即座にセットする(1フレーム目のワープ軌跡を防ぐ)
-					SetPosPlayingEffekseer3DEffect(
-						m_deathPlayHandle, m_pos.x, m_pos.y, m_pos.z
-					);	
+					//頭の位置に死亡エフェクトを再生する
+					m_pEffectManager.lock()->PlayOneShot(
+						ResourceLoader::EffectID::WormDeath, m_pos);
 				}
 				else
 				{
-					//エフェクト再生を呼ぶ
-					m_deathPlayHandle = PlayEffekseer3DEffect(
-						ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::WormDeath)
-					);
-					//再生直後に胴体の位置にセットする
-					SetPosPlayingEffekseer3DEffect(
-						m_deathPlayHandle,
-						m_segmentPositions[m_deathEffectNum - 1].x,
-						m_segmentPositions[m_deathEffectNum - 1].y,
-						m_segmentPositions[m_deathEffectNum - 1].z
-					);	
+					//胴体の位置に死亡エフェクトを再生する
+					m_pEffectManager.lock()->PlayOneShot(
+						ResourceLoader::EffectID::WormDeath,
+						m_segmentPositions[m_deathEffectNum - 1]);
 				}
 
 				//爆発音を鳴らす

@@ -10,6 +10,7 @@ class TitleCamera;
 class WaterManager;
 class SkyBox;
 class SoundManager;
+class EffectManager;
 class TitleScene : public Scene
 {
 public:
@@ -98,4 +99,7 @@ private:
 
 	//サウンドマネージャー
 	std::shared_ptr<SoundManager> m_pSoundManager;
+
+	//エフェクトマネージャー
+	std::shared_ptr<EffectManager> m_pEffectManager;
 };

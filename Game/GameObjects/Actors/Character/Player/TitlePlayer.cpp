@@ -1,10 +1,10 @@
 ﻿#include <DxLib.h>
-#include <EffekseerForDXLib.h>
 
 #include "TitlePlayer.h"
 #include "Constants/ShaderRegister.h"
 #include "Manager/LightingManager.h"
 #include "Manager/DebugManager.h"
+#include "Manager/EffectManager.h"
 
 namespace
 {
@@ -31,13 +31,21 @@ namespace
 
 TitlePlayer::TitlePlayer(
 	ResourceLoader::ModelID modelID,
-	std::weak_ptr<CameraBase> pCamera):
-	Actor(modelID,pCamera)
+	std::weak_ptr<CameraBase> pCamera,
+	std::weak_ptr<EffectManager> pEffectManager):
+	Actor(modelID,pCamera),
+	m_pEffectManager(pEffectManager)
 {
 }
 
 TitlePlayer::~TitlePlayer()
 {
+	//エフェクトマネージャーがまだ生きていれば、再生中のブーストエフェクトを止める
+	std::shared_ptr<EffectManager> pEffectManager = m_pEffectManager.lock();
+	if (pEffectManager)
+	{
+		pEffectManager->Stop(m_boostPlayEffect);
+	}
 }
 
 void TitlePlayer::OnInit()
@@ -89,17 +97,10 @@ void TitlePlayer::Update()
 		SetVel(Vector3(0.0f, 0.0f, boost_speed));
 
 		//プレイヤーより少し後ろの位置にエフェクトを出す
-		VECTOR effectPos = (
-			m_pos + GetVisualForward() * 
-			boost_effect_offset_pos.z).ToDxLib();
+		Vector3 effectPos = m_pos + GetVisualForward() * boost_effect_offset_pos.z;
 
 		//エフェクトの位置
-		SetPosPlayingEffekseer3DEffect(
-			m_boostPlayEffect,
-			effectPos.x,
-			effectPos.y,
-			effectPos.z
-		);
+		m_pEffectManager.lock()->SetPos(m_boostPlayEffect, effectPos);
 		break;
 	}
 
@@ -153,8 +154,8 @@ void TitlePlayer::StartSomersault()
 void TitlePlayer::StartBoost()
 {
 	//ブーストエフェクトを出す
-	int boostEffectH = ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::Boost);
-	m_boostPlayEffect = PlayEffekseer3DEffect(boostEffectH);
+	m_boostPlayEffect = m_pEffectManager.lock()->Play(
+		ResourceLoader::EffectID::Boost, m_pos);
 	//ブーストステートに遷移
 	m_phase = Phase::Boost;
 }

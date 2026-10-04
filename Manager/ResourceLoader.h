@@ -203,6 +203,13 @@ public:
 	//prevにあってnextにないものは解放、nextにしかないものは読み込む
 	void OnSceneChange(SceneID prev, SceneID next);
 
+	//非同期ロードを開始する
+	void BeginAsyncLoad();
+	//非同期ロードを終了する
+	void EndAsyncLoad();
+	//非同期ロードが進行中か
+	bool IsAsyncLoading() const;
+
 	//wstringをModelIDに変換する
 	static ResourceLoader::ModelID WStringToModelID(const std::wstring id);
 

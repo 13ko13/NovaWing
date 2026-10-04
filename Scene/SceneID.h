@@ -8,4 +8,5 @@ enum class SceneID : int
 	Pause,//ポーズ
 	Gameover,//ゲームオーバー
 	Clear,//クリア
+	Loading,//ロード中
 };

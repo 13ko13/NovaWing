@@ -178,6 +178,7 @@
     <ClCompile Include="Game\GameObjects\Camera\TitleCamera.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Player\TitlePlayer.cpp" />
     <ClCompile Include="Manager\SoundManager.cpp" />
+    <ClCompile Include="Manager\EffectManager.cpp" />
     <ClCompile Include="Game\UI\SpecialGaugeUI.cpp" />
     <ClCompile Include="Game\Collision\PlayerCollider.cpp" />
     <ClCompile Include="Game\Collision\RockCollider.cpp" />
@@ -259,6 +260,7 @@
     <ClCompile Include="Manager\WaterRevealManager.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\WormEnemy\WormEnemyDataSetter.cpp" />
     <ClCompile Include="Game\Collision\BossBeamTipCollider.cpp" />
+    <ClCompile Include="Scene\LoadingScene.cpp" />
     <ClCompile Include="Game\UI\WarningUI.cpp" />  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
@@ -284,6 +286,7 @@
     <ClInclude Include="Game\GameObjects\Actors\Character\Player\TitlePlayer.h" />
     <ClInclude Include="Game\Collision\ICollider.h" />
     <ClInclude Include="Manager\SoundManager.h" />
+    <ClInclude Include="Manager\EffectManager.h" />
     <ClInclude Include="Game\UI\SpecialGaugeUI.h" />
     <ClInclude Include="Game\Collision\PlayerCollider.h" />
     <ClInclude Include="Game\Collision\RockCollider.h" />
@@ -370,6 +373,7 @@
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\WormEnemy\WormEnemyDataSetter.h" />
     <ClInclude Include="Game\Collision\BossBeamTipCollider.h" />
     <ClInclude Include="Scene\SceneID.h" />
+    <ClInclude Include="Scene\LoadingScene.h" />
     <ClInclude Include="Game\UI\WarningUI.h" />  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">

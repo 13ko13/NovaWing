@@ -18,6 +18,7 @@ class Stage;
 class BossEnemy;
 class EnemyFactory;
 class SoundManager;
+class EffectManager;
 class WarningUI;
 class GameScene :public Scene
 {
@@ -89,6 +90,8 @@ private:
 	std::shared_ptr<EnemyFactory> m_pEnemyFactory;
 	//サウンドマネージャーへのポインタ
 	std::shared_ptr<SoundManager> m_pSoundManager;
+	//エフェクトマネージャーへのポインタ
+	std::shared_ptr<EffectManager> m_pEffectManager;
 	//ボス登場前のWARNINGへのポインタ
 	std::shared_ptr<WarningUI> m_pWarningUI;
 };

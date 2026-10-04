@@ -1214,6 +1214,41 @@
   - **ユーザー確認済み(2026-10-03): 読み込みの固まりは「だいぶまし」になった。** 画質の劣化が気にならないかは引き続き確認中。見た目に問題があれば、`resize_textures.ps1`の`-MaxSize`を変えて再実行するか、scratchpadのバックアップから戻せる。
   - 非同期ロード自体は、この対応でも固まりが気になるようなら次の手として残っている(10/2の設計メモ参照)。
 
+### 進捗（2026-10-03〜04・非同期ロード(LoadingScene)の土台を実装、ビルド成功）
+
+- テクスチャ縮小後も「だいぶまし」止まりで、Title→Gameの切り替えはまだ固まる。NOTES10/2の設計メモ通り、**非同期ロード本体に着手**。
+- **参考: スターフォックスリメイク版のロード画面(ユーザーが画面録画で提示)。** SPACE DYNAMICSロゴ、「TACTICAL ADVICE」のヒント枠、「SYSTEM INITIALIZING」の文字、右下に左スティックで動かせる機体プレビュー(R1/L1二回押しでバレルロールも)という構成。**今回は処理の土台のみ実装し、見た目(ロゴ画像・機体プレビュー・ヒント文表示)はプロトの段階では後回しにする方針。次回以降のタスクとして残す。**
+- **決定した仕様:**
+  - 専用の`LoadingScene`(画面全体を覆う)を経由させる。
+  - ロード進捗は表示しない(`GetASyncLoadNum`の残数などは使わない)。「SYSTEM INITIALIZING」の文字を通常⇔半透明で繰り返し点滅させるだけ、動いている感だけ出す。
+  - **ロード画面は最低1秒(60F)は表示し続ける**(あまりに一瞬だと遷移バグに見えるため)。非同期ロード自体が1秒未満で終わっても、最低時間を待ってから次のシーンへ切り替える。
+  - 非同期化の対象は**モデル・画像・サウンド・フォント全部**(`LoadEffekseerEffect`だけ対象外、既存の合意通り)。
+- **実装(`Manager/ResourceLoader.h/.cpp`、ユーザーが記述):** `BeginAsyncLoad()`(`SetUseASyncLoadFlag(TRUE)`)、`EndAsyncLoad()`(`FALSE`に戻す)、`IsAsyncLoading() const`(`GetASyncLoadNum() > 0`)を追加。各`Load*`関数自体の中身は変更不要(DxLib側がフラグを見て非同期/同期を切り替えてくれるため)。
+- **`SceneID`に`Loading`を追加**(`Scene/SceneID.h`)。`m_sceneResources`には登録しない(`OnSceneChange`の引数として`Loading`自体が渡ることは無い設計のため、`unordered_map::operator[]`の自動空生成に任せても実害なしと確認済み)。
+- **新規`Scene/LoadingScene.h/.cpp`を作成**(`.vscode`の「クラスの追加」タスクで生成、ユーザーが実装、Claudeは一貫して説明のみ):
+  - コンストラクタで`prevSceneID`・本来の遷移先`nextScene`・`fadeFrame`を受け取って保持。
+  - `Init()`: `BeginAsyncLoad()`→`OnSceneChange(prevSceneID, nextScene->GetSceneID())`(非同期なのですぐ戻る)。
+  - `Update()`: 経過フレームと点滅用フレームを加算、`IsAsyncLoading()`が`false`かつ経過フレームが`min_loading_frame`(60)以上になったら`EndAsyncLoad()`→`m_controller.ChangeScene(m_nextScene, m_fadeFrame)`で本来の遷移先へ。
+  - `Draw()`: `SYSTEM INITIALIZING`を60F周期でアルファ255⇔128に切り替えて`DrawString`(プレースホルダー、見た目は後回し方針のため最低限)。
+  - `GetSceneID()`: `SceneID::Loading`を返す。
+- **`Scene/SceneController.cpp`の変更(ユーザーが記述):**
+  - `ChangeScene()`: 起動直後(`m_scenes.empty()`)は**今まで通り直接遷移**(ロード画面を挟まない、ユーザー判断)。2回目以降は、`ResetSceneでクリアされる前に前のシーンIDを控え`、本来の`scene`/`fadeFrame`を`LoadingScene`でラップして`m_nextScene`にセットするよう変更。
+  - `Update()`: フェードアウト完了時に行っていた`OnSceneChange`の直接呼び出しを削除(`LoadingScene::Init()`内で行われるようになったため、二重呼び出しを避けた)。
+  - **ハマった点(修正済み): 最初`LoadingScene`のコンストラクタに本来の遷移先`scene`ではなく自分自身`m_nextScene`(代入前はほぼ`nullptr`)を渡してしまうミスがあった。** Claudeが指摘し、`scene`に修正。放置するとロード完了後に`nullptr`へ遷移しようとして危険だった。
+- ビルド成功(エラー0件)確認済み。**未確認: 実機でシーン遷移してロード画面が正しく出るか、最低1秒守られるか、固まりが改善したか。**
+- **次回やること:**
+  1. 実機でTitle→Game等の遷移を試し、`LoadingScene`が正しく機能するか確認。
+  2. 見た目の作り込み(ロゴ画像、TACTICAL ADVICE風のヒント枠、右下の機体プレビュー+左スティック移動+バレルロール操作)。プロト期間中は後回しの合意。
+  3. 9種類のシーン遷移の確認（手順⑧、非同期化の影響も含めてまだ未実施）。
+
+### 余談（2026-10-03〜04・VS CodeのIntelliSense `#include`エラー、DxLib拡張のバグと判明）
+
+- `LoadingScene.cpp`作成中、`#include "Manager/ResourceLoader.h"`等ワークスペース直下からの相対includeが、**ビルドは成功するのにVS Code上では「ソースファイルを開けません」「C/C++(1696)」のエラー表示になる**現象が発生。新規ファイルだけでなく`SceneController.cpp`等の既存ファイルでも同様に再現し、プロジェクト全体の問題と判明。
+- **原因（拡張`mahirocreative.dxlib-devenv`のソース`dist/extension.js`を直接確認して特定）:** `settings.json`の`C_Cpp.default.configurationProvider`に設定しているDxLib拡張が、IntelliSense用のincludePathを`[DxLib SDKのパス, <ワークスペースルート>/src]`に固定して返す実装になっていた（6205〜6213行目付近）。拡張の「新規プロジェクト作成」機能が常に`src/`固定でソースを生成する仕様に合わせたものと思われ、NovaWingのような「既存の`.vcxproj`を使う」構成（ソースがワークスペース直下に複数フォルダで展開、`src/`は使わない）では、`.vcxproj`の`AdditionalIncludeDirectories`を読み取る処理が実装されておらず、ワークスペースルート自体がincludePathに含まれない。
+- **発生タイミングの推定:** 拡張フォルダのタイムスタンプ(`mahirocreative.dxlib-devenv-1.2.0`、10/3 17:02作成)から、9/28に導入した1.0.0からこの会話中に自動更新(1.0.0→1.2.0)されたと推定。「昨日は発生しなかった」のはこの自動更新が原因と考えられる。
+- **対処: `settings.json`の`C_Cpp.default.configurationProvider`をコメントアウトし、既存の自前`c_cpp_properties.json`(ワークスペースルートを含む正しいincludePath)にIntelliSenseを任せる形に変更。** ビルド・実行はDxLib拡張がMSBuld経由で引き続き担当するため無関係、影響なし。
+- 開発者へのバグ報告文を作成し、`C:\Users\Admin\Desktop\dxlib_devenv_feedback.txt`に保存済み（ユーザー判断で、送付するかどうか・英訳するかは未定、一旦保留）。
+
 ### 進捗（2026-10-03・ビーム反射後の曲がり角度を調整、ほぼ必中だった不具合を修正）
 
 - **ユーザー指摘: 反射したビームが「絶対に」ボスに当たる。当初の設計では「返し方が下手だと曲がりきれず外れる」想定だったはず。**
@@ -1260,4 +1295,86 @@
   - **入力0＝集まり具合(0＝散っている、1＝本体に重なる)。** 0(コード未対応のとき)は散って周回し続けるだけなので、今のコードのままでも壊れない。
   - **コード側は未対応(ユーザーが実装する)**: `ChargeBullet::Update`で、ターゲットが生きている間、毎フレーム`SetDynamicInput3DEffect(m_effectPlayHandle, 0, 集まり具合)`。集まり具合＝(集まり始める距離−ターゲットまでの距離)/(集まり始める距離−集まり終わる距離)を0〜1に切り詰めたもの(式でmin/maxが使えないので、切り詰めはコード側)。目安: 弾速25/Fなので、始める距離600(約24F前)、終わる距離はターゲットの当たり半径＋弾の半径32くらい(浮遊敵なら約160)。
   - 学び: **「生成時のみ」で親に従う子は、親の回転が時間で変わっても、それに沿って出る位置が回らない**(乱数の種を固定して確認。「常に」で従う子は回る)。**円周発生の半径には動的パラメーターが効かない**(大きさ・位置には効く)。**`@GTime`は秒**(×17で約16°/F)。キャプチャは毎回乱数が変わるので、比較は`@effect`の`Global.RandomSeed`を固定してから行う。動的入力の値はMCPから変えられないので、`.efkproj`の`<DynamicInput><Input>`を書き換えた確認用ファイルで見た。
+
+### 進捗（2026-10-04・DxLib拡張が「プロジェクトではない」と誤判定してF5が失敗する不具合、原因特定・解決）
+
+- **症状: F5(DxLib: デバッグ実行)が`preLaunchTask 'DxLib: Debug ビルド' が終了コード1で終了しました`で失敗。** ターミナルには「NovaWing.vcxproj はこの拡張機能が作ったものではないので使えません。名前を変えるか移動してください。」という内容のバッチ(`%APPDATA%\Code\User\globalStorage\mahirocreative.dxlib-devenv\build\NovaWing_*_debug.bat`)が実行されていた。MSBuildで直接ビルドすると成功する(コード自体は正常)ため、拡張側の問題と判断。
+- **原因（`dist/extension.js`を直接読んで特定）:** 拡張のプロジェクト判定関数`isDxLibProject`は「`.vscode/tasks.json`に`type:"dxlib"`のタスクがあり、**かつ** `adoptedVsProject`(＝`.vscode/settings.json`の`dxlib.vsProject`が設定されているか)が偽であること」を見ている。`adoptedVsProject`は`settings.json`を**`JSON.parse`で厳密パース**しており、**`settings.json`にコメント(`//`)が含まれているとパースに失敗し`undefined`を返す**。NovaWingの`.vscode/settings.json`は元々(gitにコミット済みの時点から)コメント入りだったため、`dxlib.vsProject`の設定が拡張から見えなくなり、プロジェクトとして認識されずビルドタスクが失敗していた。
+- **発生タイミングの推定: 10/3の自動更新(1.0.0→1.2.0)で、`settings.json`の読み方(JSONC寛容パース→厳密`JSON.parse`)が変わった可能性が高い。** 9/28〜10/3朝まではコメント入りのままF5が機能していたとみられるため。
+- **対処: `.vscode/settings.json`から全コメントを削除し、正しいJSON(コメントなし)に書き換え。** 内容（コメントで説明していた理由付け）はこのNOTESに移した。`C_Cpp.default.configurationProvider`の行自体も、前回判明したIntelliSenseのバグ対応のため削除済みのまま残している(settings.jsonにはDxLib拡張用の設定しか残っていない)。
+- MSBuildでの直接ビルドは一貫して成功していた(エラー0件)。**未確認: この修正でF5(DxLib: デバッグ実行)が実際に成功するか**、実機でユーザーが確認予定。
+- **教訓: `.vscode/`配下の設定ファイル(`tasks.json`/`launch.json`に続き`settings.json`も)にコメントを書くと、拡張がJSONとして厳密パースしている場合に壊れることがある。** VS Code自体はJSONC(コメント許容)として読むため、エディタ上は問題なく見えてしまうのが厄介。同様の不具合が今後起きたら、まず`.vscode/*.json`にコメントが混ざっていないか疑うとよい。
+- **続報: `settings.json`修正後もF5が`preLaunchTask 'DxLib: Debug ビルド' が終了コード1で終了しました`で失敗し続けた。** 生成されたバッチの中身を確認すると「NovaWing.vcxprojはこの拡張機能が作ったものではない」というエラーのまま。`extension.js`をさらに読み込み、**`writeBuildScript`(ビルド用batを書く関数、4902行目〜)が`isDxLibProject(folder)`の結果だけを見て即座に失敗扱いにしており、`dxlib.vsProject`で「既存VSプロジェクトを使う」モードを選んでいるケース(`isDxLibProject`が意図的にfalseを返す設計)を一切考慮していないことが判明。** これは1.0.0→1.2.0の自動更新で`writeBuildScript`側の分岐が`isDxLibProject`の仕様変更に追従していない、**拡張自体の退行バグ**と判断。
+- **対処: 拡張を1.2.0からアンインストールし、`Downloads\DxLib-devenv-1.0.0\DxLib-devenv-1.0.0\dxlib-devenv-1.0.0.vsix`から1.0.0を再インストール(`code --install-extension <path> --force`)。拡張機能パネルから「DxLib 開発環境」の「Auto Update」のチェックを外し、今後の自動更新を無効化した(「Auto Update All (From Publisher)」は外せなかったが、個別のAuto Updateオフが優先される認識)。** その後VS Codeを完全に再起動してF5(DxLib: デバッグ実行)が通ることを確認済み。
+- **副作用: ダウングレード〜再起動の過程でVS Codeの表示言語が一時的に英語に戻った(`argv.json`が無い状態だった)。** コマンドパレットの「Configure Display Language」からjaを選び直して解決、再起動後は大部分が日本語表示に戻った(右クリックメニュー等、一部の項目は翻訳リソースの都合で英語のまま残るが実害なし)。
+- 開発者へのバグ報告(`C:\Users\Admin\Desktop\dxlib_devenv_feedback.txt`)には、この`writeBuildScript`の退行バグも追記が必要(未追記、次回気が向いたら)。
+
+### 進捗（2026-10-04・LoadingSceneが無限ループしてタイトル→ゲームの遷移で画面が真っ暗なまま固まるバグを修正）
+
+- **症状: DxLib拡張のビルド不具合解消後、実機でタイトル→ゲーム遷移を試したところ、画面が真っ暗なままずっと戻らない。**
+- **原因(コードレビューで特定): `SceneController::Update()`の`if(!m_fade.IsFading() && m_nextScene != nullptr)`分岐は、`LoadingScene`へ切り替わった後も当然また毎フレーム素通りする(`m_nextScene`はLoadingScene切替時に`nullptr`に戻るので2回目以降はelse節＝`LoadingScene::Update()`が正しく呼ばれる)。問題は`LoadingScene::Update()`がロード完了時に呼んでいた`m_controller.ChangeScene(m_nextScene, m_fadeFrame)`の方。** `ChangeScene`は「本来の遷移先をまた`LoadingScene`で包んで`m_nextScene`にセットする」関数なので、LoadingScene完了のたびに新しいLoadingSceneが生成され続ける**無限ループ**になっていた(本来のゲームシーンには永遠に辿り着けない)。
+- **対処: `SceneController`に`ChangeSceneDirect(scene, fadeFrame)`(LoadingSceneを経由せず`ResetScene`→`Init()`→フェードイン開始するだけの関数)を新設し、`LoadingScene::Update()`の呼び出し先を`ChangeScene`から`ChangeSceneDirect`に変更。** ユーザーが自分で記述、ビルド成功確認済み。
+- **未確認: 実機でタイトル→ゲームの遷移が正しく完了するか(LoadingScene表示→ゲームシーンへ到達)。**
+
+### 進捗（2026-10-04・LoadingSceneの文字が出ない問題を調査、原因は単純な座標ミスと判明。終了時クラッシュも修正）
+
+- **症状1: タイトル→ゲーム遷移で、LoadingSceneの「SYSTEM INITIALIZING」の文字が一切見えない。**
+- **調査の過程(長くなったので記録): まず`ResourceLoader::OnSceneChange`に計測コード(`GetNowHiPerformanceCount`で各カテゴリの所要時間をデバッグコンソールへ出力、デバッグ後に削除済み)を一時追加して測定。結果、Model/Graphicはほぼ0ms(非同期化が効いている)だが、`Effect: 481ms`(想定通り、`LoadEffekseerEffect`は仕様上非同期対応外)、`Sound: 470〜1330ms`(想定外に重い)と判明。**
+  - `min_loading_frame`を伸ばしても直らないか検討したが、「`LoadingScene::Init()`内の`OnSceneChange`自体がブロッキングしている間はそもそも`Update`/`Draw`のループに入れない」ため、`min_loading_frame`(Update開始後のカウント)をいくら伸ばしても無意味と判明(ユーザーからの「伸ばせば直るのでは」という指摘に対して、`Init()`と`Update()`の呼び出しタイミングの違いを説明)。
+  - Sound/Effectの呼び出し順(`ChangeResources`内でEffect→Soundの順)を入れ替えて「Effect読み込みがSoundの非同期化を阻害しているのでは」という仮説を検証したが、効果なし(のちに元の順序に戻した)。
+  - ユーザーの提案で、参考プロジェクト`C:\Users\Admin\Documents\GitHub\ProjectNeaR`(別PCの`SakamotoKou`名義だが、このPCにも別途クローンが存在)の`LoadingManager`/`AssetManager`を調査。**学んだこと**: ProjectNeaRは「シーンの`Init()`内で`StartLoading()`(非同期フラグON)→通常の重い初期化処理→`EndLoading()`」という、NovaWingの`OnSceneChange`一括呼び出しとほぼ同じ構造。決定的な違いは、ロード画面の`Update`/`Draw`が**`SceneController`を経由せず`Application::Run()`のメインループから独立して呼ばれる**設計だったこと(`if (!loadingManager.IsLoading()) sceneController->Update()` のように、ロード中はシーン側の更新・描画を止めて`LoadingManager::Draw()`だけ呼ぶ)。また`AssetManager::GetEffectHandle`は`LoadEffekseerEffect`の前後で明示的に非同期フラグを一時オフ/オンしており、「`LoadEffekseerEffect`は非同期非対応」という認識はNovaWingの合意と一致することが確認できた。サウンド(`GetSoundHandle`)は特別な処理なく素直に`LoadSoundMem`を呼んでおり、コード上の違いは見つけられなかった。
+  - **最終的な原因判明: `LoadingScene::Draw()`の`DrawString(800, 950, ...)`が、Debugビルドの画面サイズ(`Constants/Game.h`の`screen_width/height` = 1280×720、Release/基準は1920×1080)を超える座標(Y=950)を指定しており、単純に画面外に描画されていた。** Sound/Effectが重いこと自体は事実として残っているが、「文字が見えない」問題とは直接関係なかった。
+- **対処: 座標を`(50, 50)`(画面左上)に変更。** ビルド成功、ユーザー確認で文字が表示されることを確認済み。
+- **症状2(ついでに発覚・修正済み): リザルト画面の数値カウントアップ演出中にESCキーでゲームを終了すると、`DxLib_End()`実行中にアクセス違反でクラッシュする。** 原因は、非同期ロードフラグが立った状態(またはロード中のハンドルが残ったまま)で`ResourceLoader::ReleaseAll()`→`DxLib_End()`に入っていたため。`ReleaseAll()`の先頭、`EndAsyncLoad()`より前に`WaitHandleASyncLoadAll()`(DxLibの「全ての非同期読み込みが完了するまで待つ」関数、ProjectNeaRの調査で存在を知った)を追加して解決。ユーザーが自分で記述、ビルド成功・実機で再発しないことを確認済み。
+- **教訓: 複雑な原因(非同期ロードの仕組み、呼び出し順序など)を疑う前に、まず単純な原因(座標・解像度のズレ等)を先に確認すべきだった。** 今回はDebug/Releaseで解像度が違う(`screen_width/height`)ことを忘れ、Release基準の座標をそのままDebugで確認してしまったのが遠回りの原因。
+- **Sound/Effectの重さ自体(Sound 470〜1330ms、Effect 481ms)はまだ残っている課題。** 座標ミス修正でLoadingSceneの文字は見えるようになったので、実用上の支障(画面が固まって見える)は`min_loading_frame`(今240=4秒に変更済み)の間に収まっていれば目立たなくなったはずだが、根本的な軽量化(Soundの非同期化の原因特定、またはフレーム分割ロードへの設計変更)は未着手のまま。気になるようなら次回再検討。
+
+### 進捗（2026-10-04・タイトルから「ゲームを終了」でDxLib_End()実行中にアクセス違反クラッシュする不具合、根本原因を特定・修正）
+
+- **症状: タイトル画面で「ゲームを終了」を選ぶと、`Application::Terminate()`の`DxLib_End()`実行中に`0x0000000000000000`番地への書き込みアクセス違反でクラッシュ。** 前回(リザルト画面でのESC終了時)に`WaitHandleASyncLoadAll()`を追加して直ったのとは別経路・別原因のクラッシュ。ユーザーから「全任せする、絶対に直してほしい」と依頼され、Claudeが主体的に調査・特定・修正まで実施(通常の直接編集禁止ルールの例外、ユーザー明示の委任による)。
+- **調査の過程:**
+  - まず`ReleaseAll()`周りを再確認したが既に対策済みで問題なし。
+  - Exploreサブエージェントに「`PlayEffekseer3DEffect`の呼び出し元で`StopEffekseer3DEffect`を呼んでいないクラスを洗え」と依頼。`TitlePlayer`(`TitlePlayer.cpp`、ブーストエフェクト)と`DefaultRotationState`(バレルロールエフェクト)がデストラクタ・`Exit()`で停止処理をしていないと判明、修正(`.lock()`でガードしつつ`Stop`を追加)。ただし`TitleScene.h`のメンバー宣言順(`m_pPlayer`→`m_pEffectManager`)により、**デストラクタでは`m_pEffectManager`が先に破棄され`EffectManager::~EffectManager()`の`StopAll()`で全エフェクトが既に止まっているはずのため、この修正自体は理屈上「手遅れ」で根本原因ではない可能性が高いと判断**(ただし無害なので修正は残した)。
+  - **本命の原因を特定: `Game/GameObjects/Actors/Actor.cpp`の`Actor::~Actor()`が「処理なし」の空実装で、コンストラクタで`MV1DuplicateModel`して複製したモデルハンドル(`m_modelHandle`)を一度も`MV1DeleteModel`で解放していなかった。** `Actor`は`Player`/`Rock`/`FloatingEnemy`/`WormEnemy`/`BossEnemy`/`TitlePlayer`/`Stage`全ての基底クラスであり、ゲーム全体で複製モデルハンドルが解放されずリークし続けていた。終了処理で元モデル(`ResourceLoader::ReleaseAll()`)を`MV1DeleteModel`した後、DxLib内部のモデルハンドルテーブルに「親が消えたのに子の複製ハンドルがまだ生きている」不整合が残り、`DxLib_End()`の内部後片付け処理でこれを踏んでクラッシュしていたと推測される。
+  - **対処: `Actor::~Actor()`に`MV1DeleteModel(m_modelHandle);`を追加。** 1行の修正。ビルド成功確認済み。
+  - ついでに、`TitleScene`/`GameoverScene`等のデストラクタが「シェーダーピクセルハンドル(`m_glitchPSH`)・定数バッファ(`m_cbufferGlitch`)」も解放していない(空デストラクタ)ことに気づいたが、これは単体では即クラッシュに直結しにくい軽微なリークと判断し、今回は未対応のまま(気になれば次回対応)。
+- **ユーザー確認済み(2026-10-04): 「ゲームを終了」選択時のクラッシュは再発せず、良い感じとのこと。** `Actor::~Actor()`への`MV1DeleteModel(m_modelHandle)`追加が根本対応として有効だったと判断。
   - 負荷: 弾1発でピーク約154インスタンス(前の版は約95)。チャージ中は約58。Trackの点は頂点だけなので軽い。分身の頭と星を寿命1Fにし、尾を12Fにし、渦と粒の発生間隔を広げて抑えた。- **2026-10-03続き3: 分身の集まりをコードに組み込んだ。** ユーザーの依頼でClaudeが直接編集(直接編集禁止ルールの例外)。`ChargeBullet.cpp`: 無名名前空間に`gather_start_dist = 600`・`gather_end_dist = 160`・`gather_input_index = 0`、`Update()`でターゲットが生きている間はターゲットまでの距離から集まり具合(0〜1、`std::clamp`)を計算し、毎フレーム`SetDynamicInput3DEffect`で渡す。ターゲットがいない・途中で死んだときは0(分身が散った状態に戻る)。`GameObject`に当たり半径が無いので、集まり終わる距離は浮遊敵(当たり半径132＋弾32)に合わせた定数。Debug x64ビルド成功。未確認: ゲーム内での見え方、ワームやボスなど当たり半径が違う敵での集まるタイミング。
+
+### 進捗（2026-10-04・EffectManagerを新設し、Effekseer直接呼び出し全箇所を移行）
+
+- **ユーザーの依頼でClaudeが直接編集(直接編集禁止ルールの例外)。方針は事前に3点確認: ①再生ハンドルは`int`のまま、②渡し方は`weak_ptr`(SoundManagerと同じ)、③移行範囲は全箇所一気に。**
+- **新設: `Manager/EffectManager.h/.cpp`。** `Update()`(Sync3DSetting+UpdateEffekseer3D)、`Draw()`、`Play(EffectID,pos)`→ハンドル、`PlayOneShot(EffectID,pos)`、`SetPos/SetRotation/SetRotationAxis/SetScale/SetColor/SetDynamicInput`、`IsPlaying`、`Stop`、`StopAll`。デストラクタで`StopAll()`するので、シーン破棄(リトライ・遷移)でエフェクトが残らない。`SetRotationAxis`はボスのビームがEffekseer本体の`SetRotation(軸,角度)`を直接呼んでいたぶんの置き場。
+- **所有と受け渡し:** `GameScene`/`TitleScene`が`shared_ptr<EffectManager>`を持つ。GameSceneでは`BulletManager`のコンストラクタ引数、`Player`、`BossEnemyDataSetter`/`FloatingEnemyDataSetter`/`WormEnemyDataSetter`/`EnemyFactory`の引数に追加。`TitlePlayer`はコンストラクタ引数。プレイヤーの各ステート(Boost/DefaultRotation/ChargeReady/ChargeShoot)は`Player::GetEffectManager()`、ボスの各ステート(Beam/Summon)は`BossEnemy::GetEffectManager()`経由で取得(ボスのSoundManagerと同じ流儀で、ステートのコンストラクタは変えていない)。弾は`BulletBase`が`m_pEffectManager`を持つ。
+- **デストラクタでの`Stop`は`lock()`して生きていれば止める形にした。** シーン破棄時にマネージャーが先に消えるので、`lock()`の結果を見ずに呼ぶとヌル参照になるため。`BossBeamState`だけは、ボスより先に自分が破棄されるときボス経由でマネージャーを取れない(`m_pBoss.lock()`が空)ので、`Enter()`で自分用に`weak_ptr`を保持している。
+- **挙動が少し変わった箇所(`PlayOneShot`化。再生ハンドルを持つ意味が無かったもの):** 被弾ヒット、ボスの水しぶき/シールド/死亡、ワームの死亡(最後の1個がデストラクタで途中で切られなくなり最後まで再生される)、ボスの召喚(浮遊/ワーム)。浮遊敵の死亡エフェクトは敵に追従させているので従来通りハンドル保持のまま。
+- **副作用: `EffekseerForDXLib.h`の間接include(`<vector>`など)が消えたので、`BossBeamState.h`に`<memory>`/`<vector>`を足した。** MSBuild(Debug x64)でビルド成功、エラー0件。
+- **未確認: 実機での見た目の確認(弾・ブースト・チャージ・ビーム・水しぶき・バレルロール・タイトルのブースト)、リトライ・シーン遷移でエフェクトが残らないか、Releaseビルド。**
+
+### 進捗（2026-10-04・海のリアル化の実験）
+- **目的**: スターフォックス(昼・海)の質感に近づける。ユーザー方針: 空の反射は弱めで水の色主体、キラキラ(細かい法線)と泡の筋で見せる。
+- **現状の原因分析**: 法線を頂点シェーダー(40×40グリッド、1マス約250×750)で計算しPSに補間して渡している→細かい凹凸が出ない。泡は高さだけで純白lerp、スペキュラはPhong1発、フレネル指数20で空反射はほぼ地平線のみ。ValueNoiseは過去に試して「なだらかなコブ」になり不採用。
+- **実験(Claudeが直接編集・ユーザー許可済みの例外)**: C#で生成したタイリング法線マップ(512px)をPSで2枚スクロール合成(UDN)、空反射×0.4、specular power200/strength1.5。**結果: 中央に変な線が入っただけで不採用**。原因の見立て: 夜シーンなので月のスペキュラが power200 で細い筋(glitter path)になった。参考画像は昼で太陽光が前提。法線マップ自体も絵柄が合わない可能性。
+- **実験は全て元に戻した**(ユーザー依頼「実装が終わったら必ず直す」)。WaterPS.hlslのタイムスタンプを更新したので次回VSビルドでWaterPS.psoも再生成される。実験版のコピーはスクラッチパッドのみ(リポジトリには残していない)。
+- **次回**: 夜のシーンで昼の参考画像に寄せること自体の方針確認(ライト/月/空のどこを主役にするか)、法線マップの素材選び、泡の筋パターン。ユーザー主導で設計→Claudeがレビュー。
+
+### 進捗（2026-10-04 続き・海のリアル化の実験と原状復帰）
+- **結論: 実験は全て元に戻した(ソースは実験前と同一、MSBuild Debug x64でビルド成功を確認済み)。** ユーザーが実験6/7の内容を見て自分で作り直す予定。
+- **比較方法**: 参考画像(スターフォックス)と自分のスクリーンショットを、水面を水平線〜下端で5分割した帯ごとに「平均色／輝度／輝度>0.55の画素割合／縞の向き(横方向と縦方向の勾配の比 gx/gy)」で数値比較し、拡大画像も目視した。
+- **原作の数値**: 手前〜中景の平均色 約(0.03,0.27,0.38)・輝度0.22。水平線のすぐ下は輝度0.35・R成分0.18(明るく灰色がかる＝遠景は反射が強い)。輝度>0.55の画素は手前〜中景で約0.8%、遠景で3〜5%。縞の向きは手前0.75(等方的)→遠景0.26(横縞は遠近法による)。
+- **分かったこと**: ①白い網目の正体は既存のコースティクス加算(係数を下げる) ②原作は近景ほぼ反射せず遠景ほど強く反射=Schlick(F0≈0.02) ③波の向きを絞ると手前がリボン状になる(向きは広く散らす) ④点は格子ハッシュだと整列して見える→ValueNoiseの閾値処理による不規則な破片＋低周波の塊マスク、ハッシュは整数演算(座標が大きくても精度が落ちない) ⑤法線は頂点補間だとグリッドの境目が見える→PSで計算 ⑥海メッシュの端が見えると水平線が弧になる→端を霧で空色になじませる ⑦.hlsliはMSBuildの依存に入らない(編集したらhlslも保存し直す)。
+- **実験6**(ユーザーが実機確認): 平均色・遠景の明るさ・点の割合・遠景の縞の向きが原作と数値でほぼ一致。残った差: 遠景が鏡のようになめらか(雲の形が映る水たまり)、遠景のちらつき、大きな白い破片が紙片に見える、遠景の色が青すぎる。**実験7**(波ごとの位相変化率でLOD、スケール不変の遠景ざわつきノイズ、大きな破片を柔らかく、空の反射にティント)はコンパイルのみ確認で実機未確認。
+- **スナップショット**: 実験7のコードはこのPCの`C:\Users\Admin\.claude\projects\c--Users-Admin-Documents-GitHub-NovaWing\memory\water_experiment_2026-10-04\`にあるが、リポジトリには入れていない(別PCには無い)。
+- **教訓**: バックアップからコピーで戻すと更新日時が古いままでMSBuildが再コンパイルせず、古い実験コードのexeが動く(今回は法線マップ読み込みのassertで発覚)。戻したら更新日時を新しくし、ビルドして確認する。
+- **次回**: 雨の2面ステージ作業が本題。海は上の数値と知見を元に、ユーザーが設計→Claudeがレビューの形で再実装(優先度は低め)。
+
+### 次にやること（2026-10-04・海のリアル化を自分で再現する・学校で実施）
+実験(上記)は複雑すぎて再現困難だったため、効果が大きく簡単なものから4段階に分けて**ユーザーが自分で書く**。段階ごとにF5で確認し、スクリーンショットをClaudeに見せてレビューを受ける。LOD・スケール不変ノイズ・共通.hlsli化は**やらない**。
+
+1. **コースティクスを弱める**(WaterPS.hlsl): `finalCol += causticsFinal.rgb` に係数を掛ける。ユーザー案は`* 0.3f`。`float3(...)`のキャストは不要。係数は冒頭の定数群に`caustics_strength`として名前を付ける(他の係数と同じ流儀)。実験では`0.1`で白い網目がほぼ消えた。`0.3`で網目が残るなら下げる。
+2. **水の色を原作に寄せる**: 手前〜中景の平均色が約(0.03,0.27,0.38)・輝度0.22になるように`shallow_color`/`deep_color`を調整(ライティングで約0.9倍になる分を見込んで少し明るめ)。
+3. **フレネルをSchlick風に**: 「真上から見て約2%(F0=0.02)、浅い角度ほど急に強く」。`fresnel_power`は5程度。空の反射の強さも調整して、近景は暗く遠景だけ明るくなるようにする。
+4. **白い点を1層だけ**(1〜3の後に見た目を見て判断): 既存の`ValueNoise`を使い、閾値処理で小さな点を出す。輝度の高い画素が手前〜中景で約1%になる量が目安。
+
+- 確認方法: 原作と数値で比較できる(平均色・水平線側の輝度0.35・点の割合など)。詳細な数値と知見は上の「進捗（2026-10-04 続き）」を参照。
+- 注意: 戻す・差し替えるときは、ビルドが再コンパイルされるよう更新日時に気を付ける(.hlslを保存し直す)。

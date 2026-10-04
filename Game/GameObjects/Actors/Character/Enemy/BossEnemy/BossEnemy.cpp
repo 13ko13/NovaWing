@@ -1,6 +1,4 @@
-﻿#include <EffekseerForDXLib.h>
-
-#include "BossEnemy.h"
+﻿#include "BossEnemy.h"
 #include "Constants/ShaderRegister.h"
 #include "BossIdleState.h"
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
@@ -8,6 +6,7 @@
 #include "Manager/InputManager.h"
 #include "Manager/DebugManager.h"
 #include "Manager/SoundManager.h"
+#include "Manager/EffectManager.h"
 
 namespace
 {
@@ -67,6 +66,7 @@ BossEnemy::BossEnemy(BossEnemyData& data) :
 	data.pBulletManager,data.health),
 	m_animator(m_modelHandle),
 	m_pSoundManager(data.pSoundManager),
+	m_pEffectManager(data.pEffectManager),
 	m_damageCollider(*this),
 	m_shieldCollider(*this),
 	m_beamCollider(*this),
@@ -79,10 +79,6 @@ BossEnemy::BossEnemy(BossEnemyData& data) :
 
 BossEnemy::~BossEnemy()
 {
-	//エフェクトを止める
-	StopEffekseer3DEffect(m_effectPlayHandle);
-	StopEffekseer3DEffect(m_shieldEffectPlayH);
-	StopEffekseer3DEffect(m_deathEffectPlayH);
 }
 
 void BossEnemy::OnInit()
@@ -265,18 +261,11 @@ void BossEnemy::Update()
 		if (m_prevLegPositions[i].y > water_y &&
 			m_currentLegPositions[i].y < water_y)
 		{
-			//水しぶきエフェクトを再生する
-			//Effekseerのエフェクト再生を呼ぶ
-			m_effectPlayHandle = PlayEffekseer3DEffect(
-				ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::Splash)
-			);
-			//エフェクトの位置の調整する
-			SetPosPlayingEffekseer3DEffect(
-				m_effectPlayHandle,
-				m_currentLegPositions[i].x,
-				m_currentLegPositions[i].y,
-				m_currentLegPositions[i].z
-			);
+			//水しぶきエフェクトを脚の位置に再生する
+			const VECTOR& legPos = m_currentLegPositions[i];
+			m_pEffectManager.lock()->PlayOneShot(
+				ResourceLoader::EffectID::Splash,
+				Vector3(legPos.x, legPos.y, legPos.z));
 		}
 	}
 
@@ -336,19 +325,8 @@ void BossEnemy::TakeDamage(int damage)
 		m_animator.Play(death_anim_name.c_str(), false, death_anim_speed);
 
 		//死亡エフェクトを出現させる
-		int effectH = ResourceLoader::GetInstance().GetEffect(
-			ResourceLoader::EffectID::BossDeath
-		);
-		m_deathEffectPlayH = PlayEffekseer3DEffect(effectH);
-
-		//位置をセット
-		Vector3 effectPos = m_pos + death_effect_offset;
-		SetPosPlayingEffekseer3DEffect(
-			m_deathEffectPlayH,
-			effectPos.x,
-			effectPos.y,
-			effectPos.z
-		);
+		m_pEffectManager.lock()->PlayOneShot(
+			ResourceLoader::EffectID::BossDeath, m_pos + death_effect_offset);
 	}
 }
 
@@ -367,18 +345,8 @@ std::vector<std::shared_ptr<SphereShape>> BossEnemy::GetBeamSphereR() const
 void BossEnemy::OnHitInvincibleCol(const Position3& effectPos,const int attackPower)
 {
 	//シールドのエフェクト生成
-	int effectHandle = ResourceLoader::GetInstance().GetEffect(
-		ResourceLoader::EffectID::BossShield
-	);
-	m_shieldEffectPlayH = PlayEffekseer3DEffect(effectHandle);
-
-	//エフェクトの位置をセット
-	SetPosPlayingEffekseer3DEffect(
-		m_shieldEffectPlayH,
-		effectPos.x,
-		effectPos.y,
-		effectPos.z
-	);
+	m_pEffectManager.lock()->PlayOneShot(
+		ResourceLoader::EffectID::BossShield, effectPos);
 
 	//ボスを回復させる
 	//食らったダメージの5分の1回復する

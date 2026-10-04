@@ -6,6 +6,7 @@
 #include "Game/Collision/BulletCollider.h"
 
 class CameraBase;
+class EffectManager;
 class BulletBase : public GameObject
 {
 public:
@@ -15,7 +16,8 @@ public:
 		int attackPower,
 		float radius,
 		std::weak_ptr<CameraBase> pCamera,
-		ColliderTag tag
+		ColliderTag tag,
+		std::weak_ptr<EffectManager> pEffectManager
 	);
 	virtual ~BulletBase();
 
@@ -47,8 +49,8 @@ protected:
 	//球の半径
 	float m_radius = 0.0f;
 
-	//ヒットエフェクト再生ハンドル
-	int m_hitEffectPlayH = -1;
+	//エフェクトのマネージャー
+	std::weak_ptr<EffectManager> m_pEffectManager;
 
 private:
 	//当たり判定インターフェース

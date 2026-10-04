@@ -2,11 +2,13 @@
 #include "Actor.h"
 #include "Manager/ResourceLoader.h"
 
+class EffectManager;
 class TitlePlayer : public Actor
 {
 public:
 	TitlePlayer(ResourceLoader::ModelID modelID,
-		std::weak_ptr<CameraBase> pCamera);
+		std::weak_ptr<CameraBase> pCamera,
+		std::weak_ptr<EffectManager> pEffectManager);
 	~TitlePlayer();
 
 	//初期化処理
@@ -39,5 +41,9 @@ private:
 	//宙返りの時間管理用
 	int m_somersaultFrame = 0;
 
+	//ブーストエフェクトの再生ハンドル
 	int m_boostPlayEffect = -1;
+
+	//エフェクトのマネージャー
+	std::weak_ptr<EffectManager> m_pEffectManager;
 };

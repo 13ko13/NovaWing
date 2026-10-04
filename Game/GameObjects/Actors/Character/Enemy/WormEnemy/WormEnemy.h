@@ -11,6 +11,7 @@ class Player;
 class BulletManager;
 class CameraBase;
 class SoundManager;
+class EffectManager;
 class WormEnemy : public EnemyBase
 {
 public:
@@ -28,7 +29,8 @@ public:
 		const std::weak_ptr<BulletManager> pBulletManager,//バレットマネージャー
 		std::weak_ptr<CameraBase> camera,//カメラ
 		const WormEnemyData& data,//ワームエネミーに必要なデータ
-		std::weak_ptr<SoundManager> pSoundManager
+		std::weak_ptr<SoundManager> pSoundManager,
+		std::weak_ptr<EffectManager> pEffectManager
 	);
 	~WormEnemy();
 
@@ -60,8 +62,6 @@ private:
 	//頭の位置を履歴として持つ
 	std::vector<Vector3> m_headHistory;
 
-	//死亡エフェクトのプレイハンドル
-	int m_deathPlayHandle = -1;
 	//エフェクトを再生するかどうか
 	bool m_isCanPlayEffect = false;
 	//胴体の死亡エフェクトを何回出したか
@@ -76,6 +76,8 @@ private:
 
 	//音のマネージャー
 	std::weak_ptr<SoundManager> m_pSoundManager;
+	//エフェクトのマネージャー
+	std::weak_ptr<EffectManager> m_pEffectManager;
 
 	//当たり判定インターフェース
 	EnemyCollider m_collider;

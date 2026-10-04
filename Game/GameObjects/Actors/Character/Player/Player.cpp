@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <EffekseerForDXLib.h>
 
 #include "Character/Player/Movement/IdleMovementState.h"
 #include "Character/Player/Rotation/DefaultRotationState.h"
@@ -14,6 +13,7 @@
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/InputManager.h"
 #include "Manager/DebugManager.h"
+#include "Manager/EffectManager.h"
 #include "Manager/LightingManager.h"
 #include "Manager/ResourceLoader.h"
 #include "Manager/TargetManager.h"
@@ -99,10 +99,12 @@ Player::Player(
 	std::shared_ptr<BulletManager> bulletManager,
 	ResourceLoader::ModelID modelID,
 	std::weak_ptr<CameraBase> camera,
-	std::weak_ptr<SoundManager> soundManager) :
+	std::weak_ptr<SoundManager> soundManager,
+	std::weak_ptr<EffectManager> effectManager) :
 	Character(modelID, camera),
 	m_pBulletManager(bulletManager),
-	m_pSoundManager(soundManager)
+	m_pSoundManager(soundManager),
+	m_pEffectManager(effectManager)
 {
 	m_pHitCollider = std::make_unique<PlayerCollider>(*this);
 	m_pCounterCollider = std::make_unique<CounterCollider>(*this);
@@ -227,10 +229,12 @@ void Player::Update()
 	//プレイヤーが海すれすれにいたら、羽の位置を基準に
 	//海面に水しぶきのエフェクトを出す
 	//プレイヤーの羽のボーン位置を取得
-	VECTOR leftWingPos = MV1GetFramePosition(m_modelHandle, MV1SearchFrame(
+	VECTOR leftBonePos = MV1GetFramePosition(m_modelHandle, MV1SearchFrame(
 		m_modelHandle, left_wing_bone_name));//左の羽の位置を取得
-	VECTOR rightWingPos = MV1GetFramePosition(m_modelHandle, MV1SearchFrame(
+	VECTOR rightBonePos = MV1GetFramePosition(m_modelHandle, MV1SearchFrame(
 		m_modelHandle, right_wing_bone_name));//右の羽の位置を取得
+	Vector3 leftWingPos = Vector3(leftBonePos.x, leftBonePos.y, leftBonePos.z);
+	Vector3 rightWingPos = Vector3(rightBonePos.x, rightBonePos.y, rightBonePos.z);
 
 	//羽よりもすこし左右にずらす
 	leftWingPos.x -= sea_splash_offset_x;
@@ -397,10 +401,9 @@ void Player::ChangeSpecialState(std::shared_ptr<ISpecialActionState>(newState))
 	newState->Enter();
 }
 
-void Player::UpdateWingSplash(int& splashHandle, const VECTOR& wingPos, ResourceLoader::EffectID effectID)
+void Player::UpdateWingSplash(int& splashHandle, const Vector3& wingPos, ResourceLoader::EffectID effectID)
 {
-	//エフェクトを取得
-	int effectHandle = ResourceLoader::GetInstance().GetEffect(effectID);
+	std::shared_ptr<EffectManager> pEffectManager = m_pEffectManager.lock();
 
 	//羽と海面の距離を計算
 	float distWingToSea = wingPos.y - sea_height;
@@ -408,41 +411,33 @@ void Player::UpdateWingSplash(int& splashHandle, const VECTOR& wingPos, Resource
 	if(distWingToSea < sea_splash_height_threshold)
 	{
 		//既に再生されていれば処理を飛ばす
-		if (splashHandle == -1 || 
-			IsEffekseer3DEffectPlaying(splashHandle) == -1)
+		if (splashHandle == -1 ||
+			!pEffectManager->IsPlaying(splashHandle))
 		{
 			//海面付近にいるので水しぶきのエフェクトを出す
-			splashHandle = PlayEffekseer3DEffect(effectHandle);
+			splashHandle = pEffectManager->Play(effectID, wingPos);
 		}
 		//位置更新
 		//水しぶきの高さのみ海に合わせる
-		SetPosPlayingEffekseer3DEffect(
-			splashHandle,
-			wingPos.x,
-			sea_height,
-			wingPos.z);
+		pEffectManager->SetPos(splashHandle, Vector3(wingPos.x, sea_height, wingPos.z));
 
 		//エフェクトの向きを機体のY軸回転に合わせる。
 		//水面から上がる表現なのでXとZは反映しない。
 		//プレイヤーモデルは逆向きに作られているのでBoostと同じく+DX_PI_Fで補正
-		SetRotationPlayingEffekseer3DEffect(
-			splashHandle,
-			0.0f,
-			GetRotationY() + DX_PI_F,
-			0.0f);
+		pEffectManager->SetRotation(splashHandle, Vector3(0.0f, GetRotationY() + DX_PI_F, 0.0f));
 		//海面との距離を0～1の比率にしてエフェクトに渡す（海面で0、しきい値で1）
 		float heightRate = std::clamp(distWingToSea / sea_splash_height_threshold, 0.0f, 1.0f);
-		SetDynamicInput3DEffect(splashHandle, 0, heightRate);
+		pEffectManager->SetDynamicInput(splashHandle, 0, heightRate);
 		//海面との距離を元にアルファ値を計算してエフェクトに渡す
 		int alpha = static_cast<int>(255.0f * std::clamp((1.0f - heightRate) * sea_splash_fade_scale, 0.0f, 1.0f));
-		SetColorPlayingEffekseer3DEffect(splashHandle, 255, 255, 255, alpha);
+		pEffectManager->SetColor(splashHandle, 255, 255, 255, alpha);
 	}
 	else
 	{
 		//海面付近にいないので水しぶきのエフェクトを止める
 		if (splashHandle != -1)
 		{
-			StopEffekseer3DEffect(splashHandle);
+			pEffectManager->Stop(splashHandle);
 			splashHandle = -1;
 		}
 	}

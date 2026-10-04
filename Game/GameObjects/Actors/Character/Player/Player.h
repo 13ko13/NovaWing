@@ -7,6 +7,7 @@
 #include "Manager/SoundManager.h"
 
 class InputManager;
+class EffectManager;
 class BulletManager;
 class CameraBase;
 class IMovementState;
@@ -24,7 +25,8 @@ public:
 	Player(std::shared_ptr<BulletManager> bulletManager,
 		ResourceLoader::ModelID modelID,
 		std::weak_ptr<CameraBase> camera,
-		std::weak_ptr<SoundManager> soundManager);
+		std::weak_ptr<SoundManager> soundManager,
+		std::weak_ptr<EffectManager> effectManager);
 	~Player();
 
 	void OnInit() override;
@@ -92,6 +94,9 @@ public:
 	//チャージ中エフェクトの再生ハンドルを設定
 	void SetChargingEffectHandle(int handle) { m_chargingEffectH = handle; }
 
+	//エフェクトマネージャーを取得
+	std::weak_ptr<EffectManager> GetEffectManager() const { return m_pEffectManager; }
+
 	//今宙返り中かどうかを返す
 	bool IsSomersault() const;
 
@@ -158,7 +163,7 @@ private:
 
 	//羽のボーンのy座標以外を使用して海面に
 	//水しぶきエフェクトをループ再生させる
-	void UpdateWingSplash(int& splashHandle, const VECTOR& wingPos, ResourceLoader::EffectID effectID);
+	void UpdateWingSplash(int& splashHandle, const Vector3& wingPos, ResourceLoader::EffectID effectID);
 
 	//ステートの更新
 	//テンプレート関数なのでヘッダに実装をかく
@@ -201,6 +206,7 @@ private:
 	//借りてくるだけなのでweak_ptrにする
 	std::weak_ptr<BulletManager> m_pBulletManager;//弾の管理
 	std::weak_ptr<SoundManager> m_pSoundManager;//音の管理
+	std::weak_ptr<EffectManager> m_pEffectManager;//エフェクトの管理
 
 	//プレイヤーの向きが逆向きなので
 	//プレイヤーの初期回転を保存する

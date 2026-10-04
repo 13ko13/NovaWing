@@ -1,8 +1,7 @@
-﻿#include <EffekseerForDXLib.h>
-
-#include "BoostState.h"
+﻿#include "BoostState.h"
 #include "Character/Player/Player.h"
 #include "Manager/SoundManager.h"
+#include "Manager/EffectManager.h"
 
 namespace
 {
@@ -36,8 +35,8 @@ void BoostState::Enter()
 	m_pSoundManager.lock()->Play(SoundManager::SoundType::Boost);
 
 	//ブーストエフェクトを出す
-	int boostEffectH = ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::Boost);
-	m_boostPlayEffect = PlayEffekseer3DEffect(boostEffectH);
+	m_boostPlayEffect = pPlayer->GetEffectManager().lock()->Play(
+		ResourceLoader::EffectID::Boost, pPlayer->GetPos());
 }
 
 void BoostState::Update()
@@ -49,25 +48,19 @@ void BoostState::Update()
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 
 	//プレイヤーより少し後ろの位置にエフェクトを出す
-	VECTOR effectPos = (
-		pPlayer->GetPos() + pPlayer->GetVisualForward() * 
-		boost_effect_offset_pos.z).ToDxLib();
+	Vector3 effectPos = pPlayer->GetPos() +
+		pPlayer->GetVisualForward() * boost_effect_offset_pos.z;
+
+	std::shared_ptr<EffectManager> pEffectManager = pPlayer->GetEffectManager().lock();
 
 	//プレイヤーから回転角を取得してエフェクトの角度を変える
-	SetRotationPlayingEffekseer3DEffect(
+	pEffectManager->SetRotation(
 		m_boostPlayEffect,
-		pPlayer->GetRotationX(),
-		pPlayer->GetRotationY() + DX_PI_F,
-		0.0f
+		Vector3(pPlayer->GetRotationX(), pPlayer->GetRotationY() + DX_PI_F, 0.0f)
 	);
 
 	//エフェクトの位置
-	SetPosPlayingEffekseer3DEffect(
-		m_boostPlayEffect,
-		effectPos.x,
-		effectPos.y,
-		effectPos.z
-	);
+	pEffectManager->SetPos(m_boostPlayEffect, effectPos);
 }
 
 void BoostState::Exit()
@@ -79,7 +72,7 @@ void BoostState::Exit()
 	//ブースト音を止める
 	m_pSoundManager.lock()->FadeOut(SoundManager::SoundType::Boost, boost_fade_out_time);
 	//エフェクトも止める
-	StopEffekseer3DEffect(m_boostPlayEffect);
+	pPlayer->GetEffectManager().lock()->Stop(m_boostPlayEffect);
 }
 
 float BoostState::GetSpeed() const

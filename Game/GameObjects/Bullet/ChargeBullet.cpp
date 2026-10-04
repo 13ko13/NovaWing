@@ -1,7 +1,7 @@
-﻿#include <EffekseerForDXLib.h>
-#include <algorithm>
+﻿#include <algorithm>
 
 #include "ChargeBullet.h"
+#include "Manager/EffectManager.h"
 
 namespace
 {
@@ -23,27 +23,26 @@ ChargeBullet::ChargeBullet(
 	const Vector3& vel,
 	int attackPower,
 	std::weak_ptr<GameObject> pTarget,
-	std::weak_ptr<CameraBase> pCamera):
-	BulletBase(pos,vel,attackPower,radius,pCamera,ColliderTag::PlayerBullet),
+	std::weak_ptr<CameraBase> pCamera,
+	std::weak_ptr<EffectManager> pEffectManager):
+	BulletBase(pos,vel,attackPower,radius,pCamera,ColliderTag::PlayerBullet,pEffectManager),
 	m_pTarget(pTarget)
 {
 	m_speed = vel.Length();
 
-	//Effekseerのエフェクト再生を呼ぶ
-	m_effectPlayHandle = PlayEffekseer3DEffect(
-		ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::PlayerChargeBullet)
-	);
-
-	//再生直後に正しい位置へ即座にセットする(1フレーム目のワープ軌跡を防ぐ)
-	SetPosPlayingEffekseer3DEffect(
-		m_effectPlayHandle, pos.x, pos.y, pos.z
-	);
+	//エフェクトの再生を依頼する
+	m_effectPlayHandle = m_pEffectManager.lock()->Play(
+		ResourceLoader::EffectID::PlayerChargeBullet, pos);
 }
 
 ChargeBullet::~ChargeBullet()
 {
 	//エフェクトを止める
-	StopEffekseer3DEffect(m_effectPlayHandle);
+	//(シーン終了でマネージャーが先に消えている場合は止める必要がない)
+	if (std::shared_ptr<EffectManager> pEffectManager = m_pEffectManager.lock())
+	{
+		pEffectManager->Stop(m_effectPlayHandle);
+	}
 }
 
 void ChargeBullet::Update()
@@ -82,12 +81,11 @@ void ChargeBullet::Update()
 	}
 
 	//エフェクトの位置の調整する
-	SetPosPlayingEffekseer3DEffect(
-		m_effectPlayHandle, GetPos().x, GetPos().y, GetPos().z
-	);
+	std::shared_ptr<EffectManager> pEffectManager = m_pEffectManager.lock();
+	pEffectManager->SetPos(m_effectPlayHandle, GetPos());
 
 	//エフェクトに分身の集まり具合を渡す
-	SetDynamicInput3DEffect(m_effectPlayHandle, gather_input_index, gatherRate);
+	pEffectManager->SetDynamicInput(m_effectPlayHandle, gather_input_index, gatherRate);
 }
 
 void ChargeBullet::Draw()
@@ -102,7 +100,7 @@ void ChargeBullet::OnHitEnemy()
 	BulletBase::OnHitEnemy();
 
 	//エフェクトを止める
-	StopEffekseer3DEffect(m_effectPlayHandle);
+	m_pEffectManager.lock()->Stop(m_effectPlayHandle);
 
 	//消す処理
 	OnDead();

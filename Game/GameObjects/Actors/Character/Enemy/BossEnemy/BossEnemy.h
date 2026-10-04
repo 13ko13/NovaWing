@@ -13,6 +13,7 @@ class BulletManager;
 class IBossEnemyState;
 class EnemyFactory;
 class SoundManager;
+class EffectManager;
 class BossEnemy : public EnemyBase
 {
 public:
@@ -24,6 +25,7 @@ public:
 		std::weak_ptr<BulletManager> pBulletManager;
 		std::weak_ptr<CameraBase> pCamera;
 		std::weak_ptr<SoundManager> pSoundManager;
+		std::weak_ptr<EffectManager> pEffectManager;
 		Vector3 pos;
 		int health = 0;
 	};
@@ -80,6 +82,9 @@ public:
 	//サウンドマネージャー取得
 	std::weak_ptr<SoundManager> GetSoundManager() const { return m_pSoundManager; }
 
+	//エフェクトマネージャー取得
+	std::weak_ptr<EffectManager> GetEffectManager() const { return m_pEffectManager; }
+
 private:
 	//敵の描画(シェーダ適応も含めた)
 	void DrawEnemy();
@@ -106,15 +111,14 @@ private:
 	//モデル用のアニメーター
 	ModelAnimator m_animator;
 
-	//effekseerの再生中のエフェクトのハンドル
-	int m_effectPlayHandle = -1;
-
 	//ステート
 	std::shared_ptr<IBossEnemyState> m_pState;
 	//敵生産工場
 	std::weak_ptr<EnemyFactory> m_pEnemyFactory;
 	//音のマネージャー
 	std::weak_ptr<SoundManager> m_pSoundManager;
+	//エフェクトのマネージャー
+	std::weak_ptr<EffectManager> m_pEffectManager;
 
 	//プレイヤーの弾が当たった時に、無敵判定する部分
 	std::shared_ptr<SphereShape> m_invincibleHitCol = std::make_shared<SphereShape>();
@@ -126,12 +130,6 @@ private:
 	bool m_isAppear = false;
 	//一番最初の着地時のみに使用するフラグ
 	bool m_isFirstLanding = false;
-
-	//シールドエフェクトの再生ハンドル
-	int m_shieldEffectPlayH = -1;
-
-	//死亡エフェクト再生ハンドル
-	int m_deathEffectPlayH = -1;
 
 	//死亡待機状態をどのぐらい続けるかを計測
 	int m_dyingFrame = 0;

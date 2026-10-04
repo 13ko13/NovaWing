@@ -24,11 +24,5 @@ private:
 	//敵生産工場
 	std::weak_ptr<EnemyFactory> m_pEnemyFactory;
 
-	//浮遊敵召喚時エフェクト再生ハンドル
-	int m_floatingEffRightPlayH = -1;
-	int m_floatingEffLeftPlayH = -1;
-	//ワーム召喚時エフェクト再生ハンドル
-	int m_wormEffRightPlayH = -1;
-	int m_wormEffLeftPlayH = -1;
 };
 

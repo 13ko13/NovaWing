@@ -1,10 +1,13 @@
 ﻿#pragma once
+#include <memory>
+#include <vector>
 #include "IBossEnemyState.h"
 #include "Utility/Vector3.h"
 #include "Game/Collision/SphereShape.h"
 
 class Player;
 class BossEnemy;
+class EffectManager;
 class BossBeamState : public IBossEnemyState
 {
 public:
@@ -61,6 +64,10 @@ private:
 	void FadeOutHitBeam(int& playH, int& fadeFrame);
 
 private:
+	//エフェクトのマネージャー
+	//ボスより先にこのステートが破棄されるときにボス経由では取得できないので自分で持つ
+	std::weak_ptr<EffectManager> m_pEffectManager;
+
 	//ビームのエフェクト再生ハンドル
 	int m_rightBeamEffectPlayH = -1;
 	int m_leftBeamEffectPlayH = -1;

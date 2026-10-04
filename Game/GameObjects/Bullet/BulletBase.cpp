@@ -1,9 +1,8 @@
-﻿#include <EffekseerForDXLib.h>
-
-#include "BulletBase.h"
+﻿#include "BulletBase.h"
 #include "Manager/LightingManager.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/DebugManager.h"
+#include "Manager/EffectManager.h"
 
 namespace
 {
@@ -19,11 +18,13 @@ BulletBase::BulletBase(
 	int attackPower,
 	float radius,
 	std::weak_ptr<CameraBase> pCamera,
-	ColliderTag tag):
+	ColliderTag tag,
+	std::weak_ptr<EffectManager> pEffectManager):
 	m_attackPower(attackPower),
 	m_lifeTime(0),
 	m_radius(radius),
 	m_pCamera(pCamera),
+	m_pEffectManager(pEffectManager),
 	m_collider(*this, tag)
 {
 	//位置を設定
@@ -80,11 +81,5 @@ void BulletBase::Draw()
 void BulletBase::OnHitEnemy()
 {
 	//ヒットエフェクトは共通なのでここで行う
-	int hitEffectHandle = ResourceLoader::GetInstance().GetEffect(
-		ResourceLoader::EffectID::HitEffect
-	);
-	m_hitEffectPlayH = PlayEffekseer3DEffect(hitEffectHandle);
-	
-	//位置をセット
-	SetPosPlayingEffekseer3DEffect(m_hitEffectPlayH, m_pos.x, m_pos.y, m_pos.z);
+	m_pEffectManager.lock()->PlayOneShot(ResourceLoader::EffectID::HitEffect, m_pos);
 }

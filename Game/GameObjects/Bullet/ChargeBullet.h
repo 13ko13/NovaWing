@@ -10,7 +10,8 @@ public:
 		const Vector3& vel,
 		int attackPower,
 		std::weak_ptr<GameObject> pTarget,
-		std::weak_ptr<CameraBase> pCamera);
+		std::weak_ptr<CameraBase> pCamera,
+		std::weak_ptr<EffectManager> pEffectManager);
 	~ChargeBullet();
 
 	void Update() override;//更新処理

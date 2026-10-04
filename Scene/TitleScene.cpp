@@ -1,7 +1,6 @@
 ﻿#include <algorithm>
 #include <memory>
 #include <cmath>
-#include <EffekseerForDXLib.h>
 
 #include "TitleScene.h"
 #include "SceneID.h"
@@ -24,6 +23,7 @@
 #include "Game/BackGround/SkyBox.h"
 #include "Manager/LightingManager.h"
 #include "Manager/SoundManager.h"
+#include "Manager/EffectManager.h"
 
 namespace
 {
@@ -123,10 +123,14 @@ void TitleScene::Init()
 	//ゲームオブジェクトマネージャーの初期化
 	GameObjectManager::GetInstance().ClearAll();
 
+	//タイトル用のプレイヤーが使うので先にエフェクトマネージャーを生成
+	m_pEffectManager = std::make_shared<EffectManager>();
+
 	//タイトル用のプレイヤーを生成
 	m_pPlayer = std::make_shared<TitlePlayer>(
 		ResourceLoader::ModelID::Player,
-		std::weak_ptr<CameraBase>());//まだカメラは生成されていないので空のカメラを渡す
+		std::weak_ptr<CameraBase>(),//まだカメラは生成されていないので空のカメラを渡す
+		m_pEffectManager);
 	//ゲームオブジェクトマネージャーに登録
 	m_pPlayer->Init();
 
@@ -186,9 +190,8 @@ void TitleScene::Update()
 	//サウンドマネージャーの更新
 	m_pSoundManager->Update();
 
-	//Effekseerのエフェクト更新
-	Effekseer_Sync3DSetting();
-	UpdateEffekseer3D();
+	//エフェクトマネージャーの更新
+	m_pEffectManager->Update();
 	
 	switch (m_phase)
 	{
@@ -376,8 +379,8 @@ void TitleScene::Draw()
 	//UIの見た目の大きさをDebug/Releaseで揃えるためのスケール
 	float uiScale = Application::GetInstance().GetUIScale();
 
-	//Effekseerのエフェクト描画
-	DrawEffekseer3D();
+	//エフェクトの描画
+	m_pEffectManager->Draw();
 
 
 	//ロゴ演出フェーズになってからロゴを描画

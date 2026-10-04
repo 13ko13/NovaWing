@@ -20,7 +20,8 @@ std::vector<std::shared_ptr<EnemyBase>> WormEnemyDataSetter::CreateEnemy(
     std::weak_ptr<Player> pPlayer,
      std::weak_ptr<CameraBase> pCamera,
       std::weak_ptr<BulletManager> pBulletManager,
-      std::weak_ptr<SoundManager> pSoundManager)
+      std::weak_ptr<SoundManager> pSoundManager,
+      std::weak_ptr<EffectManager> pEffectManager)
 {
     //最終的な返り値
     std::vector<std::shared_ptr<EnemyBase>> pEnemies;
@@ -69,7 +70,8 @@ std::vector<std::shared_ptr<EnemyBase>> WormEnemyDataSetter::CreateEnemy(
             pBulletManager,//バレットマネージャー
             pCamera,//カメラ
             wormData,
-            pSoundManager
+            pSoundManager,
+            pEffectManager
         ));
     }
 

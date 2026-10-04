@@ -1,5 +1,5 @@
-﻿#include <EffekseerForDXLib.h>
-#include "ReflectedBullet.h"
+﻿#include "ReflectedBullet.h"
+#include "Manager/EffectManager.h"
 
 namespace
 {
@@ -7,29 +7,27 @@ namespace
 	constexpr float hit_col_radius = 32.0f;
 }
 
-ReflectedBullet::ReflectedBullet(const ReflectBulletData& data) :
+ReflectedBullet::ReflectedBullet(
+	const ReflectBulletData& data, std::weak_ptr<EffectManager> pEffectManager) :
 	BulletBase(data.pos,data.vel,data.attackPower,
-		hit_col_radius,data.pCamera,ColliderTag::PlayerBullet),
+		hit_col_radius,data.pCamera,ColliderTag::PlayerBullet,pEffectManager),
 	m_pTarget(data.pTarget),
 	m_homingStrength(data.homingStrength)
 {
 	m_speed = data.vel.Length();
 
-	//Effekseerのエフェクト再生を呼ぶ(見た目は敵弾のまま)
-	m_effectPlayH = PlayEffekseer3DEffect(
-		ResourceLoader::GetInstance().GetEffect(ResourceLoader::EffectID::EnemyBullet)
-	);
-
-	//再生直後に正しい位置へ即座にセットする(1フレーム目のワープ軌跡を防ぐ)
-	SetPosPlayingEffekseer3DEffect(
-		m_effectPlayH, data.pos.x, data.pos.y, data.pos.z
-	);
+	//エフェクトの再生を依頼する(見た目は敵弾のまま)
+	m_effectPlayH = m_pEffectManager.lock()->Play(ResourceLoader::EffectID::EnemyBullet, data.pos);
 }
 
 ReflectedBullet::~ReflectedBullet()
 {
 	//エフェクトを止める
-	StopEffekseer3DEffect(m_effectPlayH);
+	//(シーン終了でマネージャーが先に消えている場合は止める必要がない)
+	if (std::shared_ptr<EffectManager> pEffectManager = m_pEffectManager.lock())
+	{
+		pEffectManager->Stop(m_effectPlayH);
+	}
 }
 
 void ReflectedBullet::Update()
@@ -54,9 +52,7 @@ void ReflectedBullet::Update()
 	}
 
 	//エフェクトの位置の調整する
-	SetPosPlayingEffekseer3DEffect(
-		m_effectPlayH, GetPos().x, GetPos().y, GetPos().z
-	);
+	m_pEffectManager.lock()->SetPos(m_effectPlayH, GetPos());
 }
 
 void ReflectedBullet::Draw()
@@ -71,7 +67,7 @@ void ReflectedBullet::OnHitEnemy()
 	BulletBase::OnHitEnemy();
 
 	//エフェクトを止める
-	StopEffekseer3DEffect(m_effectPlayH);
+	m_pEffectManager.lock()->Stop(m_effectPlayH);
 
 	//消す処理
 	OnDead();

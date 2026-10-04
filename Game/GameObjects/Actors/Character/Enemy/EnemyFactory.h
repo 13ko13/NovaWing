@@ -10,6 +10,7 @@ class EnemyBase;
 class TargetManager;
 class CollisionManager;
 class SoundManager;
+class EffectManager;
 class EnemyFactory
 {
 public:
@@ -18,7 +19,8 @@ public:
 		std::weak_ptr<CameraBase> pCamera,
 		std::weak_ptr<TargetManager> pTargetManager,
 		std::weak_ptr<CollisionManager> pCollisionManager,
-		std::weak_ptr<SoundManager> pSoundManager
+		std::weak_ptr<SoundManager> pSoundManager,
+		std::weak_ptr<EffectManager> pEffectManager
 	);
 
 	~EnemyFactory();
@@ -44,4 +46,5 @@ private:
 	std::weak_ptr<TargetManager> m_pTargetManager;
 	std::weak_ptr<CollisionManager> m_pCollisionManager;
 	std::weak_ptr<SoundManager> m_pSoundManager;
+	std::weak_ptr<EffectManager> m_pEffectManager;
 };

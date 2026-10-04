@@ -57,6 +57,9 @@ public:
 	/// <returns>フェードマネージャー</returns>
 	const Fade GetFade() const { return m_fade; }
 
+	//ChangeScene無限ループを避けるために直接シーン遷移する関数を作る
+	void ChangeSceneDirect(std::shared_ptr<Scene> scene, float fadeFrame);
+
 private:
 	//スタックに積まれているシーンを管理
 	//一番最後に積まれたシーンのUpdateのみ実行される

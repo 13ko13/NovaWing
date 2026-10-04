@@ -7,7 +7,8 @@
 #include "Game/GameObjects/Camera/CameraBase.h"
 
 
-BulletManager::BulletManager()
+BulletManager::BulletManager(std::weak_ptr<EffectManager> pEffectManager) :
+	m_pEffectManager(pEffectManager)
 {
 }
 
@@ -44,7 +45,7 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 	{
 		//インスタンスを作成
 		std::shared_ptr<PlayerBullet> pBullet =
-			std::make_shared<PlayerBullet>(pos, vel, attackPower, pCamera);
+			std::make_shared<PlayerBullet>(pos, vel, attackPower, pCamera, m_pEffectManager);
 
 		//初期化
 		pBullet->Init();
@@ -60,7 +61,8 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 		//敵の弾も同様に作成
 		//インスタンスを作成
 		std::shared_ptr<EnemyBullet> pBullet =
-			std::make_shared<EnemyBullet>(pos, vel, attackPower, pCamera,pTarget.lock());
+			std::make_shared<EnemyBullet>(
+				pos, vel, attackPower, pCamera, pTarget.lock(), m_pEffectManager);
 
 		//初期化
 		pBullet->Init();
@@ -75,7 +77,8 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 	{
 		//チャージ弾はターゲットを受け取る必要がある
 		std::shared_ptr<ChargeBullet> pBullet =
-			std::make_shared<ChargeBullet>(pos, vel, attackPower, pTarget, pCamera);
+			std::make_shared<ChargeBullet>(
+				pos, vel, attackPower, pTarget, pCamera, m_pEffectManager);
 
 		///初期化
 		pBullet->Init();
@@ -94,7 +97,7 @@ void BulletManager::CreateReflectedBullet(const ReflectedBullet::ReflectBulletDa
 	//インスタンスを作成
 	//見た目は敵の弾のままだが、扱いはプレイヤー側の弾とする
 	std::shared_ptr<ReflectedBullet> pBullet =
-		std::make_shared<ReflectedBullet>(data);
+		std::make_shared<ReflectedBullet>(data, m_pEffectManager);
 
 	//初期化
 	pBullet->Init();
