@@ -17,8 +17,8 @@ namespace
 		{ ResourceLoader::GraphicID::PlayerEmissionMap, player_emission_map_path },//エミッションマップ
 
 		//浮遊敵
-		{ ResourceLoader::GraphicID::EnemyNormalMap, enemy_normal_map_path },//法線マップ
-		{ ResourceLoader::GraphicID::EnemyEmissionMap, enemy_emission_map_path },//エミッションマップ
+		{ ResourceLoader::GraphicID::FloatingNormalMap, floating_normal_map_path },//法線マップ
+		{ ResourceLoader::GraphicID::FloatingEmissionMap, floating_emission_map_path },//エミッションマップ
 
 		//ワーム
 		{ ResourceLoader::GraphicID::WormHeadNormalMap, worm_head_normal_map_path },//頭の法線マップ
@@ -138,7 +138,7 @@ namespace
 		//浮遊敵・ワームエネミー
 		{ ResourceLoader::SoundID::EnemyDeath, enemy_death_se_path },//共通の死亡音
 		{ ResourceLoader::SoundID::EnemyShoot, enemy_shoot_se_path },//共通の弾発射音
-		{ ResourceLoader::SoundID::EnemyBoot, enemy_boot_se_path },//浮遊敵がactiveになるときの音
+		{ ResourceLoader::SoundID::FloatingBoot, floating_boot_se_path },//浮遊敵がactiveになるときの音
 
 		//BGM
 		{ ResourceLoader::SoundID::GameBGM, game_bgm_path },//ゲームBGM
@@ -164,6 +164,7 @@ namespace
 		//プレイヤー
 		{ ResourceLoader::EffectID::PlayerBullet, { player_bullet_effect_path, player_bullet_effect_scale } },//弾
 		{ ResourceLoader::EffectID::PlayerChargeBullet, { player_charge_bullet_effect_path, player_charge_bullet_effect_scale } },//チャージ弾
+		{ ResourceLoader::EffectID::ChargeExplosion, { charge_explosion_effect_path, charge_explosion_effect_scale } },//チャージ弾の着弾爆発
 		{ ResourceLoader::EffectID::Charging, { charging_effect_path, charging_effect_scale } },//チャージ中
 		{ ResourceLoader::EffectID::Boost, { boost_effect_path, boost_effect_scale } },//ブースト
 		{ ResourceLoader::EffectID::LeftWingSplash, { left_wing_splash_effect_path, left_wing_splash_effect_scale } },//左羽の水しぶき
@@ -437,7 +438,7 @@ void ResourceLoader::InitSceneResources()
         GraphicID::SkyBoxRight, GraphicID::SkyBoxUp, GraphicID::SkyBoxBottom,
         GraphicID::Caustics, GraphicID::RockNorm, GraphicID::DissolveNoise,
         GraphicID::PlayerNormalMap, GraphicID::PlayerMetalicMap, GraphicID::PlayerEmissionMap,
-        GraphicID::EnemyNormalMap, GraphicID::EnemyEmissionMap,
+        GraphicID::FloatingNormalMap, GraphicID::FloatingEmissionMap,
         GraphicID::WormHeadNormalMap, GraphicID::WormHeadMetalicMap, GraphicID::WormHeadEmissionMap,
         GraphicID::WormBodyDiffuseMap, GraphicID::BossNormal, GraphicID::BossEmission,
         GraphicID::NormalReticle, GraphicID::ChargeReticle,
@@ -450,7 +451,7 @@ void ResourceLoader::InitSceneResources()
         GraphicID::BackTitle, GraphicID::BackTitleOnCursor
     };
     game.effects = {
-        EffectID::PlayerBullet, EffectID::PlayerChargeBullet, EffectID::Charging,
+        EffectID::PlayerBullet, EffectID::PlayerChargeBullet, EffectID::ChargeExplosion, EffectID::Charging,
         EffectID::EnemyBullet, EffectID::HitEffect, EffectID::Boost,
         EffectID::LeftWingSplash, EffectID::RightWingSplash,
         EffectID::LeftBarrelRoll, EffectID::RightBarrelRoll,
@@ -465,7 +466,7 @@ void ResourceLoader::InitSceneResources()
         SoundID::NormalShoot, SoundID::Brake, SoundID::Boost,
         SoundID::BossMove, SoundID::BossDeath, SoundID::BossDamage, SoundID::BossRecovery,
         SoundID::BossBeam, SoundID::BossSummon, SoundID::EnemyShoot,
-        SoundID::EnemyBoot, SoundID::EnemyDeath, SoundID::OnCursor
+        SoundID::FloatingBoot, SoundID::EnemyDeath, SoundID::OnCursor
     };
     m_sceneResources[SceneID::Game] = game;
 
@@ -717,6 +718,11 @@ void ResourceLoader::KeepEffect()
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::PlayerChargeBullet] = handle;
 
+	//チャージ弾の着弾爆発エフェクト
+	handle = LoadEffekseerEffect(charge_explosion_effect_path, charge_explosion_effect_scale);
+	assert(handle >= 0);
+	m_effectHandles[ResourceLoader::EffectID::ChargeExplosion] = handle;
+
 	//プレイヤーのチャージ中エフェクト
 	handle = LoadEffekseerEffect(charging_effect_path, charging_effect_scale);
 	assert(handle >= 0);
@@ -886,9 +892,9 @@ void ResourceLoader::KeepSound()
 	assert(handle >= 0);
 	m_soundHandles[ResourceLoader::SoundID::EnemyShoot] = handle;
 	//浮遊敵がactiveになるときの音
-	handle = LoadSoundMem(enemy_boot_se_path);
+	handle = LoadSoundMem(floating_boot_se_path);
 	assert(handle >= 0);
-	m_soundHandles[ResourceLoader::SoundID::EnemyBoot] = handle;
+	m_soundHandles[ResourceLoader::SoundID::FloatingBoot] = handle;
 	//ゲームBGM
 	handle = LoadSoundMem(game_bgm_path);
 	assert(handle >= 0);

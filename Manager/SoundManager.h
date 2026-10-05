@@ -41,7 +41,7 @@ public:
 		EnemyShoot,//弾発射音
 
 		//浮遊敵
-		EnemyBoot,//activeになるときの音
+		FloatingBoot,//activeになるときの音
 
 		//BGM
 		GameBGM,//ゲームBGM

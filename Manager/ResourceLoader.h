@@ -31,8 +31,8 @@ public:
 		PlayerMetalicMap,//プレイヤーのメタリックマップ
 		PlayerEmissionMap,//プレイヤーのエミッションマップ
 
-		EnemyNormalMap,//敵の法線マップ
-		EnemyEmissionMap,//敵のエミッションマップ
+		FloatingNormalMap,//浮遊敵の法線マップ
+		FloatingEmissionMap,//浮遊敵のエミッションマップ
 
 		WormHeadNormalMap,//ワームの頭の法線マップ
 		WormHeadMetalicMap,//ワームの頭のメタリックマップ
@@ -101,6 +101,7 @@ public:
 		WormDeath,//ワームの死亡エフェクト
 		FloatingDeath,//浮遊敵の死亡エフェクト
 		PlayerChargeBullet,//プレイヤーのチャージ弾エフェクト
+		ChargeExplosion,//チャージ弾の着弾爆発エフェクト
 		Charging,//プレイヤーのチャージ中のエフェクト
 		EnemyBullet,//エネミーの弾エフェクト
 		Splash,//水しぶきエフェクト
@@ -152,7 +153,7 @@ public:
 		EnemyShoot,//弾発射音
 
 		//浮遊敵
-		EnemyBoot,//activeになるときの音
+		FloatingBoot,//activeになるときの音
 
 		//BGM
 		GameBGM,//ゲームBGM

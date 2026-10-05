@@ -52,7 +52,7 @@ namespace
 	//浮遊敵・ワームエネミー共通の弾発射音
 	constexpr int enemy_shoot_volume = 70;
 	//浮遊敵がactiveになるときの音
-	constexpr int enemy_boot_volume = 125;
+	constexpr int floating_boot_volume = 125;
 
 	//ゲームBGM
 	constexpr int game_bgm_volume = 150;
@@ -183,9 +183,9 @@ void SoundManager::Init()
 		ResourceLoader::SoundID::EnemyShoot,
 		true, enemy_shoot_volume, false);
 	//浮遊敵がactiveになるときの音
-	InitData(SoundType::EnemyBoot,
-		ResourceLoader::SoundID::EnemyBoot,
-		true, enemy_boot_volume, false);
+	InitData(SoundType::FloatingBoot,
+		ResourceLoader::SoundID::FloatingBoot,
+		true, floating_boot_volume, false);
 
 	//ゲームBGM(ループ)
 	InitData(SoundType::GameBGM,
