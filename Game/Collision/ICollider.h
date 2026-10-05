@@ -10,7 +10,7 @@
 enum class ColliderTag
 {
 	Player,//プレイヤー
-	Enemy,//敵(接触してもダメージのない敵)
+	Floating,//浮遊敵(接触してもダメージのない敵)
 	Worm,//ワームエネミー(接触するとプレイヤーにダメージ)
 	BossDamage,//ボスのダメージ判定
 	BossShield,//ボスの無敵判定(弾を弾く)
@@ -21,6 +21,8 @@ enum class ColliderTag
 	Counter,//カウンター
 	BossBeamTip,//ボスのビームの先端(カウンターで反射するため)
 	BossBeamReflect,//ボスのビームの反射後の判定(ボスにダメージを与えるため)
+	ChargeBullet,//チャージショット本体
+	ChargeExplosion,//チャージショットで発生する爆発。雑魚しかダメージ受けない
 };
 
 /// <summary>

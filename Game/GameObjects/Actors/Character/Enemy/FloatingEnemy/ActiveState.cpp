@@ -39,7 +39,7 @@ ActiveState::~ActiveState()
 void ActiveState::Enter()
 {
 	//activeになった音を鳴らす
-	m_pEnemy.lock()->GetSoundManager().lock()->Play(SoundManager::SoundType::EnemyBoot);
+	m_pEnemy.lock()->GetSoundManager().lock()->Play(SoundManager::SoundType::FloatingBoot);
 }
 
 void ActiveState::Update()

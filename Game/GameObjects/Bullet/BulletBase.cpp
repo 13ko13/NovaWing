@@ -78,7 +78,7 @@ void BulletBase::Draw()
 #endif
 }
 
-void BulletBase::OnHitEnemy()
+void BulletBase::OnHitEnemy(ColliderTag hitTag)
 {
 	//ヒットエフェクトは共通なのでここで行う
 	m_pEffectManager.lock()->PlayOneShot(ResourceLoader::EffectID::HitEffect, m_pos);

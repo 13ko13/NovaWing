@@ -30,7 +30,7 @@ FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 	m_colSphere(std::make_shared<SphereShape>(pos, 0.0f)),
 	m_pSoundManager(pSoundManager),
 	m_pEffectManager(pEffectManager),
-	m_collider(*this, ColliderTag::Enemy)
+	m_collider(*this, ColliderTag::Floating)
 {
 	//位置を反映
 	SetPos(pos);
@@ -141,10 +141,10 @@ void FloatingEnemy::DrawEnemy()
 	const ResourceLoader& resourceLoader = ResourceLoader::GetInstance();
 	//法線マップ取得
 	const int normGraphH = resourceLoader.GetGraphic(
-		ResourceLoader::GraphicID::EnemyNormalMap);
+		ResourceLoader::GraphicID::FloatingNormalMap);
 	//エミッションマップを取得
 	const int emissionGraphH = resourceLoader.GetGraphic(
-		ResourceLoader::GraphicID::EnemyEmissionMap);
+		ResourceLoader::GraphicID::FloatingEmissionMap);
 	//ディゾルブ用ノイズ
     int noiseHandle = ResourceLoader::GetInstance().GetGraphic(
         ResourceLoader::GraphicID::DissolveNoise

@@ -33,7 +33,10 @@ public:
 	const int GetAttackPower() const { return m_attackPower; }
 
 	//相手に弾が当たった時の処理
-	virtual void OnHitEnemy();
+	virtual void OnHitEnemy(ColliderTag hitTag);
+
+	//まだ何かに当たることができるか
+	virtual bool CanHit() const { return !IsDead(); }
 
 protected:
 	//当たり判定用の球
