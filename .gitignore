@@ -408,3 +408,12 @@ FodyWeavers.xsd
 
 # Claude Code local settings
 .claude/settings.local.json
+# Unity (StageEditor)
+StageEditor/[Ll]ibrary/
+StageEditor/[Tt]emp/
+StageEditor/[Oo]bj/
+StageEditor/[Ll]ogs/
+StageEditor/[Uu]ser[Ss]ettings/
+StageEditor/.vs/
+StageEditor/*.csproj
+StageEditor/*.sln
