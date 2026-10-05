@@ -26,5 +26,7 @@ private:
 	int m_chargingPlayEffectH = -1;
 	//エフェクトの大きさを変更するため保持しておく
 	Vector3 m_effectScale;
+	//エフェクトをChargeReadyStateに引き継いだか(trueならExitで止めない)
+	bool m_isEffectHandedOver = false;
 };
 
