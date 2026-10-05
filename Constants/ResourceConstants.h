@@ -19,8 +19,8 @@ namespace
 	constexpr const wchar_t* player_metalic_map_path = L"Data/Model/Player.fbm/StarSparrow_MetallicSmoothness.png";
 	constexpr const wchar_t* player_emission_map_path = L"Data/Model/Player.fbm/StarSparrow_Emission.png";
 	//浮遊敵
-	constexpr const wchar_t* enemy_normal_map_path = L"Data/Model/Drone.fbm/Drone_NormalMap.png";
-	constexpr const wchar_t* enemy_emission_map_path = L"Data/Model/Drone.fbm/Drone_Emission.png";
+	constexpr const wchar_t* floating_normal_map_path = L"Data/Model/Drone.fbm/Drone_NormalMap.png";
+	constexpr const wchar_t* floating_emission_map_path = L"Data/Model/Drone.fbm/Drone_Emission.png";
 	//ワーム
 	constexpr const wchar_t* worm_head_normal_map_path = L"Data/Model/Worm_fix.fbm/Worm_Normal.png";
 	constexpr const wchar_t* worm_head_metalic_map_path = L"Data/Model/Worm_fix.fbm/Worm_Metallic.png";
@@ -103,6 +103,7 @@ namespace
 	constexpr const wchar_t* worm_death_effect_path = L"Data/Effect/EnemyDeath/EnemyDeath.efk";
 	constexpr const wchar_t* floating_death_effect_path = L"Data/Effect/EnemyDeath/EnemyDeath.efk";
 	constexpr const wchar_t* player_charge_bullet_effect_path = L"Data/Effect/PlayerChargeBullet/PlayerChargeBullet.efk";
+	constexpr const wchar_t* charge_explosion_effect_path = L"Data/Effect/ChargeExplosion/ChargeExplosion.efk";
 	constexpr const wchar_t* charging_effect_path = L"Data/Effect/Charging/Charging.efk";
 	constexpr const wchar_t* enemy_bullet_effect_path = L"Data/Effect/EnemyBullet/EnemyBullet.efk";
 	//水しぶき
@@ -141,6 +142,8 @@ namespace
 	constexpr float worm_death_effect_scale = 1.0f;
 	constexpr float floating_death_effect_scale = 1.5f;
 	constexpr float player_charge_bullet_effect_scale = 1.0f;
+	//1.0で外周の半径が400(爆発の判定半径÷400にする)
+	constexpr float charge_explosion_effect_scale = 1.75f;
 	constexpr float charging_effect_scale = 1.0f;
 	constexpr float enemy_bullet_effect_scale = 1.5f;
 	constexpr float splash_effect_scale = 3.0f;
@@ -220,7 +223,7 @@ namespace
 	//浮遊敵・ワームエネミー共通の弾発射音
 	constexpr const wchar_t* enemy_shoot_se_path = L"Data/Sounds/Game/EnemyShoot.mp3";
 	//浮遊敵がactiveになるときの音
-	constexpr const wchar_t* enemy_boot_se_path = L"Data/Sounds/Game/Floating/EnemyBoot.mp3";
+	constexpr const wchar_t* floating_boot_se_path = L"Data/Sounds/Game/Floating/EnemyBoot.mp3";
 
 	//ゲームBGM
 	constexpr const wchar_t* game_bgm_path = L"Data/Sounds/Game/GameBGM.mp3";
