@@ -14,7 +14,7 @@ public:
 	void Draw() override;//描画処理
 
 	//弾が敵に当たった時の処理
-	void OnHitEnemy() override;
+	void OnHitEnemy(ColliderTag hitTag) override;
 
 private:
 	//Effekseerのエフェクト再生中のハンドル

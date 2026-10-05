@@ -61,10 +61,10 @@ void ReflectedBullet::Draw()
 	BulletBase::Draw();
 }
 
-void ReflectedBullet::OnHitEnemy()
+void ReflectedBullet::OnHitEnemy(ColliderTag hitTag)
 {
 	//弾の共通処理
-	BulletBase::OnHitEnemy();
+	BulletBase::OnHitEnemy(hitTag);
 
 	//エフェクトを止める
 	m_pEffectManager.lock()->Stop(m_effectPlayH);

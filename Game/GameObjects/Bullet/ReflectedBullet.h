@@ -19,7 +19,7 @@ public:
     void Update() override;
     void Draw() override;
     //敵にヒットした時の処理
-    void OnHitEnemy() override;
+    void OnHitEnemy(ColliderTag hitTag) override;
 
 private:
     //ホーミング先のターゲット
