@@ -30,6 +30,12 @@ void BossDamageCollider::OnCollision(const ICollider& other)
 	{
 		m_owner.TakeDamage(reflect_beam_damage);
 	}
+	else if (other.GetTag() == ColliderTag::ChargeBullet)
+	{
+		//ダメージを受ける
+		const BulletCollider& bullet = static_cast<const BulletCollider&>(other);
+		m_owner.TakeDamage(bullet.GetAttackPower());
+	}
 }
 
 bool BossDamageCollider::IsCollisionActive() const

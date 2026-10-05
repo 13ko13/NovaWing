@@ -15,12 +15,12 @@ std::vector<std::shared_ptr<ColliderShape>> BulletCollider::GetCollision() const
 void BulletCollider::OnCollision(const ICollider& other)
 {
 	//何に当たっても弾は消える
-	m_owner.OnHitEnemy();
+	m_owner.OnHitEnemy(other.GetTag());
 }
 
 bool BulletCollider::IsCollisionActive() const
 {
-	return !m_owner.IsDead();
+	return m_owner.CanHit();
 }
 
 int BulletCollider::GetAttackPower() const

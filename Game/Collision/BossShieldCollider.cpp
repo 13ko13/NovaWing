@@ -20,6 +20,11 @@ void BossShieldCollider::OnCollision(const ICollider& other)
 		const BulletCollider& bullet = static_cast<const BulletCollider&>(other);
 		m_owner.OnHitInvincibleCol(bullet.GetPos(), bullet.GetAttackPower());
 	}
+	else if(other.GetTag() == ColliderTag::ChargeBullet)
+	{
+		const BulletCollider& bullet = static_cast<const BulletCollider&>(other);
+		m_owner.OnHitInvincibleCol(bullet.GetPos(), bullet.GetAttackPower());
+	}
 }
 
 bool BossShieldCollider::IsCollisionActive() const
