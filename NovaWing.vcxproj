@@ -261,7 +261,7 @@
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\WormEnemy\WormEnemyDataSetter.cpp" />
     <ClCompile Include="Game\Collision\BossBeamTipCollider.cpp" />
     <ClCompile Include="Scene\LoadingScene.cpp" />
-    <ClCompile Include="Game\Collision\ChargeExprosionCollider.cpp" />
+    <ClCompile Include="Game\Collision\ChargeExplosionCollider.cpp" />
     <ClCompile Include="Game\UI\WarningUI.cpp" />  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
@@ -375,7 +375,7 @@
     <ClInclude Include="Game\Collision\BossBeamTipCollider.h" />
     <ClInclude Include="Scene\SceneID.h" />
     <ClInclude Include="Scene\LoadingScene.h" />
-    <ClInclude Include="Game\Collision\ChargeExprosionCollider.h" />
+    <ClInclude Include="Game\Collision\ChargeExplosionCollider.h" />
     <ClInclude Include="Game\UI\WarningUI.h" />  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">

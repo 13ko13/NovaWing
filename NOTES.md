@@ -1378,3 +1378,43 @@
 
 - 確認方法: 原作と数値で比較できる(平均色・水平線側の輝度0.35・点の割合など)。詳細な数値と知見は上の「進捗（2026-10-04 続き）」を参照。
 - 注意: 戻す・差し替えるときは、ビルドが再コンパイルされるよう更新日時に気を付ける(.hlslを保存し直す)。
+
+### 設計中（2026-10-05・チャージショットの着弾爆発で範囲ワンパン）
+- **仕様**: チャージ弾が当たってもダメージは入れない。着弾した瞬間に大きいコライダー(爆発)を出し、その範囲内の敵を倒す(雑魚はワンパン、ボスは低め)。
+- **現状の問題**: チャージ弾は`ColliderTag::PlayerBullet`+`BulletCollider`なので通常弾と同じく接触でダメージが入る。当たると即`OnDead()`なので爆発の判定を持てない。作りかけの`ChargeExprosionCollider`は`IsCollisionActive()`が常にfalse、`GetOwner()`にreturnがない、弾の小さい球を返している、Wormがボス扱い(20ダメ)になる、OnCollisionの対象にWormがない。
+- **提案した方針**: ①タグを`ChargeBullet`(着弾を検知するだけ)と`ChargeExplosion`(ダメージ)に分ける ②ChargeBulletを消さずに「飛行中→爆発中」の状態にして、爆発の球とコライダーをChargeBulletに持たせる(.hには前方宣言+unique_ptr) ③爆発の判定は着弾フレームの1フレームだけ有効(数フレーム有効だとボスに毎フレームダメージが入る。ダメージを入れるのは受ける側なので、爆発側では多段ヒットを止められない) ④hit_pairsでは爆発のペアをチャージ弾のペアより後ろに置き、同じフレームで爆発させる。CollisionManagerで爆発のコライダーもaddColliderする。
+- **ボスの扱い(2026-10-05決定)**: シールドに当たっても爆発はする。ただしボスへの効果は直撃したコライダーだけ。BossDamageに直撃→ダメージのみ(回復なし)、BossShieldに直撃→回復のみ(ダメージなし)。→ボスはChargeBulletタグの直撃で処理し(BossDamage/BossShieldColliderのOnCollisionにChargeBullet分岐を追加、値はチャージ弾のGetAttackPower)、爆発のペアは`{ChargeExplosion, Enemy}`と`{ChargeExplosion, Worm}`だけにする。ChargeExprosionColliderは雑魚専用になり、ボス用の分岐は不要。
+- **注意**: チャージ弾は当たっても死なないので、BossDamageとBossShieldに同時に触れるとダメージと回復が両方起きる。爆発状態に入ったらチャージ弾のコライダーを無効にする(例: BulletBaseに`virtual bool IsHitActive()`を追加してBulletCollider::IsCollisionActiveで使い、ChargeBulletでオーバーライド)。hit_pairsはBossDamageをBossShieldより先にする。
+- **確認待ち**: 雑魚に当たった爆発の範囲にボスがいても、ボスには何も起きない(直撃のみ)で良いか。
+
+### やりたいこと（2026-10-05・チャージ爆発が終わった後）: CollisionManagerを自分で作り直す
+- CollisionManagerはClaudeが作ったもので、ユーザーは中身を理解できていない。**ユーザーが自分で作り直し、Claudeは説明役**(コードは書かない)。
+- 進め方の案: 今の作りを部品ごとに説明する(コライダーをタグごとに集める→hit_pairsの組み合わせだけ判定→IsHitで形状同士を比較→OnHitで両方のOnCollisionを呼ぶ→プレイヤー被弾の多段ヒット防止(DamageSource)→カウンター時の敵弾反射)。理解した部品からユーザーが書き直す。
+
+### 進捗（2026-10-05・チャージ爆発エフェクト`ChargeExplosion`の制作準備とEffekseer MCPの導入）
+- **Effekseer MCPを導入した**（それまでこのPCには無かった）。ユーザーがダウンロードした`EFFEKSEER_MCP_SETUP_GUIDE.md`の手順で構築。
+  - Effekseer **1.80.7**を公式GitHubから`Downloads\Effekseer1.80.7Win\`に展開(1.80.6は残してある)。MCP用のコピーは`%LOCALAPPDATA%\EffekseerMcp\effekseer`、サーバーは`%LOCALAPPDATA%\EffekseerMcp\server\EffekseerMcp.Server.exe`、ソースは`C:\dev\EffekseerMcp`。
+  - テスト: ホスト層24/24 PASS、MCP受け入れ102/103(失敗1件は「capture uses the new background」。手順書のトラブル表にある既知の症状で、制作には影響なし)。
+  - `~/.claude.json`の先頭にユーザー単位の`mcpServers.effekseer`を追加(バックアップ`.claude.json.bak-effekseer-mcp`)。**新しいセッションから有効**。
+  - `setup.ps1`はDownloadsのEffekseerを自動検出するが、1.80.6と1.80.7が両方あると古い方を拾い得るので`-EffekseerTool`で1.80.7を明示した。
+- **ChargeExplosionのヒアリング結果（ユーザー回答済み）**: 一気に完成まで作る(関門ごとの確認なし)。完成の基準は「ゲーム内で判定の球のデバッグ表示と外周が重なり、範囲が一目で分かる」。球は「縁が光る泡」を基本に、多少中が見えるように(最初の数フレームだけ中も光る)。オレンジの炎・煙は入れない(緑だけ)。カメラは全方位、負荷は少なめ、雰囲気はv10のチャージショットに合わせる。
+- **方針案**: 球はどの方向から見ても円なので、3Dメッシュは使わずビルボードで作る(全方位でも軽い)。層: Flash(0〜6F、白緑のCore+StarB。v10の玉が弾けた印) / Shell(縁が光る泡テクスチャを新規作成。0→3Fで半径0→8へEaseOut、8〜15F保持、40Fまでに消える。**縁がちょうど8**) / Fill(薄い緑のGlowで内側) / Arc(CS_Arcの電気が球の中で短く走る) / Wisp・Spark(外周へ散る余韻)。最大40〜60インスタンス目標(v10の弾は約154)。
+- **v10と参考動画の分析**: v10の色は緑(30,255,110)・白緑(235,255,238)、加算。暗い緑の`Backing`(アルファブレンド)で背景から浮かせている。参考動画(スターフォックス)の着弾は、緑の電気の球が約0.1秒で一気に広がり、中心が白飛び、表面に電気の筋、約0.3秒保持→緑の筋が散って消える。
+- **大きさ**: 出力倍率50なので半径400＝エディタ8単位。`charge_explosion_effect_scale = 1.0f`が基準、判定半径が変わったら「新しい半径÷400」。
+- **(済・2026-10-05)** 下の「次回」のうち、エフェクト制作・書き出し・登録まで完了。詳細は「進捗（2026-10-05・ChargeExplosion制作）」。
+- **次回（新しいセッションで）**: スキル`effekseer-effect-production`の手順(MCPでエディタ操作・4方向確認)で`Data/Effect/ChargeExplosion/`を制作→`.efk`書き出し→登録(`ResourceConstants.h`のパスとscale、`ResourceLoader.h`の`EffectID`、`ResourceLoader.cpp`の対応表・ゲームシーンの一覧・個別の読み込み。`PlayerChargeBullet`で検索して同じ場所すべて)→`ChargeBullet.cpp`の`OnHitEnemy()`に`PlayOneShot(ResourceLoader::EffectID::ChargeExplosion, m_pos)`の1行(**ユーザーが編集中なので触る前に必ず確認**、仮のHitEffectがあれば差し替え)→ビルド→ゲーム内でデバッグ表示の球と並べて確認→NOTES.md追記。編集してよいのは登録・再生の箇所だけ。
+
+### 進捗（2026-10-05・ChargeExplosion制作）
+- **成果物**: `Data/Effect/ChargeExplosion/ChargeExplosion.efkefc`(編集用) / `ChargeExplosion.efk`(出力倍率50) / `ChargeExplosion_v1.efkproj`(手書きの初版) / `Texture/`(CS_系はPlayerChargeBulletからコピー、`CE_Shell.png`は新規の「縁が光る泡」512px。縁のピークは半幅の0.90)。
+- **層**(描画順): Backing(暗緑ブレンド) / Fill(内側の薄い緑) / FillFlash(0〜8Fだけ中も光る) / Shell(泡。0→3Fで判定半径まで広がり15Fまで保持、40Fで消える) / ShellFlash(縁を0〜10Fだけ強調) / Core・Star(中心の白飛び) / Arc(内部の電気、12個) / Spark(外へ散る粒、24個) / Wisp(12F以降の緑の筋、5個)。合計で約50インスタンス。
+- **大きさ**: Shellのスケール17.78で縁が半径8(エディタ単位)＝ゲームで400。エディタで一辺16の四角と重ねて、縁が接することを確認した。
+- **判定半径は700だった**(`ChargeBullet.cpp`の`explosion_radius`)ので、`charge_explosion_effect_scale = 1.75f`(700÷400)にした。半径を変えたらこの値も変える。
+- **登録済み**: `ResourceConstants.h`(パスとscale)、`ResourceLoader.h`(`EffectID::ChargeExplosion`)、`ResourceLoader.cpp`(対応表・ゲームシーンの一覧・個別の読み込み)。
+- **再生も追加済み**(ユーザーの許可を得て): `ChargeBullet.cpp`の`OnHitEnemy()`で`PlayOneShot(ResourceLoader::EffectID::ChargeExplosion, m_pos)`。Debugビルド成功。
+- **未**: ゲーム内でデバッグ表示の球と外周が重なるかの確認(ユーザーがプレイして確認)。
+- **v2(立体感の追加・2026-10-05)**: ユーザー「3D感がない」→ 本物の3D球を追加。`Model/CE_Sphere.efkmodel`(半径1のUV球、64×32)+`Texture/CE_Net.png`(電気の筋を正距円筒で描いたもの。左右がつながり、極付近は消える)。ノード`Net`(手前の半球、Culling=Front、明るい)と`NetBack`(奥の半球、Culling=Back、alpha70)。スケールは0→3Fで7.9(縁の泡の内側)、ゆっくり回転(Y 1.6°/F、X 0.4°/F)。平たく見えた`Wisp`は削除。v1は`ChargeExplosion_v1.efkefc/.efk`に残してある。
+  - 知見: エディタではCulling=**Back**で奥側の面が描かれた(球の中心に不透明な板を置き、深度で隠して確認)。**ゲームは左手系なので表裏が逆になる可能性がある**。ゲームで奥の筋が明るく見えたら、NetとNetBackのCullingを入れ替える。
+  - **ユーザーがゲーム内で確認し「いい感じ」と承認(2026-10-05)。ChargeExplosionは完成。**
+  - 生成スクリプトはセッションのscratchpadにあった(`gen_shell.ps1`/`gen_net.ps1`/`gen_proj.ps1`)。消えるので、作り直すときは要再作成。
+- **注意**: エフェクトは約45Fで消えるが、爆発状態は90F続く(`explosion_max_frame`)。デバッグ表示の球はそれより長く残る。
+- **知見(Effekseer)**: 手書き.efkprojのSingleFCurveは、サンプリング既定値(10)だと短いキー(0→3F)がなまり、約10Fかけて広がった。`fcurve_set`で`sampling: 1`にすると、キーどおり3Fで広がる。PowerShellでは`R`がInvoke-Historyの別名なので、関数名に使わない。

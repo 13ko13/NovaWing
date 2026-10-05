@@ -42,10 +42,10 @@ void PlayerBullet::Draw()
 	BulletBase::Draw();
 }
 
-void PlayerBullet::OnHitEnemy()
+void PlayerBullet::OnHitEnemy(ColliderTag hitTag)
 {
 	//弾の共通処理
-	BulletBase::OnHitEnemy();
+	BulletBase::OnHitEnemy(hitTag);
 
 	//エフェクトを止める
 	m_pEffectManager.lock()->Stop(m_effectPlayHandle);

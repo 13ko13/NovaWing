@@ -16,7 +16,7 @@ public:
 	void Draw() override;//描画処理
 
 	//弾がプレイヤーに当たった時の処理
-	void OnHitEnemy() override;
+	void OnHitEnemy(ColliderTag hitTag) override;
 
 	//発射元のエネミーを取得
 	std::weak_ptr<EnemyBase> GetShooter() const { return m_pShooter; }
