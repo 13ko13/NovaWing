@@ -13,7 +13,7 @@
 namespace
 {
     //CSVファイル名
-    const wchar_t* const worm_csv_name = L"WormEnemyData";
+    const wchar_t* const worm_csv_name = L"Stage1/WormEnemy";
 }
 
 std::vector<std::shared_ptr<EnemyBase>> WormEnemyDataSetter::CreateEnemy(
@@ -49,13 +49,13 @@ std::vector<std::shared_ptr<EnemyBase>> WormEnemyDataSetter::CreateEnemy(
             dataString[1], dataString[2], dataString[3]);
 
         //胴体の数
-        int segmentNum = std::stoi(dataString[4]);
+        int segmentNum = std::stoi(dataString[10]);
 
         //移動方向(Z+:1,Z-:-1)
-        float direction = std::stof(dataString[5]);
+        float direction = std::stof(dataString[11]);
 
         //プレイヤーがどの位置(Z)まで来たら動き出すか
-        float activatePlayerZ = std::stof(dataString[6]);
+        float activatePlayerZ = std::stof(dataString[12]);
 
         WormEnemy::WormEnemyData wormData;
         wormData.modelID = modelID;

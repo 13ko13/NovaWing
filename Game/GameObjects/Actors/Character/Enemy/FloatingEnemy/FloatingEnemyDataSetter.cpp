@@ -13,7 +13,7 @@
 namespace
 {
     //CSVファイル名
-    const wchar_t* const floating_csv_name = L"FloatingEnemyData";
+	const wchar_t* const floating_csv_name = L"Stage1/FloatingEnemy";
 }
 
 std::vector<std::shared_ptr<EnemyBase>> FloatingEnemyDataSetter::CreateEnemy(
@@ -58,7 +58,7 @@ std::vector<std::shared_ptr<EnemyBase>> FloatingEnemyDataSetter::CreateEnemy(
             pBulletManager,//バレットマネージャー
             pCamera,//カメラ
             pos,//位置
-            health,
+            5,
             pSoundManager,
             pEffectManager
             ));

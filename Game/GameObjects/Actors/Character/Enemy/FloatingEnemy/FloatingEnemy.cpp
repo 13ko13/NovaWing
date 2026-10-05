@@ -163,6 +163,9 @@ void FloatingEnemy::DrawEnemy()
 
 void FloatingEnemy::TakeDamage(int damage)
 {
+	//死亡待機中は死亡処理を二重に行わない
+	if (m_isDying) return;
+
 	//体力を減らす
 	m_health -= damage;
 	//体力が0以下になったら死亡処理

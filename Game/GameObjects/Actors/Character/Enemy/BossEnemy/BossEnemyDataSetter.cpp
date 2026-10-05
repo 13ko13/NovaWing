@@ -8,7 +8,7 @@
 namespace
 {
     //CSVファイル名
-    const wchar_t* const boss_csv_name = L"BossEnemyData";
+    const wchar_t* const boss_csv_name = L"Stage1/Boss";
 }
 
 std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
@@ -53,7 +53,7 @@ std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
         bossData.pCamera = pCamera;
         bossData.pos = pos;
         bossData.pPlayer = pPlayer;
-        bossData.health = hp;
+        bossData.health = 2000;
         bossData.pSoundManager = pSoundManager;
         bossData.pEffectManager = pEffectManager;
 
