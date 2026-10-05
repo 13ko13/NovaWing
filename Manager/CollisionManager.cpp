@@ -36,11 +36,17 @@ namespace
 	//弾は当たると消えるので、ボスのダメージ判定を無敵判定より先に置いてダメージ判定を優先させる
 	const TagPair hit_pairs[] =
 	{
-		{ ColliderTag::PlayerBullet, ColliderTag::Enemy },
+		{ ColliderTag::PlayerBullet, ColliderTag::Floating },
 		{ ColliderTag::PlayerBullet, ColliderTag::Worm },
 		{ ColliderTag::EnemyBullet,ColliderTag::Counter },
 		{ ColliderTag::EnemyBullet, ColliderTag::Player },
 		{ ColliderTag::PlayerBullet, ColliderTag::BossDamage },
+		{ ColliderTag::ChargeBullet, ColliderTag::Floating },
+		{ ColliderTag::ChargeBullet, ColliderTag::Worm },
+		{ ColliderTag::ChargeBullet, ColliderTag::BossDamage },
+		{ ColliderTag::ChargeBullet, ColliderTag::BossShield },
+		{ ColliderTag::ChargeExplosion, ColliderTag::Floating },
+		{ ColliderTag::ChargeExplosion, ColliderTag::Worm },
 		{ ColliderTag::PlayerBullet, ColliderTag::BossShield },
 		{ ColliderTag::BossBeam, ColliderTag::Counter },
 		{ ColliderTag::BossBeamReflect, ColliderTag::BossDamage },
@@ -158,6 +164,8 @@ void CollisionManager::Update()
 		if (!pBullet) continue;
 		keepAlive.push_back(pBullet);
 		addCollider(pBullet->GetCollider());
+		//爆発のコライダーも登録
+		addCollider(pBullet->GetExplosionCollider());
 	}
 	for (const std::weak_ptr<EnemyBullet>& weakBullet : pBulletManager->GetEnemyBullets())
 	{
