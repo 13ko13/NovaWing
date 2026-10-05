@@ -4,7 +4,7 @@
 namespace
 {
 	//カウンター後の無敵時間
-	constexpr int counter_invincible_frame = 60;
+	constexpr int counter_invincible_frame = 120;
 }
 
 CounterCollider::CounterCollider(Player& owner) :
@@ -24,8 +24,9 @@ std::vector<std::shared_ptr<ColliderShape>> CounterCollider::GetCollision() cons
 
 void CounterCollider::OnCollision(const ICollider& other)
 {
-	//相手のタグがボスビームの先端の時だけ処理
-	if (other.GetTag() != ColliderTag::BossBeamTip) return;
+	//相手のタグがボスビームの先端か、反射後のボスビームの時だけ処理
+	if (other.GetTag() != ColliderTag::BossBeamTip &&
+		other.GetTag() !=ColliderTag::BossBeamReflect) return;
 
 	//無敵時間を開始する
 	m_owner.OnInvincibleStart(counter_invincible_frame);
