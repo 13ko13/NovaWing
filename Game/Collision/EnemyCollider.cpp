@@ -1,6 +1,7 @@
 ﻿#include "EnemyCollider.h"
 #include "BulletCollider.h"
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
+#include "Game/Collision/ChargeExplosionCollider.h"
 
 EnemyCollider::EnemyCollider(EnemyBase& owner, ColliderTag tag) :
 	m_owner(owner),
@@ -21,6 +22,13 @@ void EnemyCollider::OnCollision(const ICollider& other)
 		//タグがPlayerBulletなら相手はBulletCollider
 		const BulletCollider& bullet = static_cast<const BulletCollider&>(other);
 		m_owner.TakeDamage(bullet.GetAttackPower());
+	}
+	//タグが爆発だった場合は火力が高くなる
+	else if (other.GetTag() == ColliderTag::ChargeExplosion)
+	{
+		const ChargeExplosionCollider& explosion =
+			static_cast<const ChargeExplosionCollider&>(other);
+		m_owner.TakeDamage(explosion.GetAttackPower());
 	}
 }
 
