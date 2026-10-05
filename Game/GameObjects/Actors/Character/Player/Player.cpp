@@ -299,6 +299,9 @@ void Player::ClampPosition()
 
 void Player::Somersault(InputManager& input)
 {
+	//操作不能中は受け付けない
+	if (m_isDisabled) return;
+
 	bool isSomersoult = false;
 	if (std::dynamic_pointer_cast<SomersaultState>(m_pSpecialState))
 	{
@@ -335,6 +338,9 @@ void Player::Somersault(InputManager& input)
 
 void Player::Boost(const InputManager& input)
 {
+	//操作不能中は受け付けない
+	if (m_isDisabled) return;
+
 	// ゲージマックス中にブースト入力されたら
 	if (input.IsTriggered(InputEvent::boost) &&
 		m_gauge >= gauge_max)
@@ -351,6 +357,9 @@ void Player::Boost(const InputManager& input)
 
 void Player::Brake(const InputManager& input)
 {
+	//操作不能中は受け付けない
+	if (m_isDisabled) return;
+
 	// ゲージマックス中にブレーキ入力されたら
 	if (input.IsTriggered(InputEvent::brake) &&
 		m_gauge >= gauge_max)
@@ -475,6 +484,9 @@ void Player::Draw()
 		{
 			m_pCounterCollider->GetSphere()->Draw(0x0000ff);
 		}
+
+		//無敵時間
+		DrawFormatString(0, 550, 0xffffff, L"InvincibleTime : %d", m_invincibleFrame);
 	}
 #endif
 }
@@ -545,6 +557,8 @@ void Player::TakeDamage(int damage)
 	{
 		//死亡音を鳴らす
 		pSoundManager->Play(SoundManager::SoundType::PlayerDeath,false,true);
+		//各ステートのExitを呼んで、チャージやブーストのエフェクトを止める
+		ChangeAllStateToDisabled();
 		OnDead();
 	}
 }
@@ -648,6 +662,9 @@ bool Player::IsSomersault() const
 
 void Player::ChangeAllStateToDisabled()
 {
+	//既に操作不能なら何もしない(毎フレーム呼ばれてもステートを作り直さない)
+	if (m_isDisabled) return;
+
 	//操作できない間に撃たれ続けて死なないよう、被弾しない状態にする
 	m_isDisabled = true;
 

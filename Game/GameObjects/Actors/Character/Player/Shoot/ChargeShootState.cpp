@@ -44,8 +44,9 @@ ChargeShootState::~ChargeShootState()
 
 void ChargeShootState::Exit()
 {
-	// もしチャージ未完了であればエフェクトは停止する
-	if (m_chargeFrame < charge_comp_frame)
+	// ChargeReadyStateに引き継いでいなければエフェクトを停止する
+	// (強制的にステートが変わった場合もここで消える)
+	if (!m_isEffectHandedOver)
 	{
 		m_pPlayer.lock()->GetEffectManager().lock()->Stop(m_chargingPlayEffectH);
 	}
@@ -53,7 +54,7 @@ void ChargeShootState::Exit()
 	// チャージ中の音を止める
 	m_pSoundManager.lock()->Stop(SoundManager::SoundType::Charging);
 	// チャージ完了音も止める
-	m_pSoundManager.lock()->Stop(SoundManager::SoundType::ChargeComplete);
+	m_pSoundManager.lock()->Stop(SoundManager::SoundType::ChargeComplete); 
 }
 
 void ChargeShootState::Update()
@@ -131,6 +132,8 @@ void ChargeShootState::Update()
 		// 完了していたら
 		else
 		{
+			// エフェクトは待機ステートが引き続き使う
+			m_isEffectHandedOver = true;
 			// チャージショット待機ステートに遷移する
 			ChangeState(std::make_shared<ChargeReadyState>(m_pPlayer, m_pBulletManager, m_pSoundManager,m_pTargetManager));
 		}
