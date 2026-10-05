@@ -1386,6 +1386,7 @@
 - **ボスの扱い(2026-10-05決定)**: シールドに当たっても爆発はする。ただしボスへの効果は直撃したコライダーだけ。BossDamageに直撃→ダメージのみ(回復なし)、BossShieldに直撃→回復のみ(ダメージなし)。→ボスはChargeBulletタグの直撃で処理し(BossDamage/BossShieldColliderのOnCollisionにChargeBullet分岐を追加、値はチャージ弾のGetAttackPower)、爆発のペアは`{ChargeExplosion, Enemy}`と`{ChargeExplosion, Worm}`だけにする。ChargeExprosionColliderは雑魚専用になり、ボス用の分岐は不要。
 - **注意**: チャージ弾は当たっても死なないので、BossDamageとBossShieldに同時に触れるとダメージと回復が両方起きる。爆発状態に入ったらチャージ弾のコライダーを無効にする(例: BulletBaseに`virtual bool IsHitActive()`を追加してBulletCollider::IsCollisionActiveで使い、ChargeBulletでオーバーライド)。hit_pairsはBossDamageをBossShieldより先にする。
 - **確認待ち**: 雑魚に当たった爆発の範囲にボスがいても、ボスには何も起きない(直撃のみ)で良いか。
+- **(完了・2026-10-05)** ユーザーがゲーム内で確認し、チャージ弾の爆発(挙動・エフェクトとも)は「良い感じ」と承認。
 
 ### やりたいこと（2026-10-05・チャージ爆発が終わった後）: CollisionManagerを自分で作り直す
 - CollisionManagerはClaudeが作ったもので、ユーザーは中身を理解できていない。**ユーザーが自分で作り直し、Claudeは説明役**(コードは書かない)。
@@ -1418,3 +1419,68 @@
   - 生成スクリプトはセッションのscratchpadにあった(`gen_shell.ps1`/`gen_net.ps1`/`gen_proj.ps1`)。消えるので、作り直すときは要再作成。
 - **注意**: エフェクトは約45Fで消えるが、爆発状態は90F続く(`explosion_max_frame`)。デバッグ表示の球はそれより長く残る。
 - **知見(Effekseer)**: 手書き.efkprojのSingleFCurveは、サンプリング既定値(10)だと短いキー(0→3F)がなまり、約10Fかけて広がった。`fcurve_set`で`sampling: 1`にすると、キーどおり3Fで広がる。PowerShellでは`R`がInvoke-Historyの別名なので、関数名に使わない。
+
+### 進捗（2026-10-05・ブーストのエフェクトをリアル調で作り直し、v1）
+
+- 依頼: ブースト時のエフェクトをかっこよく。リアル調、水色、負荷は少なめ、一気に作る。両翼で風を切っている感じと、ブーストの炎らしさの両方を出す。参考作品はなし。
+- ファイル: `Data/Effect/Boost/Boost_v1/Boost.efkefc` / `.efk`（拡大率50で書き出し）/ `Texture/BS_*.png`（自作）。旧版の`Data/Effect/Boost/Boost.*`は残してある。テクスチャ生成は`Data/Effect/Boost/tools/gen_boost_textures.ps1`。確認画像は`tools/review/`（`compare_old_v1.png`が旧版との比較）。
+- 座標の前提（今のコードに合わせた）: エフェクトの原点＝機体の200後ろ（`BoostState`の`boost_effect_offset_pos`）、回転は`(rotX, rotY+π, 0)`なので**エディタの+Zが機体の後ろ**。機体の中心は`Ship`ノードのz=-4。噴射口は`Ship/Nozzle`のz=+1.2（機体中心から60後ろ、推定）、翼端は`Ship/WingTipR/L`のx=±1.6・z=+0.45（バレルロールと同じ推定値）。**ずれていたらこの3ノードの位置だけ直せばよい。**
+- 構成: 炎＝`FlameOuter`/`FlameCore`（Ringの円錐、流れる筋のテクスチャをUVスクロール、毎F作り直して長さを揺らす）＋`NozzleGlow`＋`ShockDiamond`（炎の中の明るい節、3個）＋`ExhaustTrail`（空間に残る排気、2個/F）。開始の一瞬だけ`IgnitionRing`/`IgnitionFlash`。風を切る＝翼端の`Vortex`（Track、空間に残る細い渦の線、軽くねじれる）＋`TipCone`（翼端の鋭い白い円錐）＋`WingSliceR/L`（翼の後縁からはがれる気流の筋）＋`AirStreak`（機体のまわりを後ろへ流れる気流の線）。同時に出ている数はおよそ100個。
+- プレビューのしかた: エディタの「振る舞い」で位置の速度Zを-0.34（ブースト速度17÷50）にすると、空間に残る層の見え方がゲームに近くなる（ファイルには保存されない）。仮の機体モデル`tools/DummyJet.efkmodel`は書き出し前に外してある。
+- **コード側は未対応（ユーザーが実装する）**: `Constants/ResourceConstants.h`の`boost_effect_path`を`L"Data/Effect/Boost/Boost_v1/Boost.efk"`にする。タイトル画面も同じエフェクトを使っている。
+- 未確認: ゲーム内での見え方（大きさ、噴射口と翼端の位置、明るさ）。タイトルはブースト速度が70/Fなので、空間に残る層（排気・渦）がゲーム中より長く伸びるはず。
+
+### 方針決定（2026-10-05・2面「雨の荒廃ビル街」）
+- **2面は海を使わない。** 理由: 1面と同じ景色が嫌。1面=今の海ステージのまま、2面=荒廃したビル街。WaterManagerは2面では使わない。
+- **GameSceneは1つのまま使い回す(案B)。** スカイボックス・CSV4種・BGM・天候・ボスの有無などを`StageConfig`にまとめて差し替える。コピーして`Game2Scene`は作らない。リトライは同じ設定、クリア後は次の設定で作り直す。
+- **ステージ選択画面は一旦なし**(余裕があれば)。1面クリア→2面へ直行を先に作る。
+- **見た目**: 地面は道路＋がれき。ビルはフリー素材。曇り空のスカイボックス＋霧(フォグ)＋Effekseerのカメラ追従の雨粒(ユーザーの思い描いていたイメージと一致)。
+- **敵**: コスト表の新敵3種(蝶=かくかく移動・回転弾・逃げる・死亡 7h / 固定砲台=弾・死亡 2h / 突進=プレイヤーへ移動・死亡 2h、計11h、いずれもプロト・S)を入れる方向。2面専用か1面にも出すかは未確認。ボスは仕様未定。
+- **後回し**: カメラレンズの水滴(シェーダ8h)。海のリアル化は放置(2面に海が無いので優先度はさらに下がる)。
+- **未決定**: ビルの当たり判定(Rock流用が候補)、地面の作り方、新敵の初登場ステージ、2面のボス。
+
+### 進捗（2026-10-05続き・ブーストのエフェクト: 全体を後ろへ）
+
+- ユーザーがゲームで確認し「モデルより少し前に寄っている、もう少し後ろでいい」。
+- `Ship`ノードのzを-4→-3.2にした（全体を0.8＝ゲームで40後ろへ。噴射口・翼端・気流すべて一緒に動く）。ほかは変更なし。
+- ファイル: `Data/Effect/Boost/Boost_v1/`を上書きした。**ユーザーの希望で、エフェクトの版ごとのフォルダ（_v2など）は今後作らない。戻すときはgitで。** 位置の比較画像は`tools/review/compare_v1_v2.png`。
+- コード側の変更は不要（`boost_effect_path`は`Boost_v1/Boost.efk`のまま）。
+- 未確認: ゲーム内での位置。翼端の線だけ前後がずれて見える場合は、`Ship/WingTipR/L`のzを個別に直す。
+
+### 進捗（2026-10-05続き・エフェクトの前の版と未使用素材を整理）
+
+- ユーザーの方針: **前の版は残さない。Claudeが作ったエフェクトを使う。戻すときはgitで。** 以後、修正は同じファイルを上書きする。
+- 消したもの（gitの履歴から戻せる）: 旧ブースト(`Boost.*`、`aurora01/orb_colored`)、`BarrelRoll_v1_*`、`BossBeam.*`(旧版、`BossBeam_2`は使用中なので残した)、`ChargeExplosion_v1.*`、`Charging_v0/`と`Charging_v1〜v10.efkproj`、`EnemyBullet_v2.*`/`_v3a_NoRing.*`、`EnemyDeath_v1〜v4`の途中版、`PlayerBullet_v0/`と`work/`、`PlayerChargeBullet_v0/`と`_v1〜v10(_preview).efkproj`、`WingSprayReal_v1/v2a〜d_*`と`WingSprayToon_*`、`Exprosion`/`Exprosion2`/`WingSplash`(どこからも読まれていない)。さらに、残ったエフェクトのどれからも参照されていないテクスチャ・モデル・マテリアル43個(`Splash/Parts`の未使用分など)。
+- `EnemyDeath_v4.efkefc`は`EnemyDeath.efkefc`に名前を変えた(ゲームが読む`.efk`と名前をそろえた)。
+- ブーストは`Data/Effect/Boost/`直下に移した(`Boost.efk`/`.efkefc`/`Texture/BS_*.png`)。`Boost_v1/`はなくなった。**コード側(ユーザーが実装する): `boost_effect_path`を元の`L"Data/Effect/Boost/Boost.efk"`に戻す。**
+- 残すと決めたもの: `BossBeam_Spiral.efkproj`(Claude作、未完成でゲーム未使用)。各エフェクトの`tools/`(生成スクリプト・確認画像)。
+- 既存の問題(今回の整理とは無関係): `BossBeam_2.efkefc`はテクスチャをデスクトップの`Effekseer_Sample`から参照している。`.efk`はゲームで動いている。
+- 確認: 残ったすべての`.efk`/`.efkefc`が参照する素材が存在することを確かめた(上の`BossBeam_2.efkefc`の4件を除く)。
+
+### 進捗（2026-10-05続き・ブーストのエフェクト: さらに後ろへ＋赤みを追加）
+
+- ユーザーがゲームで確認し「機体にのめりこんでいる」「赤を混ぜてよい（不完全燃焼っぽさ）。下の海と色がかぶる」。
+- `Ship`のzを-3.2→-2.4（さらにゲームで40後ろ。最初の版からは合計80後ろ）。
+- 赤み: `FlameBurn`（Ringの円錐、噴射口の少し後ろから長さ4.6、橙→赤）を追加し、`ExhaustTrail`を橙→暗い赤に変えた。**この2つは合成を加算(Add)ではなく通常(Blend)にした。** 加算だと明るい青い海に重なったとき赤が白〜ピンクに飛んで見えなくなるため。噴射口近くの青白い芯(`FlameCore`/`FlameOuter`/`NozzleGlow`)は加算のまま。
+- 気づいた点: ゲームのスクリーンショットでは、炎の付け根が機体の上に重なって描かれていた。エフェクトが機体の深度で隠れていない可能性がある（`EffectManager`の`DrawEffekseer3D`の呼び順・深度の扱いは未確認）。後ろへずらして対処したが、重なりが残るならコード側の描画順を調べる。
+
+### 進捗（2026-10-05続き・ブーストのエフェクト: さらに後ろへ＋赤みを追加）
+
+- ユーザーがゲームで確認し「機体にのめりこんでいる」「少し赤を混ぜてよい（不完全燃焼っぽく。青い海と色がかぶるので）」。
+- `Ship`のzを-3.2→-2.4にした（最初の-4から合計80後ろ）。
+- 赤み: `FlameBurn`（Ringの円錐、噴射口から0.6後ろ〜3.9、橙→赤）を炎の外側に追加。`ExhaustTrail`（排気）の色を水色→橙(255,120,50)から暗い赤(120,35,30)へ変わるようにした。噴射口付近は青白いまま、後ろへ行くほど橙〜赤になる。
+- 描画の仕組みのメモ: エフェクトは`EffectManager::Draw()`の`DrawEffekseer3D()`で描いている。機体に重なって見えるのは位置が前すぎるため（深度で隠れていない可能性もある）。まだ重なるなら`Ship`のzをさらに大きくする。
+- `Data/Effect/Boost/Boost.efk`を上書きして書き出した。未確認: ゲーム内での見え方。
+
+### 設計（2026-10-05・Unityでステージ配置→CSV書き出し、定数もCSV化）
+- **方針(ユーザー決定)**: 配置はすべてUnityで行いCSVに書き出す。定数・パラメータも「ほぼ全部」CSV化する(就職後の実務を意識。調整頻度に関係なく)。参考は`ProjectNeaR`(先輩の作品)。
+- **ProjectNeaRの仕組み**: `Data/CSV/<ステージ>/`に`StageData.csv`(配置)・`CharacterData.csv`・`CharaStatusData.csv`(HP等、IDで配置と結合)。`CSVData`継承の`ActorData`/`CharaStatusData`がコンストラクタで`Conversion()`。Unity座標→DxLibは`kUnityToDXPosition = 100`を読み込み時に1か所で掛ける。回転はUnityの順序に合わせたクォータニオン。
+- **NovaWingの設計**: `Data/CSV/Stage1/`・`Stage2/`に配置(Unity書き出し: Rock/FloatingEnemy/WormEnemy/Boss/…)、`Data/CSV/Params/`に手調整の数値(`EnemyStatus.csv`=modelIDキーでhp等、`RockShape.csv`=岩の球をモデルごとに、`<クラス>.csv`=`Name,Value`の定数)。共通列は`modelID,posXYZ,rotXYZ,scaleXYZ`、種類固有の列は後ろ。列はヘッダ名で引く。定数は「キー無しはassert」の型付き窓口。
+- **Unity側**: リポジトリ直下`StageEditor/`(Libraryは.gitignore)。プレハブに`PlacedObject`(modelID＋ワーム用追加項目)。エディタメニュー「NovaWing/Export Stage CSV」で`Data/CSV/<ステージ名>/`に書き出す。Unity1単位=ゲーム100単位(Z=8000→Unity80)。FBXは`Data/Model`からコピー(二重管理は許容)。
+- **タスク順**: ①`StageEditor/`作成 ②PlacedObject+書き出し(まず浮遊敵) ③既存配置を再現して座標・回転(Unity/DxLibで順序が違う)を実機検証 ④岩・ワーム・ボスを追加、hpと岩の球を`Params/`へ ⑤DataSetterをヘッダ名引き＋`CSVData`継承の型へ(旧保留タスク3と同時) ⑥2面のビルを載せる。
+- **2026-10-05続き: 「赤の主張が強すぎる」→ 控えめにした。** `FlameBurn`の中心色を(255,130,60,α85)に(元はα120でより赤い)。`ExhaustTrail`は青白(170,190,230,α60)から始まり、消えぎわだけ橙(220,95,60,α35)になるようにした。さらに弱めるなら`FlameBurn`のα、強めるなら排気の終わりの色を調整する。
+- **ユーザーがゲーム内で確認し「良い感じ」と承認(2026-10-05)。ブーストのエフェクトは完成。**
+- **(変更・2026-10-05)** 座標変換(Unity1単位=ゲーム100単位)は**C++側ではなくUnityの書き出しで1か所だけ**行う(`StageCsvExporter.cs`の`UnityToGame`)。CSVはゲーム単位(ワームの`activatePlayerZ`もゲーム単位なので揃う)。ゲーム側の`unity_to_game_scale`は不要。回転(度)と大きさは変換なし。理由: ユーザー指摘「毎回scale定数を作るのが面倒」＋単位の混在を避ける。
+- **(進捗)** Unity側: `StageEditor/`をNovaWing直下に移動済み(`.gitignore`追記済み)、`PlacedObject.cs`と`Editor/StageCsvExporter.cs`作成、浮遊敵1体の書き出しはユーザー確認済み。ゲーム側の読み込み(`FloatingEnemyDataSetter`を`Stage1/FloatingEnemy`の新形式に)は未実施。CSVのpos列を1セルvectorにするかは後回し(今は`posX,posY,posZ`の分割列)。
+- **(完了・2026-10-05)** 浮遊敵で「Unityで置く→書き出し→ゲームで読む」の一通りがユーザー確認済み。`FloatingEnemyDataSetter`の読み込み先は`L"Stage1/FloatingEnemy"`(ファイル名に`Data`は付かない。最初`Stage1/FloatingEnemyData`と書いて敵が0体になった。`LoadCSV`は存在しないファイルでもエラーを出さず空配列を返す)。hpは仮に`5`の直書き(あとで`Params/EnemyStatus.csv`へ)。Unity書き出し時、Excelで開いたままのCSVがあると`Sharing violation`になる。
+- **次**: 岩・ワーム・ボスの読み込みを新形式に(ヘッダ名引き＋`CSVData`継承の型へ、回転・大きさの扱い)、旧CSVの敵を全部Unityに置き直す、`hp`と岩の球を`Params/`へ。
