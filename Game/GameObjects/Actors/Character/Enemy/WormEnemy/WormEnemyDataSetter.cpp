@@ -13,7 +13,13 @@
 namespace
 {
     //CSVファイル名
-    const wchar_t* const worm_csv_name = L"Stage1/WormEnemy";
+	const wchar_t* const worm_csv_name = L"Stage1/WormEnemy";
+	//CSVでの胴体の数の要素番号
+	constexpr int segment_count_number = 10;
+	//CSVでの移動方向の要素番号
+	constexpr int direction_number = 11;
+	//CSVでのプレイヤーのZ座標がどれぐらいに来たら動き出すかの要素番号
+	constexpr int active_player_z_number = 12;
 }
 
 std::vector<std::shared_ptr<EnemyBase>> WormEnemyDataSetter::CreateEnemy(
@@ -49,13 +55,13 @@ std::vector<std::shared_ptr<EnemyBase>> WormEnemyDataSetter::CreateEnemy(
             dataString[1], dataString[2], dataString[3]);
 
         //胴体の数
-        int segmentNum = std::stoi(dataString[10]);
+        int segmentNum = std::stoi(dataString[segment_count_number]);
 
         //移動方向(Z+:1,Z-:-1)
-        float direction = std::stof(dataString[11]);
+        float direction = std::stof(dataString[direction_number]);
 
         //プレイヤーがどの位置(Z)まで来たら動き出すか
-        float activatePlayerZ = std::stof(dataString[12]);
+        float activatePlayerZ = std::stof(dataString[active_player_z_number]);
 
         WormEnemy::WormEnemyData wormData;
         wormData.modelID = modelID;

@@ -48,9 +48,6 @@ std::vector<std::shared_ptr<EnemyBase>> FloatingEnemyDataSetter::CreateEnemy(
         Vector3 pos = Vector3::FromWString(
             dataString[1],dataString[2],dataString[3]);
 
-        //HP(文字列)をintに変換
-        int health = std::stoi(dataString[4]);
-
         //その位置と、pCameraで敵を一つ作成する
         pEnemies.push_back(std::make_shared<FloatingEnemy>(
             pPlayer,//プレイヤー

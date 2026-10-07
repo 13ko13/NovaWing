@@ -44,9 +44,6 @@ std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
         Vector3 pos = Vector3::FromWString(
             dataString[1], dataString[2], dataString[3]);
 
-        //HP(文字列)をintに変換
-        int hp = std::stoi(dataString[4]);
-
         BossEnemy::BossEnemyData bossData;
         bossData.Id = modelID;
         bossData.pBulletManager = pBulletManager;
