@@ -1484,3 +1484,11 @@
 - **(進捗)** Unity側: `StageEditor/`をNovaWing直下に移動済み(`.gitignore`追記済み)、`PlacedObject.cs`と`Editor/StageCsvExporter.cs`作成、浮遊敵1体の書き出しはユーザー確認済み。ゲーム側の読み込み(`FloatingEnemyDataSetter`を`Stage1/FloatingEnemy`の新形式に)は未実施。CSVのpos列を1セルvectorにするかは後回し(今は`posX,posY,posZ`の分割列)。
 - **(完了・2026-10-05)** 浮遊敵で「Unityで置く→書き出し→ゲームで読む」の一通りがユーザー確認済み。`FloatingEnemyDataSetter`の読み込み先は`L"Stage1/FloatingEnemy"`(ファイル名に`Data`は付かない。最初`Stage1/FloatingEnemyData`と書いて敵が0体になった。`LoadCSV`は存在しないファイルでもエラーを出さず空配列を返す)。hpは仮に`5`の直書き(あとで`Params/EnemyStatus.csv`へ)。Unity書き出し時、Excelで開いたままのCSVがあると`Sharing violation`になる。
 - **次**: 岩・ワーム・ボスの読み込みを新形式に(ヘッダ名引き＋`CSVData`継承の型へ、回転・大きさの扱い)、旧CSVの敵を全部Unityに置き直す、`hp`と岩の球を`Params/`へ。
+
+### 進捗（2026-10-07・1面のレベルデザインを作り直し、Unityに同期）
+- **依頼**: チャージ弾が範囲爆発になったので、それを活かす配置をClaudeが作る。ワームは正面からだけ。岩・敵・ボスの位置は全部変えてよい。
+- **ワーム**: 全8体を`direction=-1`(プレイヤーへ向かう)に統一。出現位置は動き出しのZ＋約3500。後ろから来る4体は削除。
+- **浮遊敵(42体)**: 爆発半径700に収まる塊で構成。Z=4000導入2体 / 7500リング6体 / 11000左右4体ずつ / 14500の3×3壁 / 17000〜18000縦列5体 / 22000密集9体 / 26000離れた3体。
+- **岩(31個)**: 低い岩(Rock1)は飾り、高い岩(Rock2/3)は「門」「中央の仕切り」「スラローム」「狭まる回廊(±1100→±900→±700)」として敵の塊の前に配置。ボスはそのまま(Z=30500、登場Z=27000)。
+- **Unity同期**: `StageEditor/Assets/Editor/StageCsvImporter.cs`を追加(メニュー「NovaWing/Import Stage CSV」)。Claudeがバッチモードで実行しStage1.unityを更新済み。コマンド: `Unity.exe -batchmode -quit -nographics -projectPath StageEditor -executeMethod StageCsvImporter.ImportAndSaveBatch`(Unity 2022.3.62f3)。書き出し直して元のCSVと一致を確認(負の回転角が345表記になるだけ)。
+- **未確認**: ゲーム内での塊の大きさ・門の隙間・ワームの出現距離。岩の幅は推定。プレイして調整する。
