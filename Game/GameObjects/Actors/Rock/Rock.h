@@ -13,6 +13,7 @@ public:
 		Vector3 pos;
 		std::vector<float> sphereRadii;
 		std::vector<float> sphereYOffsets;
+		float rotYRadian;
 	};
 
 	Rock(std::weak_ptr<CameraBase> pCamera,

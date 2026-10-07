@@ -12,7 +12,7 @@ namespace
 
 Rock::Rock(std::weak_ptr<CameraBase> pCamera, const RockData& data):
     Actor(data.modelId, pCamera),
-    m_collider(*this)
+	m_collider(*this)
 {
     //位置を反映
     SetPos(data.pos);
@@ -31,7 +31,10 @@ Rock::Rock(std::weak_ptr<CameraBase> pCamera, const RockData& data):
         float radius = data.sphereRadii[i];
 
         m_collider.AddSphere(posWithOffset, radius);
-    }
+	}
+
+	//回転情報をセット
+	m_rotation = Quaternion(Vector3(0.0f, 1.0f, 0.0f), data.rotYRadian);
 }
 
 void Rock::OnInit()

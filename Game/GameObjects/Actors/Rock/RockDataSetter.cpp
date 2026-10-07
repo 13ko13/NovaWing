@@ -13,7 +13,8 @@ namespace
     const int model_id_number = 0;//モデルのIDの要素番号
     const int model_x_number = 1;//モデルのX位置要素番号
     const int model_y_number = 2;//モデルのY位置要素番号
-    const int model_z_number = 3;//モデルのZ位置要素番号
+	const int model_z_number = 3;//モデルのZ位置要素番号
+	const int model_rot_y_number = 5;//モデルのY軸回転(度)の要素番号
 
 	//1つのモデル分の球の情報
 	struct RockSphereData
@@ -62,14 +63,19 @@ std::vector<std::shared_ptr<Rock>> RockDataSetter::CreateRock(
             dataString[model_x_number],
             dataString[model_y_number],
             dataString[model_z_number]
-        );
+		);
+
+		//Y軸回転量(文字列)をfloatに変換
+		float rotYRadian = std::stof(dataString[model_rot_y_number]);
+		rotYRadian *= DX_PI_F / 180.0f;
 
         //岩のデータ構造体にいれる
         Rock::RockData data;
         data.modelId = modelID;
         data.pos = pos;
         data.sphereRadii = sphere_settings.at(modelID).radii;
-        data.sphereYOffsets = sphere_settings.at(modelID).yOffsets;
+		data.sphereYOffsets = sphere_settings.at(modelID).yOffsets;
+		data.rotYRadian = rotYRadian;
 
         //その位置と、pCameraで岩を一つ作成する
         pRocks.push_back(std::make_shared<Rock>(pCamera, data));
