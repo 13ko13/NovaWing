@@ -1492,3 +1492,42 @@
 - **岩(31個)**: 低い岩(Rock1)は飾り、高い岩(Rock2/3)は「門」「中央の仕切り」「スラローム」「狭まる回廊(±1100→±900→±700)」として敵の塊の前に配置。ボスはそのまま(Z=30500、登場Z=27000)。
 - **Unity同期**: `StageEditor/Assets/Editor/StageCsvImporter.cs`を追加(メニュー「NovaWing/Import Stage CSV」)。Claudeがバッチモードで実行しStage1.unityを更新済み。コマンド: `Unity.exe -batchmode -quit -nographics -projectPath StageEditor -executeMethod StageCsvImporter.ImportAndSaveBatch`(Unity 2022.3.62f3)。書き出し直して元のCSVと一致を確認(負の回転角が345表記になるだけ)。
 - **未確認**: ゲーム内での塊の大きさ・門の隙間・ワームの出現距離。岩の幅は推定。プレイして調整する。
+
+### 進捗・決定（2026-10-07 続き・DataSetter整理と「パラメータのCSV化」の設計）
+**今日終わったこと(ユーザーが実装、コミットはまだ)**
+- 浮遊敵・ボスのDataSetterから、新形式では意味が変わった`dataString[4]`(hpの読み込み。新形式の4列目はrotX)を削除。hpは当面直書き(浮遊敵`5`、ボス`2000`)のまま。
+- ワームの列番号を定数化(`segment_count_number=10`/`direction_number=11`/`active_player_number=12`)。※`active_player_number`は`activate_player_z_number`の方が分かりやすいとレビュー済み(直すかは任意)。
+- 岩のY軸回転を反映(A案)。`Rock::RockData::rotYRadian`を追加し、`RockDataSetter`でCSVの度→ラジアン変換(`model_rot_y_number=5`)、`Rock`のコンストラクタで`m_rotation`に代入。**回転は度でCSVに入り、変換はDataSetterで行う。** 当たり判定の球はY軸回転では動かないので修正不要。X/Z回転・scaleは未対応(球の変換が必要になる)。この修正(名前の統一)だけは例外的にClaudeが直接編集した。**ゲーム内で`rotY=345`の岩(`Rock1,1200,0,3200`)の向きが変わるか、向きが逆でないかは未確認。** 空白がスペース→タブに変わった行が残っている(無害)。
+- ビルド・実行は未確認(Claude側ではしていない)。
+
+**パラメータのCSV化: 方針の見直し(重要)**
+- 以前は「定数をほぼ全部(433個、約60ファイル)CSV化」としていたが、**ProjectNeaR方式に寄せることにした(ユーザー決定)**。ProjectNeaRを調べた結果:
+  - CSVにあるのは「キャラ/敵ごとのステータス」(`CharaStatusData.csv`: 1行=1キャラ、列=体力・攻撃力・移動速度など)だけ。`CSVData`の派生クラス(`CharaStatusData`)のコンストラクタで`Conversion()`して型にする。
+  - `Player.cpp`などの`kXxx`定数はCSVにせず、cppの匿名名前空間に残している。
+  - 弱点: 列を番号で引き、要素数が違うと`Conversion()`が黙ってreturnする。→NovaWingでは**ヘッダ名で引き、無い名前はassert**にする。
+- したがって**CSVに出すのは「種類ごとに変えたい数値」(HP・球の半径・死亡フレーム・移動速度・弾の値など)だけ**。モデル/アニメ名・骨のインデックス・アニメ再生速度・エフェクトのオフセットなど「モデルと対になった値」はコードに残す。**「描画の細かい数値も含めたい」という以前の希望は、この方針で取り下げ(要望があれば再検討)。**
+- 検討したが採用しなかった案: `Name,Value`のCSVを`ParamTable`で読み、クラスごとの`XxxParams`構造体を関数内staticで共有する案(Claudeの提案)。ProjectNeaR方式を優先したので保留。
+
+**`EnemyStatus.csv`の設計(決定)**
+- `Data/CSV/Params/EnemyStatus.csv`に**全敵を1つの表に並べる**(ユーザー決定)。使わない列は0にする。1列目は`modelID`、列はヘッダ名付き(英語名)、BOMなしUTF-8。
+- 最初の列案: `modelID,hp,colRadius,trueDeadFrame,deathEffectInterval`
+  - FloatingEnemy: hp5(直書き)/colRadius132/trueDeadFrame10/deathEffectInterval0
+  - WormHead: hp=現在値(`WormEnemy.cpp`で要確認)/colRadius40/trueDeadFrame**0**/deathEffectInterval13
+  - Boss: hp2000/trueDeadFrame330(=60*5+30)/colRadiusは球が3つ(無敵用1500・ダメージ用310など)あるので**最初は対象外**
+- ワームは`true_dead_frame`を使わない(胴体が全部消えたら`OnEnemyDead()`、`WormEnemy.cpp:227`付近)ので、そこは0で良い。**0は「使わない」の意味なので、`EnemyStatusData`のコメントかCSVに「使わない敵は0」と明記する。**
+- 後で足す候補: ワームの`move_speed`18・`bullet_speed`8・`bullet_power`5・`shoot_interval`60、ボスの`recovery_rate`0.4など。
+- 読み込み: `EnemyStatusData : CSVData`(ヘッダ名で引く、無いのはassert)を作り、`modelID`で行を引く取り出し口を用意。同じ表を敵ごとに読み直さないよう**1回だけ読んでキャッシュ**する(浮遊敵が42体いるため)。
+
+**次にやること(ユーザーが書く。Claudeはレビュー役)**
+1. `EnemyStatus.csv`を作る(ワームのHPは`WormEnemy.cpp`の現在値を確認)。
+2. `EnemyStatusData`(`CSVData`派生、ヘッダ名引き＋assert)を作る。→形を見せてレビューを受ける。
+3. `modelID`で引く取り出し口＋キャッシュを作る。
+4. 浮遊敵→ワーム→ボスの順に直書き定数・`5`/`2000`を置き換え、1体ごとにビルド確認。
+5. 同じ形で岩の球を`RockShape.csv`へ(`RockDataSetter.cpp`の匿名名前空間の球設定と、旧`Data/CSV/RockData.csv`の整理も含む)。
+- プレイヤーの定数(23個)をどうするかは未決定。ProjectNeaR方式なら「移動速度など種類ごとに変えたい値」だけが対象になる。
+- 参考: `C:\Users\Admin\Documents\GitHub\ProjectNeaR\source\Project\General\CSV\CharaStatusData.h/.cpp`、`bin\Data\CSV\Stage1\CharaStatusData.csv`。
+
+**その他の注意(次回の確認用)**
+- 1面の配置は今日作り直してコミット済み(上の「進捗（2026-10-07・1面のレベルデザイン…）」)。Unityの`Stage1.unity`も同期済み。**未確認: ゲーム内での塊の大きさ・門の隙間・ワームの出現距離**(岩のscaleはコードで`(3,5,3)`固定、岩の幅は推定)。
+- Unityで「Export Stage CSV」を押すと、Unityシーンの内容でCSVが上書きされる。CSVを直接直したら`StageCsvImporter`(バッチ実行コマンドは上の項目)でUnityに取り込むこと。
+- ウィンドウの縮小の相談があった(VS Codeの`Ctrl`+`-`が効かない件)。コマンドパレットの「View: Zoom Out」か`window.zoomLevel`で対応する案を伝えた。
