@@ -10,6 +10,7 @@
 #include "../Constants/Game.h"
 #include "../Manager/ResourceLoader.h"
 #include "../Scene/TitleScene.h"
+#include "Scene/TutorialMessageScene.h"
 
 namespace
 {
@@ -76,7 +77,7 @@ void Application::Run()
 
 	//TitleSceneを作成してChangeSceneで読み込む
 	controller.ChangeScene(
-		std::make_shared<TitleScene>(
+		std::make_shared<TutorialMessageScene>(
 			controller), 60.0f);
 
 	while (ProcessMessage() != -1)
