@@ -1573,3 +1573,32 @@
 - `GaugeActionStateBase`(ゲージ消費中)の`vel.x`は対象外。傾いたままブースト等をしても速くならない。意図どおりかは未確認。
 - 読みやすさの指摘(任意): 2つの分岐の`std::abs(stick.x) * ±tilt_move_speed_x`は`abs`不要(条件で符号が決まる)。「傾きとスティックの向きが同じなら速度=25」の1つの判断にまとめると短くなる。
 - **未確認: 実機での体感**(25が速すぎないか、45°の切り替わりが唐突でないか)。チュートリアルの「傾き」の項で教える内容になる。
+
+### 設計決定・進捗（2026-10-08・チュートリアルのメッセージ表示 `TutorialMessageScene`）
+**設計(ユーザー決定)**
+- 形式: ステージ型は維持しつつ、**「説明を出してゲームを止める→次へで閉じる→右上にタスクを表示→成功するまで先へ進ませない」**というタスク型の流れ。メッセージは**画面下部の黒い四角の上に文字**を出す(最初は文字だけ。画像・ボタン表示はあと)。
+- 動機(ユーザー): **プレイヤーに成功体験を感じてほしい**。→Claudeの提案で、巻き戻しは「位置を戻す(A案)」ではなく**「成功するまでその場で練習できる(B案: 見えない壁・進行を止める)」**を採用する方向(ユーザーの明確な選択はまだ無く、理由の説明だけ)。成功したら右上のタスクに✓/色変更＋SE＋「OK!」などの演出を出す案。各タスクの条件は「1回できたら成功」と甘めにする。一定時間成功しなければヒント再表示(後回し)。
+- 実装方針: ポーズと同じく**シーンのスタック**(`GameScene`から`PushScene(TutorialMessageScene)`、閉じるときに`PopScene`)。`SceneController::Update`は末尾のシーンだけ更新、`Draw`は全シーンなので、ゲームは止まり背景に残る。`PushScene`は`OnSceneChange`を呼ばない。
+- タスクと配置の対応(たたき台、1面の新配置に合わせた): 移動・傾き=Z0〜3000(敵なし) / バレルロール〜3500 / ショット=3500〜(最初の浮遊敵Z=4000の手前) / チャージ=6500〜(門Z=7000、リング6体Z=7500の手前) / ブースト・ブレーキ=10000前後。ロックオンは順番に入っていない(実在するか未確認)。
+- 将来の形: `Stage1/Tutorial.csv`(`triggerZ,message,taskText,taskType`など)。外部化で作ったヘッダ名引き(`CSVData::GetColumnIndex`)を使う。
+
+**今日の作業(ユーザーが実装、未コミット)**
+- `Scene/TutorialMessageScene.h/.cpp`を新規作成(`.vcxproj`/`.filters`にも登録済み)。`Scene`を継承し、`Init`/`Update`/`Draw`/`GetSceneID`を実装。画面比率で下部(x 0.2〜0.8、y 0.8〜0.95)に`DrawBox`し、`DrawString`で「テストメッセージ」を表示できた。
+- **試作のため`Main/Application.cpp`の最初のシーンを`TitleScene`→`TutorialMessageScene`に変更している。コミット前に必ず`TitleScene`に戻すこと。**
+- つまずきと原因(次回の参考):
+  - `xmemory`のエラー: `Scene::Init()`が`abstract`なのに`Init`を実装していなかったため、`make_shared`で「抽象クラスをインスタンス化できない」(C2259)。
+  - 黒い四角が出ない: Y座標を`wsize.width`で計算していた(`height`が正しい)。→修正済み。
+  - リンカエラー: ヘッダに`Init()`を書いたが`.cpp`に定義が無かった。→修正済み。
+  - フォントのアサート(`GetFont`の「フォントIDが見つかりません」): `Result`フォントはクリアシーンのリソース一覧(`clear.fonts`、`ResourceLoader.cpp`486行付近)にしか入っておらず、最初のシーンにするとIDが`None`で何も読まれないため。今は`DrawString`(既定フォント)で回避。本番では**メッセージ用の`FontID`を足し、`font_infos`(204行付近)と`game.fonts`(472行付近)に登録**すれば、そのまま`GetFont`が使える。`ReleaseFont`は`RemoveFontResourceEx`を呼ぶので、同じフォントファイルを複数IDで使う場合は解放の影響に注意。
+- 現状のコードの注意: 四角の色が`0xffffff`(白)・文字が黒になっている(確認用。黒い四角＋白文字に戻す)。`m_textFontHandle`と`#include "Manager/ResourceLoader.h"`は今は未使用。`GetSceneID`は`SceneID()`(=`None`)を返している。本番は専用IDにするか、`PauseScene`のように専用IDを持たせる。
+
+**次にやること(学校で)**
+1. 決定ボタンの`InputEvent`を調べる(`PauseScene.cpp`の選択肢決定が参考)。`TutorialMessageScene::Update`で押した瞬間に`m_controller.PopScene()`。**単独シーンで`PopScene`すると`m_scenes.back()`で落ちる**ので、確認は3と同時に行う(先に確認するなら画面に`DrawFormatString`で表示するだけにする)。
+2. `Application.cpp`を`TitleScene`に戻す。
+3. `GameScene`から`PushScene`する。場所は`PauseScene`を積む箇所(`GameScene.cpp`443行付近)の近く。最初は固定Z(例: 2000)と「1回だけ」のフラグで試す。
+4. メッセージ文をコンストラクタ引数にする。その後`Tutorial.csv`化、右上のタスクUI(`UIBase`派生)、タスクごとの成功判定。
+5. 四角を黒＋白文字に戻し、フォント・`GetSceneID`を整える。
+
+**その他**
+- `abs`の簡略化(傾き加速の2分岐を1つの判断に)は任意。実機での体感(25が適切か)は未確認。
+- 1面の配置(塊の大きさ・門の隙間・ワームの出現距離)と岩`rotY`の向きもゲーム内で未確認。
