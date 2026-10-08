@@ -11,11 +11,7 @@
 namespace
 {
 	//モデルのサイズ
-	const Vector3 model_scale = { 1.0f,1.0f,1.0f };
-	//敵自身の球の当たり判定の半径
-	constexpr float col_radius = 132.0f;
-	//死亡待機状態から完全死亡になるまでのフレーム
-	constexpr int true_dead_frame = 10;
+	const Vector3 model_scale = { 2.0f,2.0f,2.0f };
 }
 
 FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
@@ -23,10 +19,9 @@ FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 	const std::weak_ptr<BulletManager> pBulletManager,
 	std::weak_ptr<CameraBase> camera,
 	const Vector3& pos,
-	int health,
 	std::weak_ptr<SoundManager> pSoundManager,
 	std::weak_ptr<EffectManager> pEffectManager) :
-	EnemyBase(Id,camera,pPlayer,pBulletManager,health),
+	EnemyBase(Id,camera,pPlayer,pBulletManager),
 	m_colSphere(std::make_shared<SphereShape>(pos, 0.0f)),
 	m_pSoundManager(pSoundManager),
 	m_pEffectManager(pEffectManager),
@@ -92,13 +87,13 @@ void FloatingEnemy::Update()
 		Character::Update();
 
 		//当たり判定の更新
-		m_colSphere->Update(m_pos, col_radius);
+		m_colSphere->Update(m_pos, m_colRadius);
 	}
 	//死亡待機中はフレームを数えて一定フレーム経ったら存在を削除
 	else
 	{
 		m_dyingFrame++;
-		if(m_dyingFrame > true_dead_frame)
+		if(m_dyingFrame > m_trueDeadFrame)
 		{
 			//完全死亡
 			OnEnemyDead();

@@ -42,9 +42,6 @@ namespace
 	//ダメージ判定用球の半径
 	constexpr float damage_col_radius = 310.0f;
 
-	//死亡待機状態から完全死亡になるまでの時間
-	constexpr int true_dead_frame = 60 * 5 + 30;
-
 	//死亡待機状態になってから死亡音を鳴らすまでのフレーム
 	constexpr int death_sound_delay_frame = 90;
 
@@ -63,7 +60,7 @@ namespace
 
 BossEnemy::BossEnemy(BossEnemyData& data) :
 	EnemyBase(data.Id, data.pCamera, data.pPlayer,
-	data.pBulletManager,data.health),
+	data.pBulletManager),
 	m_animator(m_modelHandle),
 	m_pSoundManager(data.pSoundManager),
 	m_pEffectManager(data.pEffectManager),
@@ -218,7 +215,7 @@ void BossEnemy::Update()
 			m_pSoundManager.lock()->Play(SoundManager::SoundType::BossDeath);
 		}
 
-		if (m_dyingFrame > true_dead_frame)
+		if (m_dyingFrame > m_trueDeadFrame)
 		{
 			//完全死亡
 			OnEnemyDead();

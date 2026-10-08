@@ -19,7 +19,6 @@ public:
 		const std::weak_ptr<BulletManager> pBulletManager,
 		std::weak_ptr<CameraBase> camera,
 		const Vector3& pos,
-		int health,
 		std::weak_ptr<SoundManager> pSoundManager,
 		std::weak_ptr<EffectManager> pEffectManager);
 	~FloatingEnemy();

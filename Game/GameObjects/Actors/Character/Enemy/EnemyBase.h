@@ -16,8 +16,7 @@ public:
 		ResourceLoader::ModelID modelID,
 		std::weak_ptr<CameraBase> pCamera,
 		std::weak_ptr<Player> pPlayer,
-		std::weak_ptr<BulletManager> pBulletManager,
-		int maxHealth = 100
+		std::weak_ptr<BulletManager> pBulletManager
 	);
 	virtual ~EnemyBase();
 
@@ -43,5 +42,9 @@ protected:
 	std::weak_ptr<BulletManager> m_pBulletManager;
 	//死亡待機状態か
 	bool m_isDying = false;
+	//当たり判定球の半径
+	float m_colRadius = 0.0f;
+	//本当に死ぬまでのフレーム
+	int m_trueDeadFrame = 0;
 };
 

@@ -74,6 +74,9 @@ private:
 	//プレイヤーがどの位置(Z)まで来たら動き出すか
 	float m_activatePlayerZ = 0.0f;
 
+	//死亡エフェクトを出す間隔
+	int m_deathEffectInterval = 0;
+
 	//音のマネージャー
 	std::weak_ptr<SoundManager> m_pSoundManager;
 	//エフェクトのマネージャー

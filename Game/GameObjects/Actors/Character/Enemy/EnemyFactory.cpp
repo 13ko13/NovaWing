@@ -5,7 +5,6 @@
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/TargetManager.h"
 #include "Manager/CollisionManager.h"
-#include "CSVData/EnemyStatusData.h"
 
 namespace
 {
@@ -44,14 +43,12 @@ std::shared_ptr<EnemyBase> EnemyFactory::Create(
 		//エネミーの種類ごとに生成
 	case EnemyType::FloatingEnemy://浮遊敵
 	{
-		int hp = EnemyStatusData::FindByModelID(ResourceLoader::ModelID::FloatingEnemy).GetHp();
 		std::shared_ptr<FloatingEnemy> pFloating = std::make_shared<FloatingEnemy>(
 			m_pPlayer,
 			ResourceLoader::ModelID::FloatingEnemy,
 			m_pBulletManager,
 			m_pCamera,
 			pos,
-			hp,
 			m_pSoundManager,
 			m_pEffectManager
 		);

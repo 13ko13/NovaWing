@@ -1,4 +1,6 @@
-﻿#include "WormEnemy.h"
+﻿#include <cassert>
+
+#include "WormEnemy.h"
 #include "Character/Player/Player.h"
 #include "Manager/BulletManager.h"
 #include "Manager/LightingManager.h"
@@ -7,6 +9,7 @@
 #include "Manager/EffectManager.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/DebugManager.h"
+#include "CSVData/EnemyStatusData.h"
 
 namespace
 {
@@ -16,9 +19,6 @@ namespace
 	constexpr float rot_speed = 4.0f;
 	//螺旋移動の時の半径
 	constexpr float spiral_radius = 160.0f;
-
-	//当たり判定球の半径
-	constexpr float sphere_radius = 40.0f;
 
 	//どのぐらいの間隔で弾を撃つか
 	constexpr int shoot_interval = 60;
@@ -31,8 +31,6 @@ namespace
 
 	//モデルのサイズ
 	const Vector3 model_scale = { 1.0f,1.0f,1.0f };
-	//胴体の死亡エフェクトを出すときの間隔フレーム数
-	constexpr int death_effect_interval = 13;
 }
 
 WormEnemy::WormEnemy(
@@ -56,6 +54,11 @@ WormEnemy::WormEnemy(
 
 	//螺旋の中心を保存
 	m_spiralCenter = Vector2(data.pos.x, data.pos.y);
+
+	//エフェクトを出す間隔を設定
+	m_deathEffectInterval = EnemyStatusData::FindByModelID(data.modelID).GetDeathEffectInterval();
+	//ゼロ除算対策
+	assert(m_deathEffectInterval > 0);
 }
 
 WormEnemy::~WormEnemy()
@@ -151,13 +154,13 @@ void WormEnemy::Update()
 
 		//各Sphereの位置を更新
 		//頭の当たり判定更新
-		m_headSphere->Update(m_pos, sphere_radius);
+		m_headSphere->Update(m_pos, m_colRadius);
 		//胴体の当たり判定更新(胴体の数だけループ)
 		for (int i = 0; i < m_segmentCount; i++)
 		{
 			//対応する位置をそれぞれ更新する
 			m_segmentSpheres[i]->Update(
-				m_segmentPositions[i], sphere_radius
+				m_segmentPositions[i], m_colRadius
 			);
 		}
 
@@ -197,7 +200,7 @@ void WormEnemy::Update()
 		//死亡エフェクトを一定間隔で、頭と胴体の場所に出す
 		if (m_segmentCount >= m_deathEffectNum)
 		{
-			if (m_frame % death_effect_interval == 0)
+			if (m_frame % m_deathEffectInterval == 0)
 			{
 				//死亡エフェクトが未発動であれば頭の位置にエフェクトを出す
 				if (m_deathEffectNum == 0)

@@ -12,6 +12,7 @@ namespace
 
 	constexpr float move_speed_x = 19.0f;//横方向の移動速度
 	constexpr float move_speed_y = 19.0f;//縦方向の移動速度
+	constexpr float tilt_move_speed_x = 25.0f;//機体が傾いているときの横移動速度
 
 	constexpr float stick_dead_zone = 0.1f;//スティックのデッドゾーン
 
@@ -23,6 +24,9 @@ namespace
 	constexpr float stick_input_max = 1000.0f;
 	//この値未満ならIdleMovementStateに戻すしきい値
 	constexpr float idle_return_threshold = 0.1f;
+
+	//プレイヤーが傾いていると判断する閾値
+	constexpr float tilt_threshold = DX_PI_F / 4.0f;
 }
 
 MovingState::MovingState(const std::weak_ptr<Player> pPlayer) :
@@ -75,9 +79,21 @@ void MovingState::Update()
 	//上下入力
 	vel.y = -stick.y * move_speed_y;
 	//左右入力
-	//TODO:プレイヤーを通じて、ローリング状態を取得。
 	//ローリングされてたら、そのローリングの符号に応じた方向への移動速度を増やす
-	vel.x = stick.x * move_speed_x;
+	if (pPlayer->GetRotationZ() > tilt_threshold&&
+		stick.x > 0.0f)
+	{
+		vel.x = std::abs(stick.x) * tilt_move_speed_x;
+	}
+	else if (pPlayer->GetRotationZ() < -tilt_threshold&&
+		stick.x < 0.0f)
+	{
+		vel.x = std::abs(stick.x) * -tilt_move_speed_x;
+	}
+	else
+	{
+		vel.x = stick.x * move_speed_x;
+	}
 
 	//進むときのスピードを設定する
 	vel.z = move_speed_z;

@@ -1546,7 +1546,24 @@
 - **キャッシュの置き場所(ユーザー決定)**: 新クラス(`GameScene`が持つ`EnemyStatusTable`)は「敵のステータスごときにクラスを作りたくない」で不採用。`EnemyStatusData`の`static const EnemyStatusData& FindByModelID(ModelID)`の中の`static const auto table = CreateStatusTable()`(private static)で初回だけ読む。**CSVを変えたらゲーム再起動が必要**。
 - **(済・動作確認済み)** 浮遊敵のHP: `FloatingEnemyDataSetter`と`EnemyFactory`(ボスの召喚)の`5`を`FindByModelID(...).GetHp()`に置き換え。
 - **次**: 浮遊敵の`col_radius`(132)/`true_dead_frame`(10)(`FloatingEnemy.cpp:16,18`)→ワーム→ボス。
+- **(済・ビルドOK)設計変更**: `FindByModelID`は`EnemyBase`のコンストラクタで呼ぶ(ユーザー提案)。HPは`Character`に`FindByModelID(modelID).GetHp()`を渡し、`EnemyBase`の`maxHealth`引数は削除。`EnemyBase`に`protected`の`m_colRadius`/`m_trueDeadFrame`(コンストラクタ本体で代入。初期化子リストは長くなるのでユーザーは使わない方針)。→**`EnemyBase`継承の敵は全員`EnemyStatus.csv`に行が必要(無いとassert)**。浮遊敵の`health`引数・定数2つ、`FloatingEnemyDataSetter`/`EnemyFactory`の`hp`、`BossEnemy`の`EnemyBase`への`data.health`を削除済み。`BossData::health`と`BossEnemyDataSetter`の`2000`は未使用のまま残っている(ボスの番で片付け)。
+- 残り: ワーム(`WormEnemy.cpp`の`sphere_radius`40・`death_effect_interval`13)→ボス(`true_dead_frame`、health整理)→`RockShape.csv`。
+- **(済)ワーム**: `sphere_radius`→`m_colRadius`、`death_effect_interval`はワームだけなので`WormEnemy`の`m_deathEffectInterval`(コンストラクタで`FindByModelID(data.modelID)`)。動作確認済み。**注意: `m_frame % m_deathEffectInterval`なのでCSVで0にすると死亡時に0除算でクラッシュ。**
+- **(済)ボス**: `true_dead_frame`→`m_trueDeadFrame`、`BossEnemyData::health`と`BossEnemyDataSetter`の`2000`を削除。ボスの判定半径(1500/310)は対象外のまま。
+- **敵の外部化は完了。残り: 手順5の`RockShape.csv`(岩の球)**。→**ユーザー判断で岩は当面放置**。
+
+### 設計中（2026-10-08・チュートリアル）
+- **形式(ユーザー決定)**: ステージ型。今のステージ1をそのまま使い、進みながらヒントを出す(課題型ではない)。実装案は「プレイヤーのZがこの値を超えたらヒント」を`Stage1/Hint.csv`等で持つ(未決定)。
+- **教える順(ユーザー案)**: 移動→傾き→バレルロール→ブースト→ブレーキ→ショット→チャージショット。ロックオンは順に入っていない(未確認)。
+- **未実装と判明**: 「傾けた方向への横移動が速くなる」。`MovingState.cpp`の`vel.x = stick.x * move_speed_x`(19)に傾きが反映されていない。傾き=ローリングボタン1回押しの長押しでZ回転±90°(`DefaultRotationState.cpp`の180〜195行目、海面付近は0)。
+- 別件: 浮遊敵(オレンジのテクスチャ)と敵弾(黄オレンジ、R255/G200/B40前後)の色が似て見づらい→別セッションで対応中。
 
 ### 進捗（2026-10-08・リザルト画面のDebug/ReleaseでUIサイズが違う問題を修正）
 - 2026-09-23の`GetUIScale()`対応から漏れていた箇所を修正。`ClearScene.cpp`のテンプレート画像(`templete_size`)に`uiScale`を掛けた。リザルトの数字はフォント(`FontID::Result`, 105px固定)で描いていたため、`ResourceLoader::LoadFont`で`size`と`space`に`GetUIScale()`を掛けるようにした(全フォント共通、現状フォントはResultのみ)。
 - Debug/Release両方でビルド成功。**実機での見た目確認は未実施。** ぼかし(`blur_range`=16)はGraphFilterの仕様上8/16/32しか選べないため据え置き(Debugでは相対的に少し強めのにじみになる)。
+
+### 進捗（2026-10-08・敵の弾の色を黄〜橙からピンク寄りのマゼンタに変更）
+- 理由: 黄色の浮遊敵や橙の着弾・爆発と色がかぶっていた。緑(プレイヤー弾)・青/水色(海・空・ブースト)・黄(浮遊敵)・橙(爆発)・赤(WARNING)・紫(ボスのビーム)を避けて、ピンク寄りのマゼンタにした。
+- Effekseer MCPで`EnemyBullet.efkefc`の全ノードの色を変更し、`.efk`を書き出した(倍率50)。Glow(255,40,150,255)・Ring(255,70,180,220→230,20,140,0)・Tail(255,80,200,200→200,20,140,0)・SeaGlow(255,70,185,210)・SeaTrail(255,60,180,140→)・芯のCore(255,235,250)・Streak(255,225,245→255,120,215)。
+- **Glow/Ring/Tail/SeaGlow/SeaTrailの合成を加算→通常(Blend)に変更。** 加算のままだと青い海の上で青が足されて紫に見え、ボスのビームと区別しにくかったため。芯(Core/Streak)は加算のまま。テクスチャは白+アルファなのでBlendでも黒い四角は出ない。
+- エディタ上で黒背景・海の青(40,110,160)背景の両方で確認済み。**ゲーム内の見た目は未確認。**

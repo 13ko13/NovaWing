@@ -50,7 +50,6 @@ std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
         bossData.pCamera = pCamera;
         bossData.pos = pos;
         bossData.pPlayer = pPlayer;
-        bossData.health = 2000;
         bossData.pSoundManager = pSoundManager;
         bossData.pEffectManager = pEffectManager;
 

@@ -27,7 +27,6 @@ public:
 		std::weak_ptr<SoundManager> pSoundManager;
 		std::weak_ptr<EffectManager> pEffectManager;
 		Vector3 pos;
-		int health = 0;
 	};
 
 	BossEnemy(BossEnemyData& data);
