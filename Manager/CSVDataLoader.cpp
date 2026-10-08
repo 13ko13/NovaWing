@@ -30,13 +30,26 @@ std::vector<std::shared_ptr<CSVData>> CSVDataLoader::LoadCSV(const wchar_t* path
 	std::wstring pPath = csv_path + path + csv;
 	//データをすべて読み込む
 	auto valuesDatas = GetWStringList(pPath.c_str());
-
-	for (auto values : valuesDatas)
+	//空の時は何もせず返す
+	if(valuesDatas.empty())
 	{
+		return datas;
+	}
+
+	//0番目の情報をヘッダとして保持
+	std::vector<std::wstring> header = valuesDatas[0];
+
+	for (size_t i = 1; i < valuesDatas.size(); i++)
+	{
+		//データを取得
+		std::vector<std::wstring>& values = valuesDatas[i];
+
 		//データ
 		std::shared_ptr<CSVData> data = std::make_shared<CSVData>();
 		//データをセット
 		data->SetData(values);
+		//ヘッダーをセット
+		data->SetHeader(header);
 		//配列に追加
 		datas.push_back(data);
 	}
@@ -87,7 +100,7 @@ std::vector<std::vector<std::wstring>> CSVDataLoader::GetWStringList(const wchar
 	//行ごとに処理
 	std::wstringstream ws(wdata);
 	std::wstring line;
-	bool isHeader = false;//ヘッダー行を読み飛ばすためのフラグ
+	bool isHeader = false;//ヘッダーを判定するためのフラグ
 	std::vector<std::wstring> header;//ヘッダー行を格納する配列
 
 	//CSVの行を終わりまで読み取る
@@ -116,6 +129,8 @@ std::vector<std::vector<std::wstring>> CSVDataLoader::GetWStringList(const wchar
 		{
 			header = values;
 			isHeader = true;
+			//ヘッダーもvaluesDatasに追加する
+			valuesDatas.emplace_back(header);
 			continue;
 		}
 

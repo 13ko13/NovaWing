@@ -66,5 +66,9 @@
         "editor.formatOnPaste": false,
         "editor.formatOnSave": false,
         "editor.formatOnType": true
-    }
+    },
+    "[csv]": {
+        "files.encoding": "utf8"
+    },
+    "rainbow_csv.virtual_alignment_mode": "always"
 }

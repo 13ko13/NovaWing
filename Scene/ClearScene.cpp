@@ -410,7 +410,7 @@ void ClearScene::Draw()
 	DrawGraphToShaderByCenter(
 		wsize.width * 0.5f,
 		wsize.height * 0.5f,
-		templete_size,
+		templete_size * uiScale,
 		handle,
 		1.0f,
 		uvMaxU,

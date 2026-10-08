@@ -326,6 +326,9 @@
     </ClCompile>
     <ClCompile Include="Game\UI\WarningUI.cpp">
       <Filter>ソース ファイル</Filter>
+    <ClCompile Include="CSVData\EnemyStatusData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     </ClCompile>  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants\Game.h">
@@ -666,6 +669,9 @@
     </ClInclude>
     <ClInclude Include="Game\UI\WarningUI.h">
       <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="CSVData\EnemyStatusData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     </ClInclude>  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="LightingPS.hlsl" />

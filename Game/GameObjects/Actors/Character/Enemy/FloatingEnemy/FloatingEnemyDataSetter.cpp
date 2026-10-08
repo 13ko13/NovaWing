@@ -9,6 +9,7 @@
 #include "Utility/Vector3.h"
 #include "Game/GameObjects/Actors/Character/Enemy/FloatingEnemy/FloatingEnemy.h"
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
+#include "CSVData/EnemyStatusData.h"
 
 namespace
 {
@@ -46,7 +47,10 @@ std::vector<std::shared_ptr<EnemyBase>> FloatingEnemyDataSetter::CreateEnemy(
 
         //位置(文字列)をVector3に変換
         Vector3 pos = Vector3::FromWString(
-            dataString[1],dataString[2],dataString[3]);
+			dataString[1], dataString[2], dataString[3]);
+
+		//HPを受け取る
+		int hp = EnemyStatusData::FindByModelID(modelID).GetHp();
 
         //その位置と、pCameraで敵を一つ作成する
         pEnemies.push_back(std::make_shared<FloatingEnemy>(
@@ -55,7 +59,7 @@ std::vector<std::shared_ptr<EnemyBase>> FloatingEnemyDataSetter::CreateEnemy(
             pBulletManager,//バレットマネージャー
             pCamera,//カメラ
             pos,//位置
-            5,
+            hp,//HP
             pSoundManager,
             pEffectManager
             ));

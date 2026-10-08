@@ -5,6 +5,7 @@
 
 #include "ResourceLoader.h"
 #include "Constants/ResourceConstants.h"
+#include "Main/Application.h"
 
 namespace
 {
@@ -946,14 +947,16 @@ void ResourceLoader::LoadFont(FontID id)
 
 	//フォントをPC内に一時的に追加
 	AddFontResourceEx(it->second.path, FR_PRIVATE, NULL);
+	//UIの見た目の大きさをDebug/Releaseで揃えるためのスケール
+	float uiScale = Application::GetInstance().GetUIScale();
 	int handle = CreateFontToHandle(
 		it->second.name,
-		it->second.size,
+		static_cast<int>(it->second.size * uiScale),
 		it->second.thick,
 		it->second.type
 	);
 	assert(handle >= 0 && "フォントの読み込みに失敗しました");
-	SetFontSpaceToHandle(it->second.space, handle);
+	SetFontSpaceToHandle(static_cast<int>(it->second.space * uiScale), handle);
 
 	//ttfのパスとハンドルを同時に保存
 	m_fontHandles[id].handle = handle;

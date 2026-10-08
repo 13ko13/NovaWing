@@ -262,6 +262,7 @@
     <ClCompile Include="Game\Collision\BossBeamTipCollider.cpp" />
     <ClCompile Include="Scene\LoadingScene.cpp" />
     <ClCompile Include="Game\Collision\ChargeExplosionCollider.cpp" />
+    <ClCompile Include="CSVData\EnemyStatusData.cpp" />
     <ClCompile Include="Game\UI\WarningUI.cpp" />  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
@@ -376,6 +377,7 @@
     <ClInclude Include="Scene\SceneID.h" />
     <ClInclude Include="Scene\LoadingScene.h" />
     <ClInclude Include="Game\Collision\ChargeExplosionCollider.h" />
+    <ClInclude Include="CSVData\EnemyStatusData.h" />
     <ClInclude Include="Game\UI\WarningUI.h" />  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">

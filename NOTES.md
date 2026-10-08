@@ -1531,3 +1531,22 @@
 - 1面の配置は今日作り直してコミット済み(上の「進捗（2026-10-07・1面のレベルデザイン…）」)。Unityの`Stage1.unity`も同期済み。**未確認: ゲーム内での塊の大きさ・門の隙間・ワームの出現距離**(岩のscaleはコードで`(3,5,3)`固定、岩の幅は推定)。
 - Unityで「Export Stage CSV」を押すと、Unityシーンの内容でCSVが上書きされる。CSVを直接直したら`StageCsvImporter`(バッチ実行コマンドは上の項目)でUnityに取り込むこと。
 - ウィンドウの縮小の相談があった(VS Codeの`Ctrl`+`-`が効かない件)。コマンドパレットの「View: Zoom Out」か`window.zoomLevel`で対応する案を伝えた。
+
+### 方針決定（2026-10-08・ステージ1をチュートリアルに）
+- **進める順(ユーザー決定)**: ①パラメータの外部化(`EnemyStatus.csv`、上の「次にやること」1〜5)をとりあえず終わらせる → ②**ステージ1をチュートリアルにする**(大まかでよい) → ③ステージ2(雨の荒廃ビル街)へ。
+- チュートリアルの中身(何を教えるか・進め方)は未決定。
+- 外部化のメモ: ワームのHPは直書きではなく、`EnemyBase`のコンストラクタ引数`maxHealth`の既定値`100`がそのまま使われている(`WormEnemy.cpp:45`で渡していない)。
+
+### 進捗（2026-10-08・外部化: ヘッダをCSVDataまで届ける、完了）
+- **`Data/CSV/Params/EnemyStatus.csv`作成済み**(ユーザー)。`modelID,hp,colRadius,trueDeadFrame,deathEffectInterval` / FloatingEnemy 5,132,10,0 / WormHead 100,40,0,13 / Boss 2000,0,330,0。
+- **BOM**: 最初Excelの「CSV UTF-8」で保存しBOM付きになった→VS Codeで「エンコード付きで保存→UTF-8」で除去。原因の一つはワークスペース設定`files.encoding: utf8bom`。`.vscode/settings.json`に`"[csv]": {"files.encoding": "utf8"}`と`rainbow_csv.virtual_alignment_mode: always`(見た目だけ列をそろえる。ステータスバーの「Align」は実際にスペースを書き込むので押さない)を追加。**読み込み側のBOM除去はユーザー判断で見送り**(ExcelでCSV UTF-8保存すると1列目のヘッダ名が`﻿modelID`になりassertで止まる、と覚えておく)。旧`Data/CSV/RockData.csv`だけBOM付き(旧形式、整理予定)。
+- **ユーザーが実装・動作確認済み**: `GetWStringList`がヘッダ行も先頭に入れて返す / `CSVData`に`m_header`と`SetHeader` / `LoadCSV`が空チェック→`[0]`をヘッダ→`i=1`から`SetData`+`SetHeader`。既存の岩・敵・ボスは今までどおり出る。
+- **次**: `CSVData`に「ヘッダ名から何列目かを探す関数」(無い名前はassert)→`EnemyStatusData`。
+- **(済・ユーザー実装)** `CSVData::GetColumnIndex(name) const`(protected、無ければassert→-1)、`GetHeader()`、デストラクタをvirtualに。`CSVData/EnemyStatusData`(`CSVData`継承、`shared_ptr<CSVData>`を受けるコンストラクタでデータ+ヘッダを写して`Conversion()`、modelIDは`ResourceLoader::ModelID`で保持＝.hで`ResourceLoader.h`をincludeするのはユーザー判断で許容)。
+- **キャッシュの置き場所(ユーザー決定)**: 新クラス(`GameScene`が持つ`EnemyStatusTable`)は「敵のステータスごときにクラスを作りたくない」で不採用。`EnemyStatusData`の`static const EnemyStatusData& FindByModelID(ModelID)`の中の`static const auto table = CreateStatusTable()`(private static)で初回だけ読む。**CSVを変えたらゲーム再起動が必要**。
+- **(済・動作確認済み)** 浮遊敵のHP: `FloatingEnemyDataSetter`と`EnemyFactory`(ボスの召喚)の`5`を`FindByModelID(...).GetHp()`に置き換え。
+- **次**: 浮遊敵の`col_radius`(132)/`true_dead_frame`(10)(`FloatingEnemy.cpp:16,18`)→ワーム→ボス。
+
+### 進捗（2026-10-08・リザルト画面のDebug/ReleaseでUIサイズが違う問題を修正）
+- 2026-09-23の`GetUIScale()`対応から漏れていた箇所を修正。`ClearScene.cpp`のテンプレート画像(`templete_size`)に`uiScale`を掛けた。リザルトの数字はフォント(`FontID::Result`, 105px固定)で描いていたため、`ResourceLoader::LoadFont`で`size`と`space`に`GetUIScale()`を掛けるようにした(全フォント共通、現状フォントはResultのみ)。
+- Debug/Release両方でビルド成功。**実機での見た目確認は未実施。** ぼかし(`blur_range`=16)はGraphFilterの仕様上8/16/32しか選べないため据え置き(Debugでは相対的に少し強めのにじみになる)。

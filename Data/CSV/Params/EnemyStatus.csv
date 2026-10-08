@@ -1,0 +1,4 @@
+modelID,hp,colRadius,trueDeadFrame,deathEffectInterval
+FloatingEnemy,5,132,10,0
+WormHead,100,40,0,13
+Boss,2000,0,330,0
