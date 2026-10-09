@@ -41,7 +41,7 @@ float BrakeState::GetSpeed() const
 	return brake_speed;
 }
 
-const char* BrakeState::GetButtonName() const
+InputEvent BrakeState::GetInputEvent() const
 {
-	return "brake";
+	return InputEvent::brake;
 }

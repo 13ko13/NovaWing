@@ -14,7 +14,7 @@ public:
 
 private:
 	float GetSpeed() const override;//速度
-	const char* GetButtonName() const override;//ボタン名
+	InputEvent GetInputEvent() const override;//ボタンの入力イベント
 
 	//ブーストエフェクト
 	int m_boostPlayEffect = -1;

@@ -1602,3 +1602,12 @@
 **その他**
 - `abs`の簡略化(傾き加速の2分岐を1つの判断に)は任意。実機での体感(25が適切か)は未確認。
 - 1面の配置(塊の大きさ・門の隙間・ワームの出現距離)と岩`rotY`の向きもゲーム内で未確認。
+
+### 2026-10-09 `InputEvent`を文字列定数から`enum class`に変更
+- 指摘(`InputEvent`はenumでよいのでは)を受けて変更。ユーザーの明示的な依頼でClaudeが直接編集した。
+- `Manager/InputManager.h`: `namespace InputEvent`(`constexpr const char*`)→`enum class InputEvent`。デバッグ用5つは`#ifdef _DEBUG`のまま。`m_inputTable`/`m_inputData`/`m_lastInputData`のキーを`std::string`→`InputEvent`、`IsPressed/IsTriggered/IsReleased`の引数を`InputEvent`に変更。
+- `Manager/InputManager.cpp`: 上記3関数の引数変更とコメント修正。登録側(`m_inputTable[InputEvent::ok] = ...`)は変更なし。
+- `BossEnemy.cpp`: 文字列リテラルで直接呼んでいた`IsTriggered("killBoss")`を`InputEvent::killBoss`に修正(これのみ)。
+- `GaugeActionStateBase`/`BoostState`/`BrakeState`: `const char* GetButtonName()`が文字列を返していたので`InputEvent GetInputEvent()`に変更(基底ヘッダに`InputManager.h`をinclude)。
+- 効果: 綴りミス・コピペ重複(過去の`upScanlineFrequency`バグ)がコンパイルエラーになり、毎フレームの文字列比較が整数比較になる。
+- **未確認: ビルド**(ユーザーがF5で確認する)。

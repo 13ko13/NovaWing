@@ -204,7 +204,21 @@ namespace
 	//FontIDと読み込み情報の対応表
 	const std::unordered_map<ResourceLoader::FontID, FontInfo> font_infos =
 	{
-		{ ResourceLoader::FontID::Result, { result_font_path, result_font_name, result_font_size, result_font_thick, result_font_type, font_space } },//リザルト用
+		{ ResourceLoader::FontID::Result,{
+			result_font_path,
+			result_font_name,
+			result_font_size,
+			result_font_thick,
+			result_font_type,
+			font_space } },//リザルト用
+
+		{ ResourceLoader::FontID::Message,{
+			message_font_path,
+			message_font_name,
+			message_font_size,
+			message_font_thick,
+			message_font_type,
+			font_space } },//メッセージ用
 	};
 }
 
@@ -468,8 +482,9 @@ void ResourceLoader::InitSceneResources()
         SoundID::BossMove, SoundID::BossDeath, SoundID::BossDamage, SoundID::BossRecovery,
         SoundID::BossBeam, SoundID::BossSummon, SoundID::EnemyShoot,
         SoundID::FloatingBoot, SoundID::EnemyDeath, SoundID::OnCursor
-    };
-    m_sceneResources[SceneID::Game] = game;
+	};
+	game.fonts = { FontID::Message };
+	m_sceneResources[SceneID::Game] = game;
 
     //クリア
     SceneResources clear;

@@ -48,6 +48,7 @@
 #include "Game/UI/SpecialGaugeUI.h"
 #include "Game/UI/WarningUI.h"
 #include "PauseScene.h"
+#include "Scene/TutorialMessageScene.h"
 
 namespace
 {
@@ -443,6 +444,11 @@ void GameScene::Update()
 		m_controller.PushScene(std::make_shared<PauseScene>(m_controller, m_pSoundManager, m_pPlayer));
 	}
 
+	//試しにチュートリアルメッセージシーンを上乗せ
+	if (InputManager::GetInstance().IsTriggered(InputEvent::Tutorial))
+	{
+		m_controller.PushScene(std::make_shared<TutorialMessageScene>(m_controller,L"左スティックで移動しろ！"));
+	}
 }
 
 void GameScene::Draw()

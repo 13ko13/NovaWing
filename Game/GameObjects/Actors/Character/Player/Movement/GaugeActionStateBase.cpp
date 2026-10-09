@@ -34,15 +34,15 @@ GaugeActionStateBase::~GaugeActionStateBase()
 
 void GaugeActionStateBase::Update()
 {
-	//ボタンの名前を取得(boost or brake)
-	const char* buttonName = GetButtonName();
+	//ボタンの入力イベントを取得(boost or brake)
+	const InputEvent inputEvent = GetInputEvent();
 	//InputManager
 	InputManager& input = InputManager::GetInstance();
 	//Player
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 
 	//ボタンを押されているならゲージを消費する
-	if (input.IsPressed(buttonName))
+	if (input.IsPressed(inputEvent))
 	{
 		//ゲージを消費
 		pPlayer->ChangeGauge(gauge_consumption);

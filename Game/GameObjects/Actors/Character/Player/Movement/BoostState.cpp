@@ -80,7 +80,7 @@ float BoostState::GetSpeed() const
 	return boost_speed;
 }
 
-const char* BoostState::GetButtonName() const
+InputEvent BoostState::GetInputEvent() const
 {
-	return "boost";
+	return InputEvent::boost;
 }

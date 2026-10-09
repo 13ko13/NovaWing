@@ -1,11 +1,13 @@
 ﻿#pragma once
 
 #include "Scene.h"
+#include <string>
 
 class TutorialMessageScene : public Scene
 {
 public:
-    TutorialMessageScene(SceneController& controller);
+	TutorialMessageScene(SceneController& controller,
+		const std::wstring& hintText);
 	virtual ~TutorialMessageScene();
 
 	//初期化
@@ -20,4 +22,6 @@ public:
 private:
 	//テキストのフォントハンドル
 	int m_textFontHandle = -1;
+	//ヒントテキスト
+	std::wstring m_hintText;
 };

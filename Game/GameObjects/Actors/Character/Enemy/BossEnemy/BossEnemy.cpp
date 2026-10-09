@@ -268,7 +268,7 @@ void BossEnemy::Update()
 
 #ifdef _DEBUG
 	//ボスをワンボタンキル
-	if (InputManager::GetInstance().IsTriggered("killBoss"))
+	if (InputManager::GetInstance().IsTriggered(InputEvent::killBoss))
 	{
 		m_health -= m_maxHealth;
 	}

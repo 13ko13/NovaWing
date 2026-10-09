@@ -24,7 +24,7 @@ InputManager::InputManager() :
 	m_bufY(0),
 	m_rightStickDir({ 0.0f, 0.0f })
 {
-	// イベント名を添え字にして、右辺値に実際の入力種別と押されたボタンの配列を置く
+	// イベントを添え字にして、右辺値に実際の入力種別と押されたボタンの配列を置く
 	// パッド側はXINPUT_BUTTON_*(GetJoypadXInputStateのButtons配列のインデックス)を指定する
 	m_inputTable[InputEvent::ok] = { {PeripheralType::keyboard, KEY_INPUT_A}, // キーボード:A
 									{PeripheralType::pad1, XINPUT_BUTTON_A} };	 // パッド:Aボタン
@@ -67,7 +67,9 @@ InputManager::InputManager() :
 	m_inputTable[InputEvent::upScanlineFrequency] =
 		{ {PeripheralType::keyboard, KEY_INPUT_Q} }; // キーボード:Q
 	m_inputTable[InputEvent::downScanlineFrequency] =
-		{ {PeripheralType::keyboard, KEY_INPUT_E} }; // キーボード:E
+	{ { PeripheralType::keyboard, KEY_INPUT_E } }; // キーボード:E
+	m_inputTable[InputEvent::Tutorial] =
+	{ { PeripheralType::keyboard, KEY_INPUT_T } }; // キーボード:T
 #endif
 
 	// あらかじめ入力データのための枠を開けておく
@@ -99,7 +101,7 @@ void InputManager::Update()
 	// inputTableを回して各イベントの入力をチェックする
 	for (const auto& inputInfo : m_inputTable)
 	{
-		auto& input = m_inputData[inputInfo.first]; // inputInfo.firstには"ok"等が入っている
+		auto& input = m_inputData[inputInfo.first]; // inputInfo.firstにはInputEvent::ok等が入っている
 		// inputを書き換えると、inputDataのそのイベントが押されてるかどうかを
 		// 書き換えることになる
 		for (const auto& state : inputInfo.second) // InputStateのベクタを回す
@@ -200,30 +202,25 @@ InputManager& InputManager::GetInstance()
 	return instance;
 }
 
-bool InputManager::IsPressed(const char* name) const
+bool InputManager::IsPressed(InputEvent event) const
 {
-	// もし「ない」イベントを送られるとクラッシュします
-	// もしクラッシュがいやだったら
-	// if(inputData.contains(name))
-	//{
-	//	 return false;//で回避できます。
-	// }
-	return m_inputData.at(name); // const関数内部なので[]ではなくatを使用してる
+	// 対応表に登録されていないイベントを送られるとクラッシュします
+	return m_inputData.at(event); // const関数内部なので[]ではなくatを使用してる
 }
 
-bool InputManager::IsTriggered(const char* name) const
+bool InputManager::IsTriggered(InputEvent event) const
 {
 	// 今入力されているボタンと
 	// 前のフレームで入力されているボタンを比較する
-	return m_inputData.at(name) && !m_lastInputData.at(name);
+	return m_inputData.at(event) && !m_lastInputData.at(event);
 }
 
-bool InputManager::IsReleased(const char* name) const
+bool InputManager::IsReleased(InputEvent event) const
 {
 	// 前のフレームで入力されているボタンと
 	// 現在入力されているかどうかを比較して
 	// 入力されていなかったらtrueにする
-	return m_lastInputData.at(name) && !m_inputData.at(name);
+	return m_lastInputData.at(event) && !m_inputData.at(event);
 }
 
 int InputManager::GetBufX()

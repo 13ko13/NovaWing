@@ -173,6 +173,17 @@ namespace
 	//間隔
 	constexpr int font_space = 4;
 
+	//場所
+	constexpr const wchar_t* message_font_path = L"Data/Fonts/ZenKakuGothicNew-Bold.ttf";
+	//フォント名
+	constexpr const wchar_t* message_font_name = L"Zen Kaku Gothic New";
+	//サイズ
+	constexpr int message_font_size = 60;
+	//太さ
+	constexpr int message_font_thick = 3;
+	//フォントタイプ
+	constexpr int message_font_type = DX_FONTTYPE_ANTIALIASING_4X4;
+
 	//----------サウンドのパス--------------
 	//タイトルでの飛行音
 	constexpr const wchar_t* title_boost_sound_path = L"Data/Sounds/Title/TitleBoost.mp3";

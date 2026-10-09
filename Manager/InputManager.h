@@ -5,33 +5,34 @@
 
 #include "../Utility/Vector2.h"
 
-//入力イベント名(InputManagerの対応表・IsTriggered等の呼び出しで共通して使う定数)
+//入力イベント(InputManagerの対応表・IsTriggered等の呼び出しで共通して使う)
 //注意:ヘッダに書かないと別のクラスから使用することができない
-namespace InputEvent
+enum class InputEvent
 {
-	constexpr const char* ok = "ok";
-	constexpr const char* next = "next";
-	constexpr const char* shoot = "shoot";
-	constexpr const char* somersault = "somersault";
-	constexpr const char* boost = "boost";
-	constexpr const char* brake = "brake";
-	constexpr const char* up = "up";
-	constexpr const char* down = "down";
-	constexpr const char* any_key = "anyKey";
-	constexpr const char* pause = "pause";
-	constexpr const char* close = "close";
-	constexpr const char* right_rolling = "rightRolling";
-	constexpr const char* left_rolling = "leftRolling";
+	ok,
+	next,
+	shoot,
+	somersault,
+	boost,
+	brake,
+	up,
+	down,
+	any_key,
+	pause,
+	close,
+	right_rolling,
+	left_rolling,
 
 #ifdef _DEBUG
 	//デバッグ用
-	constexpr const char* gaugeUp = "gaugeUp";
-	constexpr const char* gaugeDown = "gaugeDown";
-	constexpr const char* killBoss = "killBoss";
-	constexpr const char* downScanlineFrequency = "downScanlineFrequency";
-	constexpr const char* upScanlineFrequency = "upScanlineFrequency";
+	gaugeUp,
+	gaugeDown,
+	killBoss,
+	downScanlineFrequency,
+	upScanlineFrequency,
+	Tutorial
 #endif
-}
+};
 
 /// <summary>
 /// 周辺機器種別
@@ -60,9 +61,9 @@ class InputManager
 {
 	//mapは対応表のようなもの
 private:
-	std::map<std::string, std::vector<InputState>> m_inputTable;///イベント名と実際の入力の対応表
-	std::map<std::string, bool>m_inputData;///実際に入力されたかどうかのデータ
-	std::map<std::string, bool>m_lastInputData;///前のフレームに入力されたかどうかのデータ
+	std::map<InputEvent, std::vector<InputState>> m_inputTable;///イベントと実際の入力の対応表
+	std::map<InputEvent, bool>m_inputData;///実際に入力されたかどうかのデータ
+	std::map<InputEvent, bool>m_lastInputData;///前のフレームに入力されたかどうかのデータ
 
 	//コントローラーの左スティックを倒したときの値を保持するもの
 	int m_bufX;
@@ -96,23 +97,23 @@ public:
 	/// <summary>
 	/// 特定のボタンがおされているか
 	/// </summary>
-	/// <param name="name">イベント名(例:OK,BACKなど)</param>
+	/// <param name="event">入力イベント(例:ok,closeなど)</param>
 	/// <returns>押されている:true,押されていない:false</returns>
-	bool IsPressed(const char* name) const;
+	bool IsPressed(InputEvent event) const;
 
 	/// <summary>
 	/// 特定のボタンが現在押されたか(押された瞬間のみ反応する)
 	/// </summary>
-	/// <param name="name">イベント名</param>
+	/// <param name="event">入力イベント</param>
 	/// <returns>今押された瞬間:true,押されてないor押しっぱなし:false</returns>
-	bool IsTriggered(const char* name) const;
+	bool IsTriggered(InputEvent event) const;
 
 	/// <summary>
 	/// 特定のボタンが離された瞬間のみ反応する
 	/// </summary>
-	/// <param name="name">イベント名</param>
+	/// <param name="event">入力イベント</param>
 	/// <returns>離された瞬間:true,まだ押されていたらfalse</returns>
-	bool IsReleased(const char* name) const;
+	bool IsReleased(InputEvent event) const;
 
 	/// <summary>
 	/// コントローラーの左スティックを倒したときどのくらい倒したかのXの値を取得する

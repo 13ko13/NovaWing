@@ -170,6 +170,7 @@ public:
 	enum class FontID : int
 	{
 		Result,//リザルト用のフォント
+		Message,//チュートリアルや、メッセージ用のフォント
 	};
 
 	//シーンそれぞれが使うリソースの一覧
