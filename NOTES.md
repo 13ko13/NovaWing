@@ -1611,3 +1611,74 @@
 - `GaugeActionStateBase`/`BoostState`/`BrakeState`: `const char* GetButtonName()`が文字列を返していたので`InputEvent GetInputEvent()`に変更(基底ヘッダに`InputManager.h`をinclude)。
 - 効果: 綴りミス・コピペ重複(過去の`upScanlineFrequency`バグ)がコンパイルエラーになり、毎フレームの文字列比較が整数比較になる。
 - **未確認: ビルド**(ユーザーがF5で確認する)。
+
+### 2026-10-09 チュートリアルのメッセージフォントを M PLUS 1p Bold に変更
+- Stick(試していた)が微妙だったため、日本語対応・NovaWingの雰囲気(リザルトはOrbitron)に合うフォントを探して差し替え。ユーザーの明示的な依頼でClaudeが直接編集した。
+- 採用: **M PLUS 1p Bold**(Google Fonts / SIL OFL 1.1、第1・第2水準漢字入り)。幾何学的で角のある字形がOrbitronと馴染み、小さくても読みやすい。
+- `Data/Fonts/Stick-Regular.ttf`と`OFL_Stick.txt`を削除し、`MPLUS1p-Bold.ttf`と`OFL_MPLUS1p.txt`を追加。`ResourceConstants.h`の`message_font_path`/`message_font_name`(`L"M PLUS 1p"`、GDI+で確認)を変更。
+- 注意: `.gitignore`の`*.txt`で`OFL_MPLUS1p.txt`が無視される。OFLはライセンス文の同梱が条件なので`git add -f`で追加する。
+- 候補だったが不採用: マキナス(Makinas)。SF感は一番強いが再配布禁止のため、公開リポジトリにttfを置けない。
+- **未確認: ゲーム内表示**(ユーザーがF5で確認する)。
+- **追記(同日): マキナス 4 Flat に再変更。** M PLUS 1p を実際に見たユーザーの評価は「ただのゴシック体は仕事感が出てダサい」。ゴシック体以外の9種(マキナス4 Square/Flat、DotGothic16、Dela Gothic One、Rampart One、RocknRoll One、Reggae One、Train One、Potta One)を実際の文で比較し、ユーザーが **Makinas 4 Flat** を選んだ。
+  - `MPLUS1p-Bold.ttf`と`OFL_MPLUS1p.txt`は削除。`message_font_path = L"Data/Fonts/Makinas-4-Flat.otf"`、`message_font_name = L"Makinas-4-Flat"`(フォントファイル内のWin32ファミリー名)。
+  - ライセンス(もじワク研究): 商用可、ゲーム内表示OK。ただし無断の二次配布・アップロードは禁止 → 一度`.gitignore`に入れたが、ユーザーより「リポジトリはprivateなので再配布は考えなくてよい」とのことで取り消し、otfもコミット対象にした(公開する場合は要再検討)。
+  - **未確認: ゲーム内表示**(otfがDxLibで読めるか、F5で確認)。
+
+### 設計・タスク（2026-10-09・設定画面とチャージ操作の切り替え）
+**動機(ユーザー)**: スターフォックス式チャージショット(長押し→離す→もう一度押して発射)が「分かりづらい」という声が複数人から出た。よくある「長押し→離す」で撃てる方式にオプションで切り替えられるようにしたい。あわせてポーズから開ける「設定」を作る。
+
+**設定項目(ユーザー決定)**
+- 音量
+- 移動の切り替え(スティックの方向にそのまま動く / 上に倒すと下に動く=Y軸反転)
+- チャージショットの打ち方(現行: 長押し→離す→再度押す / 新: 長押し→離すで発射)
+- フルスクリーン切り替え
+
+**現状の把握(Claudeがコードを読んで確認)**
+- チャージ: `NormalShootState`で10フレーム長押し→`ChargeShootState`→`ChargeReadyState`。`ChargeReadyState`は離した後60フレーム以内に`IsTriggered(shoot)`で発射。
+- スティックYを読む場所は4か所: `MovingState`/`IdleMovementState`/`GaugeActionStateBase`/`DefaultRotationState`(`GetBufY()`直呼び)。
+- `PauseScene`の選択肢は画像2枚(ゲームに戻る/タイトルに戻る)+デバッグ用の文字。`SoundManager::SetVolume`は既にある。`ChangeWindowMode`は`Application.cpp`にある。
+
+**設計案(Claude提案、未決定)**
+- `GameSettings`(シングルトン)に音量・Y反転・チャージ方式・フルスクリーンを持たせる。ファイル保存は後回し。
+- `SettingsScene`を新設し、`PauseScene`から`PushScene`。上下で項目選択、左右で値変更、Bで戻る。最初は画像なしの文字表示(デバッグ項目と同じ)。
+- Y反転: 4か所に`if`を書かず、`InputManager`に「設定反映済みのY値を返す関数」を1つ作って4か所を置き換える。
+- チャージ方式: `ChargeReadyState`の「再度押して発射」を、方式によって「離した瞬間に発射」に切り替える。「溜まっているか」と「発射トリガー」を分けておく。
+- フルスクリーン: DxLibは`ChangeWindowMode`でグラフィックハンドル/シェーダが消える場合があるので実機確認が必要。リスクが高いので最後。
+
+**タスク(この順を提案)**
+1. `GameSettings`を作る
+2. `PauseScene`に「設定」を追加し、`SettingsScene`の枠を作る
+3. チャージ方式の切り替え(要望が一番強いので先に)
+4. Y軸反転(`InputManager`に共通関数)
+5. 音量
+6. フルスクリーン(実機確認が必須)
+
+**先に決めること**
+- 音量はBGM/SE別か、全体1本か
+- 設定を次回起動に引き継ぐ(保存する)か。日程的には後回しでよいと思う
+
+**注意**: 現在の優先は「チュートリアルのメッセージ表示」の続きと2面制作。この設定機能は日程(試作→10/24、アルファ→11/24)を見て差し込む。
+
+### 2026-10-09 チュートリアルの続き(現状確認)
+- ユーザーの作業(未コミット): `TutorialMessageScene`のコンストラクタで文を受け取り、`FontID::Message`(マキナス4 Flat)で`DrawStringToHandle`。OKボタン(`InputEvent::ok`)で`PopScene`。`GetSceneID`は`SceneID::Game`。`GameScene::Update`の末尾で`m_pPlayer->GetPos().z > tutorial_z`(2000)なら`PushScene`。`Application.cpp`は`TitleScene`に戻っている。
+- Claudeの指摘(答えは言わず、F5で確かめてもらう): 今の条件だとZ2000を超えた後は毎フレーム条件が真になる。`PopScene`した次のフレームに何が起きるか。
+- ほかの気づき: 文字が四角の左上の角にくっついている(余白なし)。ショットとOKが同じボタンなら、撃ちながら通過した瞬間に読む前に閉じる可能性(要確認)。
+
+### 2026-10-10 `.editorconfig`にタブ指定を追加
+- VS内でコピペすると1行目以外がスペースになる問題。VSの個人設定(スペースの挿入)が原因と推測。家・学校どちらでも効くよう、`.editorconfig`のC++セクションに`indent_style = tab`/`indent_size = 4`/`tab_width = 4`を追加(ユーザー了承、Claudeが編集)。VSでファイルを開き直すと反映。既存のスペース行は`Ctrl+K, Ctrl+D`で直す。
+
+### 2026-10-10 `TutorialController`を作成、動作確認OK
+- ユーザーの発案で、チュートリアルの進行を`GameScene`から分離した`Manager/TutorialController.h/.cpp`を新規作成(ユーザーが実装、Claudeはレビュー)。シングルトンにせず`GameScene`のメンバー(`Init`で`Player`生成後に作成、`Update`の末尾で呼ぶ)。
+- 構成: `enum class TaskType{None,Move,Tilt,BarrelRoll,Boost,Brake,Shot,ChargeShot}`(public)、`enum class StepState{WaitTrigger,Trying,Success}`、`struct StepData{triggerZ,message,taskType}`、`std::vector<StepData> m_steps`、`m_stepIndex`、`m_successFrame`。`weak_ptr<Player>`と`SceneController&`を受け取る。
+- 流れ: `WaitTrigger`でZを超えたら`TutorialMessageScene`を`PushScene`して`Trying`へ(メッセージ表示中は`GameScene::Update`が止まるので「表示中」状態は不要)→成功で`Success`→2秒(`to_next_step_frame`)で次のステップへ(index++、フレーム0、`WaitTrigger`に戻す)。全部終わったら何もしない。
+- 設計の判断: 「各ステップの完了bool」は進行度(index)と重複するので持たない。`TaskType`は文字列でなくenum(CSVからは読み込み時に1回変換)。
+- 仮の部分: ステップはコンストラクタに直書き(Z2000「移動しろ！」/Z3000「傾けろ！」)。成功判定は`InputEvent::Tutorial`(デバッグ専用キー)を押したら成功→**Releaseではビルドが通らないので要対応**。
+- 途中で直したバグ: Success後に状態・フレームを戻さず次ステップが飛ばされる/`if (pPlayer) return;`の条件が逆。
+- **F5で動作確認OK**(ユーザー)。
+
+**次にやること**
+1. Release対策(`Trying`の仮判定)。`GameScene.cpp`の`tutorial_z`・`TutorialMessageScene.h`のinclude削除(済んでいなければ)。
+2. 右上のタスク表示UI(`UIBase`派生)と成功演出(✓・色・SE)。
+3. `TaskType`ごとの本物の成功判定(移動・傾き・ロール…)。
+4. 成功するまで先に進ませない仕組み。
+5. `Stage1/Tutorial.csv`化。

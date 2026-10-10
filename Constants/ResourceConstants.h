@@ -174,9 +174,9 @@ namespace
 	constexpr int font_space = 4;
 
 	//場所
-	constexpr const wchar_t* message_font_path = L"Data/Fonts/ZenKakuGothicNew-Bold.ttf";
+	constexpr const wchar_t* message_font_path = L"Data/Fonts/Makinas-4-Flat.otf";
 	//フォント名
-	constexpr const wchar_t* message_font_name = L"Zen Kaku Gothic New";
+	constexpr const wchar_t* message_font_name = L"Makinas-4-Flat";
 	//サイズ
 	constexpr int message_font_size = 60;
 	//太さ

@@ -20,6 +20,7 @@ class EnemyFactory;
 class SoundManager;
 class EffectManager;
 class WarningUI;
+class TutorialController;
 class GameScene :public Scene
 {
 public:
@@ -94,4 +95,6 @@ private:
 	std::shared_ptr<EffectManager> m_pEffectManager;
 	//ボス登場前のWARNINGへのポインタ
 	std::shared_ptr<WarningUI> m_pWarningUI;
+	//チュートリアルコントローラーへのポインタ
+	std::shared_ptr<TutorialController> m_pTutorialController;
 };

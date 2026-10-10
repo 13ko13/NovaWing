@@ -264,6 +264,7 @@
     <ClCompile Include="Game\Collision\ChargeExplosionCollider.cpp" />
     <ClCompile Include="CSVData\EnemyStatusData.cpp" />
     <ClCompile Include="Scene\TutorialMessageScene.cpp" />
+    <ClCompile Include="Manager\TutorialController.cpp" />
     <ClCompile Include="Game\UI\WarningUI.cpp" />  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
@@ -380,6 +381,7 @@
     <ClInclude Include="Game\Collision\ChargeExplosionCollider.h" />
     <ClInclude Include="CSVData\EnemyStatusData.h" />
     <ClInclude Include="Scene\TutorialMessageScene.h" />
+    <ClInclude Include="Manager\TutorialController.h" />
     <ClInclude Include="Game\UI\WarningUI.h" />  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">

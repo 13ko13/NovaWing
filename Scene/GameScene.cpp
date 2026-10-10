@@ -48,7 +48,7 @@
 #include "Game/UI/SpecialGaugeUI.h"
 #include "Game/UI/WarningUI.h"
 #include "PauseScene.h"
-#include "Scene/TutorialMessageScene.h"
+#include "Manager/TutorialController.h"
 
 namespace
 {
@@ -260,7 +260,10 @@ void GameScene::Init()
 	m_pStage->Init();
 
 	// ライトの方向ベクトルをセットする
-	LightingManager::GetInstance().SetLightDirection(Game::light_direction);
+	LightingManager::GetInstance().SetLightDirection(Game::light_direction); 
+
+	//チュートリアルコントローラーの初期化
+	m_pTutorialController = std::make_shared<TutorialController>(m_pPlayer, m_controller);
 }
 
 void GameScene::Update()
@@ -444,11 +447,8 @@ void GameScene::Update()
 		m_controller.PushScene(std::make_shared<PauseScene>(m_controller, m_pSoundManager, m_pPlayer));
 	}
 
-	//試しにチュートリアルメッセージシーンを上乗せ
-	if (InputManager::GetInstance().IsTriggered(InputEvent::Tutorial))
-	{
-		m_controller.PushScene(std::make_shared<TutorialMessageScene>(m_controller,L"左スティックで移動しろ！"));
-	}
+	//チュートリアルコントローラーの更新
+	m_pTutorialController->Update();
 }
 
 void GameScene::Draw()

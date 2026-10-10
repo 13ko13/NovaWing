@@ -332,6 +332,9 @@
     <ClCompile Include="Scene\TutorialMessageScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Manager\TutorialController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     </ClCompile>  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants\Game.h">
@@ -676,6 +679,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Scene\TutorialMessageScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\TutorialController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     </ClInclude>  </ItemGroup>
