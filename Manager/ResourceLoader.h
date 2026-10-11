@@ -171,6 +171,7 @@ public:
 	{
 		Result,//リザルト用のフォント
 		Message,//チュートリアルや、メッセージ用のフォント
+		Task,//チュートリアル中の右上に表示するタスク用のフォント
 	};
 
 	//シーンそれぞれが使うリソースの一覧
@@ -186,8 +187,6 @@ public:
 public:
 	static ResourceLoader& GetInstance();
 
-	//ロード
-	void LoadAll();
 	//解放
 	void ReleaseAll();
 

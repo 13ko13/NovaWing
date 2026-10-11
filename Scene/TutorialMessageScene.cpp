@@ -61,10 +61,6 @@ void TutorialMessageScene::Draw()
 	//黒いボックスの上にメッセージを表示
 	DrawBox(x1, y1, x2, y2, 0x000000, true);
 	DrawStringToHandle(x1, y1,m_hintText.c_str(),0xffffff,m_textFontHandle);
-
-#ifdef _DEBUG
-	DrawFormatString(0, 15, 0xffffff, L"TutorialMessageScene");
-#endif
 }
 
 SceneID TutorialMessageScene::GetSceneID() const

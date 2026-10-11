@@ -219,6 +219,14 @@ namespace
 			message_font_thick,
 			message_font_type,
 			font_space } },//メッセージ用
+			
+		{ ResourceLoader::FontID::Task,{
+			message_font_path,
+			message_font_name,
+			task_font_size,
+			task_font_thick,
+			message_font_type,
+			font_space } },//タスク用
 	};
 }
 
@@ -233,24 +241,6 @@ ResourceLoader::ResourceLoader()
 {
 	//シーンごとのリソースを先に一覧としてまとめる
 	InitSceneResources();
-}
-
-void ResourceLoader::LoadAll()
-{
-	//モデルを読み込んでハンドルを保存する
-	KeepModel();
-
-	//画像を読み込んでハンドルを保存する
-	KeepGraph();
-
-	//エフェクトを読み込んでハンドルを保存する
-	KeepEffect();
-
-	//フォントを読み込んでハンドルを保存
-	KeepFont();
-
-	//サウンドを読み込んでハンドルを保存
-	KeepSound();
 }
 
 void ResourceLoader::LoadGraphic(GraphicID id)
@@ -483,7 +473,7 @@ void ResourceLoader::InitSceneResources()
         SoundID::BossBeam, SoundID::BossSummon, SoundID::EnemyShoot,
         SoundID::FloatingBoot, SoundID::EnemyDeath, SoundID::OnCursor
 	};
-	game.fonts = { FontID::Message };
+	game.fonts = { FontID::Message, FontID::Task };
 	m_sceneResources[SceneID::Game] = game;
 
     //クリア

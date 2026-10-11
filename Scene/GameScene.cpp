@@ -263,7 +263,7 @@ void GameScene::Init()
 	LightingManager::GetInstance().SetLightDirection(Game::light_direction); 
 
 	//チュートリアルコントローラーの初期化
-	m_pTutorialController = std::make_shared<TutorialController>(m_pPlayer, m_controller);
+	m_pTutorialController = std::make_shared<TutorialController>(m_pPlayer, m_controller,m_pUIManager);
 }
 
 void GameScene::Update()

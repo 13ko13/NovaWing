@@ -184,6 +184,11 @@ namespace
 	//フォントタイプ
 	constexpr int message_font_type = DX_FONTTYPE_ANTIALIASING_4X4;
 
+	//サイズ
+	constexpr int task_font_size = 30;
+	//太さ
+	constexpr int task_font_thick = 3;
+
 	//----------サウンドのパス--------------
 	//タイトルでの飛行音
 	constexpr const wchar_t* title_boost_sound_path = L"Data/Sounds/Title/TitleBoost.mp3";

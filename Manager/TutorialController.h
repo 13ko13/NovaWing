@@ -6,23 +6,29 @@
 
 class Player;
 class SceneController;
+class TutorialUI;
+class UIManager;
 
 /// チュートリアルを全て制御するクラス
 class TutorialController
 {
 public:
-    enum class TaskType {
+	enum class TaskType {
 		None,
 		Move,
 		Tilt,
-        BarrelRoll,
-        Boost,
-        Brake,
-        Shot,
-        ChargeShot
+		BarrelRoll,
+		Boost,
+		Brake,
+		Shot,
+		ChargeShot
 	};
-	
-	TutorialController(std::weak_ptr<Player> pPlayer, SceneController& controller);
+
+	TutorialController(
+		std::weak_ptr<Player> pPlayer,
+		SceneController& controller,
+		std::weak_ptr<UIManager> uiManager
+		);
 	virtual ~TutorialController();
 
 	//更新
@@ -48,7 +54,7 @@ private:
 	};
 
 	std::weak_ptr<Player> m_pPlayer;
-    SceneController& m_controller;
+	SceneController& m_controller;
 	int m_stepIndex = 0;
 
 	//ステップごとの情報を配列で持つ
@@ -56,4 +62,7 @@ private:
 
 	//成功演出用のフレーム
 	int m_successFrame = 0;
+
+	//タスクとして表示しておくときのUI
+	std::shared_ptr<TutorialUI> m_tutorialUI;
 };

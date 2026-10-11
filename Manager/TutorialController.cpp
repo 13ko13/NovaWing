@@ -4,6 +4,8 @@
 #include "../Scene/SceneController.h"
 #include "Scene/TutorialMessageScene.h"
 #include "Manager/InputManager.h"
+#include "Manager/UIManager.h"
+#include "Game/UI/TutorialUI.h"
 
 namespace
 {
@@ -11,7 +13,10 @@ namespace
 	constexpr int to_next_step_frame = 60 * 2;
 }
 
-TutorialController::TutorialController(std::weak_ptr<Player> pPlayer, SceneController& controller) :
+TutorialController::TutorialController(
+	std::weak_ptr<Player> pPlayer,
+	SceneController& controller,
+	std::weak_ptr<UIManager> uiManager) :
 	m_pPlayer(pPlayer),
 	m_controller(controller)
 {
@@ -25,6 +30,12 @@ TutorialController::TutorialController(std::weak_ptr<Player> pPlayer, SceneContr
 	data.message = L"傾けろ！";
 	data.taskType = TaskType::Tilt;
 	m_steps.push_back(data);
+
+	//tutorialUIの実体を確保
+	m_tutorialUI = std::make_shared<TutorialUI>();
+
+	//UIManagerに登録
+	uiManager.lock()->Register(m_tutorialUI);
 }
 
 TutorialController::~TutorialController()
@@ -52,10 +63,14 @@ void TutorialController::Update()
 		}
 		break;
 	case StepState::Trying:
+		//タスクを表示させる(UI)
+		m_tutorialUI->OnStart(m_steps[m_stepIndex].message);
+		
 		//仮でチュートリアルボタンを押したら成功とする
 		if (InputManager::GetInstance().IsTriggered(InputEvent::Tutorial))
 		{
 			m_stepState = StepState::Success;
+			m_tutorialUI->OnSuccess();
 		}
 
 		break;
@@ -68,6 +83,7 @@ void TutorialController::Update()
 			m_stepIndex++;
 			m_successFrame = 0;
 			m_stepState = StepState::WaitTrigger;
+			m_tutorialUI->OnEnd();
 		}
 		break;
 	}
