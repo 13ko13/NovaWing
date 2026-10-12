@@ -3,6 +3,7 @@
 
 #include "UIBase.h"
 
+struct Vector2;
 class TutorialUI : public UIBase
 {
 public:
@@ -18,6 +19,9 @@ public:
 	void OnEnd();
 
 private:
+	void DrawCheckMark(const Vector2& checkBoxPos);
+
+private:
 	std::wstring m_taskText;
 	//今の状態
 	enum class TaskDrawState
@@ -30,4 +34,7 @@ private:
 
 	//タスク表示用のフォントハンドル
 	int m_taskFontHandle = -1;
+
+	//チェックマークのアニメーション用フレーム
+	int m_checkAnimFrame = 0;
 };

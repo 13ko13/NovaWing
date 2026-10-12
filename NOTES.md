@@ -1682,3 +1682,22 @@
 3. `TaskType`ごとの本物の成功判定(移動・傾き・ロール…)。
 4. 成功するまで先に進ませない仕組み。
 5. `Stage1/Tutorial.csv`化。
+
+### 2026-10-12 チュートリアルUI(`TutorialUI`)の進捗
+- `Game/UI/TutorialUI.h/.cpp`(`UIBase`派生)。`TutorialController`のコンストラクタで生成し`UIManager`に登録(`GameScene`から`m_pUIManager`を渡す)。状態は`enum class TaskDrawState{Hide,Show,Success}`、外から`OnStart(taskText)`/`OnSuccess()`/`OnEnd()`。
+- 右上(画面比率0.87,0.1)に黒い枠を`DrawBox`。枠の半幅150・半高20に`GetUIScale()`を掛けた。
+- `OnStart`は`Trying`中に毎フレーム呼ばれるが、`TutorialUI::OnStart`の先頭で`Hide`以外なら`return`して1回だけ効くようにした(ユーザー判断: 状態を増やしたくない。PushScene時に呼ぶとメッセージの後ろに枠が見えてしまうため)。
+- 今は右上にも`message`を渡している。`taskText`は**CSV化のときに`StepData`とCSVの列に追加する**(ユーザー決定)。
+- フォントは`FontID::Message`(60px)を流用。大きければ同じファイルでサイズ違いの`FontID`を追加する案。
+- **次**: `m_taskFontHandle`の取得、`Show`/`Success`での文字描画、成功演出。
+
+### 後でやるタスク(2026-10-12 ユーザー報告、未調査)
+1. **タイトルで早めに決定(演出スキップ)を押すと、すぐフェードせず少し固まってから非同期ロードに入る。** フリーズと勘違いされるので直したい。(推測: スキップ時に同期ロードや重い初期化が走っている、またはフェード開始前に何かを待っている。`TitleScene`のスキップ処理と`ChangeScene`→`LoadingScene`の流れを確認する)
+2. **プレイヤーがずっと回転するステートのままになることがある。** 再現条件は未確認(どの操作の後か、バレルロール/傾きの`DefaultRotationState`周りか要確認)。
+
+### 2026-10-12 タスクUIのチェックマークアニメーション(完了)
+- `TutorialUI`: 右上の枠(背景0x777777→枠線 通常0x00bb00/成功0xdddd00、太さ6)＋テキスト(`FontID::Task` 30px)＋左側のチェックボックス(黒、半幅13、画面比率0.805,0.1)。描画順は 背景→枠→テキスト→チェックボックス→✓(DxLibは後に描いたものが上)。
+- 成功時、`DrawCheckMark(const Vector2&)`で✓を「線が描かれていく」アニメーション(A案)。3点(start(-8,0)/corner(-3,6)/end(8,-7)、チェックボックス中心からのoffset)、20フレーム、境目0.35までに1本目、残りで2本目。`Vector2::Lerp`使用。`m_checkAnimFrame`は`OnSuccess`で0に戻し`Update`で増やす。
+- 学び: `uiScale`は「ずらし量・長さ・太さ」にだけ掛ける。Lerpのt(割合)や計算済みの画面座標には掛けない。`std::min`で1本目の進み具合を1に止める(止めないとLerpが終点を越える)。
+- 太い線は端が直角に切れるので角に隙間が出る。対策は角に`DrawCircleAA`(直径=太さ)だが、**太さ3なら目立たないので見送り**(ユーザー判断)。
+- 見た目の調整(文字位置の`100`を文字幅から計算、余白、下のメッセージ枠も)は後回し。

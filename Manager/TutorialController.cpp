@@ -60,12 +60,13 @@ void TutorialController::Update()
 			m_controller.PushScene(std::make_shared<TutorialMessageScene>(m_controller, m_steps[m_stepIndex].message));
 			//ステートの変更
 			m_stepState = StepState::Trying;
+			
 		}
 		break;
 	case StepState::Trying:
 		//タスクを表示させる(UI)
+		//表示中なら UI 側で無視される
 		m_tutorialUI->OnStart(m_steps[m_stepIndex].message);
-		
 		//仮でチュートリアルボタンを押したら成功とする
 		if (InputManager::GetInstance().IsTriggered(InputEvent::Tutorial))
 		{
