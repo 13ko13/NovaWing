@@ -20,6 +20,16 @@ public:
 	);
 	virtual ~EnemyBase();
 
+	//最後にダメージを与えた攻撃の種類(何で倒されたかをプレイヤーに伝えるため)
+	enum class DamageSource
+	{
+		None,//まだダメージを受けていない、または弾以外
+		NormalShot,//通常弾(反射弾も含む)
+		ChargeShot,//チャージショットの爆発
+	};
+	//最後にダメージを与えた攻撃の種類を設定する
+	void SetLastDamageSource(DamageSource source) { m_lastDamageSource = source; }
+
 	//死亡待機状態かを返す
 	bool IsDying() const { return m_isDying; }
 
@@ -46,5 +56,7 @@ protected:
 	float m_colRadius = 0.0f;
 	//本当に死ぬまでのフレーム
 	int m_trueDeadFrame = 0;
+	//最後にダメージを与えた攻撃の種類
+	DamageSource m_lastDamageSource = DamageSource::None;
 };
 

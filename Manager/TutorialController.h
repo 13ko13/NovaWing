@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "Utility/Vector3.h"
+
 class Player;
 class SceneController;
 class TutorialUI;
@@ -35,6 +37,9 @@ public:
 	void Update();
 
 private:
+	//タスクが終っているか
+	bool IsTaskCleared(const Player& player) const;
+
 	//各ステップ内の状態
 	enum class StepState
 	{
@@ -65,4 +70,11 @@ private:
 
 	//タスクとして表示しておくときのUI
 	std::shared_ptr<TutorialUI> m_tutorialUI;
+
+	//タスク開始時のプレイヤーの位置
+	Vector3 m_taskStartPos;
+	//タスク開始時に、通常弾で倒していた敵の数
+	int m_normalShotDefeatedStartCount = 0;
+	//タスク開始時に、チャージショットで倒していた敵の数
+	int m_chargeShotDefeatedStartCount = 0;
 };

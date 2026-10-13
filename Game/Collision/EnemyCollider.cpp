@@ -21,6 +21,8 @@ void EnemyCollider::OnCollision(const ICollider& other)
 	{
 		//タグがPlayerBulletなら相手はBulletCollider
 		const BulletCollider& bullet = static_cast<const BulletCollider&>(other);
+		//倒されたときに何で倒されたか分かるように、ダメージより先に記録する
+		m_owner.SetLastDamageSource(EnemyBase::DamageSource::NormalShot);
 		m_owner.TakeDamage(bullet.GetAttackPower());
 	}
 	//タグが爆発だった場合は火力が高くなる
@@ -28,6 +30,8 @@ void EnemyCollider::OnCollision(const ICollider& other)
 	{
 		const ChargeExplosionCollider& explosion =
 			static_cast<const ChargeExplosionCollider&>(other);
+		//倒されたときに何で倒されたか分かるように、ダメージより先に記録する
+		m_owner.SetLastDamageSource(EnemyBase::DamageSource::ChargeShot);
 		m_owner.TakeDamage(explosion.GetAttackPower());
 	}
 }

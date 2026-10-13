@@ -28,6 +28,8 @@
 #include "Shoot/DisabledShootState.h"
 #include "Game/Collision/PlayerCollider.h"
 #include "Game/Collision/CounterCollider.h"
+#include "Movement/BoostState.h"
+#include "Movement/BrakeState.h"
 
 namespace
 {
@@ -457,6 +459,18 @@ bool Player::IsNearSea() const
 	//機体の中心と海面の距離
 	float distance = m_pos.y - sea_height;
 	return distance < sea_roll_limit_height;
+}
+
+bool Player::IsBoosting() const
+{
+	//ブーストステートにダイナミックキャストして、nullじゃなければtrue
+	return std::dynamic_pointer_cast<BoostState>(m_pMovementState) != nullptr;
+}
+
+bool Player::IsBraking() const
+{
+	//ブレーキステートにダイナミックキャストして、nullじゃなければtrue
+	return std::dynamic_pointer_cast<BrakeState>(m_pMovementState) != nullptr;
 }
 
 void Player::Draw()

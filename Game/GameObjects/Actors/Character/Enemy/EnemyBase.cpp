@@ -23,9 +23,23 @@ EnemyBase::~EnemyBase()
 void EnemyBase::OnEnemyDead()
 {
 	//プレイヤーに敵が死んだことを伝える
-	if (m_pPlayer.lock() != nullptr)
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+	if (pPlayer != nullptr)
 	{
-		m_pPlayer.lock()->AddDefeatedEnemyCount();	
+		pPlayer->AddDefeatedEnemyCount();
+
+		//何で倒されたかも伝える(チュートリアルの判定用)
+		switch (m_lastDamageSource)
+		{
+		case DamageSource::NormalShot:
+			pPlayer->AddNormalShotDefeatedCount();
+			break;
+		case DamageSource::ChargeShot:
+			pPlayer->AddChargeShotDefeatedCount();
+			break;
+		default:
+			break;
+		}
 	}
 
 	OnDead();

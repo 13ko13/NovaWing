@@ -1,12 +1,4 @@
 modelID,posX,posY,posZ,rotX,rotY,rotZ,scaleX,scaleY,scaleZ
-FloatingEnemy,-180,300,4000,0,0,0,1,1,1
-FloatingEnemy,180,300,4000,0,0,0,1,1,1
-FloatingEnemy,-260,450,7500,0,0,0,1,1,1
-FloatingEnemy,-260,750,7500,0,0,0,1,1,1
-FloatingEnemy,0,900,7500,0,0,0,1,1,1
-FloatingEnemy,0,300,7500,0,0,0,1,1,1
-FloatingEnemy,260,750,7500,0,0,0,1,1,1
-FloatingEnemy,260,450,7500,0,0,0,1,1,1
 FloatingEnemy,-1200,700,11000,0,0,0,1,1,1
 FloatingEnemy,-1000,500,11000,0,0,0,1,1,1
 FloatingEnemy,-1000,900,11000,0,0,0,1,1,1
@@ -15,6 +7,9 @@ FloatingEnemy,800,700,11000,0,0,0,1,1,1
 FloatingEnemy,1000,500,11000,0,0,0,1,1,1
 FloatingEnemy,1000,900,11000,0,0,0,1,1,1
 FloatingEnemy,1200,700,11000,0,0,0,1,1,1
+FloatingEnemy,0,500,11500,0,0,0,1,1,1
+FloatingEnemy,-250,500,12000,0,0,0,1,1,1
+FloatingEnemy,250,500,12500,0,0,0,1,1,1
 FloatingEnemy,-400,400,14500,0,0,0,1,1,1
 FloatingEnemy,-400,1000,14500,0,0,0,1,1,1
 FloatingEnemy,-400,700,14500,0,0,0,1,1,1

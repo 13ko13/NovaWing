@@ -1,16 +1,21 @@
-﻿#include "TutorialController.h"
+﻿#include <cmath>
 
+#include "TutorialController.h"
 #include "../Game/GameObjects/Actors/Character/Player/Player.h"
 #include "../Scene/SceneController.h"
 #include "Scene/TutorialMessageScene.h"
-#include "Manager/InputManager.h"
 #include "Manager/UIManager.h"
 #include "Game/UI/TutorialUI.h"
+#include "Utility/Vector2.h"
 
 namespace
 {
 	//次のステップに移るまでの時間(成功を表示しておく間の時間)
 	constexpr int to_next_step_frame = 60 * 2;
+	//プレイヤーが移動タスクを完了したかの判定用の距離閾値
+	constexpr float move_task_distance = 500.0f;
+	//プレイヤーが機体を傾けるタスクを完了したかの判定用の角度閾値
+	constexpr float tilt_task_angle = DX_PI_F / 4;
 }
 
 TutorialController::TutorialController(
@@ -20,16 +25,20 @@ TutorialController::TutorialController(
 	m_pPlayer(pPlayer),
 	m_controller(controller)
 {
-	//仮
-	StepData data;
-	data.triggerZ = 2000.0f;
-	data.message = L"移動しろ！";
-	data.taskType = TaskType::Move;
-	m_steps.push_back(data);
-	data.triggerZ = 3000.0f;
-	data.message = L"傾けろ！";
-	data.taskType = TaskType::Tilt;
-	m_steps.push_back(data);
+	//仮(後でTutorialData.csvから読み込む)
+	//プレイヤーはZ=1200から毎フレーム8進む(約480/秒)。成功後2秒で次へ進むので、間隔は約1500以上空ける
+	//ブースト・ブレーキはゲージ満タンが必要(回復は約3.3秒)なので、ブレーキはブーストから離しておく
+	//ショットの的はZ=11500〜12500の3体、チャージの的はZ=14500の9体(FloatingEnemy.csv)
+	m_steps =
+	{
+		{ 1300.0f, L"左スティックで移動しろ！", TaskType::Move },
+		{ 2800.0f, L"LBかRBを長押しして傾けろ！", TaskType::Tilt },
+		{ 4300.0f, L"LBかRBを2回押してバレルロールしろ！", TaskType::BarrelRoll },
+		{ 5800.0f, L"Xでブーストしろ！", TaskType::Boost },
+		{ 9200.0f, L"Aでブレーキしろ！", TaskType::Brake },
+		{ 10500.0f, L"Bで敵を撃ち落とせ！", TaskType::Shot },
+		{ 12600.0f, L"Bを長押しして溜め、もう一度Bでチャージショットを撃って敵を倒せ！", TaskType::ChargeShot },
+	};
 
 	//tutorialUIの実体を確保
 	m_tutorialUI = std::make_shared<TutorialUI>();
@@ -60,15 +69,20 @@ void TutorialController::Update()
 			m_controller.PushScene(std::make_shared<TutorialMessageScene>(m_controller, m_steps[m_stepIndex].message));
 			//ステートの変更
 			m_stepState = StepState::Trying;
-			
+			//プレイヤーの現在位置を覚えておく
+			m_taskStartPos = pPlayer->GetPos();
+			//通常弾で倒した敵の数を覚えておく
+			m_normalShotDefeatedStartCount = pPlayer->GetNormalShotDefeatedCount();
+			//チャージショットで倒した敵の数を覚えておく
+			m_chargeShotDefeatedStartCount = pPlayer->GetChargeShotDefeatedCount();
 		}
 		break;
 	case StepState::Trying:
 		//タスクを表示させる(UI)
 		//表示中なら UI 側で無視される
 		m_tutorialUI->OnStart(m_steps[m_stepIndex].message);
-		//仮でチュートリアルボタンを押したら成功とする
-		if (InputManager::GetInstance().IsTriggered(InputEvent::Tutorial))
+		//タスクが終了していたら成功ステートに遷移
+		if (IsTaskCleared(*pPlayer))
 		{
 			m_stepState = StepState::Success;
 			m_tutorialUI->OnSuccess();
@@ -87,5 +101,52 @@ void TutorialController::Update()
 			m_tutorialUI->OnEnd();
 		}
 		break;
+	}
+}
+
+bool TutorialController::IsTaskCleared(const Player& player) const
+{
+	switch (m_steps[m_stepIndex].taskType)
+	{
+	case TaskType::Move:
+	{
+		//プレイヤーの位置
+		Vector3 playerPos = player.GetPos();
+		//タスク開始時の位置から一定距離以上動いていればタスククリアとする
+		Vector3 moveDelta = playerPos - m_taskStartPos;
+		//XとYだけを見た移動距離を出す
+		float distanceXY = Vector2(moveDelta.x, moveDelta.y).Length();
+		//移動距離がタスク完了判定の距離を越えていればクリア
+		return distanceXY > move_task_distance;
+	}
+	case TaskType::Tilt:
+	{
+		//プレイヤーのZ軸回転が一定の角度を越えていればクリアとする
+		float rotZ = player.GetRotationZ();
+
+		return std::abs(rotZ) > tilt_task_angle;
+	}
+	case TaskType::BarrelRoll:
+		//プレイヤーがバレルロールしていればtrueを返す
+		return player.IsRolling();
+
+	case TaskType::Boost:
+		//プレイヤーがブーストしていればtrueを返す
+		return player.IsBoosting();
+
+	case TaskType::Brake:
+		//プレイヤーがブレーキしていればtrueを返す
+		return player.IsBraking();
+
+	case TaskType::Shot:
+		//タスク開始から通常弾で敵を倒していたらタスククリアとする
+		return player.GetNormalShotDefeatedCount() > m_normalShotDefeatedStartCount;
+
+	case TaskType::ChargeShot:
+		//タスク開始からチャージショットで敵を倒していたらタスククリアとする
+		return player.GetChargeShotDefeatedCount() > m_chargeShotDefeatedStartCount;
+
+	default:
+		return false;
 	}
 }

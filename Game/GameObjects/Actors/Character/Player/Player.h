@@ -112,9 +112,17 @@ public:
 
 	//倒した敵の数をインクリメントさせる
 	void AddDefeatedEnemyCount() { m_defeatedEnemyCount++; }
-
 	//倒した敵の数を取得
 	int GetDefeatedEnemyCount() const { return m_defeatedEnemyCount; }
+
+	//通常弾で倒した敵の数をインクリメントさせる
+	void AddNormalShotDefeatedCount() { m_normalShotDefeatedCount++; }
+	//チャージショットで倒した敵の数をインクリメントさせる
+	void AddChargeShotDefeatedCount() { m_chargeShotDefeatedCount++; }
+	//通常弾で倒した敵の数を取得
+	int GetNormalShotDefeatedCount() const { return m_normalShotDefeatedCount; }
+	//チャージショットで倒した敵の数を取得
+	int GetChargeShotDefeatedCount() const { return m_chargeShotDefeatedCount; }
 
 	//カメラ取得
 	std::weak_ptr<CameraBase> GetCamera() const { return m_pCamera; }
@@ -138,6 +146,11 @@ public:
 
 	//海に近すぎるかを返す(プレイヤーが海に近いと海に埋まってしまうため)
 	bool IsNearSea() const;
+
+	//ブースト中かを返す
+	bool IsBoosting() const;
+	//ブレーキ中かを返す
+	bool IsBraking() const;
 
 private:
 	//回転の更新
@@ -253,6 +266,11 @@ private:
 
 	//倒した敵の数
 	int m_defeatedEnemyCount = 0;
+
+	//通常弾で倒した敵の数(チュートリアルの判定用)
+	int m_normalShotDefeatedCount = 0;
+	//チャージショットで倒した敵の数(チュートリアルの判定用)
+	int m_chargeShotDefeatedCount = 0;
 
 	//左右の羽の水しぶきエフェクト再生ハンドル
 	int m_leftWingEffectH = -1;

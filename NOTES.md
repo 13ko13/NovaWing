@@ -1693,7 +1693,7 @@
 
 ### 後でやるタスク(2026-10-12 ユーザー報告、未調査)
 1. **タイトルで早めに決定(演出スキップ)を押すと、すぐフェードせず少し固まってから非同期ロードに入る。** フリーズと勘違いされるので直したい。(推測: スキップ時に同期ロードや重い初期化が走っている、またはフェード開始前に何かを待っている。`TitleScene`のスキップ処理と`ChangeScene`→`LoadingScene`の流れを確認する)
-2. **プレイヤーがずっと回転するステートのままになることがある。** 再現条件は未確認(どの操作の後か、バレルロール/傾きの`DefaultRotationState`周りか要確認)。
+2. **タイトルシーンで、プレイヤー(`TitlePlayer`)が回転する演出のステート中に演出スキップすると、プレイヤーが回転し続ける。** タイトルのステートとプレイヤーの動きが連動していない(スキップでタイトル側のステートが進んでも、プレイヤーの回転が止まらない)のが原因。ゲーム中のバレルロール(`DefaultRotationState`)とは無関係。(2026-10-13 ユーザーが訂正)
 
 ### 2026-10-12 タスクUIのチェックマークアニメーション(完了)
 - `TutorialUI`: 右上の枠(背景0x777777→枠線 通常0x00bb00/成功0xdddd00、太さ6)＋テキスト(`FontID::Task` 30px)＋左側のチェックボックス(黒、半幅13、画面比率0.805,0.1)。描画順は 背景→枠→テキスト→チェックボックス→✓(DxLibは後に描いたものが上)。
@@ -1701,3 +1701,26 @@
 - 学び: `uiScale`は「ずらし量・長さ・太さ」にだけ掛ける。Lerpのt(割合)や計算済みの画面座標には掛けない。`std::min`で1本目の進み具合を1に止める(止めないとLerpが終点を越える)。
 - 太い線は端が直角に切れるので角に隙間が出る。対策は角に`DrawCircleAA`(直径=太さ)だが、**太さ3なら目立たないので見送り**(ユーザー判断)。
 - 見た目の調整(文字位置の`100`を文字幅から計算、余白、下のメッセージ枠も)は後回し。
+
+### 2026-10-13 チュートリアルのタスク成功判定(全TaskType)
+- `TutorialController::IsTaskCleared(const Player&)`(private)で`taskType`ごとに判定(ユーザー実装、方針A: Controllerが毎フレームPlayerに聞く)。`Trying`に入る瞬間に開始時の値を記録(条件なしで毎回)。
+  - Move: 開始位置からのXYだけの距離(`Vector2(diff.x,diff.y).Length()`) > `move_task_distance`(500)。Zを入れると自動前進で成功してしまうため除外。
+  - Tilt: `abs(GetRotationZ())` > 45°(左はマイナスなのでabs)。
+  - BarrelRoll: `IsRolling()`(=`DefaultRotationState::m_isStartRolling`、2回押しのバレルロール)。
+  - Boost/Brake: `Player::IsBoosting()/IsBraking()`を追加(`IsSomersault`と同じく`dynamic_pointer_cast`で`m_pMovementState`を判定)。
+  - Shot/ChargeShot: **その弾で敵を倒したら成功**(ユーザー希望)。
+- 「何で倒したか」の仕組み(方針A、ユーザーの依頼でClaudeが実装、勉強用):
+  - `EnemyBase::DamageSource{None,NormalShot,ChargeShot}`と`m_lastDamageSource`/`SetLastDamageSource`。`EnemyCollider::OnCollision`で`TakeDamage`の**前に**記録(`PlayerBullet`→NormalShot(反射弾含む)、`ChargeExplosion`→ChargeShot。チャージ弾本体は雑魚にダメージなし)。
+  - `EnemyBase::OnEnemyDead`で従来の`AddDefeatedEnemyCount()`に加え、種類に応じて`Player::AddNormalShotDefeatedCount()/AddChargeShotDefeatedCount()`。
+  - Tutorialは`m_normalShotDefeatedStartCount`/`m_chargeShotDefeatedStartCount`から増えたら成功。
+  - 一度入れた「撃った回数」カウンター(`AddNormalShoot`等、3つのShootState)は不要になったので取り消し。
+- ついでに: ヘッダの重複`private:`、未使用の`InputManager.h`includeを削除。Debug/Releaseともビルド成功(Claude確認)。**ゲーム内の動作は未確認**。
+- 未解決: 敵を撃ち漏らして通り過ぎるとShot系タスクが成功不能→「成功するまで先に進ませない仕組み」で対策する。
+
+### 2026-10-13 チュートリアル通し確認用の調整(Claudeが実装、ユーザーが最終確認する)
+- `TutorialController`のコンストラクタの仮ステップを7つに(初期化リストで`m_steps = {{triggerZ, message, taskType}, ...}`): 移動1300/傾き2800/バレルロール4300/ブースト5800/ブレーキ9200/ショット10500/チャージ12600。根拠: プレイヤーはZ=1200開始・8/フレーム(約480/秒)、成功後2秒で次へ。ブースト・ブレーキはゲージ満タン必須(回復約3.3秒)なのでブレーキを離した。
+- ステージ1の敵配置(チュートリアル区間を安全にし、的を用意):
+  - FloatingEnemy: Z4000の2体とZ7500のリング6体を削除。ショットの的としてZ11500(0)/12000(-250)/12500(250)、y500に3体追加。チャージの的は既存のZ14500の9体。
+  - WormEnemy: Z5500(起動2000)を削除。Z10500の起動Zを7000→9500(ショット区間で出る)。
+  - 岩は変更なし(Z1500とZ5000に中央の岩あり)。
+- 気づき(未対応): 右上のタスク枠は約8文字分しか入らないので長い文ははみ出す(`taskText`追加で解決予定)。`InputManager.cpp`のLB/RBのコメントが逆(RIGHT_SHOULDERはRB)。メッセージを閉じるOK(A)とブレーキ(A)が同じボタンだが、ブレーキは`IsTriggered`なので閉じた押下では発動しない。
