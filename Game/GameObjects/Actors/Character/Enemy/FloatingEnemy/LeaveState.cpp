@@ -7,7 +7,7 @@ namespace
 	// 離脱速度
 	constexpr float leave_speed = 7.0f;
 	// どのくらい時間が経ったら死亡するか
-	constexpr int leave_frame = 60 * 4;
+	constexpr int leave_frame = 60 * 7;
 
 	// 周期
 	constexpr float wave_speed = 0.1f;

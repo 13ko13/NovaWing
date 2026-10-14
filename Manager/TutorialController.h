@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Utility/Vector3.h"
+#include "Game/GameObjects/Actors/Character/Enemy/EnemyFactory.h"
 
 class Player;
 class SceneController;
@@ -29,7 +30,8 @@ public:
 	TutorialController(
 		std::weak_ptr<Player> pPlayer,
 		SceneController& controller,
-		std::weak_ptr<UIManager> uiManager
+		std::weak_ptr<UIManager> uiManager,
+		std::shared_ptr<EnemyFactory> pEnemyFactory
 		);
 	virtual ~TutorialController();
 
@@ -50,12 +52,20 @@ private:
 	//現在のステップ内の状態
 	StepState m_stepState = StepState::WaitTrigger;
 
+	//ステップ開始時に出す敵1体分のデータ
+	struct SpawnData
+	{
+		Vector3 offset;//プレイヤーの位置からのずれ
+		EnemyFactory::EnemyType type;//敵の種類
+	};
+
 	//ステップ一つ分のデータ
 	struct StepData
 	{
 		float triggerZ;
 		std::wstring message;
 		TaskType taskType;
+		std::vector<SpawnData> spawnData;//敵の数ぶんのデータ
 	};
 
 	std::weak_ptr<Player> m_pPlayer;
@@ -77,4 +87,9 @@ private:
 	int m_normalShotDefeatedStartCount = 0;
 	//タスク開始時に、チャージショットで倒していた敵の数
 	int m_chargeShotDefeatedStartCount = 0;
+	//タスク開始時のカウンター成功回数
+	int m_counterSuccessCount = 0;
+
+	//エネミー工場
+	std::weak_ptr<EnemyFactory> m_pEnemyFactory;
 };

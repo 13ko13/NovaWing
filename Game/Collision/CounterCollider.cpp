@@ -24,6 +24,13 @@ std::vector<std::shared_ptr<ColliderShape>> CounterCollider::GetCollision() cons
 
 void CounterCollider::OnCollision(const ICollider& other)
 {
+	//相手のタグがEnemyBulletの時のみチュートリアル用にカウンター成功回数を増加
+	if(other.GetTag() == ColliderTag::EnemyBullet)
+	{
+		m_owner.AddCounterSuccess();
+	}
+	
+
 	//相手のタグがボスビームの先端か、反射後のボスビームの時だけ処理
 	if (other.GetTag() != ColliderTag::BossBeamTip &&
 		other.GetTag() !=ColliderTag::BossBeamReflect) return;

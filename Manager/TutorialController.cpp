@@ -21,23 +21,42 @@ namespace
 TutorialController::TutorialController(
 	std::weak_ptr<Player> pPlayer,
 	SceneController& controller,
-	std::weak_ptr<UIManager> uiManager) :
+	std::weak_ptr<UIManager> uiManager,
+		std::shared_ptr<EnemyFactory> pEnemyFactory) :
 	m_pPlayer(pPlayer),
-	m_controller(controller)
+	m_controller(controller),
+	m_pEnemyFactory(pEnemyFactory)
 {
 	//仮(後でTutorialData.csvから読み込む)
 	//プレイヤーはZ=1200から毎フレーム8進む(約480/秒)。成功後2秒で次へ進むので、間隔は約1500以上空ける
 	//ブースト・ブレーキはゲージ満タンが必要(回復は約3.3秒)なので、ブレーキはブーストから離しておく
-	//ショットの的はZ=11500〜12500の3体、チャージの的はZ=14500の9体(FloatingEnemy.csv)
+	//敵はステップ開始時にプレイヤーの位置+offsetに出す。浮遊敵は距離4000未満で出現するので、前方2500ならすぐ出てくる
+	//チャージの爆発半径は700なので、チャージの的は左右±300に収めて1発でまとめて倒せるようにする
 	m_steps =
 	{
-		{ 1300.0f, L"左スティックで移動しろ！", TaskType::Move },
-		{ 2800.0f, L"LBかRBを長押しして傾けろ！", TaskType::Tilt },
-		{ 4300.0f, L"LBかRBを2回押してバレルロールしろ！", TaskType::BarrelRoll },
-		{ 5800.0f, L"Xでブーストしろ！", TaskType::Boost },
-		{ 9200.0f, L"Aでブレーキしろ！", TaskType::Brake },
-		{ 10500.0f, L"Bで敵を撃ち落とせ！", TaskType::Shot },
-		{ 12600.0f, L"Bを長押しして溜め、もう一度Bでチャージショットを撃って敵を倒せ！", TaskType::ChargeShot },
+		{ 1300.0f, L"左スティックで移動しろ！", TaskType::Move, {} },
+		{ 2800.0f, L"LBかRBを長押しして傾けろ！", TaskType::Tilt, {} },
+		{ 4300.0f, L"LBかRBを2回押してバレルロールしろ！回転中は敵の弾を跳ね返せる！", TaskType::BarrelRoll,
+			{
+				{ Vector3(-300.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+				{ Vector3( 300.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+			} },
+		{ 5800.0f, L"Xでブーストしろ！", TaskType::Boost, {} },
+		{ 9200.0f, L"Aでブレーキしろ！", TaskType::Brake, {} },
+		{ 10500.0f, L"Bで敵を撃ち落とせ！", TaskType::Shot,
+			{
+				{ Vector3(-400.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+				{ Vector3(   0.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+				{ Vector3( 400.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+			} },
+		{ 12600.0f, L"Bを長押しして溜め、もう一度Bでチャージショットを撃って敵を倒せ！", TaskType::ChargeShot,
+			{
+				{ Vector3(-300.0f,    0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+				{ Vector3(   0.0f,    0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+				{ Vector3( 300.0f,    0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+				{ Vector3(   0.0f,  300.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+				{ Vector3(   0.0f, -300.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+			} },
 	};
 
 	//tutorialUIの実体を確保
@@ -75,6 +94,8 @@ void TutorialController::Update()
 			m_normalShotDefeatedStartCount = pPlayer->GetNormalShotDefeatedCount();
 			//チャージショットで倒した敵の数を覚えておく
 			m_chargeShotDefeatedStartCount = pPlayer->GetChargeShotDefeatedCount();
+			//カウンター成功回数を覚えておく
+			m_counterSuccessCount = pPlayer->GetCounterSuccessCount();
 		}
 		break;
 	case StepState::Trying:

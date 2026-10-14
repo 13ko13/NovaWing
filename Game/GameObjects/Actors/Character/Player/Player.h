@@ -152,6 +152,11 @@ public:
 	//ブレーキ中かを返す
 	bool IsBraking() const;
 
+	//カウンター成功回数を取得する
+	int GetCounterSuccessCount() const { return m_counterSuccessCount; }
+	//カウンターの成功回数をインクリメントする
+	void AddCounterSuccess() { m_counterSuccessCount++; }
+
 private:
 	//回転の更新
 	void UpdateRotation();
@@ -280,4 +285,7 @@ private:
 	int m_invincibleFrame = 0;
 	//演出などで操作できない状態か
 	bool m_isDisabled = false;
+
+	//カウンターに成功した回数
+	int m_counterSuccessCount = 0;
 };
