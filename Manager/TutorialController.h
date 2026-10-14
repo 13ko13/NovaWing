@@ -11,6 +11,7 @@ class Player;
 class SceneController;
 class TutorialUI;
 class UIManager;
+class EnemyBase;
 
 /// チュートリアルを全て制御するクラス
 class TutorialController
@@ -39,18 +40,25 @@ public:
 	void Update();
 
 private:
+	
 	//タスクが終っているか
 	bool IsTaskCleared(const Player& player) const;
+	//タスク用の敵をスポーンさせる
+	void SpawnTaskEnemies(const Player& player);
+	//タスク用の敵がすべていなくなったか
+	bool IsDeadAllTaskEnemies() const;
+
+private:
 
 	//各ステップ内の状態
 	enum class StepState
 	{
-		WaitTrigger,//トリガーZに来るのを待つ
+		WaitNextStep,//次のステップを待つ
 		Trying,//挑戦中
 		Success,//成功
 	};
 	//現在のステップ内の状態
-	StepState m_stepState = StepState::WaitTrigger;
+	StepState m_stepState = StepState::WaitNextStep;
 
 	//ステップ開始時に出す敵1体分のデータ
 	struct SpawnData
@@ -62,7 +70,6 @@ private:
 	//ステップ一つ分のデータ
 	struct StepData
 	{
-		float triggerZ;
 		std::wstring message;
 		TaskType taskType;
 		std::vector<SpawnData> spawnData;//敵の数ぶんのデータ
@@ -88,8 +95,15 @@ private:
 	//タスク開始時に、チャージショットで倒していた敵の数
 	int m_chargeShotDefeatedStartCount = 0;
 	//タスク開始時のカウンター成功回数
-	int m_counterSuccessCount = 0;
+	int m_counterSuccessStartCount = 0;
 
 	//エネミー工場
 	std::weak_ptr<EnemyFactory> m_pEnemyFactory;
+
+	//タスクが終ってない状態で敵が消えたら巻き戻したいので
+	//そのタスクに必要な敵のポインタを保持しておく
+	std::vector<std::weak_ptr<EnemyBase>> m_pTaskEnemies;
+
+	//タスククリア後に次のタスクを表示するまでのフレームカウンター
+	int m_appearNextStepFrame = 0;
 };

@@ -59,7 +59,18 @@ void LeaveState::Update()
 
 	pEnemy->SetVel(vel);
 
-	// TODO:画面外に行ったら死亡判定とする
+	//画面外に行ったら死亡判定とする
+	//自身がカメラの視野範囲内に入っていなければ消す
+	float radius = pEnemy->GetCollisionSpheres()[0]->GetRadius();//当たり判定の半径取得
+	Vector3 halfSize = Vector3(radius, radius, radius);
+	Vector3 boxMin = pEnemy->GetPos() -halfSize;
+	Vector3 boxMax = pEnemy->GetPos() + halfSize;
+	if (CheckCameraViewClip_Box(boxMin.ToDxLib(), boxMax.ToDxLib()))
+	{
+		pEnemy->OnDead();
+		//念のためreturn
+		return;
+	}
 
 	// 一応時間でも死亡するようにしておく
 	if (m_frame >= leave_frame)

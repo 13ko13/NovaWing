@@ -7,15 +7,19 @@
 #include "Manager/UIManager.h"
 #include "Game/UI/TutorialUI.h"
 #include "Utility/Vector2.h"
+#include "Game/GameObjects/Actors/Character/Enemy/EnemyFactory.h"
 
 namespace
 {
-	//次のステップに移るまでの時間(成功を表示しておく間の時間)
-	constexpr int to_next_step_frame = 60 * 2;
+	//成功を表示しておく間の時間
+	constexpr int success_show_frame = 60 * 2;
 	//プレイヤーが移動タスクを完了したかの判定用の距離閾値
 	constexpr float move_task_distance = 500.0f;
 	//プレイヤーが機体を傾けるタスクを完了したかの判定用の角度閾値
 	constexpr float tilt_task_angle = DX_PI_F / 4;
+
+	//次のタスクに移るまでの時間
+	constexpr int wait_next_step_frame = 60;
 }
 
 TutorialController::TutorialController(
@@ -34,28 +38,28 @@ TutorialController::TutorialController(
 	//チャージの爆発半径は700なので、チャージの的は左右±300に収めて1発でまとめて倒せるようにする
 	m_steps =
 	{
-		{ 1300.0f, L"左スティックで移動しろ！", TaskType::Move, {} },
-		{ 2800.0f, L"LBかRBを長押しして傾けろ！", TaskType::Tilt, {} },
-		{ 4300.0f, L"LBかRBを2回押してバレルロールしろ！回転中は敵の弾を跳ね返せる！", TaskType::BarrelRoll,
+		{ L"左スティックで移動しろ！", TaskType::Move,{} },
+		{ L"LBかRBを長押しして傾けろ！", TaskType::Tilt,{} },
+		{ L"LBかRBを2回押してバレルロールしろ！回転中は敵の弾を跳ね返せる！", TaskType::BarrelRoll,
 			{
 				{ Vector3(-300.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-				{ Vector3( 300.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+				{ Vector3(300.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
 			} },
-		{ 5800.0f, L"Xでブーストしろ！", TaskType::Boost, {} },
-		{ 9200.0f, L"Aでブレーキしろ！", TaskType::Brake, {} },
-		{ 10500.0f, L"Bで敵を撃ち落とせ！", TaskType::Shot,
+		{ L"Xでブーストしろ！", TaskType::Boost,{} },
+		{ L"Aでブレーキしろ！", TaskType::Brake,{} },
+		{ L"Bで敵を撃ち落とせ！", TaskType::Shot,
 			{
 				{ Vector3(-400.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-				{ Vector3(   0.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-				{ Vector3( 400.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+				{ Vector3(0.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+				{ Vector3(400.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
 			} },
-		{ 12600.0f, L"Bを長押しして溜め、もう一度Bでチャージショットを撃って敵を倒せ！", TaskType::ChargeShot,
+		{ L"Bを長押しして溜め、もう一度Bでチャージショットを撃って敵を倒せ！", TaskType::ChargeShot,
 			{
 				{ Vector3(-300.0f,    0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-				{ Vector3(   0.0f,    0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-				{ Vector3( 300.0f,    0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-				{ Vector3(   0.0f,  300.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-				{ Vector3(   0.0f, -300.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+				{ Vector3(0.0f,    0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+				{ Vector3(300.0f,    0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+				{ Vector3(0.0f,  300.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
+				{ Vector3(0.0f, -300.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
 			} },
 	};
 
@@ -80,49 +84,99 @@ void TutorialController::Update()
 
 	switch (m_stepState)
 	{
-	case StepState::WaitTrigger:
-		//プレイヤーの座標がステップデータのトリガーZを越えたら遷移する
-		if (pPlayer->GetPos().z > m_steps[m_stepIndex].triggerZ)
-		{
-			//チュートリアルメッセージシーンをPushする
-			m_controller.PushScene(std::make_shared<TutorialMessageScene>(m_controller, m_steps[m_stepIndex].message));
-			//ステートの変更
-			m_stepState = StepState::Trying;
-			//プレイヤーの現在位置を覚えておく
-			m_taskStartPos = pPlayer->GetPos();
-			//通常弾で倒した敵の数を覚えておく
-			m_normalShotDefeatedStartCount = pPlayer->GetNormalShotDefeatedCount();
-			//チャージショットで倒した敵の数を覚えておく
-			m_chargeShotDefeatedStartCount = pPlayer->GetChargeShotDefeatedCount();
-			//カウンター成功回数を覚えておく
-			m_counterSuccessCount = pPlayer->GetCounterSuccessCount();
-		}
-		break;
+	case StepState::WaitNextStep:
+	{
+		m_appearNextStepFrame++;
+		if (m_appearNextStepFrame < wait_next_step_frame) break;
+
+		//チュートリアルメッセージシーンをPushする
+		m_controller.PushScene(std::make_shared<TutorialMessageScene>(m_controller, m_steps[m_stepIndex].message));
+		//ステートの変更
+		m_stepState = StepState::Trying;
+		//カウンターリセット
+		m_appearNextStepFrame = 0;
+		//プレイヤーの現在位置を覚えておく
+		m_taskStartPos = pPlayer->GetPos();
+		//通常弾で倒した敵の数を覚えておく
+		m_normalShotDefeatedStartCount = pPlayer->GetNormalShotDefeatedCount();
+		//チャージショットで倒した敵の数を覚えておく
+		m_chargeShotDefeatedStartCount = pPlayer->GetChargeShotDefeatedCount();
+		//カウンター成功回数を覚えておく
+		m_counterSuccessStartCount = pPlayer->GetCounterSuccessCount();
+
+		SpawnTaskEnemies(*pPlayer);
+	}
+	break;
 	case StepState::Trying:
+	{
+		//プレイヤーがタスクをクリアしているか
+		bool isCleared = IsTaskCleared(*pPlayer);
+
+		//もしまだ成功していなくて
+		//このステップのspawnDataが空ではなく、
+		//タスク用の敵が全員いない場合であれば敵を出す
+		if (!isCleared &&
+			!m_steps[m_stepIndex].spawnData.empty() &&
+			IsDeadAllTaskEnemies())
+		{
+			//敵を出現
+			SpawnTaskEnemies(*pPlayer);
+		}
+
 		//タスクを表示させる(UI)
 		//表示中なら UI 側で無視される
 		m_tutorialUI->OnStart(m_steps[m_stepIndex].message);
 		//タスクが終了していたら成功ステートに遷移
-		if (IsTaskCleared(*pPlayer))
+		if (isCleared)
 		{
 			m_stepState = StepState::Success;
 			m_tutorialUI->OnSuccess();
 		}
+	}
 
-		break;
+	break;
 	case StepState::Success:
 		//2秒ぐらいで次のステップへ移動する
 		m_successFrame++;
-		if (m_successFrame > to_next_step_frame)
+		if (m_successFrame > success_show_frame)
 		{
 			//次のステップに移動すると同時に、他の情報をリセット
 			m_stepIndex++;
 			m_successFrame = 0;
-			m_stepState = StepState::WaitTrigger;
+			m_stepState = StepState::WaitNextStep;
 			m_tutorialUI->OnEnd();
 		}
 		break;
 	}
+}
+
+void TutorialController::SpawnTaskEnemies(const Player& player)
+{
+	//敵を生成する前に前回の敵を消しておく
+	m_pTaskEnemies.clear();
+	std::shared_ptr<EnemyFactory> pEnemyFactory = m_pEnemyFactory.lock();
+	//SpawnData情報をもとに敵を召喚する
+	if (pEnemyFactory)
+	{
+		for (const auto& data : m_steps[m_stepIndex].spawnData)
+		{
+			//生成した敵を持っておく
+			m_pTaskEnemies.push_back(pEnemyFactory->Create(
+				player.GetPos() + data.offset, data.type));
+		}
+	}
+}
+
+bool TutorialController::IsDeadAllTaskEnemies() const
+{
+	//すべての敵をループして参照先が存在するものが一体でもいれば
+	//まだすべての敵が死んだわけではないのでfalseを返す
+	for (const auto& enemy : m_pTaskEnemies)
+	{
+		if (!enemy.expired()) return false;
+	}
+
+	return true;
 }
 
 bool TutorialController::IsTaskCleared(const Player& player) const
@@ -148,8 +202,8 @@ bool TutorialController::IsTaskCleared(const Player& player) const
 		return std::abs(rotZ) > tilt_task_angle;
 	}
 	case TaskType::BarrelRoll:
-		//プレイヤーがバレルロールしていればtrueを返す
-		return player.IsRolling();
+		//タスク開始からカウンターの回数が増えていればクリア(カウンターは必中なので敵を殺せる)
+		return player.GetCounterSuccessCount() > m_counterSuccessStartCount;
 
 	case TaskType::Boost:
 		//プレイヤーがブーストしていればtrueを返す

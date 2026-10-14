@@ -14,7 +14,7 @@
 namespace
 {
 	//頭の移動速度
-	constexpr float move_speed =18.0f;
+	constexpr float move_speed = 18.0f;
 	//螺旋状に回転するときの回転速度
 	constexpr float rot_speed = 4.0f;
 	//螺旋移動の時の半径
@@ -40,7 +40,7 @@ WormEnemy::WormEnemy(
 	const WormEnemyData& data,//ワームエネミーに必要なデータ
 	std::weak_ptr<SoundManager> pSoundManager,
 	std::weak_ptr<EffectManager> pEffectManager) :
-	EnemyBase(data.modelID,camera,pPlayer,pBulletManager),
+	EnemyBase(data.modelID, camera, pPlayer, pBulletManager),
 	m_segmentCount(data.segmentCount),
 	m_headSphere(std::make_shared<SphereShape>(data.pos, 0.0f)),
 	m_moveDirection(data.direction),
@@ -95,7 +95,7 @@ void WormEnemy::OnInit()
 void WormEnemy::Update()
 {
 	//プレイヤーがワームの動き出し距離まで来ていなければ処理を飛ばす
-	if(m_pPlayer.lock()->GetPos().z < m_activatePlayerZ) return;
+	if (m_pPlayer.lock()->GetPos().z < m_activatePlayerZ) return;
 
 	//フレーム更新
 	m_frame++;
@@ -146,9 +146,9 @@ void WormEnemy::Update()
 		{
 			//履歴が足りないときにクラッシュするので
 			//if文でガードする
-			if (static_cast<int>(m_headHistory.size()) > (i+1) * spacing)
+			if (static_cast<int>(m_headHistory.size()) > (i + 1) * spacing)
 			{
-				m_segmentPositions[i] = m_headHistory[(i+1) * spacing];
+				m_segmentPositions[i] = m_headHistory[(i + 1) * spacing];
 			}
 		}
 
@@ -165,7 +165,8 @@ void WormEnemy::Update()
 		}
 
 		//一定間隔で弾を発射する
-		if (m_frame % shoot_interval == 0)
+		if (m_frame % shoot_interval == 0 &&
+		!CheckCameraViewClip(m_pos.ToDxLib()))
 		{
 			//弾の管理者を取得する
 			std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock();
@@ -185,7 +186,7 @@ void WormEnemy::Update()
 			//弾管理者に発射を依頼
 			pBulletManager->CreateBullet(
 				BulletManager::BulletType::EnemyBullet,//敵の弾
-				shootPos, shootVel, bullet_power,m_pCamera,
+				shootPos, shootVel, bullet_power, m_pCamera,
 				std::static_pointer_cast<EnemyBase>(shared_from_this()));//発射位置と速度と攻撃力
 
 			//発射音を鳴らす
@@ -194,7 +195,7 @@ void WormEnemy::Update()
 	}
 
 	//死亡エフェクト再生許可が出ていれば(死亡していれば)
-	if(m_isCanPlayEffect)
+	if (m_isCanPlayEffect)
 	{
 		//まだ死亡エフェクトを胴体の数 + 1(頭の数)分出し終わっていなければ
 		//死亡エフェクトを一定間隔で、頭と胴体の場所に出す
@@ -235,7 +236,7 @@ void WormEnemy::Update()
 void WormEnemy::Draw()
 {
 	//プレイヤーがワームの動き出し距離まで来ていなければ処理を飛ばす
-	if(m_pPlayer.lock()->GetPos().z < m_activatePlayerZ) return;
+	if (m_pPlayer.lock()->GetPos().z < m_activatePlayerZ) return;
 
 	//頭がまだ爆発していなければ描画する
 	if (m_deathEffectNum == 0)
@@ -247,7 +248,7 @@ void WormEnemy::Draw()
 		//頭のモデルを描画
 		DrawWormHead();
 	}
-	
+
 	//胴体のモデルを描画
 	//胴体の数だけループを回す
 	for (int i = 0; i < m_segmentCount; i++)
@@ -257,7 +258,7 @@ void WormEnemy::Draw()
 		{
 			//それぞれの胴体の位置にモデルを適用する
 			ApplyMatrix(
-				model_scale, 
+				model_scale,
 				m_segmentPositions[i],
 				m_rotation, m_modelHandle);
 			//シェーダに渡すカメラ情報を更新してから
@@ -297,19 +298,19 @@ void WormEnemy::DrawWormHead()
 	const int emissionGraphH = resourceLoader.GetGraphic(
 		ResourceLoader::GraphicID::WormHeadEmissionMap);
 	//ディゾルブ用ノイズ
-    int noiseHandle = ResourceLoader::GetInstance().GetGraphic(
-        ResourceLoader::GraphicID::DissolveNoise
-    );
-	
-	//ハンドルとレジスタ番号をセットで保持しておく
-    std::vector<std::pair<int,int>> textures;
-    textures.push_back({ShaderRegister::tex_normal,normGraphH});//法線マップ
-    textures.push_back({ShaderRegister::tex_metalic,metalicGraphH});//メタリックマップ
-    textures.push_back({ShaderRegister::tex_emission,emissionGraphH});//エミッション
-    textures.push_back({ShaderRegister::tex_noise,noiseHandle});//ノイズテクスチャ
+	int noiseHandle = ResourceLoader::GetInstance().GetGraphic(
+		ResourceLoader::GraphicID::DissolveNoise
+	);
 
-    //DrawWithLightingにペアの配列を渡してモデルを描画
-    DrawWithLighting(textures);
+	//ハンドルとレジスタ番号をセットで保持しておく
+	std::vector<std::pair<int, int>> textures;
+	textures.push_back({ ShaderRegister::tex_normal,normGraphH });//法線マップ
+	textures.push_back({ ShaderRegister::tex_metalic,metalicGraphH });//メタリックマップ
+	textures.push_back({ ShaderRegister::tex_emission,emissionGraphH });//エミッション
+	textures.push_back({ ShaderRegister::tex_noise,noiseHandle });//ノイズテクスチャ
+
+	//DrawWithLightingにペアの配列を渡してモデルを描画
+	DrawWithLighting(textures);
 }
 
 void WormEnemy::DrawWormBody()
@@ -330,19 +331,19 @@ void WormEnemy::DrawWormBody()
 	const int diffuseGraphH = resourceLoader.GetGraphic(
 		ResourceLoader::GraphicID::WormBodyDiffuseMap);
 	//ディゾルブ用ノイズ
-    int noiseHandle = ResourceLoader::GetInstance().GetGraphic(
-        ResourceLoader::GraphicID::DissolveNoise);
+	int noiseHandle = ResourceLoader::GetInstance().GetGraphic(
+		ResourceLoader::GraphicID::DissolveNoise);
 
 	//ハンドルとレジスタ番号をセットで保持しておく
-    std::vector<std::pair<int,int>> textures;
-    textures.push_back({ShaderRegister::tex_normal,normGraphH});//法線マップ
-    textures.push_back({ShaderRegister::tex_metalic,metalicGraphH});//メタリックマップ
-    textures.push_back({ShaderRegister::tex_emission,emissionGraphH});//エミッション
-    textures.push_back({ShaderRegister::tex_noise,noiseHandle});//ノイズテクスチャ
-    textures.push_back({ShaderRegister::tex_diffuse,diffuseGraphH});//ディフューズマップ
+	std::vector<std::pair<int, int>> textures;
+	textures.push_back({ ShaderRegister::tex_normal,normGraphH });//法線マップ
+	textures.push_back({ ShaderRegister::tex_metalic,metalicGraphH });//メタリックマップ
+	textures.push_back({ ShaderRegister::tex_emission,emissionGraphH });//エミッション
+	textures.push_back({ ShaderRegister::tex_noise,noiseHandle });//ノイズテクスチャ
+	textures.push_back({ ShaderRegister::tex_diffuse,diffuseGraphH });//ディフューズマップ
 
-    //DrawWithLightingにペアの配列を渡してモデルを描画
-    DrawWithLighting(textures);
+	//DrawWithLightingにペアの配列を渡してモデルを描画
+	DrawWithLighting(textures);
 }
 
 void WormEnemy::TakeDamage(int damage)

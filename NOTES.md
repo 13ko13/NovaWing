@@ -1742,3 +1742,29 @@
 - **これからのブラッシュアップには「プレイヤーに不親切な部分をなくしていく」ことも含む。** 例: 敵の攻撃の予備動作(撃つ前に分かるようにする)。
 - 設計案を出すときは、締め切り優先で不親切な解決策(できないまま先へ進める・強制終了するなど)を勧めない。親切さを保ったまま軽く実装できる案を優先して提案する。
 - 気づき(未対応): 右上のタスク枠は約8文字分しか入らないので長い文ははみ出す(`taskText`追加で解決予定)。`InputManager.cpp`のLB/RBのコメントが逆(RIGHT_SHOULDERはRB)。メッセージを閉じるOK(A)とブレーキ(A)が同じボタンだが、ブレーキは`IsTriggered`なので閉じた押下では発動しない。
+
+### 2026-10-14 重さ対策(チュートリアル中に敵が多いと重い)
+- ユーザーの判断: 原因は「敵が多い＋弾が多い」。
+- 実施: CSVからチュートリアル区間の敵を削除(Claude、ユーザー依頼)。FloatingEnemyのZ11000(8体)/11500/12000/12500(各1体)、WormEnemyのZ10500。これで本番の敵はZ14500の9体＋ワーム2体(起動Z11000)から。
+- 候補(未実施): ①カメラより後ろに行った敵弾を消す(`BulletBase::Update`。寿命300フレーム=**5秒**でコメントの「3秒」は誤り。通り過ぎた弾もエフェクト・当たり判定が残る) ②離脱した浮遊敵を時間(`leave_frame`=7秒)でなく画面外で消す ③`HideState`中の浮遊敵は描画・アニメーションを省く(今は状態に関係なく毎フレーム描画) ④`GameObjectManager::UpdateAll`のfor文が`shared_ptr`を値コピーしている→`const auto&`。
+- 注意: Z14500のワーム2体は起動Z11000なので、チャージのステップ(12600)の頃に出てくる。
+
+### 2026-10-14 チュートリアル確認のためステージの雑魚を一時的に全削除
+- ユーザー依頼(Claude実施): `Stage1/FloatingEnemy.csv`と`Stage1/WormEnemy.csv`をヘッダ行だけにした(雑魚0体)。ボス・岩はそのまま。ヘッダだけのCSVは`CSVDataLoader`で空の配列になるので落ちない。
+- **戻すとき**: `git checkout <コミット> -- Data/CSV/Stage1/FloatingEnemy.csv Data/CSV/Stage1/WormEnemy.csv`(この変更より前のコミットから)。本来は「チュートリアルが終わるまでステージの雑魚を出さない」仕組みにするか、配置を後ろにずらす。
+
+### 2026-10-14 チュートリアルの進行をZ基準から時間基準に(ユーザー実装、動作確認OK)
+- `StepState`: `WaitTrigger`→`WaitNextStep`(1秒待ってからメッセージ・開始値の記録・敵生成→`Trying`)、`Trying`、`Success`(✓を`success_show_frame`=2秒見せる→`OnEnd`・index++→`WaitNextStep`)。最初の状態も`WaitNextStep`なので開始直後に1秒の間が入る。「✓を見せる時間」と「次までの間」はユーザー判断で別々の待ちにした(個別に調整できる)。
+- `StepData`から`triggerZ`を削除(`TutorialData.csv`のヘッダーからも後で消す)。
+- BarrelRollの判定を`GetCounterSuccessCount() > m_counterSuccessStartCount`に変更(反射弾は撃った敵を追尾するので跳ね返せば当たる)。
+- 敵が撃つのは画面内(`!CheckCameraViewClip(敵の位置)`)にいるときだけ(浮遊敵`ActiveState`・ワーム)。`EnemyBullet::Update`で弾を包む箱(位置±半径)が`CheckCameraViewClip_Box`で視野外なら`OnDead`。プレイヤーの弾(チャージの追尾)は対象外にするため`BulletBase`ではなく`EnemyBullet`に書いた。
+- 名前の整理(任意、未確認): `to_next_step_frame`→`wait_next_step_frame`、`m_apearNextTaskFrame`→`m_waitNextStepFrame`(綴り)、`success_show_frame`のコメント。
+- **次**: 敵が必要なタスク(バレルロール・ショット・チャージ)で、成功前に敵がいなくなったときの対策(巻き戻し)。
+
+### 2026-10-14 タスク用の敵の出し直し(リスポーン)と離脱敵の画面外削除(ユーザー実装、動作確認OK)
+- `TutorialController`: `SpawnTaskEnemies(const Player&)`に敵生成を切り出し(`WaitNextStep`と`Trying`から呼ぶ)。`IsDeadAllTaskEnemies()`で`m_pTaskEnemies`が全部`expired()`か判定。`Trying`で「未成功 かつ `!spawnData.empty()` かつ 全員いない」なら出し直す。`IsTaskCleared`は`Trying`の最初で1回だけ計算して使い回す。
+- 敵を持っている所はどれも`weak_ptr`(TargetManager/CollisionManager/EnemyBulletのShooter)なので、`GameObjectManager`から外れれば`expired()`になる。
+- バグ(修正済み): 出し直し条件が`spawnData.empty()`(`!`抜け)で、敵ありのステップで出し直しが起きず、バレルロールがクリア不能だった。
+- `LeaveState`: 4秒だと画面内で消えて不自然→7秒にしていたが、**画面外(`CheckCameraViewClip_Box`、当たり判定の半径の箱)に出たら`OnDead`**に変更(撃墜ではないので`OnEnemyDead`ではない)。7秒は保険として残す。
+- 残りの任意: `IsLeaving()`で離脱開始時点で「いない」扱い(待ちが気になれば)、`isCleard`→`isCleared`、`IsDeadAllTaskEnemies`→`AreAllTaskEnemiesGone`、離脱の判定半径を見た目に合わせて少し大きく。
+- この先: チュートリアルの`Tutorial.csv`化(`taskText`列も)、タスク枠に文字を収める、ステージの雑魚CSVを戻す(チュートリアル後に出す仕組みか配置調整)。

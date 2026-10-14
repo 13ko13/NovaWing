@@ -67,7 +67,8 @@ void ActiveState::Update()
 
 	//弾の発射
 	//一定周期で弾を打ってくる
-	if (m_frame % bullet_interval == 0)
+	if (m_frame % bullet_interval == 0 &&
+		!CheckCameraViewClip(pEnemy->GetPos().ToDxLib()))
 	{
 		//弾の管理者を取得する
 		std::shared_ptr<BulletManager> pBulletManager = pEnemy->GetBulletManager();

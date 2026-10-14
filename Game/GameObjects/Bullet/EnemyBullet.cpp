@@ -40,6 +40,15 @@ void EnemyBullet::Update()
 	pEffectManager->SetPos(m_effectPlayHandle, GetPos());
 	//
 	pEffectManager->SetDynamicInput(m_effectPlayHandle, 0, GetPos().y - 50.0f);
+
+	//自身がカメラの視野範囲内に入っていなければ消す
+	Vector3 halfSize = Vector3(m_radius, m_radius, m_radius);
+	Vector3 boxMin = m_pos - halfSize;
+	Vector3 boxMax = m_pos + halfSize;
+	if (CheckCameraViewClip_Box(boxMin.ToDxLib(), boxMax.ToDxLib()))
+	{
+		OnDead();
+	}
 }
 
 void EnemyBullet::Draw()
