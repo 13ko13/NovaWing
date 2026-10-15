@@ -27,7 +27,8 @@ std::vector<std::shared_ptr<EnemyBase>> WormEnemyDataSetter::CreateEnemy(
      std::weak_ptr<CameraBase> pCamera,
       std::weak_ptr<BulletManager> pBulletManager,
       std::weak_ptr<SoundManager> pSoundManager,
-      std::weak_ptr<EffectManager> pEffectManager)
+	  std::weak_ptr<EffectManager> pEffectManager,
+	  float offsetZ)
 {
     //最終的な返り値
     std::vector<std::shared_ptr<EnemyBase>> pEnemies;
@@ -52,7 +53,10 @@ std::vector<std::shared_ptr<EnemyBase>> WormEnemyDataSetter::CreateEnemy(
 
         //位置(文字列)をVector3に変換
         Vector3 pos = Vector3::FromWString(
-            dataString[1], dataString[2], dataString[3]);
+			dataString[1], dataString[2], dataString[3]);
+
+		//プレイヤーがチュートリアルを終了した地点分ずらす
+		pos.z += offsetZ;
 
         //胴体の数
         int segmentNum = std::stoi(dataString[segment_count_number]);
@@ -61,7 +65,8 @@ std::vector<std::shared_ptr<EnemyBase>> WormEnemyDataSetter::CreateEnemy(
         float direction = std::stof(dataString[direction_number]);
 
         //プレイヤーがどの位置(Z)まで来たら動き出すか
-        float activatePlayerZ = std::stof(dataString[active_player_z_number]);
+		float activatePlayerZ = std::stof(dataString[active_player_z_number]);
+		activatePlayerZ += offsetZ;
 
         WormEnemy::WormEnemyData wormData;
         wormData.modelID = modelID;

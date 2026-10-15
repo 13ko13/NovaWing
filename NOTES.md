@@ -1785,3 +1785,24 @@
 4. `boss_appear_z`の判定にもずらし量を足す(ずらし量をメンバーに持つ)。
 5. 雑魚CSV(`FloatingEnemy.csv`/`WormEnemy.csv`)を、ヘッダだけにする前のコミットから戻す。
 - 注意: `GameScene`内で`m_pBoss`や`m_pRocks`を生成前に使っている所がないか(nullチェック)。ボス関連(WARNING・ムービー・カメラのズーム)が`m_pBoss`前提で動いていないか確認する。
+
+**(2026-10-15 変更)ずらし方を変えた(ユーザー案)**
+- **Stage1のCSVを全部Zで−1200した**(Claude実施)ので、CSVの値は「ステージ開始時のプレイヤーからの距離」。**ずらし量＝チュートリアル終了時のプレイヤーZそのもの**(−1200はコードに不要)。対象: `FloatingEnemy`/`WormEnemy`(posZと`activatePlayerZ`)/`Rock`/`Boss`(30500→29300)。
+- 雑魚CSVは、チュートリアル用に削る前の**10/07のレベルデザイン(コミット`f039c0a`)から戻した**(配置はユーザーがClaudeに一任「面白ければいい」。今はそのまま)。
+- ユーザーが作った`Player::GetFirstPos()`はユーザー依頼でClaudeが削除。`GameScene::Update`の呼び出しは`CreateStageObjects(m_pPlayer->GetPos().z)`に。
+- **ボスは`Init`で作ったまま、ステージ開始時に`SetPos`でZにずらし量を足す**(`m_pBoss`は`CollisionManager`/`BossHPGaugeUI`/`Update`の`IsDead`・`IsDying`で生成直後から使われるため、生成を遅らせるとnullで落ちる。`BossEnemy`は最初の位置を別に覚えていないので`SetPos`だけでよい)。`boss_appear_z`は27000→**25800**にしてずらし量を足し、ステージ開始前は判定しない。
+- **Unityの`Stage1.unity`はCSVとずれた**(Zが1200違う)。Unityで書き出す前に`StageCsvImporter`で取り込み直すこと。
+- **(10/15)ユーザー実装・動作確認OK**: `CreateStageObjects(offsetZ)`、`m_isAppearEnemy`で1回だけ、`m_stageOffsetZ`、3つの`DataSetter`に`offsetZ`(ワームは`activatePlayerZ`も)、ボスは`CreateStageObjects`の最後で`SetPos`、`boss_appear_z`=25800+オフセット、ステージ開始前は判定しない。`m_isApear*`→`m_isAppear*`に綴り修正。
+- **(10/15)ユーザー報告の細かい問題**:
+  1. メッセージ→ボタンで閉じるまでの猶予がなく、連打ですぐ閉じる(`TutorialMessageScene::Update`が表示直後からOK(A)を受け付ける。ブレーキもA)。案: 経過フレームを数えて約1秒は閉じない＋受付後に「Aで次へ」を表示。
+  2. 岩などが急に出てくる(チュートリアル終了時に一括生成、最も近い岩は300先、`camera_far`=5500の内側なので目の前に出現)。案: `m_stageOffsetZ = プレイヤーZ + GetFarClip()`で描画範囲の外に作る。副作用で最初の岩まで約12秒の空白→「MISSION START」等の演出で埋める案。未決定。
+  3. 浮遊敵の爆発エフェクトがおかしい気がする(症状は未確認)。
+  3の結論: 浮遊敵は爆発を`Play`してハンドルを持ち、デストラクタで`Stop`していた→`trueDeadFrame`(10F)で消えると爆発が途中で切れていた(ワームは`PlayOneShot`なので無事。ファイルは同じ`EnemyDeath.efk`、倍率が浮遊敵1.5/ワーム1.0)。**`PlayOneShot`に変更する(ユーザー決定)**、`m_effectPlayHandle`・104行目の`SetPos`・デストラクタの`Stop`は不要に。
+  5. **ブースト後にブレーキのタスクが来ると、ゲージ満タン待ちの時間ができる**→ゲージを使うタスクではゲージを満タンにしてあげる(ユーザー)。`Player::ChangeGauge(delta)`/`GetMaxSpecialGauge()`(100)で外から満タンにできる。**決定: タスク開始時に1回だけ満タン(A案)**。「タスク中は使っていなければ常に満タン(B案)」は親切だが、ゲージの仕組みをプレイヤーが誤解する(回復が速い/減らないと思う)のでユーザーが不採用。
+  6. **宙返りのチュートリアルがない**。宙返り=十字キー上(キーボードZ)、ゲージ50より多く必要(`somersoult_use_gauge`)。判定は既存の`Player::IsSomersault()`が使える。
+  - **(10/15終了時点の状況)** 3の爆発は`PlayOneShot`に修正済み(ユーザー、`m_effectPlayHandle`も削除済み)。残りを手間の少ない順に: ①メッセージの猶予(方針あり) ②ゲージ満タン(方針あり、A案) ③宙返りタスク(**入れる位置が未決定**。ブレーキの後を提案中。`m_steps`はClaudeが書く) ④岩の急な出現(**先回り後の約12秒の空白をどうするか未決定**) ⑤カウンターのリアクション(案のみ)。
+  - **次回はまず①から(ユーザーが書く)**: `TutorialMessageScene`に経過フレームのメンバ(例`m_frame`)を足して`Update`の先頭で増やす→定数(例`close_enable_frame = 60`)未満の間はOKを押しても`PopScene`しない→`Draw`で定数以上になったらボックス右下に「Aで次へ」を描く(点滅させるなら`(m_frame / 30) % 2 == 0`のときだけ描く)。
+  - ②の書き方: `TutorialController`の`WaitNextStep`→`Trying`の切り替え時(開始値の記録・敵生成をしている所)で、`taskType`がブースト/ブレーキ/宙返りなら`pPlayer->ChangeGauge(pPlayer->GetMaxSpecialGauge() - pPlayer->GetSpecialGauge())`。タスクが増えるなら`StepData`に「開始時に満タンにするか」の`bool`を持たせる案も。
+  - ③で足すもの: `TaskType::Somersault`、`IsTaskCleared`に`case TaskType::Somersault: return player.IsSomersault();`、`m_steps`に1行(メッセージ案「十字キー上で宙返りしろ！」)。
+  4. **カウンター成功時のリアクションがない(タスク)**。案(ユーザー): 一瞬スロー(ヒットストップ的)／画面効果(ポストエフェクト)／ヒットエフェクト(ユーザー評価は「一番合わなさそう」)。未着手。カウンター成功の検知場所は`CounterCollider::OnCollision`(相手が`EnemyBullet`のとき、`AddCounterSuccess`している所)。
+- 作業中のコードの注意(10/15時点): `Init`の`CreateStageObjects();`が引数なし(コンパイルエラー、そもそも`Init`では呼ばない)。`Update`で`IsFinished()`の間は毎フレーム呼ばれる→1回だけにするフラグが要る。各`DataSetter`に`offsetZ`を足す処理はまだ。

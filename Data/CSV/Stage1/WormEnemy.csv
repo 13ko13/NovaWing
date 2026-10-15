@@ -1,1 +1,9 @@
 modelID,posX,posY,posZ,rotX,rotY,rotZ,scaleX,scaleY,scaleZ,segmentCount,direction,activatePlayerZ
+WormHead,-300,300,4300,0,0,0,1,1,1,5,-1,800
+WormHead,300,600,9300,0,0,0,1,1,1,5,-1,5800
+WormHead,-300,800,13300,0,0,0,1,1,1,7,-1,9800
+WormHead,300,400,13300,0,0,0,1,1,1,5,-1,9800
+WormHead,-300,300,17300,0,0,0,1,1,1,5,-1,13800
+WormHead,0,700,17300,0,0,0,1,1,1,7,-1,13800
+WormHead,300,300,17300,0,0,0,1,1,1,5,-1,13800
+WormHead,0,600,26300,0,0,0,1,1,1,7,-1,22800

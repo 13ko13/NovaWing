@@ -18,7 +18,8 @@ public:
         std::weak_ptr<CameraBase> pCamera,
         std::weak_ptr<BulletManager> pBulletManager,
         std::weak_ptr<SoundManager> pSoundManager,
-        std::weak_ptr<EffectManager> pEffectManager
+        std::weak_ptr<EffectManager> pEffectManager,
+	  	float offsetZ
     );
 
 private:

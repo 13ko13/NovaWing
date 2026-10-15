@@ -59,7 +59,7 @@ namespace
 	constexpr int frame_per_second = 60;
 
 	//ボスを登場タイミングz座標(プレイヤー位置)
-	constexpr float boss_appear_z = 27000.0f;
+	constexpr float boss_appear_z = 25800.0f;
 
 	//地震のような強く長い揺れ
 	//ボス登場時のカメラを揺らす力
@@ -180,46 +180,6 @@ void GameScene::Init()
 	//ボスに工場をセットする
 	m_pBoss->SetEnemyFactory(m_pEnemyFactory);
 
-	//浮遊エネミーの初期化
-	//データの数分のエネミーを作成
-	std::vector<std::shared_ptr<EnemyBase>> floatingEnemies = FloatingEnemyDataSetter::CreateEnemy(
-		m_pPlayer,
-		m_pCamera,
-		m_pBulletManager,
-		m_pSoundManager,
-		m_pEffectManager
-	);
-	//それぞれの初期化
-	for (std::shared_ptr<EnemyBase> pEnemy : floatingEnemies)
-	{
-		pEnemy->Init();
-		//衝突判定マネージャーに敵を登録する
-		m_pCollisionManager->Register(pEnemy);
-		//ターゲットマネージャーにエネミーを登録する
-		m_pTargetManager->Register(pEnemy);
-		//生存を保持するための配列に格納
-		m_pEnemies.push_back(pEnemy);
-	}
-
-	//ワームエネミーの初期化
-	std::vector<std::shared_ptr<EnemyBase>> wormEnemies = WormEnemyDataSetter::CreateEnemy(
-		m_pPlayer,
-		m_pCamera,
-		m_pBulletManager,
-		m_pSoundManager,
-		m_pEffectManager
-	);
-	for (std::shared_ptr<EnemyBase> pEnemy : wormEnemies)
-	{
-		pEnemy->Init();
-		//衝突判定マネージャーに敵を登録する
-		m_pCollisionManager->Register(pEnemy);
-		//ターゲットマネージャーにエネミーを登録する
-		m_pTargetManager->Register(pEnemy);
-		//生存を保持するための配列に格納
-		m_pEnemies.push_back(pEnemy);
-	}
-
 	//UIManagerの初期化
 	m_pUIManager = std::make_shared<UIManager>();
 	m_pUIManager->Register(std::make_shared<ReticleUI>(m_pTargetManager, m_pPlayer));
@@ -244,8 +204,64 @@ void GameScene::Init()
 		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxBottom)
 	);
 
+	//ステージの初期化
+	m_pStage = std::make_shared<Stage>(ResourceLoader::ModelID::Stage,
+	m_pCamera);
+	m_pStage->Init();
+
+	// ライトの方向ベクトルをセットする
+	LightingManager::GetInstance().SetLightDirection(Game::light_direction);
+
+	//チュートリアルコントローラーの初期化
+	m_pTutorialController = std::make_shared<TutorialController>(m_pPlayer, m_controller, m_pUIManager, m_pEnemyFactory);
+}
+
+void GameScene::CreateStageObjects(float offsetZ)
+{
+	//浮遊エネミーの初期化
+		//データの数分のエネミーを作成
+	std::vector<std::shared_ptr<EnemyBase>> floatingEnemies = FloatingEnemyDataSetter::CreateEnemy(
+		m_pPlayer,
+		m_pCamera,
+		m_pBulletManager,
+		m_pSoundManager,
+		m_pEffectManager,
+		offsetZ
+	);
+	//それぞれの初期化
+	for (std::shared_ptr<EnemyBase> pEnemy : floatingEnemies)
+	{
+		pEnemy->Init();
+		//衝突判定マネージャーに敵を登録する
+		m_pCollisionManager->Register(pEnemy);
+		//ターゲットマネージャーにエネミーを登録する
+		m_pTargetManager->Register(pEnemy);
+		//生存を保持するための配列に格納
+		m_pEnemies.push_back(pEnemy);
+	}
+
+	//ワームエネミーの初期化
+	std::vector<std::shared_ptr<EnemyBase>> wormEnemies = WormEnemyDataSetter::CreateEnemy(
+		m_pPlayer,
+		m_pCamera,
+		m_pBulletManager,
+		m_pSoundManager,
+		m_pEffectManager,
+		offsetZ
+	);
+	for (std::shared_ptr<EnemyBase> pEnemy : wormEnemies)
+	{
+		pEnemy->Init();
+		//衝突判定マネージャーに敵を登録する
+		m_pCollisionManager->Register(pEnemy);
+		//ターゲットマネージャーにエネミーを登録する
+		m_pTargetManager->Register(pEnemy);
+		//生存を保持するための配列に格納
+		m_pEnemies.push_back(pEnemy);
+	}
+
 	//岩の生成&初期化
-	m_pRocks = RockDataSetter::CreateRock(m_pCamera);
+	m_pRocks = RockDataSetter::CreateRock(m_pCamera, offsetZ);
 	//それぞれの岩の初期化
 	for (std::shared_ptr<Rock> pRock : m_pRocks)
 	{
@@ -254,22 +270,26 @@ void GameScene::Init()
 		m_pCollisionManager->RegisterRock(pRock);
 	}
 
-	//ステージの初期化
-	m_pStage = std::make_shared<Stage>(ResourceLoader::ModelID::Stage,
-	m_pCamera);
-	m_pStage->Init();
-
-	// ライトの方向ベクトルをセットする
-	LightingManager::GetInstance().SetLightDirection(Game::light_direction); 
-
-	//チュートリアルコントローラーの初期化
-	m_pTutorialController = std::make_shared<TutorialController>(m_pPlayer, m_controller,m_pUIManager,m_pEnemyFactory);
+	//ボスの位置も改めてセットする
+	Vector3 bossPos = m_pBoss->GetPos();
+	bossPos.z += m_stageOffsetZ;
+	m_pBoss->SetPos(bossPos);
 }
 
 void GameScene::Update()
 {
 	//フレームカウンターの更新
 	m_frame++;
+
+	//チュートリアルが終わっていれば通常ステージの敵や岩を生成する
+	if (m_pTutorialController->IsFinished() &&
+		!m_isAppearEnemy)
+	{
+		m_stageOffsetZ = m_pPlayer->GetPos().z;
+
+		CreateStageObjects(m_stageOffsetZ);
+		m_isAppearEnemy = true;
+	}
 
 	//全GameObjectのUpdateを呼ぶ
 	GameObjectManager::GetInstance().UpdateAll();
@@ -297,10 +317,11 @@ void GameScene::Update()
 
 	//プレイヤーが特定のz座標まで到達したら
 	//カメラを揺らしてボスを登場させる
-	if (m_pPlayer->GetPos().z > boss_appear_z)
+	if (m_pPlayer->GetPos().z > boss_appear_z + m_stageOffsetZ &&
+		m_isAppearEnemy)
 	{
 		//ボスが出現していない場合のみ行う
-		if (!m_isApearBoss)
+		if (!m_isAppearBoss)
 		{
 			//プレイヤーが何も行わないようにする
 			m_pPlayer->ChangeAllStateToDisabled();
@@ -369,7 +390,7 @@ void GameScene::Update()
 						boss_appear_camera_dist,
 						boss_appear_camera_height);
 					//ボス出現フラグを立てる
-					m_isApearBoss = true;
+					m_isAppearBoss = true;
 					//ボスの行動を許可する
 					m_pBoss->SetIsBossAppear(true);
 					//プレイヤーも普通のステートに戻す
@@ -380,14 +401,14 @@ void GameScene::Update()
 		}
 
 		//カメラがムービーの最後の位置へ移り終わったら、ムービーの描画をやめる
-		if (m_isDrawBossMovie && m_isApearBoss && !m_pCamera->IsZoom())
+		if (m_isDrawBossMovie && m_isAppearBoss && !m_pCamera->IsZoom())
 		{
 			m_isDrawBossMovie = false;
 		}
 
 		//ボスが出現していて、まだボスBGMに切り替えていない場合
 		//カメラのズームが終わったタイミングでボスBGMに切り替える
-		if (m_isApearBoss && !m_isChangedToBossBGM && !m_pCamera->IsZoom())
+		if (m_isAppearBoss && !m_isChangedToBossBGM && !m_pCamera->IsZoom())
 		{
 			m_pSoundManager->Play(SoundManager::SoundType::BossBGM, true);
 			m_isChangedToBossBGM = true;
@@ -488,14 +509,14 @@ void GameScene::Draw()
 	//水マネージャーの描画
 	m_pWaterManager->Draw();
 
-	
+
 	//レティクルよりプレイヤーが優先的に描画されてほしいので
 	//プレイヤーをもう一度描画する
 	m_pPlayer->Draw();
-	
+
 	//エフェクトの描画
 	m_pEffectManager->Draw();
-	
+
 	//全てのUIを描画する
 	m_pUIManager->Draw();
 

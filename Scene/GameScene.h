@@ -38,12 +38,17 @@ private:
 	/// </summary>
 	void DrawGrid();
 
+	//チュートリアル終了を検知して、終了していたら
+	//エネミーや岩を出現させる
+	//プレイヤーがチュートリアルを終了したZ座標を渡す必要がある
+	void CreateStageObjects(float offsetZ);
+
 private:
 	//フレームカウンター
 	int m_frame;
 
 	//ボスが出現したか
-	bool m_isApearBoss = false;
+	bool m_isAppearBoss = false;
 	//ボスBGMに切り替え済みか
 	bool m_isChangedToBossBGM = false;
 	//ボス死亡時のBGMフェードアウト済みか
@@ -51,6 +56,9 @@ private:
 	//ボス登場ムービーを描画するか
 	//(ムービー終了後もカメラが最後の位置へ移り終わるまでは最後のコマを出し続ける)
 	bool m_isDrawBossMovie = false;
+
+	//敵を出現させたか
+	bool m_isAppearEnemy = false;
 
 	//ボス登場時の演出ステート
 	enum class BossApearState
@@ -62,6 +70,9 @@ private:
 		CameraZoom,//カメラをズームアップ
 	};
 	BossApearState m_bossApearState = BossApearState::None;
+
+	//プレイヤーがチュートリアルを終了した位置を保存しておく(敵が出てくる位置のオフセット)
+	float m_stageOffsetZ = 0.0f;
 
 	//プレイヤーへのポインタ
 	std::shared_ptr<Player> m_pPlayer;

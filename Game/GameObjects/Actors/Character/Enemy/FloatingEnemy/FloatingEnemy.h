@@ -68,9 +68,6 @@ private:
 	//アニメーター
 	std::shared_ptr<ModelAnimator> m_pAnimator;
 
-	//effekseerの再生中のエフェクトのハンドル
-	int m_effectPlayHandle = -1;
-
 	//死亡状態中のフレーム計測
 	int m_dyingFrame = 0;
 

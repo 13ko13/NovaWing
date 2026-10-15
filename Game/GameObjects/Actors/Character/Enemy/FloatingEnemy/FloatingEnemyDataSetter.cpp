@@ -21,7 +21,8 @@ std::vector<std::shared_ptr<EnemyBase>> FloatingEnemyDataSetter::CreateEnemy(
      std::weak_ptr<CameraBase> pCamera,
       std::weak_ptr<BulletManager> pBulletManager,
       std::weak_ptr<SoundManager> pSoundManager,
-      std::weak_ptr<EffectManager> pEffectManager)
+	  std::weak_ptr<EffectManager> pEffectManager,
+	  float offsetZ)
 {
     //最終的な返り値
     std::vector<std::shared_ptr<EnemyBase>> pEnemies;
@@ -47,6 +48,8 @@ std::vector<std::shared_ptr<EnemyBase>> FloatingEnemyDataSetter::CreateEnemy(
         //位置(文字列)をVector3に変換
         Vector3 pos = Vector3::FromWString(
 			dataString[1], dataString[2], dataString[3]);
+
+		pos.z += offsetZ;
 
         //その位置と、pCameraで敵を一つ作成する
         pEnemies.push_back(std::make_shared<FloatingEnemy>(

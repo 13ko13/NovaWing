@@ -33,12 +33,7 @@ FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 
 FloatingEnemy::~FloatingEnemy()
 {
-	//エフェクトを止める
-	//(シーン終了でマネージャーが先に消えている場合は止める必要がない)
-	if (std::shared_ptr<EffectManager> pEffectManager = m_pEffectManager.lock())
-	{
-		pEffectManager->Stop(m_effectPlayHandle);
-	}
+	
 }
 
 void FloatingEnemy::OnInit()
@@ -99,9 +94,6 @@ void FloatingEnemy::Update()
 			OnEnemyDead();
 		}
 	}
-
-	//エフェクトの位置の調整する
-	m_pEffectManager.lock()->SetPos(m_effectPlayHandle, GetPos());
 }
 
 void FloatingEnemy::Draw()
@@ -173,7 +165,7 @@ void FloatingEnemy::TakeDamage(int damage)
 		m_pSoundManager.lock()->Play(SoundManager::SoundType::EnemyDeath);
 
 		//死亡エフェクトの再生を依頼する
-		m_effectPlayHandle = m_pEffectManager.lock()->Play(
+		m_pEffectManager.lock()->PlayOneShot(
 			ResourceLoader::EffectID::FloatingDeath, m_pos);
 	}
 }

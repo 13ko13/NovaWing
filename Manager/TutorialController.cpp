@@ -77,7 +77,7 @@ TutorialController::~TutorialController()
 void TutorialController::Update()
 {
 	//全部終わっているなら何もしない
-	if (m_stepIndex >= static_cast<int>(m_steps.size())) return;
+	if(IsFinished()) return;
 
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	if (!pPlayer) return;
@@ -148,6 +148,12 @@ void TutorialController::Update()
 		}
 		break;
 	}
+}
+
+bool TutorialController::IsFinished() const
+{
+	//ステップが終了していれば
+	return m_stepIndex >= static_cast<int>(m_steps.size());
 }
 
 void TutorialController::SpawnTaskEnemies(const Player& player)

@@ -39,6 +39,9 @@ public:
 	//更新
 	void Update();
 
+	//チュートリアルが終わったか
+	bool IsFinished() const;
+
 private:
 	
 	//タスクが終っているか

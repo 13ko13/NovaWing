@@ -35,7 +35,8 @@ namespace
 }
 
 std::vector<std::shared_ptr<Rock>> RockDataSetter::CreateRock(
-    std::weak_ptr<CameraBase> pCamera)
+	std::weak_ptr<CameraBase> pCamera,
+	float offsetZ)
 {
     //最終的な返り値
     std::vector<std::shared_ptr<Rock>> pRocks;
@@ -64,6 +65,9 @@ std::vector<std::shared_ptr<Rock>> RockDataSetter::CreateRock(
             dataString[model_y_number],
             dataString[model_z_number]
 		);
+
+		//プレイヤーがチュートリアルを終了した位置分ずらす
+		pos.z += offsetZ;
 
 		//Y軸回転量(文字列)をfloatに変換
 		float rotYRadian = std::stof(dataString[model_rot_y_number]);
