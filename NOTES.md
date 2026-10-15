@@ -61,12 +61,7 @@
 
 **2026-08-08、コードを確認して完了済みのタスクを削除しました**（BossEnemyのボーン行列コード整理・model_scale復元、Splashエフェクトの空白対応、CSV化はすべて確認済み・完了）。
 
-1. **`FloatingEnemy`だけライティングが不自然に暗い問題（2026-10-01、素材側の調整で対応）**
-   - 否定済みの仮説: 180度回転、スキニング設定(`DrawWithLighting(..., true)`にすると消える＝Drone_fix.mv1はスキンメッシュではなく`false`が正しい)、法線マップ(`normalTS=(0,0,1)`にしても暗いまま)。FBXのメッシュノード(Cylinder001)は回転なし・スケール2.54のみで、向きの問題でもない。
-   - 原因: `Drone_Albedo.png`自体が暗い(平均RGB 76,49,14)。Unityの Standard(Specular setup) 前提の素材で、Unityでは`Drone_Specular.tga`(アルファ=滑らかさ平均0.78)による艶・スカイボックスの環境光/映り込みで明るく見えていたが、自前シェーダーにはそれらが無い。加えてライト`(1,-1,0.6)`は上から当たるため、カメラ向きの正面はdiffuse約0.38しか受けない。
-   - 対処: ゲームが読んでいる`Data/Model/Drone.fbm/Drone_Albedo.png`(mv1内の参照パス。`Drone_fix.fbm`側ではない)を、色相・彩度を保ったまま明度(HSVのV)だけガンマ0.45で持ち上げた(平均RGB 132,92,44)。正面は屋根状パーツの下で法線が下向き気味のため、ユーザー判断で「かなり明るく」に。元画像はgit履歴から復元可能。
-   - それでも左側の敵・正面が暗い(ライトが左上手前から当たり、右側の敵は左側面が見えるので明るい)。Albedoの黄色は明度上限に張り付いていてこれ以上上げられないため、`Drone.fbm/Drone_Emission.png`に`Albedo×0.4`を加算した(光の向きに関係なく底上げされる、FloatingEnemyだけに効く)。足りなければ係数を上げて作り直す。
-   - シェーダー側でUnityの見た目に寄せるなら、`Drone_Specular.tga`を`tex_metalic`に渡す(ただし今のシェーダーは滑らかさを`.r`から読むので、アルファとの慣習差の調整が要る)のが次の候補。
+**2026-10-15、再度コードと照らして完了済みを削除しました**（1: FloatingEnemyの暗さは素材側で対応済み、5: ボス本実装、7: TitleCamera実装、8: Effekseer残留、11: EffectManager新設(10/04)。番号は他の記述から参照されているため、残りの番号は振り直していない）。あわせて、下の進捗ログ内の「次回やること」「次」「残り」のうち、完了済みのものも削除した（未完了だったものは12番に集約）。
 
 2. **`near_clip`/`far_clip`が`CapturePS.hlsl`/`WaterPS.hlsl`の2ファイルに重複定義**されている（`LightingPS.hlsl`は既に対象外と確認）。共通`.hlsli`への切り出しが未着手。
 
@@ -77,13 +72,7 @@
 
 4. **`LightingPS.hlsl`(共通化済み)と`WaterPS.hlsl`間で視線ベクトル・反射ベクトル・specular計算式が重複**。`WaterPS.hlsl`側だけまだ独自実装のまま、`.hlsli`共通化が候補、未着手。
 
-5. **ボスの本格実装（2026-08-21完了）。** 雑魚召喚・ビーム攻撃・登場演出・死亡エフェクトまで実装・動作確認済み。多段ヒット防止は見送り、ダメージ値を1に固定。ビームの当たり判定球配列は判定終端を通り過ぎたものを削除する対応済み。
-
 6. **VS CodeのIntelliSenseで`DxLib::VECTOR`等の型が「不完全な型」表示になる問題、原因未特定のまま保留。** ビルド自体は正常なため実害なし。深追いは費用対効果が低いと判断済み。
-
-7. **`CameraBase`のGameCamera/TitleCamera分割、GameCamera側は完了（2026-08-21）。** 詳細は下記「進捗（2026-08-21・タイトルシーン着手）」参照。`TitleCamera`はまだ空の骨格のみ、これから中身を実装する。
-
-8. ~~リプレイ等で2回目のGameSceneに入ったとき、前回のEffekseerエフェクトが残る問題~~ → **完了（2026-10-01確認）。** `SceneController::ResetScene()`で`m_scenes.clear()`の直前に`GameObjectManager::ClearAll()`を呼ぶ修正済み(詳細は下記「Boostエフェクト追加、シーン切り替え時のEffekseerエフェクト残留バグ修正」)。番号は他の記述から参照されているため欠番にせず残す。
 
 9. **シングルトンクラスが増えすぎている件、いずれ集約用クラス(例: GameServices)への移行を検討したい（2026-09-28・ユーザー提起、未着手）。** 現状`Application`/`InputManager`/`ResourceLoader`/`DebugManager`等が個別に`GetInstance()`を持つ素朴なMeyer'sシングルトン。今回`DebugManager`を追加する際、影響範囲を絞るためいったん同じパターンで作ったが、根本対応としては全マネージャーを1箇所で保持・提供する集約クラスへの置き換えが候補。既存コードへの影響が大きいため別タスクとして着手予定。
 
@@ -95,11 +84,11 @@
    - ステージはZ方向に長い(1200〜27000)ので、影を描く範囲はプレイヤー周辺に限定する必要がある。
    - 進める順の案: ステージかオブジェクト同士で動く形を作る → 海面は最後。
 
-11. **EffectManagerの新設（2026-10-01・方針のみ相談、未着手）。** 現状はEffekseerのAPI(`PlayEffekseer3DEffect`/`SetPos...`/`Stop...`等)を17ファイル・83箇所で直接呼び、再生ハンドルも各クラスが保持して自前で`Stop`している。`Sync3DSetting`/`UpdateEffekseer3D`/`DrawEffekseer3D`も各シーンが直接呼んでいる。ロード側(`ResourceLoader::EffectID`)は一元化済みなのでそのまま使う。
-   - 所有: `SoundManager`/`BulletManager`と同じく、シーンが`shared_ptr<EffectManager>`を持ち、各オブジェクト・ステートには`weak_ptr`で渡す。
-   - 機能案: `Update()`/`Draw()`(Sync3DSetting込み)、`Play(EffectID, pos)`→ハンドル(Play+SetPosの2行セットを1つに)、`PlayOneShot(EffectID, pos)`(被弾・死亡・召喚など撃ちっぱなし用、ハンドル不要)、`SetPos`/`SetRotation`/`SetScale`/`SetColor`/`IsPlaying`/`Stop`、`StopAll()`(シーン遷移・リトライ時の残留対策)。
-   - 検討点: 再生ハンドルを`int`のまま返すか、RAIIのハンドル型(中身は`int`1つ、破棄時に自動`Stop`、ムーブのみ)にするか。Claudeの推奨はRAII(止め忘れが原理的になくなり、デストラクタの`Stop`群が消える)。
-   - 移行順の案: ①シーンのUpdate/Drawを置き換え → ②撃ちっぱなし系を`PlayOneShot`へ → ③追従系(弾・ブースト・チャージ・ビーム・Player.cppの水しぶき)を移行。
+12. **進捗ログの「次回やること」から集約した、未完了の小さなタスク（2026-10-15時点でコード確認）**
+   - `BrakeState::Exit()`でもブースト同様に音を止める必要があるか確認する(今は`EndUseGauge()`のみ。10/01に低優先として放置中)。
+   - `TargetManager.cpp`の98行目付近、使っていない`std::vector<std::shared_ptr<EnemyBase>> pEnemies;`を削除する(軽微)。
+   - 効果音・BGMの音量バランス・タイミングを、通しプレイで最終確認する。
+   - プレイヤーの定数(23個)をCSV化するかは未決定。ProjectNeaR方式なら「種類ごとに変えたい値」だけが対象(参考: `C:\Users\Admin\Documents\GitHub\ProjectNeaR\source\Project\General\CSV\CharaStatusData.h/.cpp`)。
 
 ## 進捗（2026-08-21・タイトルシーン着手：CameraBase分割、TitlePlayer/TitleCamera新設）
 
@@ -126,11 +115,6 @@
 
 **現状（2026-08-21時点）**: `TitlePlayer.h`(`Actor`継承の空クラス)、`TitleCamera.h`(`CameraBase`未継承のTODO付き空クラス)は新規作成済みだが中身は未実装。`GameCamera`側は完成、既存のゲームプレイの動作確認済み。
 
-**次回やること（旧、下記の続き参照）:**
-1. ~~`TitleCamera`を`CameraBase`から継承させ、`UpdatePosition()`等を実装する。~~ → 完了。
-2. ~~`TitlePlayer`の中身を実装する。~~ → 前進・宙返りフェーズ、描画まで完了。ブーストはまだ（下記参照）。
-3. ~~`TitleScene`にこれらを組み込む。~~ → `TitleScene::Init()`で`TitlePlayer`/`TitleCamera`を生成・`GameObjectManager`登録済み、タイトル画面にプレイヤー機体が表示・前進する状態まで動作確認済み（下記参照）。演出全体のステート管理（前進→宙返り→ブーストの切り替えタイミング）はまだ未実装。
-4. タイトルロゴのスタンプ演出（拡大→通常サイズ）、選択肢のフェードインを実装する。
 
 ## 進捗（2026-08-21続き2・TitleCamera/TitlePlayerの基礎実装）
 
@@ -191,9 +175,6 @@
 - **ハマった点1: 海のメッシュの端(切れ目)が視界に入ってしまう。** `GameScene`側にある「プレイヤーが端に近づいたらメッシュをワープさせる」仕組み自体は流用されるが、タイトル演出はプレイヤー・カメラの移動距離がメッシュサイズ(30000程度)よりかなり小さいため、本来ワープ機構に頼らずとも収まるはずだった。**対処**: `TitlePlayer`/`TitleCamera`の初期位置を調整（メッシュの中心寄りにする）ことで解決。
 - **ハマった点2: 手前の海が不自然に暗く見える。** ライティング関連の設定漏れが原因（詳細な特定方法は未記録、ユーザーが解決）。**次回、同種の問題が起きた場合は`LightingManager::SetLightDirection`が`TitleScene::Init()`で呼ばれているか確認すること**（`GameScene`ではプレイヤー生成時などに設定されている可能性がある）。
 
-**次回やること（旧、下記の続き参照）:**
-1. 細部の見た目調整（速度・フレーム数・座標などのバランス調整）があれば随時対応。
-2. リプレイ等でEffekseerエフェクトが残留する問題（上記タスク8）はまだ未着手のまま。
 
 ## 進捗（2026-08-21続き5・ボスHPゲージの表示タイミング修正、リザルトシーンに着手）
 
@@ -213,11 +194,6 @@
   - `FloatingEnemy.cpp`/`WormEnemy.cpp`/`BossEnemy.cpp`の3クラスそれぞれの完全死亡分岐で`OnDead()`→`OnEnemyDead()`に置き換え（ユーザー依頼によりClaudeが直接編集）。
 - **GameScene**: ボス撃破判定（`m_pBoss->IsDead()`）のタイミングで`ClearResultData`を組み立て（`clearTime`は`m_frame`、`defeatedEnemyCount`/`hitCount`はPlayerから取得）、`ClearScene`へ`ChangeScene`する処理を実装済み。
 
-**次回やること:**
-1. `ClearScene::Draw()`に`m_resultData`の実際の数値表示を実装する（クリアタイムをフレームのまま出すか秒に変換するかは未決定、次回検討）。
-2. 倒した敵の数・クリアタイム・被弾回数を総合した「評価（スコア）」算出ロジックの設計・実装（まだ未着手）。
-3. 細部の見た目調整（速度・フレーム数・座標などのバランス調整）があれば随時対応。
-4. リプレイ等でEffekseerエフェクトが残留する問題（上記タスク8）はまだ未着手のまま。
 
 ## 進捗（2026-08-24・学校で作業、リザルトテンプレート画像とカーテン演出）
 
@@ -245,10 +221,6 @@
   - ダウンロード内の`SampleTPSGame`の`GameScene.cpp`（`GraphFilter(RTBloom_, DX_GRAPH_FILTER_GAUSS, 16, 1400)`、ぼかし前後に`DrawGraph`で加算合成描画するパターン、別箇所では2回連続ぼかしがけの例）を参考に、`blur_range=16`, `blur_strength=1400`、2回連続`GraphFilter`呼び出しに調整。
   - **既知の限界**: `ResultTemplete`画像側のラベル文字(COMPLETE等)は画像編集ソフトで事前に焼き込まれた光彩のため綺麗だが、リアルタイムでガウスフィルターをかけている数字側は同じクオリティには届かない。ユーザー判断で「現状のクオリティで十分」として一旦区切りをつけた。
 
-**次回やること:**
-1. 倒した敵の数・クリアタイム・被弾回数を総合した「評価（スコア）」算出ロジックの設計・実装（まだ未着手）。
-2. 細部の見た目調整（光彩の強さ、文字の座標・色・サイズなど）があれば随時対応。
-3. リプレイ等でEffekseerエフェクトが残留する問題（上記タスク8）はまだ未着手のまま。
 
 ## 進捗（未記録期間・ClearSceneに評価/選択肢一式が実装済み、選択肢ワイプが未完成のまま残っていることが判明）
 
@@ -289,7 +261,7 @@
 - プレイヤーのモデルが逆向きなため`GetForward()`/`GetBack()`は見た目と正反対を指す。`Player::GetVisualForward()`/`GetVisualBack()`を新設し、以後は見た目通りの前後が欲しい場面ではこちらを使う。
 - `Vector3::Lerp`の「現在位置」と「移動量」を混同し`m_beamPosL = 方向 * 速度`のように位置を移動量で丸ごと上書きするミス(`+=`ではなく`=`)、左右の変数取り違えが複数回発生。`#ifdef _DEBUG`のスペルミス(`_DEBGU`)でデバッグ専用メンバーの宣言が常にコンパイル対象外になっていたことも発覚(エディタのグレーアウトはIntelliSenseの誤表示でなく実際にプリプロセッサ条件が不成立というサインのことがある)。
 
-**多段ヒット防止(`DamageSource`)の設計、まだ未完成。次回はここから再開:**
+**多段ヒット防止(`DamageSource`)の設計の経緯（→2026-08-28に完成）:**
 - 発端: 既存の岩・ワームの多段ヒット防止(`m_isTakingDamage`という単一boolフラグ)は、「同じフレーム内で複数の異なる攻撃源(岩とワーム等)に同時に当たると、先に判定された方が優先され、後の攻撃が無視される」という欠陥があると気づいた。ビーム追加でこの状況(複数種の攻撃に同時接触)が現実的になったため対応することに。
 - 要件を「同じ攻撃源からの多段ヒットだけ防げればよい(異なる攻撃源は独立して判定してよい)」に決定。`bool`1個ではなく`enum class DamageSource { Rock, Worm, Beam }`＋`std::set<DamageSource>`で攻撃源ごとに独立管理する方針に転換。
 - **試した設計とその問題点**:
@@ -297,13 +269,7 @@
   2. 「`Update()`の最初で毎フレーム`ClearTakingDamage()`」→ シンプルだが、次のフレームで記録が消えてしまうため「連続で当たり続けても1回だけ」という無敵時間の要件そのものと矛盾し、結果的に多段ヒットしてしまう。実装時、`StartTakingDamage`を`if(HitCollision)`の外に置いてしまい「毎回無条件でset に追加される」バグ(岩でダメージが一切通らなくなる)も発生。
   3. 「前フレームの記録」と「今フレームの記録」を2つの`set`で持ち、判定は前フレーム分を見る案 → 理屈は正しいが「フレームの切り替え(今の記録を前の記録としてコピーし今の記録を空にする)をどこで行うか」が分かりにくく、複雑と判断。
   - **結論: 方式1(`insert`/`OnLeaveDamaging`)に戻ることに決定。** ただし各判定ループの外側に`isHitRock`/`isHitWorm`/`isHitBeam`のようなその場限りのフラグを用意し、ループの外で`if (!isHitXxx) OnLeaveDamaging(...)`を呼ぶ、という以前の岩・ワーム実装と同じパターンで統一する。
-- **現状(2026-08-18時点、未実装)**: `Player.h`/`.cpp`が`ClearTakingDamage()`方式のまま(`OnLeaveDamaging`が無い状態)。`CollisionManager.cpp`側もまだ`ClearTakingDamage()`呼び出し・`StartTakingDamage`のみの状態。**次回は`Player`に`OnLeaveDamaging(DamageSource)`を復活させ、`CollisionManager::Update()`の岩・ワーム・ビーム各ループに`isHitXxx`フラグを追加してから作業を再開すること。**
 
-**次回やること（旧、下記の続き参照）:**
-1. ~~多段ヒット防止の実装~~ → **見送りに決定（2026-08-18）**。ダメージを1に固定して多段ヒットを許容する方針に変更、上記タスク5参照。
-2. `BossBeamState`の当たり判定球配列(`m_beamSpheresL/R`)がビーム中増え続ける一方で削除処理がない点、必要なら対応を検討。
-3. リプレイ時のEffekseerエフェクト残留の対応(上記タスク7)。
-4. ボスの死亡演出はまだ未着手。
 
 ## 進捗（2026-08-19・ボスの本配置着手：登場条件・登場演出・カメラの設計）
 
@@ -321,12 +287,6 @@
   - `SpecialAction`: 既存の`NoneState`（何もしないステート）がそのまま無効化用として使える。
   - `Shoot`: 対応する「何もしない」ステートがまだ存在しない。`IShootState`を継承する新規`DisabledShootState`(仮称)をユーザーが作成予定（`Movement`/`Rotation`の既存実装と同じパターンで実装できる見込み）。
 
-**次回やること（旧、下記の続き参照）:**
-1. ~~`DisabledShootState`の新規作成。~~ → 対応済み（下記参照）。
-2. ~~`Player`に「4ステート全部を無効化ステートに切り替える」ための処理。~~ → `DisabledAllState()`として実装済み。
-3. `GameScene`に登場演出のステート/フラグと、「①落下+カメラ揺れ→②着地+カメラ揺れ→③ズーム→④解除」の順序を管理する仕組み → 落下・着地・カメラズームまで実装完了（下記参照）。カメラズーム解除〜通常プレイ復帰(TODO部分)は次回。
-4. ~~ボスの「上空から落下してくる」動き~~ → `SetVel`での重力実装まで完了、下記のバグ修正を経て動作確認済み。
-5. 多段ヒット防止見送りに伴うダメージ値固定の反映（まだ未確認）。
 
 ## 進捗（2026-08-19続き・ボス落下バグ修正、カメラズーム機能の実装完了）
 
@@ -344,8 +304,6 @@
 
 **2026-08-21、コードを確認して完了済みタスクを削除しました。** カメラズーム解除→プレイヤー操作復帰（`GameScene.cpp`の`BossApearState::CameraZoom`で`OnZoomUp`/`SetIsBossAppear(true)`/`ChangeAllStateToNormal()`まで実装済み）、落下バグ修正（`BossEnemy::Update()`のプレイヤー追従上書きが`if (m_isAppear)`で正しくガードされている）、ダメージ値固定（岩・ワーム・ビームとも`1`に統一済み）はすべて完了と確認。
 
-**次回やること:**
-1. ~~ボスの死亡演出~~ → 下記「進捗（2026-08-21続き）」の通り着手・作業中。
 
 ## 進捗（2026-08-21続き・ボスの死亡エフェクト完成、HPGaugeUIも分割、タイトルシーンに着手）
 
@@ -458,12 +416,6 @@
 - **`DamageSource`構造体**: 新規ファイル`Game/GameObjects/Actors/Character/DamageSource.h`をユーザーが作成（ソリューションエクスプローラー経由）。中身は`enum class DamageSourceType { Rock, Worm, Beam }`と、`type`+`id`を持つ`DamageSource`構造体、`std::set`で使うための`operator<`（まず`type`で比較し、同じ`type`なら`id`で比較する2段階比較）。**この`operator<`の実装意図をユーザーに解説済み、DamageSource.hへの実装はこれから。**
 - **API配置場所**: 多段ヒット防止のAPI（`IsTakingDamageFrom`/`StartTakingDamage`/`OnLeaveDamaging`想定）は、`Player`単体ではなく`Character`基底クラスに置く方針（将来敵側の多段ヒット防止にも使い回せるように、という判断）。
 
-**次回やること:**
-1. `DamageSource.h`の中身を実装する（enum + struct + operator<）。
-2. `Character`に`std::set<DamageSource> m_takingDamageSources`と`IsTakingDamageFrom`/`StartTakingDamage`/`OnLeaveDamaging`を追加する。
-3. `CollisionManager::Update()`のRock/WormEnemy/BossBeamの3箇所のループに、ループ外の`isHitXxx`フラグ＋ループ内での`IsTakingDamageFrom`確認＋ループ後の`OnLeaveDamaging`呼び出しを組み込む（NOTES.md過去の教訓：`OnLeaveDamaging`をどこで呼ぶかが以前つまずいたポイントなので注意）。
-4. `Brake`もBoostと同じ「Exit()での音の停止」が必要か確認する。
-5. リプレイ等でEffekseerエフェクトが残留する問題（旧タスク8）はまだ未着手のまま。
 
 ## 進捗（ClearSceneのワイプ/カーテン演出バグ修正完了、GameoverScene新規実装、EnemyBaseポリモーフィズム化に着手）
 
@@ -485,12 +437,6 @@
 - `CollisionManager`は`FloatingEnemy::GetSphere()`（単一球）と`WormEnemy::GetHeadSphere()`+`GetSegmentSpheres()`（頭+胴体複数）で当たり判定の形が非対称なため、単純な一本化はできない。`EnemyBase`に`virtual std::vector<Sphere> GetCollisionSpheres() const`のような仮想関数を用意すれば揃えられる見込みだが、まだ設計段階（未着手）。プレイヤー本体との接触ダメージ処理は`WormEnemy`にしかない機能なので、無理に共通化すべきでない可能性もある。
 - `EnemyFactory::Create()`の戻り値は既に`std::shared_ptr<EnemyBase>`になっているため、`TargetManager`/`CollisionManager`側を直せば`EnemyFactory.cpp`の`RegisterFloatingEnemy(pFloating)`/`RegisterWormEnemy(pWorm)`も`RegisterEnemy(pFloating)`/`RegisterEnemy(pWorm)`に統一するだけで済む（暗黙の派生→基底変換）。
 
-**次回やること（旧、下記の続き参照）:**
-1. ~~`TargetManager.h/.cpp`を`std::vector<std::weak_ptr<EnemyBase>>`一本化。~~ → 完了（下記参照）。
-2. ~~`EnemyFactory.cpp`の`RegisterFloatingEnemy`/`RegisterWormEnemy`呼び出しを統一。~~ → 完了（`Register`という名前に統一）。
-3. ~~`CollisionManager`のポリモーフィズム化。~~ → 完了（下記参照）。
-4. ~~`GameScene.h`の型別`vector`も統一。~~ → 完了（下記参照）。
-5. 上記の多段ヒット防止の実装（`DamageSource.h`〜）も引き続き未着手。
 
 ## 進捗（EnemyBaseポリモーフィズム化 完了、ロックオン仕様変更に着手・実装途中）
 
@@ -537,13 +483,6 @@
 - `ReticleUI::Draw()`の描画条件を`pTargetManager->IsFocus() && m_pPlayer.lock()->IsChargeReady()`から`pTargetManager->IsFocus()`のみに変更（Claudeが直接編集、単純な1箇所削除のため）。
 - ビルドは通った。
 
-**未解決の不具合（次回、学校から帰宅後に調査再開）:**
-- **実機で確認したところ、敵がロックオンされず、ロックオンレティクルUIも一切表示されなかった。** 原因はまだ未調査。疑うべき箇所の候補（次回の手がかり）:
-  - `TargetManager::Update()`内、ロック確定後に`return`しているせいで`m_pFocusTarget`更新後の処理が正しく流れているか（`BeginLock()`が呼ばれてから実際に`Update()`が呼ばれるタイミングの前後関係）。
-  - `IsOnScreen()`の判定がそもそも常にfalseになっていないか（`ConvWorldPosToScreenPos`の使い方、Z値の閾値`1.0`が実際のプロジェクション設定と合っているか）。
-  - 前方判定の内積の符号（`-GetForward()`の向き、プレイヤーモデルが逆向きである既知の仕様との整合）。
-  - `m_pEnemies`に敵が正しく`Register`されているか（`EnemyBase`ポリモーフィズム化後の登録経路に問題がないか）。
-  - `BeginLock()`/`EndLock()`が実際に呼ばれているか（`IShootState`系のコンストラクタ引数渡しに、まだ見落としている箇所がないか）。
 
 ## 進捗（2026-08-28・ロックオン不具合の原因判明・解決）
 
@@ -556,11 +495,6 @@
 
 **ロックオン仕様変更（前方＋画面内＋スティッキー方式）、これで一通り完成・動作確認済み。**
 
-**次回やること:**
-1. `TargetManager.cpp`の未使用`vector`宣言の削除（軽微、未対応のまま）。
-2. 多段ヒット防止の実装（`DamageSource.h`〜、`Character`基底へのAPI追加、`CollisionManager`への組み込み）は引き続き未着手。
-3. `Brake`もBoostと同じ「Exit()での音の停止」が必要か確認する（未確認のまま）。
-4. リプレイ等でEffekseerエフェクトが残留する問題（旧タスク8）はまだ未着手のまま。
 
 ## 進捗（2026-08-28続き・多段ヒット防止の完成、効果音・BGM全般の実装）
 
@@ -593,11 +527,6 @@
   - コード側は`ResourceConstants.h`/`ResourceLoader.h/.cpp`/`SoundManager.h/.cpp`から`SoundID::NextButton`/`SoundType::NextButton`関連を全て削除し、`ClearScene.cpp`の次へボタン音の呼び出しを`Decision`に変更。
   - ついでに既存コードの音量定数の取り違えバグ（`OnCursor`の登録に`decision_volume`、`Decision`の登録に`on_cursor_volume`という名前と用途が逆転していた実害のないミス）も発見・整理。
 
-**次回やること:**
-1. `TargetManager.cpp`の未使用`vector`宣言の削除（軽微、まだ未対応）。
-2. `Brake`もBoostと同じ「Exit()での音の停止」が必要か確認する（未確認のまま）。
-3. リプレイ等でEffekseerエフェクトが残留する問題（旧タスク8）はまだ未着手のまま。
-4. 効果音・BGM実装は一区切り。全体を通しでプレイして音量バランス・タイミングを最終確認するとよい。
 
 ## 参考: コスト表について
 
@@ -650,16 +579,7 @@
 - **ハマった点2**: `Select` enumに`HowToControll`という3番目の選択肢を用意していたが、`Draw()`の`switch(m_select)`に対応する`case`を書き忘れており、`HowToControll`を経由した際に選択肢画像が両方消える不具合が発生。最終的に`HowToControll`は使わない方針となり`Select` enumから削除、`BackGame`/`BackTitle`の2択に整理して解決。
 - **ハマった点3**: `Bボタンでポーズを閉じる`機能(`InputEvent::close`)を追加した際、`if (input.IsTriggered(InputEvent::close))`のブロックを誤って`if (... && input.IsTriggered(InputEvent::ok))`の**内側**に書いてしまい、「OKボタンとBボタンを同時押ししたときだけ閉じる」という意図しない動作になっていた。外側の独立したif文に出して解決。
 
-**→ 2026-10-02、操作説明UIは不要になり全削除（ユーザー依頼でClaudeが削除）:** `GraphicID::HowToPlay`、`how_to_play_path`、`KeepGraph`の読み込み、`GameScene.h`の`m_howToControllOpenProgress`、`GameScene.cpp`の`how_to_*`定数、画像`Data/Image/Button/HowTo.png`・`Data/Image/SelectFrame/How_To_Controll(_OnCursor).png`（ごみ箱へ）。以下の記述は経緯として残す。
-
-**操作説明UI（LBボタン長押しで左下からスライドイン、離すとスライドアウト）に着手・実装場所の認識違いあり、次回続き。**
-- 当初`PauseScene`側で実装しようとしていたが、正しくは**`GameScene`側（ポーズを開かなくてもゲームプレイ中に使える機能）**という認識のズレが発覚。`GameScene.h`には既に`m_howToControllOpenProgress`(0〜1の進行度)が用意されており、`GameScene.cpp`の`Update()`にも`InputEvent::how_to`(LBボタン、`InputManager`に新規登録済み)の押下判定・進行度の増減処理が実装されていた。
-- **発覚した未修正のバグ**: `m_howToControllOpenProgress++`/`--`が**1フレームあたり1.0**の増減になっており、0〜1のクランプと合わさって「ボタンを押した瞬間に一気に全開、離した瞬間に一気に全閉」という動作になってしまう（「にょきっとスライドする」演出になっていない）。`1.0f / 何らかのフレーム数`という緩やかな係数（他の`wipeProgress`と同じ考え方）に直す必要がある。**次回作業再開時、この修正がまだ反映されていないか確認すること。**
-
-**次回やること:**
-1. `m_howToControllOpenProgress`の増減を`++`/`--`ではなく緩やかな係数（例: `1.0f / 15.0f`等）に修正する。
-2. `m_howToControllOpenProgress`(0〜1)を使って、実際に操作説明画像を左下からスライドイン/アウトさせる`Draw()`側の実装（画面外の位置から目標位置までLerpで座標を計算する）はまだ未着手。
-3. 操作説明用の画像自体（`GraphicID::HowToControll`/`HowToControllOnCursor`は登録済みだが、内容がスライド演出向けかどうかは未確認）の内容確認。
+**→ 2026-10-02、操作説明UIは不要になり全削除（ユーザー依頼でClaudeが削除）:** `GraphicID::HowToPlay`、`how_to_play_path`、`KeepGraph`の読み込み、`GameScene.h`の`m_howToControllOpenProgress`、`GameScene.cpp`の`how_to_*`定数、画像`Data/Image/Button/HowTo.png`・`Data/Image/SelectFrame/How_To_Controll(_OnCursor).png`（ごみ箱へ）。
 
 ### 進捗（2026-09-19・当たり判定のICollider化、設計〜Player着手途中）
 
@@ -709,10 +629,6 @@
 - **旧実装からの挙動の違い（意図したもの）**: ①弾は最初に当たった時点で消えるので、同じフレームに複数の敵・ワームの複数の球へ重複ダメージを与えなくなった。②死亡済みプレイヤーは被弾しない。③ビーム終了時にプレイヤーが触れていても「離れた」扱いになり、次のビームで正しくダメージが入る。
 - `CounterCollider`は当初このタイミングでは未実装だったが、2026-09-25に実装・`.vcxproj`登録済み（下記セクション参照）。
 
-**次回やること:**
-1. Visual Studioでビルドし、全パターン（弾×浮遊敵/ワーム、弾×ボスのダメージ・無敵判定、敵弾・ビーム・ワーム接触・岩×プレイヤー、多段ヒット防止）を実機確認。
-2. 確認後、ユーザーと一緒に`CounterCollider`（ローリング中に敵弾を跳ね返す）を統一ループに組み込む。
-3. ビルド確認は現状Visual Studio上で行うこと。コマンドラインMSBuildはDxLib/EffekseerForDXLibのインクルードパスがVS IDE設定と噛み合わず`C1083`で失敗するため、この方法での確認は避ける。
 
 ### 進捗（RB/LB二回押しでバレルロール、左右とも実装済み）
 
@@ -780,13 +696,7 @@
 - 反射中の球を「ボスに当たる判定」として区別する方法は、「`BossBeamCollider`をL/R毎に分け、反射中は`GetTag()`が別タグ(`BossBeamReflected`等)を返す」方式に決定(新規コライダークラスは作らない)。
 - **先端のカウンター判定は「10Fごとに生成される軌跡の球」とは別に、`m_beamPosL/R`に毎フレーム追従する専用の判定球(`m_tipSphereL/R`)を新設し、そちらで毎フレーム判定する**とユーザーが指定(軌跡の生成間隔に判定タイミングを合わせるのは却下)。
 
-**固まった実装方針（次回、学校でここから着手）:**
-1. `BossBeamState.h`: `m_isReflectedL/R`(bool)、`m_tipSphereL/R`(先端専用の当たり判定球、毎フレーム`m_beamPosL/R`に追従)、`ReflectLeft(const Vector3& hitPos)`/`ReflectRight(...)`(反射開始、内部で反射方向計算)、`GetTipSphereL/R()`、`IsReflectedL/R()`を追加する設計まで合意。**まだヘッダ・実装ともに未着手（コード未変更）。**
-2. `BossBeamState.cpp`の`Update()`: 先端球を毎フレーム更新する処理を追加。反射後は「ボスへの方向に上限角度以内で向きを寄せていく」分岐を追加。反射中の球がボスに届いたら削除+大ダメージ。
-3. `BossBeamCollider`: L/R毎にタグを分け、反射中かどうかで返すタグを切り替える。
-4. `CollisionManager`: `hit_pairs`に先端球用のペア(`{BossBeamTip, Counter}`)と反射後命中用のペア(`{BossBeamReflected, BossDamage}`)を追加。`OnHit`に反射トリガー処理(反射方向計算→`BossBeamState::ReflectLeft/Right`呼び出し)を追加。
 
-**次回やること:** 上記1〜4を順にコードとして実装していく（ユーザーが自分で書く、Claudeはレビュー役）。
 
 **追加決定(2026-09-30):** 先端用のコライダーは**クラス1つ（例: `BossBeamTipCollider`、タグ`BossBeamTip`）を左右で2個作る**。コンストラクタで左右を受け取り、自分がどちらの先端かを覚える。理由: 当たったコライダー自身が左右を知っているので`OnReflectLeft/Right`のどちらを呼ぶかがそのまま決まる（1つにまとめると当たった後に左右を判定し直す必要がある）。`IsCollisionActive()`は「ビーム中かつ自分の側がまだ反射していない」でtrue。
 
@@ -819,10 +729,6 @@
 
 **検証:** クリーンビルド(Debug/x64)でEffekseer以外の警告・エラー0件を確認済み。**実際にDebug/Release両方でタイトル・クリア・ゲームオーバー・ポーズ画面のUIの見た目の大きさが揃うかは、Visual Studio上で両構成を実際に起動して目視確認する必要がある(未実施)。**
 
-**次回やること:**
-1. Debug構成・Release構成それぞれで実際にゲームを起動し、タイトル/クリア/ゲームオーバー/ポーズ画面のUIサイズが一致しているか目視確認する。
-2. もし他の画面(ゲームプレイ中のUI等)でも同様のサイズ差に気づいた場合、`GaugeUIBase`以外にまだ見つかっていない`scale`定数の使用箇所がないか再度洗い出す。
-4. 左回転(`m_pushLeftRollFrame`)側は今回まだ手をつけていない。右回転のロジックが固まってから同じパターンで実装する。
 
 ### 進捗（2026-09-27・VS Code単体でビルド/実行/デバッグできるよう`.vscode/`を整備）
 
@@ -944,7 +850,6 @@
   - 全15箇所ほどの既存`#ifdef _DEBUG`描画ブロック（`Application.cpp`のFPS表示、`GameScene.cpp`/`TitleScene.cpp`のグリッド線、`WaterManager.cpp`、`PlayerHPGaugeUI.cpp`、`BulletBase.cpp`、`Rock.cpp`、`TitlePlayer.cpp`、`Player.cpp`、`MovingState.cpp`、`WormEnemy.cpp`、`FloatingEnemy.cpp`、`ActiveState.cpp`、`BossEnemy.cpp`、`BossBeamState.cpp`）の中身全てに`if (DebugManager::GetInstance().IsDebugDrawEnabled()) { ... }`を追加。
 - **ハマった点：** `DebugManager.h/.cpp`をUTF-8(BOM無し)で新規作成したところ、日本語コメントを含む他ファイル(`PlayerHPGaugeUI.cpp`)のビルド時に`warning C4819`（現在のコードページで表示できない文字）が発生。既存ヘッダ(`InputManager.h`等)はUTF-8 BOM付きだったため、BOM付きに変換して解決。**このプロジェクトで日本語コメントを含む新規.h/.cppを作る際は、UTF-8 BOM付きで保存する必要がある。**
 - Debug/Release両構成でビルド成功を確認済み（`MSBuild NovaWing.vcxproj /p:Configuration=Debug(Release) /p:Platform=x64`）。Releaseビルドでは`ToggleDebugDraw`選択肢自体が`#ifdef _DEBUG`で存在しなくなる。
-- **ゲーム内での動作確認（実際にポーズ画面を開いてトグルする操作）は未実施。次回起動時に確認予定。**
 
 ### 進捗（2026-09-28続き・PauseボタンとSTARTリスタートのボタン衝突を解消、リスタートをポーズの選択肢に移設）
 
@@ -957,7 +862,6 @@
   - `Scene/PauseScene.cpp`のOK決定処理に`Select::Restart`の分岐を追加：`m_controller.ChangeScene(std::make_shared<GameScene>(m_controller), 0.0f)`で新しいGameSceneに切り替え。
   - 表示は`ToggleDebugDraw`と同様、画像が無いため`DrawFormatString`で「最初からやり直す」をテキスト表示（`debug_toggle_ratio`の下、`restart_ratio = (0.5, 0.85)`に配置）。
 - Debug/Release両構成でビルド成功を確認済み。Releaseビルドでは`Restart`選択肢自体が存在しない。
-- **ゲーム内での動作確認は未実施。次回起動時にポーズ→最初からやり直す、および元のPauseボタンが正常にポーズを開くことを確認予定。**
 - **事故と復旧:** ユーザーがエディタで保存して`.efkproj`がバイナリに戻っていたのに、ClaudeがXMLとして読もうとして失敗した。そのとき、書き込み用にファイルを開く処理だけが先に動いて、空のファイルで上書きしてしまった（`BossBeam_2.efk`も空に）。開いていたエディタでCtrl+Sしてもらって復旧した。**今後Claudeが編集するときは:** バイナリかXMLかを確認して展開する → 一時フォルダで保存と書き出しをする → 書き出したファイルのサイズとテクスチャを確認してから置き換える。**エディタで開いたまま私が書き換えたときは、エディタで開き直してから作業すること**（そのまま保存すると私の変更が消える）。
 
 ### 進捗（2026-09-28続き・ポーズ画面にプレイヤー位置ワープ機能(物差しUI)を追加、既存のbossWarpチートを削除）
@@ -977,7 +881,6 @@
   - `DrawPlayerWarpMode()`：画面を暗くした上に、横一本の物差し線(`DrawLine`)、左右端に目盛り線と「初期位置」「ボス」のラベル、選択中の位置に黄色い三角カーソル、現在のZ座標の数値表示、操作説明テキストを描画。画像アセットは使わず全てプリミティブ描画+`DrawFormatString`。
   - 既存の`bossWarp`チートを削除：`Manager/InputManager.h/.cpp`から`InputEvent::bossWarp`定義とテーブル登録を削除、`Player.cpp`の`if (input.IsPressed(InputEvent::bossWarp)) { m_pos.z = 19000.0f; }`ブロックを削除。
 - Debug/Release両構成でビルド成功を確認済み。Releaseビルドでは`WarpPlayer`選択肢自体が存在しない。
-- **ゲーム内での動作確認（実際にポーズ→プレイヤーを移動→物差し操作→ワープ）は未実施。次回起動時に確認予定。** 特に物差しの見た目の座標比率(`warp_ruler_ratio_left/right/y`)や、左スティックの移動速度(`warp_cursor_move_speed`)は実機で触ってみて微調整が要る可能性がある。
 
 ### 進捗（2026-09-30・ボスのビーム跳ね返し、実装着手）
 
@@ -1402,8 +1305,6 @@
 - **方針案**: 球はどの方向から見ても円なので、3Dメッシュは使わずビルボードで作る(全方位でも軽い)。層: Flash(0〜6F、白緑のCore+StarB。v10の玉が弾けた印) / Shell(縁が光る泡テクスチャを新規作成。0→3Fで半径0→8へEaseOut、8〜15F保持、40Fまでに消える。**縁がちょうど8**) / Fill(薄い緑のGlowで内側) / Arc(CS_Arcの電気が球の中で短く走る) / Wisp・Spark(外周へ散る余韻)。最大40〜60インスタンス目標(v10の弾は約154)。
 - **v10と参考動画の分析**: v10の色は緑(30,255,110)・白緑(235,255,238)、加算。暗い緑の`Backing`(アルファブレンド)で背景から浮かせている。参考動画(スターフォックス)の着弾は、緑の電気の球が約0.1秒で一気に広がり、中心が白飛び、表面に電気の筋、約0.3秒保持→緑の筋が散って消える。
 - **大きさ**: 出力倍率50なので半径400＝エディタ8単位。`charge_explosion_effect_scale = 1.0f`が基準、判定半径が変わったら「新しい半径÷400」。
-- **(済・2026-10-05)** 下の「次回」のうち、エフェクト制作・書き出し・登録まで完了。詳細は「進捗（2026-10-05・ChargeExplosion制作）」。
-- **次回（新しいセッションで）**: スキル`effekseer-effect-production`の手順(MCPでエディタ操作・4方向確認)で`Data/Effect/ChargeExplosion/`を制作→`.efk`書き出し→登録(`ResourceConstants.h`のパスとscale、`ResourceLoader.h`の`EffectID`、`ResourceLoader.cpp`の対応表・ゲームシーンの一覧・個別の読み込み。`PlayerChargeBullet`で検索して同じ場所すべて)→`ChargeBullet.cpp`の`OnHitEnemy()`に`PlayOneShot(ResourceLoader::EffectID::ChargeExplosion, m_pos)`の1行(**ユーザーが編集中なので触る前に必ず確認**、仮のHitEffectがあれば差し替え)→ビルド→ゲーム内でデバッグ表示の球と並べて確認→NOTES.md追記。編集してよいのは登録・再生の箇所だけ。
 
 ### 進捗（2026-10-05・ChargeExplosion制作）
 - **成果物**: `Data/Effect/ChargeExplosion/ChargeExplosion.efkefc`(編集用) / `ChargeExplosion.efk`(出力倍率50) / `ChargeExplosion_v1.efkproj`(手書きの初版) / `Texture/`(CS_系はPlayerChargeBulletからコピー、`CE_Shell.png`は新規の「縁が光る泡」512px。縁のピークは半幅の0.90)。
@@ -1518,14 +1419,6 @@
 - 後で足す候補: ワームの`move_speed`18・`bullet_speed`8・`bullet_power`5・`shoot_interval`60、ボスの`recovery_rate`0.4など。
 - 読み込み: `EnemyStatusData : CSVData`(ヘッダ名で引く、無いのはassert)を作り、`modelID`で行を引く取り出し口を用意。同じ表を敵ごとに読み直さないよう**1回だけ読んでキャッシュ**する(浮遊敵が42体いるため)。
 
-**次にやること(ユーザーが書く。Claudeはレビュー役)**
-1. `EnemyStatus.csv`を作る(ワームのHPは`WormEnemy.cpp`の現在値を確認)。
-2. `EnemyStatusData`(`CSVData`派生、ヘッダ名引き＋assert)を作る。→形を見せてレビューを受ける。
-3. `modelID`で引く取り出し口＋キャッシュを作る。
-4. 浮遊敵→ワーム→ボスの順に直書き定数・`5`/`2000`を置き換え、1体ごとにビルド確認。
-5. 同じ形で岩の球を`RockShape.csv`へ(`RockDataSetter.cpp`の匿名名前空間の球設定と、旧`Data/CSV/RockData.csv`の整理も含む)。
-- プレイヤーの定数(23個)をどうするかは未決定。ProjectNeaR方式なら「移動速度など種類ごとに変えたい値」だけが対象になる。
-- 参考: `C:\Users\Admin\Documents\GitHub\ProjectNeaR\source\Project\General\CSV\CharaStatusData.h/.cpp`、`bin\Data\CSV\Stage1\CharaStatusData.csv`。
 
 **その他の注意(次回の確認用)**
 - 1面の配置は今日作り直してコミット済み(上の「進捗（2026-10-07・1面のレベルデザイン…）」)。Unityの`Stage1.unity`も同期済み。**未確認: ゲーム内での塊の大きさ・門の隙間・ワームの出現距離**(岩のscaleはコードで`(3,5,3)`固定、岩の幅は推定)。
@@ -1541,13 +1434,10 @@
 - **`Data/CSV/Params/EnemyStatus.csv`作成済み**(ユーザー)。`modelID,hp,colRadius,trueDeadFrame,deathEffectInterval` / FloatingEnemy 5,132,10,0 / WormHead 100,40,0,13 / Boss 2000,0,330,0。
 - **BOM**: 最初Excelの「CSV UTF-8」で保存しBOM付きになった→VS Codeで「エンコード付きで保存→UTF-8」で除去。原因の一つはワークスペース設定`files.encoding: utf8bom`。`.vscode/settings.json`に`"[csv]": {"files.encoding": "utf8"}`と`rainbow_csv.virtual_alignment_mode: always`(見た目だけ列をそろえる。ステータスバーの「Align」は実際にスペースを書き込むので押さない)を追加。**読み込み側のBOM除去はユーザー判断で見送り**(ExcelでCSV UTF-8保存すると1列目のヘッダ名が`﻿modelID`になりassertで止まる、と覚えておく)。旧`Data/CSV/RockData.csv`だけBOM付き(旧形式、整理予定)。
 - **ユーザーが実装・動作確認済み**: `GetWStringList`がヘッダ行も先頭に入れて返す / `CSVData`に`m_header`と`SetHeader` / `LoadCSV`が空チェック→`[0]`をヘッダ→`i=1`から`SetData`+`SetHeader`。既存の岩・敵・ボスは今までどおり出る。
-- **次**: `CSVData`に「ヘッダ名から何列目かを探す関数」(無い名前はassert)→`EnemyStatusData`。
 - **(済・ユーザー実装)** `CSVData::GetColumnIndex(name) const`(protected、無ければassert→-1)、`GetHeader()`、デストラクタをvirtualに。`CSVData/EnemyStatusData`(`CSVData`継承、`shared_ptr<CSVData>`を受けるコンストラクタでデータ+ヘッダを写して`Conversion()`、modelIDは`ResourceLoader::ModelID`で保持＝.hで`ResourceLoader.h`をincludeするのはユーザー判断で許容)。
 - **キャッシュの置き場所(ユーザー決定)**: 新クラス(`GameScene`が持つ`EnemyStatusTable`)は「敵のステータスごときにクラスを作りたくない」で不採用。`EnemyStatusData`の`static const EnemyStatusData& FindByModelID(ModelID)`の中の`static const auto table = CreateStatusTable()`(private static)で初回だけ読む。**CSVを変えたらゲーム再起動が必要**。
 - **(済・動作確認済み)** 浮遊敵のHP: `FloatingEnemyDataSetter`と`EnemyFactory`(ボスの召喚)の`5`を`FindByModelID(...).GetHp()`に置き換え。
-- **次**: 浮遊敵の`col_radius`(132)/`true_dead_frame`(10)(`FloatingEnemy.cpp:16,18`)→ワーム→ボス。
 - **(済・ビルドOK)設計変更**: `FindByModelID`は`EnemyBase`のコンストラクタで呼ぶ(ユーザー提案)。HPは`Character`に`FindByModelID(modelID).GetHp()`を渡し、`EnemyBase`の`maxHealth`引数は削除。`EnemyBase`に`protected`の`m_colRadius`/`m_trueDeadFrame`(コンストラクタ本体で代入。初期化子リストは長くなるのでユーザーは使わない方針)。→**`EnemyBase`継承の敵は全員`EnemyStatus.csv`に行が必要(無いとassert)**。浮遊敵の`health`引数・定数2つ、`FloatingEnemyDataSetter`/`EnemyFactory`の`hp`、`BossEnemy`の`EnemyBase`への`data.health`を削除済み。`BossData::health`と`BossEnemyDataSetter`の`2000`は未使用のまま残っている(ボスの番で片付け)。
-- 残り: ワーム(`WormEnemy.cpp`の`sphere_radius`40・`death_effect_interval`13)→ボス(`true_dead_frame`、health整理)→`RockShape.csv`。
 - **(済)ワーム**: `sphere_radius`→`m_colRadius`、`death_effect_interval`はワームだけなので`WormEnemy`の`m_deathEffectInterval`(コンストラクタで`FindByModelID(data.modelID)`)。動作確認済み。**注意: `m_frame % m_deathEffectInterval`なのでCSVで0にすると死亡時に0除算でクラッシュ。**
 - **(済)ボス**: `true_dead_frame`→`m_trueDeadFrame`、`BossEnemyData::health`と`BossEnemyDataSetter`の`2000`を削除。ボスの判定半径(1500/310)は対象外のまま。
 - **敵の外部化は完了。残り: 手順5の`RockShape.csv`(岩の球)**。→**ユーザー判断で岩は当面放置**。
@@ -1592,12 +1482,6 @@
   - フォントのアサート(`GetFont`の「フォントIDが見つかりません」): `Result`フォントはクリアシーンのリソース一覧(`clear.fonts`、`ResourceLoader.cpp`486行付近)にしか入っておらず、最初のシーンにするとIDが`None`で何も読まれないため。今は`DrawString`(既定フォント)で回避。本番では**メッセージ用の`FontID`を足し、`font_infos`(204行付近)と`game.fonts`(472行付近)に登録**すれば、そのまま`GetFont`が使える。`ReleaseFont`は`RemoveFontResourceEx`を呼ぶので、同じフォントファイルを複数IDで使う場合は解放の影響に注意。
 - 現状のコードの注意: 四角の色が`0xffffff`(白)・文字が黒になっている(確認用。黒い四角＋白文字に戻す)。`m_textFontHandle`と`#include "Manager/ResourceLoader.h"`は今は未使用。`GetSceneID`は`SceneID()`(=`None`)を返している。本番は専用IDにするか、`PauseScene`のように専用IDを持たせる。
 
-**次にやること(学校で)**
-1. 決定ボタンの`InputEvent`を調べる(`PauseScene.cpp`の選択肢決定が参考)。`TutorialMessageScene::Update`で押した瞬間に`m_controller.PopScene()`。**単独シーンで`PopScene`すると`m_scenes.back()`で落ちる**ので、確認は3と同時に行う(先に確認するなら画面に`DrawFormatString`で表示するだけにする)。
-2. `Application.cpp`を`TitleScene`に戻す。
-3. `GameScene`から`PushScene`する。場所は`PauseScene`を積む箇所(`GameScene.cpp`443行付近)の近く。最初は固定Z(例: 2000)と「1回だけ」のフラグで試す。
-4. メッセージ文をコンストラクタ引数にする。その後`Tutorial.csv`化、右上のタスクUI(`UIBase`派生)、タスクごとの成功判定。
-5. 四角を黒＋白文字に戻し、フォント・`GetSceneID`を整える。
 
 **その他**
 - `abs`の簡略化(傾き加速の2分岐を1つの判断に)は任意。実機での体感(25が適切か)は未確認。
@@ -1676,12 +1560,6 @@
 - 途中で直したバグ: Success後に状態・フレームを戻さず次ステップが飛ばされる/`if (pPlayer) return;`の条件が逆。
 - **F5で動作確認OK**(ユーザー)。
 
-**次にやること**
-1. Release対策(`Trying`の仮判定)。`GameScene.cpp`の`tutorial_z`・`TutorialMessageScene.h`のinclude削除(済んでいなければ)。
-2. 右上のタスク表示UI(`UIBase`派生)と成功演出(✓・色・SE)。
-3. `TaskType`ごとの本物の成功判定(移動・傾き・ロール…)。
-4. 成功するまで先に進ませない仕組み。
-5. `Stage1/Tutorial.csv`化。
 
 ### 2026-10-12 チュートリアルUI(`TutorialUI`)の進捗
 - `Game/UI/TutorialUI.h/.cpp`(`UIBase`派生)。`TutorialController`のコンストラクタで生成し`UIManager`に登録(`GameScene`から`m_pUIManager`を渡す)。状態は`enum class TaskDrawState{Hide,Show,Success}`、外から`OnStart(taskText)`/`OnSuccess()`/`OnEnd()`。
@@ -1689,7 +1567,6 @@
 - `OnStart`は`Trying`中に毎フレーム呼ばれるが、`TutorialUI::OnStart`の先頭で`Hide`以外なら`return`して1回だけ効くようにした(ユーザー判断: 状態を増やしたくない。PushScene時に呼ぶとメッセージの後ろに枠が見えてしまうため)。
 - 今は右上にも`message`を渡している。`taskText`は**CSV化のときに`StepData`とCSVの列に追加する**(ユーザー決定)。
 - フォントは`FontID::Message`(60px)を流用。大きければ同じファイルでサイズ違いの`FontID`を追加する案。
-- **次**: `m_taskFontHandle`の取得、`Show`/`Success`での文字描画、成功演出。
 
 ### 後でやるタスク(2026-10-12 ユーザー報告、未調査)
 1. **タイトルで早めに決定(演出スキップ)を押すと、すぐフェードせず少し固まってから非同期ロードに入る。** フリーズと勘違いされるので直したい。(推測: スキップ時に同期ロードや重い初期化が走っている、またはフェード開始前に何かを待っている。`TitleScene`のスキップ処理と`ChangeScene`→`LoadingScene`の流れを確認する)
@@ -1729,14 +1606,12 @@
 - **未決定**: 自動前進で手間取るとZ14500以降の本番の敵区間に入ってしまう問題の対策。「一定Zでチュートリアルを強制終了」はユーザーが却下(タスクができないまま終わるのは不親切)。
 - **(決定・ユーザー案)巻き戻し**: 移動・傾き・ブースト・ブレーキは区間を設けず成功まで続ける。敵が要るタスク(バレルロール=カウンター/ショット/チャージ)は、**成功しないまま敵がいなくなったら、フェードしてタスク開始地点(`m_taskStartPos`)に戻し、敵を出し直す**。「もう一度！」等の一言を出す案。戻すもの: プレイヤー位置、カメラ(補間追従を即座に合わせる)、飛んでいる弾(敵弾・自弾)、残っている敵、必要ならエフェクト・ゲージ。暗転中に入れ替える。(Claudeの「前進を止める」案は不採用)
 - **順番**: ①ステップ開始時に`TutorialController`が`EnemyFactory`で敵を出す → ②巻き戻し。
+- **(10/14 実装)** 位置を戻す巻き戻しはせず、「敵がいなくなったらその場で出し直す」形で実装した(下の「タスク用の敵の出し直し」参照)。
 
 ### 進捗（2026-10-14・チュートリアルの敵をTutorialControllerから出す、作業途中）
 - 確認したこと: `EnemyFactory::Create(pos,type)`は生成→`Init()`(中で`GameObjectManager`に登録)→Target/CollisionManagerへの登録まで行うので、呼ぶだけで動く(ボスの召喚と同じ)。`GameScene`では`EnemyFactory`の生成(171行目)が`TutorialController`の生成(266行目)より前。浮遊敵は距離4000未満で出現→3秒並走して0.5秒ごとに撃つ→`LeaveState`で左右へ離脱し**7秒後に`OnDead`**(②の「敵がいなくなった」判定では、離脱中・プレイヤーの後ろに行った敵も「いない」扱いにする必要がありそう)。
 - **ユーザー実装済み**: `TutorialController.h`で`EnemyFactory.h`をinclude(ユーザー判断で許容)。`struct SpawnData{Vector3 offset; EnemyFactory::EnemyType type;}`、`StepData::spawnData`(`std::vector<SpawnData>`)、コンストラクタに`std::shared_ptr<EnemyFactory>`を追加しメンバ`m_pEnemyFactory`(weak_ptr)。
 - **Claude編集(ユーザー依頼、仮の`m_steps`のみ)**: 全ステップに敵リストを追加。バレルロール=浮遊敵2体(±300,0,2500)、メッセージに「回転中は敵の弾を跳ね返せる！」を追加。ショット=3体(-400/0/400,0,2500)。チャージ=5体の十字(中央と上下左右±300、前方2500。爆発半径700に収まる)。他は`{}`。`triggerZ`は据え置き。**チャージの下の1体(Y-300)は海面付近だと海に沈む可能性あり、要確認。**
-- **残り(ユーザー)**: ①`GameScene.cpp`266行目で`m_pEnemyFactory`を渡す ②`WaitTrigger`→`Trying`の切り替え時に`spawnData`を「プレイヤー位置+offset」で`Create` ③戻り値を`std::vector<std::weak_ptr<EnemyBase>>`に保持(②の巻き戻し判定用、ステップが変わったらクリア)。
-- その後: 動作確認→CSVからチュートリアル区間の敵(浮遊敵Z11000〜12500の11体、ワームZ10500)を削除→メッセージを「前のステップが終わったら次」に→巻き戻し。`IsTaskCleared`のBarrelRollを`GetCounterSuccessCount()`基準に変えるのも未了。
-- 未決定: 手間取らなくても、チュートリアル全体(7ステップ+各2秒)がZ14500(本番の敵)までに終わらない可能性(Z1200→14500は約28秒)。メッセージ表示中はゲームが止まるので実際の余裕は要確認。
 
 ### ブラッシュアップの方針（2026-10-14・ユーザー決定）
 - **これからのブラッシュアップには「プレイヤーに不親切な部分をなくしていく」ことも含む。** 例: 敵の攻撃の予備動作(撃つ前に分かるようにする)。
@@ -1746,27 +1621,26 @@
 ### 2026-10-14 重さ対策(チュートリアル中に敵が多いと重い)
 - ユーザーの判断: 原因は「敵が多い＋弾が多い」。
 - 実施: CSVからチュートリアル区間の敵を削除(Claude、ユーザー依頼)。FloatingEnemyのZ11000(8体)/11500/12000/12500(各1体)、WormEnemyのZ10500。これで本番の敵はZ14500の9体＋ワーム2体(起動Z11000)から。
-- 候補(未実施): ①カメラより後ろに行った敵弾を消す(`BulletBase::Update`。寿命300フレーム=**5秒**でコメントの「3秒」は誤り。通り過ぎた弾もエフェクト・当たり判定が残る) ②離脱した浮遊敵を時間(`leave_frame`=7秒)でなく画面外で消す ③`HideState`中の浮遊敵は描画・アニメーションを省く(今は状態に関係なく毎フレーム描画) ④`GameObjectManager::UpdateAll`のfor文が`shared_ptr`を値コピーしている→`const auto&`。
+- (済)敵弾は画面外に出たら消す(`EnemyBullet`で`CheckCameraViewClip_Box`)、離脱した浮遊敵も画面外で消す(`LeaveState`)。
+- 候補(未実施): ①`BulletBase.cpp`の`life_time`(300フレーム=**5秒**)のコメントが「3秒」になっている ②`HideState`中の浮遊敵は描画・アニメーションを省く(今は状態に関係なく毎フレーム描画) ③`GameObjectManager`のfor文2か所(27・49行目)が`shared_ptr`を値コピーしている→`const auto&`。
 - 注意: Z14500のワーム2体は起動Z11000なので、チャージのステップ(12600)の頃に出てくる。
 
 ### 2026-10-14 チュートリアル確認のためステージの雑魚を一時的に全削除
 - ユーザー依頼(Claude実施): `Stage1/FloatingEnemy.csv`と`Stage1/WormEnemy.csv`をヘッダ行だけにした(雑魚0体)。ボス・岩はそのまま。ヘッダだけのCSVは`CSVDataLoader`で空の配列になるので落ちない。
-- **戻すとき**: `git checkout <コミット> -- Data/CSV/Stage1/FloatingEnemy.csv Data/CSV/Stage1/WormEnemy.csv`(この変更より前のコミットから)。本来は「チュートリアルが終わるまでステージの雑魚を出さない」仕組みにするか、配置を後ろにずらす。
+- (済・10/15)チュートリアル後にステージを開始する仕組みを作り、雑魚CSVは10/07のレベルデザイン(`f039c0a`)から戻した。
 
 ### 2026-10-14 チュートリアルの進行をZ基準から時間基準に(ユーザー実装、動作確認OK)
 - `StepState`: `WaitTrigger`→`WaitNextStep`(1秒待ってからメッセージ・開始値の記録・敵生成→`Trying`)、`Trying`、`Success`(✓を`success_show_frame`=2秒見せる→`OnEnd`・index++→`WaitNextStep`)。最初の状態も`WaitNextStep`なので開始直後に1秒の間が入る。「✓を見せる時間」と「次までの間」はユーザー判断で別々の待ちにした(個別に調整できる)。
 - `StepData`から`triggerZ`を削除(`TutorialData.csv`のヘッダーからも後で消す)。
 - BarrelRollの判定を`GetCounterSuccessCount() > m_counterSuccessStartCount`に変更(反射弾は撃った敵を追尾するので跳ね返せば当たる)。
 - 敵が撃つのは画面内(`!CheckCameraViewClip(敵の位置)`)にいるときだけ(浮遊敵`ActiveState`・ワーム)。`EnemyBullet::Update`で弾を包む箱(位置±半径)が`CheckCameraViewClip_Box`で視野外なら`OnDead`。プレイヤーの弾(チャージの追尾)は対象外にするため`BulletBase`ではなく`EnemyBullet`に書いた。
-- 名前の整理(任意、未確認): `to_next_step_frame`→`wait_next_step_frame`、`m_apearNextTaskFrame`→`m_waitNextStepFrame`(綴り)、`success_show_frame`のコメント。
-- **次**: 敵が必要なタスク(バレルロール・ショット・チャージ)で、成功前に敵がいなくなったときの対策(巻き戻し)。
 
 ### 2026-10-14 タスク用の敵の出し直し(リスポーン)と離脱敵の画面外削除(ユーザー実装、動作確認OK)
 - `TutorialController`: `SpawnTaskEnemies(const Player&)`に敵生成を切り出し(`WaitNextStep`と`Trying`から呼ぶ)。`IsDeadAllTaskEnemies()`で`m_pTaskEnemies`が全部`expired()`か判定。`Trying`で「未成功 かつ `!spawnData.empty()` かつ 全員いない」なら出し直す。`IsTaskCleared`は`Trying`の最初で1回だけ計算して使い回す。
 - 敵を持っている所はどれも`weak_ptr`(TargetManager/CollisionManager/EnemyBulletのShooter)なので、`GameObjectManager`から外れれば`expired()`になる。
 - バグ(修正済み): 出し直し条件が`spawnData.empty()`(`!`抜け)で、敵ありのステップで出し直しが起きず、バレルロールがクリア不能だった。
 - `LeaveState`: 4秒だと画面内で消えて不自然→7秒にしていたが、**画面外(`CheckCameraViewClip_Box`、当たり判定の半径の箱)に出たら`OnDead`**に変更(撃墜ではないので`OnEnemyDead`ではない)。7秒は保険として残す。
-- 残りの任意: `IsLeaving()`で離脱開始時点で「いない」扱い(待ちが気になれば)、`isCleard`→`isCleared`、`IsDeadAllTaskEnemies`→`AreAllTaskEnemiesGone`、離脱の判定半径を見た目に合わせて少し大きく。
+- 残りの任意: `IsLeaving()`で離脱開始時点で「いない」扱い(待ちが気になれば)、`IsDeadAllTaskEnemies`→`AreAllTaskEnemiesGone`、離脱の判定半径を見た目に合わせて少し大きく。
 - この先: チュートリアルの`Tutorial.csv`化(`taskText`列も)、タスク枠に文字を収める、ステージの雑魚CSVを戻す(チュートリアル後に出す仕組みか配置調整)。
 
 ### 設計決定（2026-10-14・チュートリアル後にステージを開始する）
@@ -1778,13 +1652,6 @@
 
 **ずらし量**: `チュートリアル終了時のプレイヤーZ − 1200`(1200=プレイヤーの開始Z、`Player.cpp`の`first_pos`)。こうするとチュートリアル終了時のプレイヤーから見て、ステージの中身が今までのゲーム開始時と同じ距離に並ぶので、**CSVの値は書き直さずに使える**(消した雑魚CSVは`git`で戻すだけ)。
 
-**タスク(案)**
-1. `TutorialController::IsFinished()`(`m_stepIndex >= m_steps.size()`)を追加。
-2. `GameScene::Init`にある浮遊敵・ワーム・岩・ボスの生成(155〜248行目付近、各`DataSetter`)を関数に切り出し、ずらし量を引数で受け取る。チュートリアルが終わったフレームで1回だけ呼ぶ(呼んだかのフラグを持つ)。
-3. 各`DataSetter`(またはCSVから作るところ)で、Zと`activatePlayerZ`にずらし量を足す。
-4. `boss_appear_z`の判定にもずらし量を足す(ずらし量をメンバーに持つ)。
-5. 雑魚CSV(`FloatingEnemy.csv`/`WormEnemy.csv`)を、ヘッダだけにする前のコミットから戻す。
-- 注意: `GameScene`内で`m_pBoss`や`m_pRocks`を生成前に使っている所がないか(nullチェック)。ボス関連(WARNING・ムービー・カメラのズーム)が`m_pBoss`前提で動いていないか確認する。
 
 **(2026-10-15 変更)ずらし方を変えた(ユーザー案)**
 - **Stage1のCSVを全部Zで−1200した**(Claude実施)ので、CSVの値は「ステージ開始時のプレイヤーからの距離」。**ずらし量＝チュートリアル終了時のプレイヤーZそのもの**(−1200はコードに不要)。対象: `FloatingEnemy`/`WormEnemy`(posZと`activatePlayerZ`)/`Rock`/`Boss`(30500→29300)。
@@ -1805,4 +1672,20 @@
   - ②の書き方: `TutorialController`の`WaitNextStep`→`Trying`の切り替え時(開始値の記録・敵生成をしている所)で、`taskType`がブースト/ブレーキ/宙返りなら`pPlayer->ChangeGauge(pPlayer->GetMaxSpecialGauge() - pPlayer->GetSpecialGauge())`。タスクが増えるなら`StepData`に「開始時に満タンにするか」の`bool`を持たせる案も。
   - ③で足すもの: `TaskType::Somersault`、`IsTaskCleared`に`case TaskType::Somersault: return player.IsSomersault();`、`m_steps`に1行(メッセージ案「十字キー上で宙返りしろ！」)。
   4. **カウンター成功時のリアクションがない(タスク)**。案(ユーザー): 一瞬スロー(ヒットストップ的)／画面効果(ポストエフェクト)／ヒットエフェクト(ユーザー評価は「一番合わなさそう」)。未着手。カウンター成功の検知場所は`CounterCollider::OnCollision`(相手が`EnemyBullet`のとき、`AddCounterSuccess`している所)。
-- 作業中のコードの注意(10/15時点): `Init`の`CreateStageObjects();`が引数なし(コンパイルエラー、そもそも`Init`では呼ばない)。`Update`で`IsFinished()`の間は毎フレーム呼ばれる→1回だけにするフラグが要る。各`DataSetter`に`offsetZ`を足す処理はまだ。
+
+### 2026-10-15 チュートリアル: メッセージを閉じるまでの猶予(①、完了)
+- `TutorialMessageScene`: `m_frame`を`Update`で増やし、`CanClose()`(`m_frame >= close_enable_frame`=60)の間だけOKで`PopScene`。閉じられるようになったら箱の右下にリザルトと同じ「Aボタン＋次へ」の画像を`DrawRotaGraph`で描く(ユーザー実装、位置はClaude: 箱の右下の角からA(-110,-45)/次へ(-50,-45)、拡大率0.45、`uiScale`を掛ける)。
+- `ResourceLoader.cpp`の`game.graphics`に`ButtonA`/`NextText`を追加(Claude、ユーザー依頼。今まで`clear.graphics`にしか無かった)。
+- つまずき: `DrawRotaGraph`の4番目の引数は回転角(ラジアン)なので`1.0`だと約57°傾く。中心座標で置くので角の座標をそのまま渡すと半分はみ出す。
+- 次: ②ゲージを使うタスクで開始時にゲージ満タン(A案) → ③宙返りタスク(位置未決定、ブレーキの後を提案)。
+
+### 2026-10-15 チュートリアル: ゲージ満タン(②)と宙返りタスク(③)
+- ②(ユーザー実装): `WaitNextStep`→`Trying`の切り替え時、`taskType`がBoost/Brake/Somersaultなら`ChangeGauge(GetMaxSpecialGauge() - GetSpecialGauge())`で満タンにする(A案)。Somersaultの条件はClaudeが追加(ユーザー依頼)。
+- ③: `TaskType::Somersault`(ユーザー)、`IsTaskCleared`で`player.IsSomersault()`(ユーザー)、`m_steps`のブレーキの直後に「十字キー上で宙返りしろ！」(Claude)。Debugビルド成功。**ゲーム内は未確認。**
+- 残り(チュートリアル): ④右上のタスク枠に文字を収める(`taskText`、`Tutorial.csv`化とあわせるか)、⑤岩が急に出る(先回り生成と約12秒の空白)、⑥カウンター成功のリアクション。
+
+### 2026-10-15 チュートリアル: 移動タスクがクリアできない問題(解決、ユーザー確認OK)
+- 原因: 判定は「開始位置からの距離 > 500」。上下の可動範囲はY100〜900で開始Y500からは最大400しか離れられず、上下だけでは届かない。また「ぐりぐり」回すと開始位置の周りを回るだけで離れない。
+- 対応(ユーザー判断でB案): `move_task_distance`を500→100にした。A案「動いた量の合計で判定」は不採用。
+- **ここまで(10/15家)**: ①メッセージの猶予 ②ゲージ満タン ③宙返りタスク 完了。
+- **次回(学校)**: ④右上のタスク枠に文字を収める(`taskText`、`Tutorial.csv`化とあわせるか決める) → ⑤岩が急に出る(先回り生成と約12秒の空白) → ⑥カウンター成功のリアクション(アルファでも可)。その後、雨の2面。

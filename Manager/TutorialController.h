@@ -25,7 +25,8 @@ public:
 		Boost,
 		Brake,
 		Shot,
-		ChargeShot
+		ChargeShot,
+		Somersault,
 	};
 
 	TutorialController(

@@ -453,7 +453,8 @@ void ResourceLoader::InitSceneResources()
         GraphicID::WarningFrame, GraphicID::WarningText, GraphicID::WarningSubText,
         GraphicID::WarningIcon, GraphicID::WarningEdge, GraphicID::BossAppearMovie,
         GraphicID::SelectBackGround, GraphicID::BackGame, GraphicID::BackGameOnCursor,
-        GraphicID::BackTitle, GraphicID::BackTitleOnCursor
+        GraphicID::BackTitle, GraphicID::BackTitleOnCursor,
+        GraphicID::ButtonA, GraphicID::NextText//チュートリアルのメッセージの「Aで次へ」
     };
     game.effects = {
         EffectID::PlayerBullet, EffectID::PlayerChargeBullet, EffectID::ChargeExplosion, EffectID::Charging,

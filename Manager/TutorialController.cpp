@@ -14,7 +14,7 @@ namespace
 	//成功を表示しておく間の時間
 	constexpr int success_show_frame = 60 * 2;
 	//プレイヤーが移動タスクを完了したかの判定用の距離閾値
-	constexpr float move_task_distance = 500.0f;
+	constexpr float move_task_distance = 100.0f;
 	//プレイヤーが機体を傾けるタスクを完了したかの判定用の角度閾値
 	constexpr float tilt_task_angle = DX_PI_F / 4;
 
@@ -47,6 +47,7 @@ TutorialController::TutorialController(
 			} },
 		{ L"Xでブーストしろ！", TaskType::Boost,{} },
 		{ L"Aでブレーキしろ！", TaskType::Brake,{} },
+		{ L"十字キー上で宙返りしろ！", TaskType::Somersault,{} },
 		{ L"Bで敵を撃ち落とせ！", TaskType::Shot,
 			{
 				{ Vector3(-400.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
@@ -103,6 +104,16 @@ void TutorialController::Update()
 		m_chargeShotDefeatedStartCount = pPlayer->GetChargeShotDefeatedCount();
 		//カウンター成功回数を覚えておく
 		m_counterSuccessStartCount = pPlayer->GetCounterSuccessCount();
+
+		//ブースト、ブレーキ、宙返りならゲージを満タンにする
+		if (m_steps[m_stepIndex].taskType == TaskType::Boost ||
+			m_steps[m_stepIndex].taskType == TaskType::Brake ||
+			m_steps[m_stepIndex].taskType == TaskType::Somersault)
+		{
+			//減っている分増やす
+			float deltaGauge = pPlayer->GetMaxSpecialGauge() - pPlayer->GetSpecialGauge();
+			pPlayer->ChangeGauge(deltaGauge);
+		}
 
 		SpawnTaskEnemies(*pPlayer);
 	}
@@ -218,6 +229,9 @@ bool TutorialController::IsTaskCleared(const Player& player) const
 	case TaskType::Brake:
 		//プレイヤーがブレーキしていればtrueを返す
 		return player.IsBraking();
+
+	case TaskType::Somersault:
+		return player.IsSomersault();
 
 	case TaskType::Shot:
 		//タスク開始から通常弾で敵を倒していたらタスククリアとする

@@ -20,8 +20,15 @@ public:
 	SceneID GetSceneID() const override;
 
 private:
+	//メッセージを閉じることができるか
+	bool CanClose() const;
+
+private:
 	//テキストのフォントハンドル
 	int m_textFontHandle = -1;
 	//ヒントテキスト
 	std::wstring m_hintText;
+
+	//経過フレーム用
+	int m_frame = 0;
 };
