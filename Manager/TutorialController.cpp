@@ -38,30 +38,7 @@ TutorialController::TutorialController(
 	//チャージの爆発半径は700なので、チャージの的は左右±300に収めて1発でまとめて倒せるようにする
 	m_steps =
 	{
-		{ L"左スティックで移動しろ！", TaskType::Move,{} },
-		{ L"LBかRBを長押しして傾けろ！", TaskType::Tilt,{} },
-		{ L"LBかRBを2回押してバレルロールしろ！回転中は敵の弾を跳ね返せる！", TaskType::BarrelRoll,
-			{
-				{ Vector3(-300.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-				{ Vector3(300.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-			} },
-		{ L"Xでブーストしろ！", TaskType::Boost,{} },
-		{ L"Aでブレーキしろ！", TaskType::Brake,{} },
-		{ L"十字キー上で宙返りしろ！", TaskType::Somersault,{} },
-		{ L"Bで敵を撃ち落とせ！", TaskType::Shot,
-			{
-				{ Vector3(-400.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-				{ Vector3(0.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-				{ Vector3(400.0f, 0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-			} },
-		{ L"Bを長押しして溜め、もう一度Bでチャージショットを撃って敵を倒せ！", TaskType::ChargeShot,
-			{
-				{ Vector3(-300.0f,    0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-				{ Vector3(0.0f,    0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-				{ Vector3(300.0f,    0.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-				{ Vector3(0.0f,  300.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-				{ Vector3(0.0f, -300.0f, 2500.0f), EnemyFactory::EnemyType::FloatingEnemy },
-			} },
+		
 	};
 
 	//tutorialUIの実体を確保
@@ -136,7 +113,7 @@ void TutorialController::Update()
 
 		//タスクを表示させる(UI)
 		//表示中なら UI 側で無視される
-		m_tutorialUI->OnStart(m_steps[m_stepIndex].message);
+		m_tutorialUI->OnStart(m_steps[m_stepIndex].taskText);
 		//タスクが終了していたら成功ステートに遷移
 		if (isCleared)
 		{

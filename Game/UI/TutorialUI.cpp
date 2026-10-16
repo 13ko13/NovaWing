@@ -9,18 +9,20 @@
 
 namespace
 {
-	//タスクの背景を表示する割合位置
-	const Vector2 task_box_pos_ratio = Vector2(0.87f, 0.1f);
-	//タスクの背景の中心から横の端までの長さ
-	constexpr float center_to_horizontal_end = 150.0f;
+	//タスクの背景の右端の割合位置
+	constexpr float task_box_right_ratio = 0.96f;
+	//タスクの背景の割合位置Y
+	constexpr float task_box_ratio_y = 0.1f;
 	//タスクの背景の中心から縦の端までの長さ
 	constexpr float center_to_vertical_end = 20.0f;
 	//タスクの背景の枠の線の太さ
 	constexpr int task_frame_line_thickness = 3;
 	//チェックマーク用のボックスの端までの長さ
 	constexpr float check_box_center_to_end = 13.0f;
-	//チェックボックスを表示する割合位置
-	const Vector2 check_box_pos_ratio = Vector2(0.805f, 0.1f);
+	//タスクの背景の端と文字の間の余白
+	constexpr float task_box_margin = 15.0f;
+	//チェックボックスと文字の隙間
+	constexpr float check_to_text_space = 10.0f;
 	//チェックマークの各点の、チェックボックス中心からのずらし量
 	const Vector2 check_mark_start_offset = Vector2(-8.0f, 0.0f);	//左の始点
 	const Vector2 check_mark_corner_offset = Vector2(-3.0f, 6.0f);  //下の角
@@ -52,22 +54,25 @@ void TutorialUI::Draw()
 	Application& app = Application::GetInstance();
 	//ウィンドウサイズ
 	const auto& wsize = app.GetWindowSize();
-	Vector2 taskBoxPos = Vector2(
-		wsize.width * task_box_pos_ratio.x, wsize.height * task_box_pos_ratio.y
-	);
-	Vector2 checkBoxPos = Vector2(
-		wsize.width * check_box_pos_ratio.x, wsize.height * check_box_pos_ratio.y
-	);
 
 	//ウィンドウサイズに合わせたUIのスケール
 	float uiScale = app.GetUIScale();
 
 	//DrawBoxで背景を作っておく
+	//文字列の長さに合わせて大きさを変えたいので先に枠の右端の位置を決める
+	float boxRight = wsize.width * task_box_right_ratio;
+	//背景の横幅
+	//文字と横の端との余白、チェックボックスの幅を考慮して、横幅を決める
+	float boxWidth = (task_box_margin * 2 + check_box_center_to_end * 2 +
+		 check_to_text_space)* uiScale + m_textWidth;
+	//チェックボックスの大きさと、枠の余白を考えて左端を決める
+	float boxLeft = boxRight - boxWidth;
+	
 	DrawBox(
-		static_cast<int>(taskBoxPos.x - center_to_horizontal_end * uiScale),
-		static_cast<int>(taskBoxPos.y - center_to_vertical_end * uiScale),
-		static_cast<int>(taskBoxPos.x + center_to_horizontal_end * uiScale),
-		static_cast<int>(taskBoxPos.y + center_to_vertical_end * uiScale),
+		static_cast<int>(boxLeft),
+		static_cast<int>(wsize.height * task_box_ratio_y - center_to_vertical_end * uiScale),
+		static_cast<int>(boxRight),
+		static_cast<int>(wsize.height * task_box_ratio_y + center_to_vertical_end * uiScale),
 		0x777777, true
 	);
 
@@ -81,17 +86,23 @@ void TutorialUI::Draw()
 	}
 	//背景の枠
 	DrawBox(
-		static_cast<int>(taskBoxPos.x - center_to_horizontal_end * uiScale),
-		static_cast<int>(taskBoxPos.y - center_to_vertical_end * uiScale),
-		static_cast<int>(taskBoxPos.x + center_to_horizontal_end * uiScale),
-		static_cast<int>(taskBoxPos.y + center_to_vertical_end * uiScale),
+		static_cast<int>(boxLeft),
+		static_cast<int>(wsize.height * task_box_ratio_y - center_to_vertical_end * uiScale),
+		static_cast<int>(boxRight),
+		static_cast<int>(wsize.height * task_box_ratio_y + center_to_vertical_end * uiScale),
 		taskBoxFrameCol, false, task_frame_line_thickness
 	);
 
+	//チェックボックスのX座標は大枠からチェックボックスまでの
+	//余白とチェックボックスの中心から端までを足したもの
+	float checkBoxX = boxLeft + (task_box_margin + check_box_center_to_end) * uiScale;
+	Vector2 checkBoxPos = Vector2(checkBoxX, wsize.height * task_box_ratio_y);
+
 	//テキスト描画
+	float textLeft = checkBoxPos.x + (check_box_center_to_end + check_to_text_space) * uiScale;
 	DrawStringToHandle(
-		static_cast<int>(taskBoxPos.x - 100 * uiScale),
-		static_cast<int>(taskBoxPos.y - center_to_vertical_end * uiScale),
+		static_cast<int>(textLeft),
+		static_cast<int>(checkBoxPos.y - GetFontSizeToHandle(m_taskFontHandle) / 2),
 		m_taskText.c_str(), 0xffffff, m_taskFontHandle
 	);
 
@@ -177,6 +188,9 @@ void TutorialUI::OnStart(const std::wstring& taskText)
 	m_taskText = taskText;
 	//表示を開始する
 	m_taskDrawState = TaskDrawState::Show;
+	//文字の幅を測る
+	m_textWidth = GetDrawStringWidthToHandle(
+		m_taskText.c_str(), static_cast<int>(m_taskText.size()), m_taskFontHandle);
 }
 
 void TutorialUI::OnSuccess()

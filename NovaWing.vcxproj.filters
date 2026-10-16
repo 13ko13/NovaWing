@@ -338,6 +338,12 @@
     <ClCompile Include="Game\UI\TutorialUI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="CSVData\TutorialStepData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    </ClCompile>
+    <ClCompile Include="CSVData\TutorialEnemyData.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants\Game.h">
@@ -690,6 +696,12 @@
     <ClInclude Include="Game\UI\TutorialUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="CSVData\TutorialStepData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    </ClInclude>
+    <ClInclude Include="CSVData\TutorialEnemyData.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="LightingPS.hlsl" />

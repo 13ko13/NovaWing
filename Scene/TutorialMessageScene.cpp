@@ -24,6 +24,9 @@ namespace
 	const Vector2 next_text_offset = Vector2(-50.0f, -45.0f);
 	//「Aで次へ」の画像の拡大率(リザルト画面と同じ)
 	constexpr double next_prompt_scale = 0.45;
+
+	//メッセージと枠の間
+	constexpr float message_text_margin = 20.0f;
 }
 
 TutorialMessageScene::TutorialMessageScene(
@@ -62,6 +65,7 @@ void TutorialMessageScene::Draw()
 {
 	//画面サイズ
 	const auto& wsize = Application::GetInstance().GetWindowSize();
+	float uiScale = Application::GetInstance().GetUIScale();
 
 	//ボックスの描画位置
 	int x1;
@@ -74,7 +78,11 @@ void TutorialMessageScene::Draw()
 	y2 = static_cast<int>(wsize.height * message_box_end_y_ratio);
 
 	//黒いボックスの上にメッセージを表示
-	DrawBox(x1, y1, x2, y2, 0x000000, true);
+	DrawBox(
+		x1 - static_cast<int>(message_text_margin * uiScale),
+		y1 - static_cast<int>(message_text_margin * uiScale),
+		x2, y2,
+		0x000000, true);
 	DrawStringToHandle(x1, y1, m_hintText.c_str(), 0xffffff, m_textFontHandle);
 
 	//Aボタンの画像
@@ -85,7 +93,7 @@ void TutorialMessageScene::Draw()
 		ResourceLoader::GraphicID::NextText
 	);
 
-	float uiScale = Application::GetInstance().GetUIScale();
+
 
 	if (CanClose())
 	{

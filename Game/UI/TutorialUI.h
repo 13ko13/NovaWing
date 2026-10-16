@@ -37,4 +37,7 @@ private:
 
 	//チェックマークのアニメーション用フレーム
 	int m_checkAnimFrame = 0;
+
+	//文字の幅
+	int m_textWidth = 0;
 };

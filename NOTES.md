@@ -1688,4 +1688,31 @@
 - 原因: 判定は「開始位置からの距離 > 500」。上下の可動範囲はY100〜900で開始Y500からは最大400しか離れられず、上下だけでは届かない。また「ぐりぐり」回すと開始位置の周りを回るだけで離れない。
 - 対応(ユーザー判断でB案): `move_task_distance`を500→100にした。A案「動いた量の合計で判定」は不採用。
 - **ここまで(10/15家)**: ①メッセージの猶予 ②ゲージ満タン ③宙返りタスク 完了。
+- **(10/16決定)CSV化も同時にやる**: `Data/CSV/Stage1/Tutorial.csv`(`stepID,message,taskText,taskType`、1行=1ステップ、上から順)と`TutorialEnemy.csv`(`stepID,enemyType,offsetX,offsetY,offsetZ`、1行=敵1体)。読み込みは`TutorialStepData`/`TutorialEnemyData`(`CSVData`派生、`taskType`/`enemyType`は文字列のまま持ち、enumへの変換は`TutorialController.cpp`で対応表+assert)。CSVはClaudeが今の`m_steps`から作る、クラスと読み込みはユーザー。日本語入りなのでVS Codeで編集(ExcelのCSV保存は文字化け)、メッセージに半角`,`は使えない。**順番: まず文字を枠に収める→CSV化**。
+- **タスク(未着手)**: メッセージを1文字ずつ出す演出(タイピング風)。
+- **運用ルール(10/16ユーザー依頼)**: Claudeがコードの追記・修正箇所を説明するときは、**必ずファイル:行の飛べるリンクを付ける**(NOTES.mdに書く手順も同じ)。
+
+### 2026-10-16 右上のタスク枠を文字の長さに合わせる(①、作業中・ユーザーが書く)
+- 考え方: 枠の**右端を画面比率で固定し、左に伸ばす**。中身を左から `|余白|☐|すき間|文字|余白|` と並べ、左端 = 右端 −(余白×2+チェックボックスの幅+すき間)×`uiScale` − 文字の幅。
+- 手順(行番号は10/16時点):
+  1. 文字の幅を`OnStart`([TutorialUI.cpp:172-180](Game/UI/TutorialUI.cpp#L172-L180))で1回だけ測る: `GetDrawStringWidthToHandle(m_taskText.c_str(), static_cast<int>(m_taskText.size()), m_taskFontHandle)`。メンバ(例`int m_taskTextWidth`)を[TutorialUI.h:25](Game/UI/TutorialUI.h#L25)の`m_taskText`の下に追加。**フォントは読み込み時に`GetUIScale()`済みなので、測った幅に`uiScale`を掛けない**(掛けるのは自分で決めた余白などの定数だけ)。
+  2. 定数を整理([TutorialUI.cpp:12-23](Game/UI/TutorialUI.cpp#L12-L23)): `task_box_pos_ratio`のx・`center_to_horizontal_end`・`check_box_pos_ratio`を消し、枠の右端の比率(例0.95)・高さ中心の比率(今の0.1)・左右の余白(例15)・チェックボックスと文字のすき間(例10)を足す。`center_to_vertical_end`/`check_box_center_to_end`はそのまま。
+  3. `Draw`で位置を計算([TutorialUI.cpp:55-60](Game/UI/TutorialUI.cpp#L55-L60)の位置計算を置き換え): 右端→左端→チェックボックス中心x=左端+(余白+チェック半分)×uiScale→文字x=チェック中心x+(チェック半分+すき間)×uiScale。背景と枠線の`DrawBox`([66-72](Game/UI/TutorialUI.cpp#L66-L72)・[83-89](Game/UI/TutorialUI.cpp#L83-L89))に左端・右端、文字([92-96](Game/UI/TutorialUI.cpp#L92-L96)の`-100`直書き)に文字x、チェックボックス([99-105](Game/UI/TutorialUI.cpp#L99-L105))と`DrawCheckMark`([109](Game/UI/TutorialUI.cpp#L109))に計算した中心を渡す。
+  4. (ついでに)文字を上下中央に: y = 枠の中心y − `GetFontSizeToHandle(m_taskFontHandle)`/2([TutorialUI.cpp:94](Game/UI/TutorialUI.cpp#L94))。
+- **(完了・ユーザー確認OK)** 右端固定で`boxWidth=(余白×2+チェック幅+すき間)×uiScale+m_textWidth`、`boxLeft=boxRight-boxWidth`、チェックボックス中心=`boxLeft+(余白+チェック半分)×uiScale`、文字x=チェック中心+(チェック半分+すき間)×uiScale、文字y=枠の中心−`GetFontSizeToHandle`/2。定数`task_box_margin`(15)/`check_to_text_space`(10)を追加、`check_box_pos_ratio`は削除。
+- その後: ②下のメッセージ枠(CSVの`\n`で改行、[TutorialMessageScene.cpp:78](Scene/TutorialMessageScene.cpp#L78)の書き始めを余白ぶん内側に)→CSV化。
+- **(完了)②下のメッセージ枠の余白**(ユーザー実装)。改行はCSVの`\n`で行う(`CSVDataLoader`が改行に変換、`DrawStringToHandle`は改行対応)。
+
+### 2026-10-16 チュートリアルのCSV化(作業中、続きは家で)
+- **CSV(Claude作成)**: [Tutorial.csv](Data/CSV/Stage1/Tutorial.csv)(`stepID,message,taskText,taskType`、8ステップ。バレルロールとチャージの`message`は`\n`で2行。`taskText`は右上の枠用の短い文)、[TutorialEnemy.csv](Data/CSV/Stage1/TutorialEnemy.csv)(`stepID,enemyType,offsetX,offsetY,offsetZ`、10体。stepID 2/6/7)。UTF-8(BOMなし)・CRLF。**VS Codeで編集すること**。
+- **データクラス(完成)**: [TutorialStepData.h](CSVData/TutorialStepData.h)/[.cpp](CSVData/TutorialStepData.cpp)(ユーザー)、[TutorialEnemyData.h](CSVData/TutorialEnemyData.h)/[.cpp](CSVData/TutorialEnemyData.cpp)(大枠Claude・中身ユーザー)。`taskType`/`enemyType`は文字列のまま返す(enumへの変換は`TutorialController.cpp`。データクラスが使う側に依存しないため)。`GetMessage`はWindowsのマクロ(`GetMessageW`)とぶつかるので`GetMessageText`。
+- **途中で直したミス(参考)**: Getterの`return`忘れ、`m_stepID - std::stoi(...)`(`=`のつもりが`-`、C4552)、`Vector3(a, b, c,)`の最後の`,`(関数呼び出しの`()`では不可、`{}`の初期化リストなら可)、`m_enemyType`の代入漏れ。
+- **(ユーザー判断)** `Vector3.h`くらいの基本の型は.hでincludeしてよい。
+- **設定(Claude、ユーザー依頼)**: 自動生成コードの`{`が関数名と同じ行になる問題→[.editorconfig:29-33](.editorconfig#L29-L33)の`cpp_new_line_before_open_brace_*`を`ignore`→`new_line`、[.vscode/settings.json](.vscode/settings.json)に`C_Cpp.vcFormat.newLine.beforeOpenBrace.*`=`newLine`を追加(VSはファイルを開き直し、VS Codeはウィンドウ再読み込みで反映)。原因はVS/VS Codeの「定義の作成」(`return {};`付きのGetterを作ったのもこれ)。「クラスの追加」タスクのスクリプトは元から次の行。
+
+**`TutorialController`の読み込み(3段階)**
+1. **(完了)** `StepData`に`std::wstring taskText;`を追加([TutorialController.h:78](Manager/TutorialController.h#L78))、右上の枠に`taskText`を渡す([TutorialController.cpp:116](Manager/TutorialController.cpp#L116))。仮の`m_steps`の中身は削除済み([TutorialController.cpp:39-42](Manager/TutorialController.cpp#L39-L42)、今は空なので起動するとチュートリアルが即終了しステージが始まる)。
+2. **(次・家で)文字列→enumの対応表**: [TutorialController.cpp:12-23](Manager/TutorialController.cpp#L12-L23)の匿名名前空間に`ToTaskType(const std::wstring&)`(`TutorialController::TaskType`を返す)と`ToEnemyType`(`EnemyFactory::EnemyType`を返す)を作る。形は`ResourceLoader::WStringToModelID`と同じ(`static const std::unordered_map`→`find`→見つからなければ`assert`→`it->second`)。TaskTypeは`None`以外の8つ(Move/Tilt/BarrelRoll/Boost/Brake/Somersault/Shot/ChargeShot)、EnemyTypeは`FloatingEnemy`と`WormEnemy`。cppに`#include <unordered_map>`/`<cassert>`。
+3. **読み込みに置き換え**([TutorialController.cpp:34-42](Manager/TutorialController.cpp#L34-L42)の仮のコメントと`m_steps =`を置き換え): `LoadCSV(L"Stage1/Tutorial")`の各行を`TutorialStepData`にして、`StepData`(message/taskText/`ToTaskType`/空のspawnData)を`m_steps`に`push_back`。同時に`stepID`→`m_steps`の添字の対応を`unordered_map<int, size_t>`に記録。次に`LoadCSV(L"Stage1/TutorialEnemy")`の各行を`TutorialEnemyData`にして、`stepID`から添字を引き(無ければassert)、その`spawnData`に`{GetOffset(), ToEnemyType(GetEnemyType())}`を`push_back`。
+- その後: 動作確認(メッセージの2行表示、右上の`taskText`、敵の出現)→残りは⑤岩が急に出る(先回り生成と約12秒の空白)→⑥カウンター成功のリアクション→タイピング風のメッセージ演出→雨の2面。
 - **次回(学校)**: ④右上のタスク枠に文字を収める(`taskText`、`Tutorial.csv`化とあわせるか決める) → ⑤岩が急に出る(先回り生成と約12秒の空白) → ⑥カウンター成功のリアクション(アルファでも可)。その後、雨の2面。

@@ -1,0 +1,11 @@
+stepID,enemyType,offsetX,offsetY,offsetZ
+2,FloatingEnemy,-300,0,2500
+2,FloatingEnemy,300,0,2500
+6,FloatingEnemy,-400,0,2500
+6,FloatingEnemy,0,0,2500
+6,FloatingEnemy,400,0,2500
+7,FloatingEnemy,-300,0,2500
+7,FloatingEnemy,0,0,2500
+7,FloatingEnemy,300,0,2500
+7,FloatingEnemy,0,300,2500
+7,FloatingEnemy,0,-300,2500

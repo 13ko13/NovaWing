@@ -266,7 +266,9 @@
     <ClCompile Include="Scene\TutorialMessageScene.cpp" />
     <ClCompile Include="Manager\TutorialController.cpp" />
     <ClCompile Include="Game\UI\TutorialUI.cpp" />
-    <ClCompile Include="Game\UI\WarningUI.cpp" />  </ItemGroup>
+    <ClCompile Include="CSVData\TutorialStepData.cpp" />
+    <ClCompile Include="Game\UI\WarningUI.cpp" />
+    <ClCompile Include="CSVData\TutorialEnemyData.cpp" />  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
     <ClInclude Include="Game\Collision\CounterCollider.h" />
@@ -384,7 +386,9 @@
     <ClInclude Include="Scene\TutorialMessageScene.h" />
     <ClInclude Include="Manager\TutorialController.h" />
     <ClInclude Include="Game\UI\TutorialUI.h" />
-    <ClInclude Include="Game\UI\WarningUI.h" />  </ItemGroup>
+    <ClInclude Include="CSVData\TutorialStepData.h" />
+    <ClInclude Include="Game\UI\WarningUI.h" />
+    <ClInclude Include="CSVData\TutorialEnemyData.h" />  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

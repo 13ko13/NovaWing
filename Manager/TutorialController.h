@@ -75,6 +75,7 @@ private:
 	struct StepData
 	{
 		std::wstring message;
+		std::wstring taskText;
 		TaskType taskType;
 		std::vector<SpawnData> spawnData;//敵の数ぶんのデータ
 	};
