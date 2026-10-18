@@ -1,4 +1,6 @@
 ﻿#include <cmath>
+#include <unordered_map>
+#include <cassert>
 
 #include "TutorialController.h"
 #include "../Game/GameObjects/Actors/Character/Player/Player.h"
@@ -8,6 +10,9 @@
 #include "Game/UI/TutorialUI.h"
 #include "Utility/Vector2.h"
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyFactory.h"
+#include "Manager/CSVDataLoader.h"
+#include "CSVData/TutorialStepData.h"
+#include "CSVData/TutorialEnemyData.h"
 
 namespace
 {
@@ -20,6 +25,59 @@ namespace
 
 	//次のタスクに移るまでの時間
 	constexpr int wait_next_step_frame = 60;
+
+	TutorialController::TaskType ToTaskType(const std::wstring& name)
+	{
+		static const std::unordered_map<
+			std::wstring, TutorialController::TaskType> taskTable =
+		{
+			{ L"Move",TutorialController::TaskType::Move },
+			{ L"Tilt",TutorialController::TaskType::Tilt },
+			{ L"BarrelRoll",TutorialController::TaskType::BarrelRoll },
+			{ L"Boost",TutorialController::TaskType::Boost },
+			{ L"Brake",TutorialController::TaskType::Brake },
+			{ L"Somersault",TutorialController::TaskType::Somersault },
+			{ L"Shot",TutorialController::TaskType::Shot },
+			{ L"ChargeShot",TutorialController::TaskType::ChargeShot },
+		};
+
+		//taskTableから受け取った名前でTaskTypeを探す
+		auto it = taskTable.find(name);
+		//見つかったらTaskType、見つからなければassert & Noneを返す
+		if (it != taskTable.end())
+		{
+			return it->second;
+		}
+		else
+		{
+			assert(false && "登録されていないタスクです。");
+			return TutorialController::TaskType::None;
+		}
+	}
+
+	//文字列で探してEnemyTypeを返す
+	EnemyFactory::EnemyType ToEnemyType(const std::wstring& name)
+	{
+		const static std::unordered_map<
+			std::wstring, EnemyFactory::EnemyType> enemyTable =
+		{
+			{ L"FloatingEnemy",EnemyFactory::EnemyType::FloatingEnemy },
+			{ L"WormEnemy",EnemyFactory::EnemyType::WormEnemy }
+		};
+
+		//enemyTableを使ってnameでEnemyTypeを探す
+		auto it = enemyTable.find(name);
+		//見つかればEnemyType、見つからなければassert & Noneを返す
+		if (it != enemyTable.end())
+		{
+			return it->second;
+		}
+		else
+		{
+			assert(false && "登録されていない敵の種類です。");
+			return EnemyFactory::EnemyType::None;
+		}
+	}
 }
 
 TutorialController::TutorialController(
@@ -31,15 +89,52 @@ TutorialController::TutorialController(
 	m_controller(controller),
 	m_pEnemyFactory(pEnemyFactory)
 {
-	//仮(後でTutorialData.csvから読み込む)
-	//プレイヤーはZ=1200から毎フレーム8進む(約480/秒)。成功後2秒で次へ進むので、間隔は約1500以上空ける
-	//ブースト・ブレーキはゲージ満タンが必要(回復は約3.3秒)なので、ブレーキはブーストから離しておく
-	//敵はステップ開始時にプレイヤーの位置+offsetに出す。浮遊敵は距離4000未満で出現するので、前方2500ならすぐ出てくる
-	//チャージの爆発半径は700なので、チャージの的は左右±300に収めて1発でまとめて倒せるようにする
-	m_steps =
+	//Tutorial.csvの1行ずつをStepDataに詰め替えてm_stepsに入れる
+	auto stepData = CSVDataLoader::GetInstance().LoadCSV(L"Stage1/Tutorial");
+	for (auto& row : stepData)
 	{
-		
-	};
+		//その行の文字列をステップ用のデータクラスに変換
+		TutorialStepData csvStep = TutorialStepData(row);
+
+		//StepDataに1項目ずつ入れる
+		StepData step;
+		step.message = csvStep.GetMessageText();
+		step.taskText = csvStep.GetTaskText();
+		step.taskType = ToTaskType(csvStep.GetTaskType());//文字列からtaskTypeに変換
+		//spawnDataはTutorialEnemy.csvを読み込むときに入れる
+
+		//stepIDは0から順番に振ること(Enemyの添え字でそのまま使用するから)
+		//ずれていればassertで知らせる
+		assert(
+			csvStep.GetStepID() == static_cast<int>(m_steps.size()) &&
+			 "ステップIDがそろっていません"
+		);
+
+		m_steps.push_back(step);
+	}
+
+	//TutorialEnemy.csvの1行(敵1体)ずつ、対応するステップのspawnDataに入れる
+	auto enemyData = CSVDataLoader::GetInstance().LoadCSV(L"Stage1/TutorialEnemy");
+	for (auto& row : enemyData)
+	{
+		TutorialEnemyData csvEnemy = TutorialEnemyData(row);
+
+		//敵の種類を変換。Noneなら(assertは中で済んでいるので)飛ばす
+		EnemyFactory::EnemyType type = ToEnemyType(csvEnemy.GetEnemyType());
+		if (type == EnemyFactory::EnemyType::None) continue;
+		int stepID = csvEnemy.GetStepID();
+		if (stepID < 0 || static_cast<int>(m_steps.size()) <= stepID)
+		{
+			assert(false && "TutorialEnemy.csvのstepIDに対応するステップがありません");
+			continue;
+		}
+		//種類とオフセットを保持
+		SpawnData spawnData;
+		spawnData.offset = csvEnemy.GetOffset();
+		spawnData.type = type;
+
+		m_steps[stepID].spawnData.push_back(spawnData);
+	}
 
 	//tutorialUIの実体を確保
 	m_tutorialUI = std::make_shared<TutorialUI>();
@@ -55,7 +150,7 @@ TutorialController::~TutorialController()
 void TutorialController::Update()
 {
 	//全部終わっているなら何もしない
-	if(IsFinished()) return;
+	if (IsFinished()) return;
 
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	if (!pPlayer) return;

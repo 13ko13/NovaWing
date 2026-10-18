@@ -17,6 +17,10 @@ namespace
 	constexpr float center_to_vertical_end = 20.0f;
 	//タスクの背景の枠の線の太さ
 	constexpr int task_frame_line_thickness = 3;
+	//タスクの背景の枠の色(Aボタン・「次へ」の画像と同じ緑)
+	constexpr unsigned int task_frame_color = 0x60e9a4;
+	//タスク成功時の枠の色
+	constexpr unsigned int task_frame_success_color = 0xdddd00;
 	//チェックマーク用のボックスの端までの長さ
 	constexpr float check_box_center_to_end = 13.0f;
 	//タスクの背景の端と文字の間の余白
@@ -77,12 +81,12 @@ void TutorialUI::Draw()
 	);
 
 	//背景の枠の色
-	unsigned int taskBoxFrameCol = 0x00bb00;
+	unsigned int taskBoxFrameCol = task_frame_color;
 
 	if (m_taskDrawState == TaskDrawState::Success)
 	{
 		//成功時色を変える
-		taskBoxFrameCol = 0xdddd00;
+		taskBoxFrameCol = task_frame_success_color;
 	}
 	//背景の枠
 	DrawBox(

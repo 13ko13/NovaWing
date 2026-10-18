@@ -27,6 +27,7 @@ public:
 
 	enum class EnemyType
 	{
+		None,//種類なし(CSVの文字列が対応表に無かったとき)
 		FloatingEnemy,//浮遊敵
 		WormEnemy,//ワームエネミー
 

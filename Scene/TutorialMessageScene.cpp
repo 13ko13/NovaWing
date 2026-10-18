@@ -27,6 +27,10 @@ namespace
 
 	//メッセージと枠の間
 	constexpr float message_text_margin = 20.0f;
+
+	//枠線の色(Aボタン・「次へ」の画像と同じ緑)と太さ(右上のタスク枠(TutorialUI)と同じ)
+	constexpr unsigned int message_frame_color = 0x60e9a4;
+	constexpr int message_frame_thickness = 3;
 }
 
 TutorialMessageScene::TutorialMessageScene(
@@ -77,12 +81,14 @@ void TutorialMessageScene::Draw()
 	y1 = static_cast<int>(wsize.height * message_box_start_y_ratio);
 	y2 = static_cast<int>(wsize.height * message_box_end_y_ratio);
 
+	//背景の左上(文字の書き始めから余白ぶん外側)
+	int boxLeft = x1 - static_cast<int>(message_text_margin * uiScale);
+	int boxTop = y1 - static_cast<int>(message_text_margin * uiScale);
+
 	//黒いボックスの上にメッセージを表示
-	DrawBox(
-		x1 - static_cast<int>(message_text_margin * uiScale),
-		y1 - static_cast<int>(message_text_margin * uiScale),
-		x2, y2,
-		0x000000, true);
+	DrawBox(boxLeft, boxTop, x2, y2, 0x000000, true);
+	//背景の縁に緑の枠線(背景の後に描いて上に重ねる)
+	DrawBox(boxLeft, boxTop, x2, y2, message_frame_color, false, message_frame_thickness);
 	DrawStringToHandle(x1, y1, m_hintText.c_str(), 0xffffff, m_textFontHandle);
 
 	//Aボタンの画像

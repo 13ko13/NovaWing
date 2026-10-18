@@ -54,8 +54,8 @@ $FIRE = "FB:256:4:4:2"; $SMOKE = "SHEET:256:2:2"; $DEBRIS = "SHEET:128:2:2"
 $n = ""
 
 # --- lingering dark smoke (behind everything, appears as the fire cools) ---
-$n += Node "Smoke" ((Common 8 80 15 10) + (PVA @(0,1.2, 0.2,0.8, 0,1.2) @(0,0.02, 0.014,0.008, 0,0.02) $null) +
-    (RotRand 0.6) + (ScaleEase 3.6 0.6 7.5 1.0) + (Rend "ED_Smoke.png" $BLEND 12 35 $SMOKE) +
+$n += Node "Smoke" ((Common 4 80 15 10) + (PVA @(0,1.2, 0.2,0.8, 0,1.2) @(0,0.02, 0.014,0.008, 0,0.02) $null) +
+    (RotRand 0.6) + (ScaleEase 4.3 0.5 8.75 0.75) + (Rend "ED_Smoke.png" $BLEND 12 35 $SMOKE) +
     "<DrawingValues>$(ColEase @(62,54,50,225) @(46,46,50,0))</DrawingValues>")
 
 # --- big additive heat glow ---
@@ -63,23 +63,23 @@ $n += Node "HeatGlow" ((Common 1 28) + (ScaleEase 7 0 12 0) + (Rend "ED_Glow.png
     "<DrawingValues>$(ColEase @(255,160,70,235) @(200,45,5,0))</DrawingValues>")
 
 # --- main fireball puffs (flipbook) ---
-$n += Node "Fireball" ((Common 8 32 4) + (PVA @(0,0.6, 0,0.6, 0,0.6) @(0,0.05, 0.01,0.04, 0,0.05) $null) +
-    (RotRand 1.5) + (ScaleEase 3.4 0.5 6.2 0.8) + (Rend "ED_Fire.png" $BLEND 0 6 $FIRE) +
+$n += Node "Fireball" ((Common 4 32 4) + (PVA @(0,0.6, 0,0.6, 0,0.6) @(0,0.05, 0.01,0.04, 0,0.05) $null) +
+    (RotRand 1.5) + (ScaleEase 4.1 0.5 7.1 0.7) + (Rend "ED_Fire.png" $BLEND 0 6 $FIRE) +
     "<DrawingValues>$(ColEase @(255,255,255,255) @(255,255,255,255))</DrawingValues>")
 
 # --- secondary bursts, a little later and further out ---
-$n += Node "Fireball2" ((Common 6 28 3 4) + (PVA @(0,1.1, 0.2,1.0, 0,1.1) @(0,0.04, 0.012,0.03, 0,0.04) $null) +
-    (RotRand 2) + (ScaleEase 2.4 0.4 4.4 0.6) + (Rend "ED_Fire2.png" $BLEND 0 6 $FIRE) +
+$n += Node "Fireball2" ((Common 3 28 3 4) + (PVA @(0,1.1, 0.2,1.0, 0,1.1) @(0,0.04, 0.012,0.03, 0,0.04) $null) +
+    (RotRand 2) + (ScaleEase 2.9 0.4 5.2 0.6) + (Rend "ED_Fire2.png" $BLEND 0 6 $FIRE) +
     "<DrawingValues>$(ColEase @(255,255,255,255) @(255,255,255,255))</DrawingValues>")
 
 # --- additive fire on top for the hot phase only ---
-$n += Node "FireBloom" ((Common 4 14 2) + (PVA @(0,0.5, 0,0.5, 0,0.5) @(0,0.04, 0,0.04, 0,0.04) $null) +
-    (RotRand 2) + (ScaleEase 3.6 0.5 6.0 0.6) + (Rend "ED_Fire.png" $ADD 0 0 "FB:256:4:4:1") +
-    "<DrawingValues>$(ColEase @(255,210,140,130) @(255,90,20,0))</DrawingValues>")
+$n += Node "FireBloom" ((Common 2 14 2) + (PVA @(0,0.5, 0,0.5, 0,0.5) @(0,0.04, 0,0.04, 0,0.04) $null) +
+    (RotRand 2) + (ScaleEase 4.2 0.4 6.7 0.5) + (Rend "ED_Fire.png" $ADD 0 0 "FB:256:4:4:1") +
+    "<DrawingValues>$(ColEase @(255,210,140,190) @(255,90,20,0))</DrawingValues>")
 
 # --- fire licking inside the smoke after the main ball cools ---
-$n += Node "InnerFire" ((Common 6 18 4 9 2.5) + (PVA @(0,1.1, 0.2,0.9, 0,1.1) @(0,0.02, 0.02,0.01, 0,0.02) $null) +
-    (RotRand 3) + (ScaleEase 2.2 0.5 3.8 0.6) + (Rend "ED_Fire2.png" $ADD 3 0 "FB:256:4:4:1") +
+$n += Node "InnerFire" ((Common 3 18 4 9 4) + (PVA @(0,1.1, 0.2,0.9, 0,1.1) @(0,0.02, 0.02,0.01, 0,0.02) $null) +
+    (RotRand 3) + (ScaleEase 2.6 0.5 4.4 0.6) + (Rend "ED_Fire2.png" $ADD 3 0 "FB:256:4:4:1") +
     "<DrawingValues>$(ColEase @(255,190,110,170) @(255,70,10,0))</DrawingValues>")
 
 # --- shockwave ---
@@ -87,24 +87,24 @@ $n += Node "Shockwave" ((Common 1 12) + (ScaleEase 1.0 0 11 0 31) + (Rend "ED_Ri
     "<DrawingValues>$(ColEase @(255,225,180,140) @(255,130,50,0))</DrawingValues>")
 
 # --- sparks (directional billboard: stretched along velocity) ---
-$n += Node "Sparks" ((Common 36 20 6) + (PVA $null @(0,0.5, 0.08,0.45, 0,0.5) @(0,0, -0.012,0, 0,0)) +
-    "<ScalingValues><Type>2</Type><Easing><Start><X>$(RandV 0.22)</X><Y>$(RandV 2.4 0.7)</Y></Start><End><X>$(RandV 0.1)</X><Y>$(RandV 0.6)</Y></End></Easing></ScalingValues>" +
+$n += Node "Sparks" ((Common 12 20 6) + (PVA $null @(0,0.5, 0.08,0.45, 0,0.5) @(0,0, -0.012,0, 0,0)) +
+    "<ScalingValues><Type>2</Type><Easing><Start><X>$(RandV 0.3)</X><Y>$(RandV 2.4 0.7)</Y></Start><End><X>$(RandV 0.14)</X><Y>$(RandV 0.6)</Y></End></Easing></ScalingValues>" +
     (Rend "ED_Spark.png" $ADD) +
     "<DrawingValues>$(ColEase @(255,250,220,255) @(255,90,10,0))<Sprite><Billboard>4</Billboard></Sprite></DrawingValues>")
 
 # --- debris chunks with smoke trails ---
-$trail = Node "DebrisTrail" ("<CommonValues><MaxGeneration><Infinite>True</Infinite></MaxGeneration><LocationEffectType>1</LocationEffectType><RotationEffectType>1</RotationEffectType><ScaleEffectType>1</ScaleEffectType><Life>$(RandV 18 3)</Life><Generation><GenerationTime>$(RandV 1)</GenerationTime><GenerationTimeOffset>$(RandV 5)</GenerationTimeOffset></Generation></CommonValues>" +
-    (PVA $null @(0,0.004, 0.006,0.003, 0,0.004) $null) + (RotRand 2) + (ScaleEase 0.45 0.08 1.4 0.25) + (Rend "ED_Smoke.png" $BLEND 0 0 $SMOKE) +
+$trail = Node "DebrisTrail" ("<CommonValues><MaxGeneration><Infinite>True</Infinite></MaxGeneration><LocationEffectType>1</LocationEffectType><RotationEffectType>1</RotationEffectType><ScaleEffectType>1</ScaleEffectType><Life>$(RandV 18 2)</Life><Generation><GenerationTime>$(RandV 3)</GenerationTime><GenerationTimeOffset>$(RandV 5)</GenerationTimeOffset></Generation></CommonValues>" +
+    (PVA $null @(0,0.004, 0.006,0.003, 0,0.004) $null) + (RotRand 2) + (ScaleEase 1.2 0.1 2.6 0.2) + (Rend "ED_Smoke.png" $BLEND 0 0 $SMOKE) +
     "<DrawingValues>$(ColEase @(235,120,50,235) @(38,36,36,0))</DrawingValues>")
 $burn = Node "DebrisBurn" ((Common 1 40) + (ScaleEase 1.3 0 0.4 0) + (Rend "ED_Glow.png" $ADD) +
     "<DrawingValues>$(ColEase @(255,170,70,220) @(255,70,10,0))</DrawingValues>")
-$n += Node "Debris" ((Common 8 42 10) + (PVA @(0,0.5, 0,0.5, 0,0.5) @(0,0.17, 0.1,0.12, 0,0.17) @(0,0, -0.007,0, 0,0)) +
-    (RotRand 14) + (ScaleEase 0.5 0.15 0.5 0.15) + (Rend "ED_Debris.png" $BLEND 0 10 $DEBRIS) +
+$n += Node "Debris" ((Common 5 42 10) + (PVA @(0,0.5, 0,0.5, 0,0.5) @(0,0.17, 0.1,0.12, 0,0.17) @(0,0, -0.007,0, 0,0)) +
+    (RotRand 14) + (ScaleEase 0.625 0.125 0.625 0.125) + (Rend "ED_Debris.png" $BLEND 0 10 $DEBRIS) +
     "<DrawingValues>$(ColEase @(255,255,255,255) @(170,170,170,255))</DrawingValues>") ($trail + $burn)
 
 # --- floating embers ---
-$n += Node "Embers" ((Common 18 55 15 3) + (PVA @(0,1.2, 0,1.2, 0,1.2) @(0,0.07, 0.03,0.05, 0,0.07) @(0,0, -0.0012,0, 0,0)) +
-    (ScaleEase 0.18 0.05 0.04 0) + (Rend "ED_Glow.png" $ADD) +
+$n += Node "Embers" ((Common 6 55 15 3) + (PVA @(0,1.2, 0,1.2, 0,1.2) @(0,0.07, 0.03,0.05, 0,0.07) @(0,0, -0.0012,0, 0,0)) +
+    (ScaleEase 0.23 0.05 0.04 0) + (Rend "ED_Glow.png" $ADD) +
     "<DrawingValues>$(ColEase @(255,220,120,255) @(255,60,0,0))</DrawingValues>")
 
 # --- initial flash (front) ---

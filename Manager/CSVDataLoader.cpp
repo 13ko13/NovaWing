@@ -97,6 +97,13 @@ std::vector<std::vector<std::wstring>> CSVDataLoader::GetWStringList(const wchar
 		wideSize
 	);
 
+	//ExcelのCSV UTF-8で保存すると先頭にBOMが1文字つく
+	//ヘッダー名で列を探すときに邪魔になるので戦闘がBOMなら消しておく
+	if (!wdata.empty() && wdata[0] == L'\uFEFF')
+	{
+		wdata.erase(0, 1);
+	}
+
 	//行ごとに処理
 	std::wstringstream ws(wdata);
 	std::wstring line;

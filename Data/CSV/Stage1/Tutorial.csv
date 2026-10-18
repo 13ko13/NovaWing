@@ -1,4 +1,4 @@
-stepID,message,taskText,taskType
+﻿stepID,message,taskText,taskType
 0,左スティックで移動しろ！,移動する,Move
 1,LBかRBを長押しして傾けろ！,機体を傾ける,Tilt
 2,LBかRBを2回押してバレルロールしろ！\n回転中は敵の弾を跳ね返せる！,敵弾を跳ね返す,BarrelRoll

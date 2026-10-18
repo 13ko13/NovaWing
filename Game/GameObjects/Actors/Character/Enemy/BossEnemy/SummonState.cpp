@@ -33,10 +33,11 @@ void SummonState::Enter()
 	m_pBoss.lock()->GetSoundManager().lock()->Play(SoundManager::SoundType::BossSummon);
 
 	//浮遊敵とワームエネミーをランダムで召喚
-	//GetRandが0を含むので-1
-	int rand = GetRand(
-		static_cast<int>(EnemyFactory::EnemyType::Max) - 1
-	);
+	//Noneは召喚できないので、Noneの次からMaxの手前までの中から選ぶ
+	const int firstEnemyType = static_cast<int>(EnemyFactory::EnemyType::None) + 1;
+	const int enemyTypeCount = static_cast<int>(EnemyFactory::EnemyType::Max) - firstEnemyType;
+	//GetRandは0〜引数(引数も含む)を返すので、種類の数-1を渡す
+	int rand = firstEnemyType + GetRand(enemyTypeCount - 1);
 
 	//左右対称にして2か所から召喚
 	Vector3 leftSummonPos = m_summonPos - summon_effect_offset;
