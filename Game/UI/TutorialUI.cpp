@@ -66,22 +66,38 @@ void TutorialUI::Draw()
 	//スライド演出の進行度
 	float slideAnimProgress = static_cast<float>(m_slideAnimFrame) /
 		static_cast<float>(slide_anim_max_frame);
+	//上限を決めておく
+	slideAnimProgress = std::min(slideAnimProgress, 1.0f);
+	//スライドアウトの際は逆にしておく
+	if (m_taskDrawState == TaskDrawState::SlideOut)
+	{
+		slideAnimProgress = 1.0f - slideAnimProgress;
+	}
 
 	//枠と文字の描画
 	//背景の横幅
 	//文字と横の端との余白、チェックボックスの幅を考慮して、横幅を決める
 	float boxWidth = (task_box_margin * 2 + check_box_center_to_end * 2 +
-		 check_to_text_space)* uiScale + m_textWidth;
+		 check_to_text_space) * uiScale + m_textWidth;
+
+	slideAnimProgress = 1.0f - (1.0f - slideAnimProgress) * (1.0f - slideAnimProgress);
+
+	//画面外の右端
+	float screenOutRight = static_cast<float>(wsize.width) + boxWidth;
+
 	//DrawBoxで背景を作っておく
 	//文字列の長さに合わせて大きさを変えたいので先に枠の右端の位置を決める
-	float boxRight = wsize.width * task_box_right_ratio;
+	//目標の枠右端位置
+	float boxRightTarget = wsize.width * task_box_right_ratio;
+	//現在の枠右端位置
+	float currentBoxRight = screenOutRight + (boxRightTarget - screenOutRight) * slideAnimProgress;
 	//チェックボックスの大きさと、枠の余白を考えて左端を決める
-	float boxLeft = boxRight - boxWidth;
+	float boxLeft = currentBoxRight - boxWidth;
 	
 	DrawBox(
 		static_cast<int>(boxLeft),
 		static_cast<int>(wsize.height * task_box_ratio_y - center_to_vertical_end * uiScale),
-		static_cast<int>(boxRight),
+		static_cast<int>(currentBoxRight),
 		static_cast<int>(wsize.height * task_box_ratio_y + center_to_vertical_end * uiScale),
 		0x777777, true
 	);
@@ -89,7 +105,8 @@ void TutorialUI::Draw()
 	//背景の枠の色
 	unsigned int taskBoxFrameCol = task_frame_color;
 
-	if (m_taskDrawState == TaskDrawState::Success)
+	if (m_taskDrawState == TaskDrawState::Success ||
+		m_taskDrawState == TaskDrawState::SlideOut)
 	{
 		//成功時色を変える
 		taskBoxFrameCol = task_frame_success_color;
@@ -98,7 +115,7 @@ void TutorialUI::Draw()
 	DrawBox(
 		static_cast<int>(boxLeft),
 		static_cast<int>(wsize.height * task_box_ratio_y - center_to_vertical_end * uiScale),
-		static_cast<int>(boxRight),
+		static_cast<int>(currentBoxRight),
 		static_cast<int>(wsize.height * task_box_ratio_y + center_to_vertical_end * uiScale),
 		taskBoxFrameCol, false, task_frame_line_thickness
 	);
@@ -125,7 +142,8 @@ void TutorialUI::Draw()
 		0x000000, true
 	);
 
-	if (m_taskDrawState == TaskDrawState::Success)
+	if (m_taskDrawState == TaskDrawState::Success ||
+		m_taskDrawState == TaskDrawState::SlideOut)
 	{
 		DrawCheckMark(checkBoxPos);
 	}
@@ -198,13 +216,15 @@ void TutorialUI::Update()
 	if(m_slideAnimFrame > slide_anim_max_frame)
 	{
 		if (m_taskDrawState == TaskDrawState::SlideIn) m_taskDrawState = TaskDrawState::Show;
-		else if(m_taskDrawState == TaskDrawState::SlideOut) m_taskDrawState = TaskDrawState::Hide;
+		else if (m_taskDrawState == TaskDrawState::SlideOut) m_taskDrawState = TaskDrawState::Hide;
 	}
 }
 
 void TutorialUI::OnStart(const std::wstring& taskText)
 {
 	if (m_taskDrawState != TaskDrawState::Hide) return;
+
+	m_slideAnimFrame = 0;
 
 	//文字を受け取る
 	m_taskText = taskText;
@@ -227,4 +247,5 @@ void TutorialUI::OnEnd()
 {
 	//ステートを非表示に戻す
 	m_taskDrawState = TaskDrawState::SlideOut;
+	m_slideAnimFrame = 0;
 }
