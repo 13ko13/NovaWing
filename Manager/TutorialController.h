@@ -43,6 +43,9 @@ public:
 	//チュートリアルが終わったか
 	bool IsFinished() const;
 
+	//チュートリアルを途中で打ち切って終了状態にする
+	void Skip();
+
 private:
 	
 	//タスクが終っているか

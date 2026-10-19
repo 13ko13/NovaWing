@@ -7,9 +7,9 @@
 namespace
 {
 	// プレイヤーの移動に対してカメラの移動をどれぐらいにするか
-	constexpr float camera_move_strength_y = 0.3f;
-	constexpr float camera_move_strength_x = 0.3f;
-	constexpr float camera_move_strength = 0.3f;
+	constexpr float camera_move_strength_y = 0.5f;
+	constexpr float camera_move_strength_x = 1.0f;
+	constexpr float camera_move_strength = 1.0f;
 
 	// カメラのYオフセット
 	constexpr float camera_offset_y = 250.0f;
@@ -25,6 +25,11 @@ namespace
 
 	// カメラからターゲットまでの距離
 	constexpr float camera_to_target = 38000.0f;
+
+	//カメラが左右に動ける上限
+	constexpr float camera_move_limit_x = 1000.0f;
+	//横の向きに倍率をかけて横を向きすぎないようにする
+	constexpr float camera_yaw_rate = 0.4f;
 }
 
 GameCamera::GameCamera(const std::shared_ptr<Player> pPlayer)
@@ -90,9 +95,11 @@ void GameCamera::UpdatePosition()
 
 		// ターゲットの位置も補間する
 		m_targetPos = Vector3::Lerp(m_prevTargetPos, m_targetPos, lerp_t);
-
+		
 		// プレイヤーが動くと、カメラもプレイヤーよりも小さい量で移動する
 		m_pos.x = playerPos.x * camera_move_strength_x;
+		//移動できる範囲を制限
+		m_pos.x = std::clamp(m_pos.x, -camera_move_limit_x, camera_move_limit_x);
 		// yはxよりも小さく動いて、海面より下にはならないようにする
 		m_pos.y = playerPos.y * camera_move_strength_y + camera_offset_y;
 		m_pos.y = std::max(m_pos.y, Game::sea_camera_margin);
@@ -166,7 +173,9 @@ void GameCamera::UpdateTargetPos()
 		// プレイヤーから見たかなり前のほうをターゲットとする
 		if (!pPlayer->IsSomersault())
 		{
-			m_targetPos = pPlayer->GetPos() + (-pPlayer->GetForward() * camera_to_target);
+			Vector3 lookDir = -pPlayer->GetForward();
+			lookDir.x *= camera_yaw_rate;
+			m_targetPos = pPlayer->GetPos() + lookDir * camera_to_target;
 		}
 	}
 }

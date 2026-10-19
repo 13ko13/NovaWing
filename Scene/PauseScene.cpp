@@ -13,7 +13,6 @@
 #include "Utility/GraphShaderDraw.h"
 #include "Manager/SoundManager.h"
 #include "Manager/DebugManager.h"
-#include "Game/GameObjects/Actors/Character/Player/Player.h"
 
 namespace
 {
@@ -39,9 +38,10 @@ namespace
 	//プレイヤーを移動選択肢の場所
 	const Vector2 warp_player_ratio = Vector2(0.5f, 0.9f);
 
-	//物差しのワープ範囲(プレイヤーの初期位置Z 〜 ボス出現位置Z)
-	constexpr float warp_range_min_z = 1200.0f;
-	constexpr float warp_range_max_z = 27000.0f;
+	//物差しのワープ範囲(ステージ開始位置 〜 ボス出現位置)
+	//ステージ開始位置からの距離で、GameScene::WarpPlayerでステージのオフセットを足す
+	constexpr float warp_range_min_z = 0.0f;
+	constexpr float warp_range_max_z = GameScene::boss_appear_z;
 	//物差しの見た目の左右端の画面比率
 	constexpr float warp_ruler_ratio_left = 0.15f;
 	constexpr float warp_ruler_ratio_right = 0.85f;
@@ -61,11 +61,11 @@ namespace
 PauseScene::PauseScene(
 	SceneController& controller,
 	std::weak_ptr<SoundManager> pSoundManager,
-	std::weak_ptr<Player> pPlayer) :
+	std::function<void(float)> warpPlayer) :
 	Scene(controller),
 	m_pSoundManager(pSoundManager)
 #ifdef _DEBUG
-	, m_pPlayer(pPlayer)
+	, m_warpPlayer(warpPlayer)
 #endif
 {
 }
@@ -250,13 +250,11 @@ void PauseScene::UpdatePlayerWarpMode()
 	{
 		if (pSound) pSound->Play(SoundManager::SoundType::Decision);
 
-		auto pPlayer = m_pPlayer.lock();
-		if (pPlayer)
+		//チュートリアル中ならGameScene側でスキップしてからワープする
+		if (m_warpPlayer)
 		{
-			Vector3 pos = pPlayer->GetPos();
-			pos.z = warp_range_min_z +
-				(warp_range_max_z - warp_range_min_z) * m_warpCursorRatio;
-			pPlayer->SetPos(pos);
+			m_warpPlayer(warp_range_min_z +
+				(warp_range_max_z - warp_range_min_z) * m_warpCursorRatio);
 		}
 
 		//ワープ画面とポーズ画面の両方を閉じてゲームに戻る

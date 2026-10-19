@@ -1432,7 +1432,7 @@
 
 ### 進捗（2026-10-08・外部化: ヘッダをCSVDataまで届ける、完了）
 - **`Data/CSV/Params/EnemyStatus.csv`作成済み**(ユーザー)。`modelID,hp,colRadius,trueDeadFrame,deathEffectInterval` / FloatingEnemy 5,132,10,0 / WormHead 100,40,0,13 / Boss 2000,0,330,0。
-- **BOM**: 最初Excelの「CSV UTF-8」で保存しBOM付きになった→VS Codeで「エンコード付きで保存→UTF-8」で除去。原因の一つはワークスペース設定`files.encoding: utf8bom`。`.vscode/settings.json`に`"[csv]": {"files.encoding": "utf8"}`と`rainbow_csv.virtual_alignment_mode: always`(見た目だけ列をそろえる。ステータスバーの「Align」は実際にスペースを書き込むので押さない)を追加。**読み込み側のBOM除去はユーザー判断で見送り**(ExcelでCSV UTF-8保存すると1列目のヘッダ名が`﻿modelID`になりassertで止まる、と覚えておく)。旧`Data/CSV/RockData.csv`だけBOM付き(旧形式、整理予定)。
+- **BOM**: 最初Excelの「CSV UTF-8」で保存しBOM付きになった→VS Codeで「エンコード付きで保存→UTF-8」で除去。原因の一つはワークスペース設定`files.encoding: utf8bom`。`.vscode/settings.json`に`"[csv]": {"files.encoding": "utf8"}`と`rainbow_csv.virtual_alignment_mode: always`(見た目だけ列をそろえる。ステータスバーの「Align」は実際にスペースを書き込むので押さない)を追加。**読み込み側のBOM除去はユーザー判断で見送り**(ExcelでCSV UTF-8保存すると1列目のヘッダ名が`modelID`になりassertで止まる、と覚えておく)。旧`Data/CSV/RockData.csv`だけBOM付き(旧形式、整理予定)。
 - **ユーザーが実装・動作確認済み**: `GetWStringList`がヘッダ行も先頭に入れて返す / `CSVData`に`m_header`と`SetHeader` / `LoadCSV`が空チェック→`[0]`をヘッダ→`i=1`から`SetData`+`SetHeader`。既存の岩・敵・ボスは今までどおり出る。
 - **(済・ユーザー実装)** `CSVData::GetColumnIndex(name) const`(protected、無ければassert→-1)、`GetHeader()`、デストラクタをvirtualに。`CSVData/EnemyStatusData`(`CSVData`継承、`shared_ptr<CSVData>`を受けるコンストラクタでデータ+ヘッダを写して`Conversion()`、modelIDは`ResourceLoader::ModelID`で保持＝.hで`ResourceLoader.h`をincludeするのはユーザー判断で許容)。
 - **キャッシュの置き場所(ユーザー決定)**: 新クラス(`GameScene`が持つ`EnemyStatusTable`)は「敵のステータスごときにクラスを作りたくない」で不採用。`EnemyStatusData`の`static const EnemyStatusData& FindByModelID(ModelID)`の中の`static const auto table = CreateStatusTable()`(private static)で初回だけ読む。**CSVを変えたらゲーム再起動が必要**。
@@ -1738,3 +1738,42 @@
   - 色・動的パラメーター入力0(SeaGlow/SeaTrailの位置の式)は変更なし。見た目への影響: 尾の長さが約2/3、リングが3つに。正面から近づく弾でもリングが奥へ重なる見え方は残っている。
 - 比較画像(同じカメラ・同じフレーム)はClaude Desktopのチャットに添付(リポジトリには置いていない)。
 - **ゲーム内で確認すること**: ①ワームの連鎖爆発(最大8回重なる)で重さと見た目、②チャージで浮遊敵をまとめて倒したとき、③弾がたくさん飛んでいるとき、正面から来る弾の遠近感(リングと海面の光)で避けやすさが落ちていないか、④破片の煙の尾がつぶつぶに見えすぎないか(気になるならDebrisTrailの発生間隔を3→2にする。約+15インスタンス)。
+
+### 2026-10-19 デバッグのプレイヤー移動でチュートリアルをスキップ(Claude、ユーザー依頼、ビルドOK・動作未確認)
+- 壊れていた理由: チュートリアル導入後、通常ステージの敵・岩の生成とボス出現の判定が「チュートリアル終了時のプレイヤーZ(`m_stageOffsetZ`)」基準になった。チュートリアル中にワープすると敵が出ず(`m_isAppearEnemy`がfalseのまま)ボスも出ない。チュートリアルが終わった瞬間にワープ先がオフセットになってしまう問題もあった。
+- [TutorialController::Skip](Manager/TutorialController.cpp#L244): 残っているタスク用の敵を`OnDead()`で消し(倒した数には数えない)、タスクUIを`OnEnd()`、`m_stepIndex`を全ステップ数にして終了状態にする。
+- [GameScene::StartStage](Scene/GameScene.cpp#L279): 今のプレイヤーZをオフセットにして`CreateStageObjects`(Updateにあった処理をまとめただけ。[Update側](Scene/GameScene.cpp#L315))。
+- [GameScene::WarpPlayer](Scene/GameScene.cpp#L288): チュートリアル中ならSkip→**ワープ前の位置**で`StartStage`→`m_stageOffsetZ + stageZ`へ移動。物差しのZ(1200〜27000)は「ステージ開始位置からの距離」として扱う(敵・岩・ボスと同じくオフセットを足す)。
+- PauseSceneはPlayerを借りるのをやめ、`std::function<void(float)>`でワープ処理を受け取る([PauseScene.cpp:256](Scene/PauseScene.cpp#L256)、渡しているのは[GameScene.cpp:493](Scene/GameScene.cpp#L493))。PauseScene.cppから`Player.h`のincludeを削除。
+
+### 2026-10-19 ワープでボス前に飛んだときのボスとの距離を通常どおりに(Claude、ユーザー依頼、ビルドOK・動作未確認)
+- 原因: 10/15にステージの座標を「開始位置0基準」に直した(`boss_appear_z` 27000→25800、ボス30500→29300)が、物差しは1200〜27000のままだった。右端に飛ぶとボスまで2300(普通に進むと3500)で、ムービー明けのカメラ(ボスの2700手前)より前にプレイヤーがいた。
+- `boss_appear_z`をGameScene.cppの匿名名前空間から[GameScene.h:37](Scene/GameScene.h#L37)の`static constexpr`に移し、物差しの範囲を[PauseScene.cpp:43-44](Scene/PauseScene.cpp#L43-L44)で`0`〜`GameScene::boss_appear_z`にした(ボスの出現位置を変えても物差しが自動で合う)。プレイヤーは常に前進するので、ちょうど25800に置いても次のフレームで出現判定(`>`)に入る。
+
+### 2026-10-19 カメラ: 端で遠近感が分からない問題(ユーザー実装、動作確認OK)
+- 症状: 右端で右を向く(左端で左)と遠近感が分からない。原因は2つ: ①カメラxがプレイヤーxの0.3倍しか追わず斜め後ろから見ていた ②カメラの注視点が「機体の前方38000」なので機体のヨー(最大22.5°)で注視点が約14500横にずれ、カメラ自体が大きく首を振っていた。
+- 対応(ユーザー決定): カメラxは**完全追従**(`camera_move_strength_x` 0.3→1.0)＋**上限`camera_move_limit_x`=1000でclamp**([GameCamera.cpp:102](Game/GameObjects/Camera/GameCamera.cpp#L102)、代入の**後**に置く。最初は前に置いて上書きされていた)。プレイヤーのx範囲は`ClampPosition`の計算で約±1600、カメラの実距離は補間の遅れ込みで約420・その位置の画面の片幅約750なので、1000で端の機体が画面の端近くに映る。
+- カメラの向きは**振れるまま**、横成分だけ弱める: `lookDir = -GetForward(); lookDir.x *= camera_yaw_rate(0.4)`([GameCamera.cpp:176-178](Game/GameObjects/Camera/GameCamera.cpp#L176-L178))。端ほど弱める案(|x|/1600で倍率を補間)は必要になったら。
+- 注意: `ClampPosition`([Player.cpp:274-300](Game/GameObjects/Actors/Character/Player/Player.cpp#L274-L300))は「カメラから900先の画面の幅」をワールド原点基準で使っている(カメラがほぼ動かない前提の作り)。今は結果的に約±1600の固定範囲として働いている。
+
+### 残りのタスク(10/19時点)
+1. ⑤岩などが急に出る(先回り生成と約12秒の空白: A「MISSION START」演出 / B 空白を詰める)
+2. ⑥カウンター成功のリアクション(スロー/画面効果)
+3. タイピング風のメッセージ演出
+4. チュートリアルUIにグリッチシェーダ(オフスクリーン経由)
+5. 宙返り中もカメラに機体が映るように
+6. 軽量化したエフェクト・デバッグワープのゲーム内確認
+7. 雨の2面
+
+### 2026-10-19 AIテストプレイ(デバッグ専用ツール、Claude、ユーザー依頼、動作確認済み)
+- 置き場所: [DebugTools/AutoPlay/](DebugTools/AutoPlay/)。使い方・仕組み・消し方は [README.md](DebugTools/AutoPlay/README.md)。
+- **ユーザー方針: ゲームの既存コードには1行も足さない、Debug専用、すぐ消せる作り**。全C++は `#ifdef _DEBUG`。vcxproj/.filters には New-GameClass.ps1 で4クラス(AutoPlaySystem/AutoPlayWorld/AutoPlayBot/PlaytestRecorder)を登録しただけ。最初に InputManager に仮想パッドを足しかけたが、指示で取り消した(InputManager.h は元どおり)。
+- 起動: `.\DebugTools\AutoPlay\Run-AutoPlay.ps1 -Runs 10 -Speed 4 [-Mode hidden] [-Skill beginner|normal|expert]`。終わると [PlaytestReport.html](DebugTools/AutoPlay/PlaytestReport.html) が開く(被弾・死亡の場所を原因別に、カウンター、HP推移、1回ごとの表)。ログは `DebugTools/AutoPlay/Logs/`(.gitignore の `[Ll]ogs/` で対象外)。
+- 既存コードを変えずに割り込む方法:
+  - Debugのインクリメンタルリンクの ILT(jmp中継)の飛び先を書き換えて DxLib の `GetJoypadXInputState`/`GetNowHiPerformanceCount`/`ScreenFlip`/`PlaySoundMem` を差し替え([AutoPlaySystem.cpp:49](DebugTools/AutoPlay/AutoPlaySystem.cpp#L49))。パッド読み取りが毎フレーム1回なので、そこがAIの処理のきっかけ([AutoPlaySystem.cpp:255](DebugTools/AutoPlay/AutoPlaySystem.cpp#L255))。
+  - `GameObjectManager::m_pGameObjects`(private)はテンプレートの明示的インスタンス化の規則で読む([AutoPlayWorld.cpp:30](DebugTools/AutoPlay/AutoPlayWorld.cpp#L30))。
+  - チュートリアルはポーズの「プレイヤーを移動」で物差し左端へワープして飛ばす。**ポーズの選択肢の順番を変えたら** [AutoPlaySystem.cpp:35](DebugTools/AutoPlay/AutoPlaySystem.cpp#L35)・[42行目](DebugTools/AutoPlay/AutoPlaySystem.cpp#L42) を合わせる。
+- AIの回避は、16方向+行きたい方向に動いたときの危険物とのすき間を数十フレーム先まで比べて一番空く方向を選ぶ([AutoPlayBot.cpp:100](DebugTools/AutoPlay/AutoPlayBot.cpp#L100))。最初は「離れる向きの合計」だったが、Z9300/10100の中央の岩の柱(3段)で上下の押しが打ち消し合って毎回当たっていたので変えた。被弾の原因は、被弾した瞬間にプレイヤーの当たり判定に一番近いものから推測([PlaytestRecorder.cpp:323](DebugTools/AutoPlay/PlaytestRecorder.cpp#L323))。
+- 試走の結果(各3回・最大速度・画面なし): 初心者0/3クリア(主な被弾はワーム・岩、死因はワームとボスのビーム)、普通3/3、上級者3/3(被弾は合計1)。普通以上の被弾はワーム(Z1900/6900/24000付近)とボス戦の敵弾が中心。最大速度で約6倍速。
+- 未対応: AIはブースト・ブレーキ・宙返りを使わない。倍速でもボス登場ムービーは実時間。
+- (10/19追加) VS Code のステータスバーに「AIテストプレイ」「テスト結果」ボタンを追加([tasks.json](.vscode/tasks.json) のタスク2つと input 4つ、`autoPlay*`)。回数・速さ・画面・腕前をメニューで選び、Debugビルドしてから起動する。消すときはこれも外す。

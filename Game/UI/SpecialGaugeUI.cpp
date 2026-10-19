@@ -11,7 +11,7 @@
 namespace
 {
     //ゲージ画像の位置
-    const Vector2 hp_frame_pos_ratio = { 0.02f,0.11f };
+    const Vector2 special_frame_pos_ratio = { 0.02f,0.9f };
     //スキャンラインを入れる周期
     constexpr float scanline_frequency = 655.0f;
 }
@@ -47,8 +47,8 @@ void SpecialGaugeUI::Draw()
 
 	const Size& wsize = Application::GetInstance().GetWindowSize();
 	Vector2 frameDrawPos = Vector2(
-		wsize.width * hp_frame_pos_ratio.x,
-		wsize.height * hp_frame_pos_ratio.y
+		wsize.width * special_frame_pos_ratio.x,
+		wsize.height * special_frame_pos_ratio.y
 	);
 
 	//HPの割合から、切り取り位置を計算

@@ -37,6 +37,8 @@ namespace
 	constexpr float check_first_line_goal_rate = 0.35f;
 	//チェックマークの線の太さ
 	constexpr int check_thickness = 3;
+	//スライド演出にかけるフレーム数
+	constexpr int slide_anim_max_frame = 10;
 }
 
 TutorialUI::TutorialUI()
@@ -54,21 +56,25 @@ void TutorialUI::Draw()
 	//非表示ならスキップ
 	if (m_taskDrawState == TaskDrawState::Hide) return;
 
-	//枠と文字の描画
 	Application& app = Application::GetInstance();
 	//ウィンドウサイズ
 	const auto& wsize = app.GetWindowSize();
-
+	
 	//ウィンドウサイズに合わせたUIのスケール
 	float uiScale = app.GetUIScale();
 
-	//DrawBoxで背景を作っておく
-	//文字列の長さに合わせて大きさを変えたいので先に枠の右端の位置を決める
-	float boxRight = wsize.width * task_box_right_ratio;
+	//スライド演出の進行度
+	float slideAnimProgress = static_cast<float>(m_slideAnimFrame) /
+		static_cast<float>(slide_anim_max_frame);
+
+	//枠と文字の描画
 	//背景の横幅
 	//文字と横の端との余白、チェックボックスの幅を考慮して、横幅を決める
 	float boxWidth = (task_box_margin * 2 + check_box_center_to_end * 2 +
 		 check_to_text_space)* uiScale + m_textWidth;
+	//DrawBoxで背景を作っておく
+	//文字列の長さに合わせて大きさを変えたいので先に枠の右端の位置を決める
+	float boxRight = wsize.width * task_box_right_ratio;
 	//チェックボックスの大きさと、枠の余白を考えて左端を決める
 	float boxLeft = boxRight - boxWidth;
 	
@@ -182,6 +188,18 @@ void TutorialUI::Update()
 	{
 		m_checkAnimFrame++;
 	}
+
+	//右から出てくるような演出
+	if (m_taskDrawState == TaskDrawState::SlideIn ||
+		m_taskDrawState == TaskDrawState::SlideOut)
+	{
+		m_slideAnimFrame++;
+	}
+	if(m_slideAnimFrame > slide_anim_max_frame)
+	{
+		if (m_taskDrawState == TaskDrawState::SlideIn) m_taskDrawState = TaskDrawState::Show;
+		else if(m_taskDrawState == TaskDrawState::SlideOut) m_taskDrawState = TaskDrawState::Hide;
+	}
 }
 
 void TutorialUI::OnStart(const std::wstring& taskText)
@@ -191,7 +209,7 @@ void TutorialUI::OnStart(const std::wstring& taskText)
 	//文字を受け取る
 	m_taskText = taskText;
 	//表示を開始する
-	m_taskDrawState = TaskDrawState::Show;
+	m_taskDrawState = TaskDrawState::SlideIn;
 	//文字の幅を測る
 	m_textWidth = GetDrawStringWidthToHandle(
 		m_taskText.c_str(), static_cast<int>(m_taskText.size()), m_taskFontHandle);
@@ -208,5 +226,5 @@ void TutorialUI::OnSuccess()
 void TutorialUI::OnEnd()
 {
 	//ステートを非表示に戻す
-	m_taskDrawState = TaskDrawState::Hide;
+	m_taskDrawState = TaskDrawState::SlideOut;
 }

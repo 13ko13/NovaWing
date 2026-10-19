@@ -32,6 +32,14 @@ public:
 	void Draw() override;
 	SceneID GetSceneID() const override;//自身のシーンIDを返す
 
+	//ボスを登場させるプレイヤーのZ座標(ステージ開始位置からの距離)
+	//デバッグのワープの物差しの右端にも使う
+	static constexpr float boss_appear_z = 25800.0f;
+
+	//デバッグ用:プレイヤーを通常ステージの指定Z座標(ステージ開始位置からの距離)へ移動する
+	//チュートリアル中ならチュートリアルをスキップして、その場から通常ステージを始める
+	void WarpPlayer(float stageZ);
+
 private:
 	/// <summary>
 	/// デバッグ用のグリッドを描画する
@@ -42,6 +50,9 @@ private:
 	//エネミーや岩を出現させる
 	//プレイヤーがチュートリアルを終了したZ座標を渡す必要がある
 	void CreateStageObjects(float offsetZ);
+
+	//プレイヤーの今の位置を基準に通常ステージを始める
+	void StartStage();
 
 private:
 	//フレームカウンター

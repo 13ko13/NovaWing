@@ -111,9 +111,109 @@
                 "panel": "shared",
                 "clear": true
             }
+        },
+        {
+            "label": "NovaWing: AIテストプレイ",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}\\DebugTools\\AutoPlay\\Run-AutoPlay.ps1",
+                "-Runs",
+                "${input:autoPlayRuns}",
+                "-Speed",
+                "${input:autoPlaySpeed}",
+                "-Mode",
+                "${input:autoPlayMode}",
+                "-Skill",
+                "${input:autoPlaySkill}"
+            ],
+            "dependsOn": "DxLib: Debug ビルド",
+            "options": {
+                "statusbar": {
+                    "label": "$(robot) AIテストプレイ",
+                    "detail": "AIに自動で遊ばせて、被弾・死亡・カウンターをグラフにする"
+                }
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "clear": true
+            }
+        },
+        {
+            "label": "NovaWing: AIテストプレイの結果",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-Command",
+                "Start-Process '${workspaceFolder}\\DebugTools\\AutoPlay\\PlaytestReport.html'"
+            ],
+            "options": {
+                "statusbar": {
+                    "label": "$(graph) テスト結果",
+                    "detail": "AIテストプレイの結果のグラフをブラウザで開く"
+                }
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "never",
+                "panel": "shared"
+            }
         }
     ],
     "inputs": [
+        {
+            "id": "autoPlayRuns",
+            "type": "pickString",
+            "description": "AIテストプレイ (1/4) 何回遊ばせますか?",
+            "options": [
+                { "label": "3回 (お試し)", "value": "3" },
+                { "label": "10回", "value": "10" },
+                { "label": "20回", "value": "20" },
+                { "label": "50回", "value": "50" }
+            ],
+            "default": "10"
+        },
+        {
+            "id": "autoPlaySpeed",
+            "type": "pickString",
+            "description": "AIテストプレイ (2/4) 速さは?",
+            "options": [
+                { "label": "最速 (画面はカクカク、一番早く終わる)", "value": "max" },
+                { "label": "4倍速", "value": "4" },
+                { "label": "2倍速", "value": "2" },
+                { "label": "等速 (普通の速さ、音も鳴る)", "value": "1" }
+            ],
+            "default": "max"
+        },
+        {
+            "id": "autoPlayMode",
+            "type": "pickString",
+            "description": "AIテストプレイ (3/4) ゲーム画面を出しますか?",
+            "options": [
+                { "label": "出す (AIが遊ぶ様子を見る。ESCで中断)", "value": "visible" },
+                { "label": "出さない (裏で回す。ターミナルでCtrl+Cで中断)", "value": "hidden" }
+            ],
+            "default": "visible"
+        },
+        {
+            "id": "autoPlaySkill",
+            "type": "pickString",
+            "description": "AIテストプレイ (4/4) AIの腕前は?",
+            "options": [
+                { "label": "初心者 (反応が遅く、よく被弾する)", "value": "beginner" },
+                { "label": "普通", "value": "normal" },
+                { "label": "上級者 (反応が速く、カウンターをよく使う)", "value": "expert" }
+            ],
+            "default": "normal"
+        },
         {
             "id": "newClassName",
             "type": "promptString",

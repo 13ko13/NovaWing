@@ -10,6 +10,7 @@
 #include "Game/UI/TutorialUI.h"
 #include "Utility/Vector2.h"
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyFactory.h"
+#include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
 #include "Manager/CSVDataLoader.h"
 #include "CSVData/TutorialStepData.h"
 #include "CSVData/TutorialEnemyData.h"
@@ -50,6 +51,7 @@ namespace
 		}
 		else
 		{
+			
 			assert(false && "登録されていないタスクです。");
 			return TutorialController::TaskType::None;
 		}
@@ -237,6 +239,26 @@ bool TutorialController::IsFinished() const
 {
 	//ステップが終了していれば
 	return m_stepIndex >= static_cast<int>(m_steps.size());
+}
+
+void TutorialController::Skip()
+{
+	//タスク用の敵が残っていれば消す(倒した数には数えない)
+	for (const auto& enemy : m_pTaskEnemies)
+	{
+		std::shared_ptr<EnemyBase> pEnemy = enemy.lock();
+		if (pEnemy) pEnemy->OnDead();
+	}
+	m_pTaskEnemies.clear();
+
+	//タスクのUIを非表示に戻す
+	m_tutorialUI->OnEnd();
+
+	//全ステップを終えた状態にする
+	m_stepIndex = static_cast<int>(m_steps.size());
+	m_stepState = StepState::WaitNextStep;
+	m_successFrame = 0;
+	m_appearNextStepFrame = 0;
 }
 
 void TutorialController::SpawnTaskEnemies(const Player& player)

@@ -27,8 +27,10 @@ private:
 	enum class TaskDrawState
 	{
 		Hide,//非表示
+		SlideIn,//スライド演出に入る
 		Show,//表示
 		Success,//成功
+		SlideOut,//スライド演出しながら消える
 	};
 	TaskDrawState m_taskDrawState = TaskDrawState::Hide;
 
@@ -40,4 +42,7 @@ private:
 
 	//文字の幅
 	int m_textWidth = 0;
+
+	//右から出てくる演出のためのフレーム
+	int m_slideAnimFrame = 0;
 };

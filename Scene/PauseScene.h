@@ -1,21 +1,22 @@
 ﻿#pragma once
 #include <array>
 #include <memory>
+#include <functional>
 
 #include "Scene.h"
 
 class SoundManager;
-class Player;
 
 class PauseScene : public Scene
 {
 public:
-	//pSoundManagerとpPlayerはGameSceneから渡す
+	//pSoundManagerとwarpPlayerはGameSceneから渡す
 	//(ポーズ中も鳴り続けさせるため、PauseScene破棄の影響を受けないようweak_ptrで借りる)
+	//warpPlayerはプレイヤー位置ワープ機能(_DEBUGビルドのみ)で、ステージ上のZ座標を渡して呼ぶ
 	PauseScene(
 		SceneController& controller,
 		std::weak_ptr<SoundManager> pSoundManager,
-		std::weak_ptr<Player> pPlayer);
+		std::function<void(float)> warpPlayer);
 	~PauseScene();
 
 	void Init() override;
@@ -57,8 +58,9 @@ private:
 	std::weak_ptr<SoundManager> m_pSoundManager;
 
 #ifdef _DEBUG
-	//プレイヤーへのポインタ(GameSceneが所有するものを借りている、位置ワープ機能でのみ使用)
-	std::weak_ptr<Player> m_pPlayer;
+	//プレイヤーをワープさせる処理(GameSceneから渡される)
+	//チュートリアルのスキップやステージのオフセットはGameScene側で面倒を見る
+	std::function<void(float)> m_warpPlayer;
 
 	//プレイヤー位置ワープ画面を開いているか
 	bool m_isPlayerWarpMode = false;

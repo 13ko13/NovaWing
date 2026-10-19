@@ -344,6 +344,18 @@
     </ClCompile>
     <ClCompile Include="CSVData\TutorialEnemyData.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugTools\AutoPlay\AutoPlaySystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugTools\AutoPlay\AutoPlayWorld.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugTools\AutoPlay\AutoPlayBot.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugTools\AutoPlay\PlaytestRecorder.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants\Game.h">
@@ -701,6 +713,18 @@
     </ClInclude>
     </ClInclude>
     <ClInclude Include="CSVData\TutorialEnemyData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugTools\AutoPlay\AutoPlaySystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugTools\AutoPlay\AutoPlayWorld.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugTools\AutoPlay\AutoPlayBot.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugTools\AutoPlay\PlaytestRecorder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>  </ItemGroup>
   <ItemGroup>

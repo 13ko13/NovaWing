@@ -58,9 +58,6 @@ namespace
 	//1秒あたりのフレーム数
 	constexpr int frame_per_second = 60;
 
-	//ボスを登場タイミングz座標(プレイヤー位置)
-	constexpr float boss_appear_z = 25800.0f;
-
 	//地震のような強く長い揺れ
 	//ボス登場時のカメラを揺らす力
 	constexpr float boss_appear_shake_power = 7.0f;
@@ -276,6 +273,33 @@ void GameScene::CreateStageObjects(float offsetZ)
 	m_pBoss->SetPos(bossPos);
 }
 
+void GameScene::StartStage()
+{
+	//今のプレイヤーの位置を敵や岩が出てくる位置のオフセットにする
+	m_stageOffsetZ = m_pPlayer->GetPos().z;
+
+	CreateStageObjects(m_stageOffsetZ);
+	m_isAppearEnemy = true;
+}
+
+void GameScene::WarpPlayer(float stageZ)
+{
+	//チュートリアル中ならスキップして、ワープ前の位置から通常ステージを始める
+	if (!m_pTutorialController->IsFinished())
+	{
+		m_pTutorialController->Skip();
+	}
+	if (!m_isAppearEnemy)
+	{
+		StartStage();
+	}
+
+	//敵や岩と同じく、ステージのオフセット分ずらした位置へ移動する
+	Vector3 pos = m_pPlayer->GetPos();
+	pos.z = m_stageOffsetZ + stageZ;
+	m_pPlayer->SetPos(pos);
+}
+
 void GameScene::Update()
 {
 	//フレームカウンターの更新
@@ -285,10 +309,7 @@ void GameScene::Update()
 	if (m_pTutorialController->IsFinished() &&
 		!m_isAppearEnemy)
 	{
-		m_stageOffsetZ = m_pPlayer->GetPos().z;
-
-		CreateStageObjects(m_stageOffsetZ);
-		m_isAppearEnemy = true;
+		StartStage();
 	}
 
 	//全GameObjectのUpdateを呼ぶ
@@ -465,7 +486,8 @@ void GameScene::Update()
 	{
 		//ポーズを開くときも決定音を鳴らす
 		m_pSoundManager->Play(SoundManager::SoundType::Decision);
-		m_controller.PushScene(std::make_shared<PauseScene>(m_controller, m_pSoundManager, m_pPlayer));
+		m_controller.PushScene(std::make_shared<PauseScene>(m_controller, m_pSoundManager,
+			[this](float stageZ) { WarpPlayer(stageZ); }));
 	}
 
 	//チュートリアルコントローラーの更新

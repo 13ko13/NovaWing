@@ -268,7 +268,11 @@
     <ClCompile Include="Game\UI\TutorialUI.cpp" />
     <ClCompile Include="CSVData\TutorialStepData.cpp" />
     <ClCompile Include="Game\UI\WarningUI.cpp" />
-    <ClCompile Include="CSVData\TutorialEnemyData.cpp" />  </ItemGroup>
+    <ClCompile Include="CSVData\TutorialEnemyData.cpp" />
+    <ClCompile Include="DebugTools\AutoPlay\AutoPlaySystem.cpp" />
+    <ClCompile Include="DebugTools\AutoPlay\AutoPlayWorld.cpp" />
+    <ClCompile Include="DebugTools\AutoPlay\AutoPlayBot.cpp" />
+    <ClCompile Include="DebugTools\AutoPlay\PlaytestRecorder.cpp" />  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
     <ClInclude Include="Game\Collision\CounterCollider.h" />
@@ -388,7 +392,11 @@
     <ClInclude Include="Game\UI\TutorialUI.h" />
     <ClInclude Include="CSVData\TutorialStepData.h" />
     <ClInclude Include="Game\UI\WarningUI.h" />
-    <ClInclude Include="CSVData\TutorialEnemyData.h" />  </ItemGroup>
+    <ClInclude Include="CSVData\TutorialEnemyData.h" />
+    <ClInclude Include="DebugTools\AutoPlay\AutoPlaySystem.h" />
+    <ClInclude Include="DebugTools\AutoPlay\AutoPlayWorld.h" />
+    <ClInclude Include="DebugTools\AutoPlay\AutoPlayBot.h" />
+    <ClInclude Include="DebugTools\AutoPlay\PlaytestRecorder.h" />  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
