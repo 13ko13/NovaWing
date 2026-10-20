@@ -3,6 +3,7 @@
 #include "GameCamera.h"
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
 #include "Constants/Game.h"
+#include "Manager/LightingManager.h"
 
 namespace
 {
@@ -15,13 +16,13 @@ namespace
 	constexpr float camera_offset_y = 250.0f;
 
 	// プレイヤーからどれぐらい離したZ位置にカメラを置くか
-	constexpr float camera_offset_z = 300.0f;
+	constexpr float camera_offset_z = 166.0f;
 
 	//ズーム時の距離判定閾値
 	constexpr float zoom_dist_thresould = 100.0f;
 
 	// カメラのLerpに使うtの値
-	constexpr float lerp_t = 0.06f;
+	constexpr float lerp_t = 0.03f;
 
 	// カメラからターゲットまでの距離
 	constexpr float camera_to_target = 38000.0f;
@@ -69,19 +70,19 @@ void GameCamera::UpdatePosition()
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	// プレイヤーの位置
 	Vector3 playerPos = pPlayer->GetPos();
-
+	
 	//もしズームスピードに値が入っていればズームを行う
 	if (m_zoomSpeed > 0.0f)
 	{
 		//ターゲットオブジェクト
 		//自分の位置からズーム対象の位置まで
 		Vector3 zoomTargetPos = m_targetPos -
-			Vector3(0.0f, 0.0f, m_zoomLimit);
-
+		Vector3(0.0f, 0.0f, m_zoomLimit);
+		
 		float cameraToTargetDist = (zoomTargetPos - m_pos).Length();
-
+		
 		m_pos = Vector3::Lerp(m_pos, zoomTargetPos, m_zoomSpeed);
-
+		
 		if (cameraToTargetDist < zoom_dist_thresould)
 		{
 			m_zoomSpeed = 0.0f;
@@ -92,7 +93,7 @@ void GameCamera::UpdatePosition()
 	{
 		// ターゲットの位置を更新
 		UpdateTargetPos();
-
+		
 		// ターゲットの位置も補間する
 		m_targetPos = Vector3::Lerp(m_prevTargetPos, m_targetPos, lerp_t);
 		
@@ -105,13 +106,17 @@ void GameCamera::UpdatePosition()
 		m_pos.y = std::max(m_pos.y, Game::sea_camera_margin);
 		// zはプレイヤーよりも少し手前
 		m_pos.z = playerPos.z - camera_offset_z;
-
+		
 		//前フレームのカメラの位置から今のフレームの位置まで補間する
 		m_pos = Vector3::Lerp(m_prevPos, m_pos, lerp_t);
-
+		
 		// カメラの揺れを更新して、カメラの位置に加算する
 		m_pos += UpdateShake();
 	}
+
+	//プレイヤーとの距離を計算してライティングマネージャーに渡す
+	float cameraToPlayerDist = (playerPos - m_pos).Length();
+	LightingManager::GetInstance().SetStartDisolveDist(cameraToPlayerDist);
 }
 
 void GameCamera::OnShake(float power, int frame)

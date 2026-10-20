@@ -196,6 +196,8 @@
     <ClCompile Include="Game\BackGround\SkyBox.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Rock\Rock.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Rock\RockDataSetter.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Scenery\Scenery.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Scenery\SceneryDataSetter.cpp" />
     <ClCompile Include="Game\GameObjects\Bullet\ChargeBullet.cpp" />
     <ClCompile Include="Game\UI\ReticleUI.cpp" />
     <ClCompile Include="Manager\CSVDataLoader.cpp" />
@@ -315,6 +317,8 @@
     <ClInclude Include="Game\BackGround\SkyBox.h" />
     <ClInclude Include="Game\GameObjects\Actors\Rock\Rock.h" />
     <ClInclude Include="Game\GameObjects\Actors\Rock\RockDataSetter.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Scenery\Scenery.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Scenery\SceneryDataSetter.h" />
     <ClInclude Include="Game\GameObjects\Bullet\ChargeBullet.h" />
     <ClInclude Include="Game\UI\ReticleUI.h" />
     <ClInclude Include="Manager\CSVDataLoader.h" />

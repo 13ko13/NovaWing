@@ -1777,3 +1777,75 @@
 - 試走の結果(各3回・最大速度・画面なし): 初心者0/3クリア(主な被弾はワーム・岩、死因はワームとボスのビーム)、普通3/3、上級者3/3(被弾は合計1)。普通以上の被弾はワーム(Z1900/6900/24000付近)とボス戦の敵弾が中心。最大速度で約6倍速。
 - 未対応: AIはブースト・ブレーキ・宙返りを使わない。倍速でもボス登場ムービーは実時間。
 - (10/19追加) VS Code のステータスバーに「AIテストプレイ」「テスト結果」ボタンを追加([tasks.json](.vscode/tasks.json) のタスク2つと input 4つ、`autoPlay*`)。回数・速さ・画面・腕前をメニューで選び、Debugビルドしてから起動する。消すときはこれも外す。
+
+### 2026-10-19〜20 右上のタスク枠を右からスライドイン・アウト(ユーザー実装、コミット`69a6e7e`)
+- 状態: `TaskDrawState{Hide, SlideIn, Show, Success, SlideOut}`。`OnStart`→`SlideIn`、`OnEnd`→`SlideOut`(どちらも`m_slideAnimFrame = 0`)。`Update`でSlideIn/SlideOut中だけフレームを進め、`slide_anim_max_frame`(10F)を超えたらShow/Hideへ。
+- `Draw`([TutorialUI.cpp:66-95](Game/UI/TutorialUI.cpp#L66-L95)): 進行度を0〜1にclamp→SlideOutなら`1-t`→ease-out(`1-(1-t)^2`)→枠の右端を「画面外(`wsize.width + boxWidth`)」と「定位置(`wsize.width * task_box_right_ratio`)」の間で補間。チェックボックス・文字は`boxLeft`基準なので一緒に動く。SlideOut中も成功の黄色の枠と✓を描く(条件を`Success || SlideOut`に)。
+- つまずき(参考): フレームを0に戻し忘れて2回目以降スライドしない/引っ込むときの逆向きの値を別変数に入れて使っていなかった(未初期化の変数も残る)→同じ変数を書き換える形に。
+- 任意: ease-outの行([TutorialUI.cpp:83](Game/UI/TutorialUI.cpp#L83))にコメントが無い。
+- **残りのタスク(10/20時点)**: ⑤岩などが急に出る / ⑥カウンター成功のリアクション / タイピング風のメッセージ演出 / チュートリアルUIにグリッチシェーダ / 宙返り中もカメラに機体が映るように / AIテストプレイで初心者がクリアできない(ワーム・岩の被弾が多い)件の検討 / 雨の2面。軽量化したエフェクトとデバッグワープの確認は「大体OK」(ユーザー、10/19)。
+
+### 2026-10-20 景色用の島モデルを追加(Claudeが直接実装、実機の見た目は未確認)
+- **素材**: Kenney Nature Kit 2.1(CC0、`Data/Model/Scenery/License_Kenney_NatureKit.txt`)。Unity Asset Storeは再配布規約・ログインの都合で使わず、CC0にした。使用: `cliff_block_rock`→`SceneryCliff`(草の天面つき崖ブロック)、`rock_tallA`→`ScenerySpire`、`rock_largeA`→`SceneryRock`、`tree_pineGroundA`→`SceneryTree`。
+- **変換**: このPCにFBX→mv1変換ツールが無く、PythonもBlenderも無いので、OBJ→DirectX `.x`(テキスト)に変換するPowerShellスクリプトを自作して`.x`のままロード(`MV1LoadModel`は`.x`を読める)。スクリプトはリポジトリ外(scratchpad)。Kenneyは右手系なのでZ座標・法線Zを反転済み。**面の向き(裏表)が逆なら見た目がおかしくなるので実機で確認が必要。**
+- **仕組み**: `Scenery`(Actor継承、当たり判定なし、`MV1DrawModel`で標準描画) + `SceneryDataSetter`(CSVから生成)。`Data/CSV/Stage1/Scenery.csv`(列はRock.csvと同じ。rotY=5列目、scale=7〜9列目を使用)。生成は[GameScene.cpp:211-216](Scene/GameScene.cpp#L211-L216)で、ステージのオフセットに関係なく固定位置(チュートリアル区間)。モデルIDは[ResourceLoader.h](Manager/ResourceLoader.h)・[ResourceConstants.h](Constants/ResourceConstants.h)に`Scenery*`を追加。
+- **配置の考え方**: カメラのFarが5500([CameraBase.cpp:11](Game/GameObjects/Camera/CameraBase.cpp#L11))なので、島は進路の左右|x|=2600〜5000に置いた(プレイヤーは画角内にclampされ約±1000以内、敵・岩は|x|≦1200なので干渉しない)。z=2600〜16200に4つの島+岩。島の土台は海面下(y=-100)から立ち上げ。
+- **確認してほしい点**: ①島の見た目(色・向き・水との境目)、②見えるタイミング(Far=5500のため遠くの島はポップインする可能性)、③ライティングが標準描画でNovaWingの雰囲気と合うか。気に入らなければ`Scenery.csv`の数値で調整(コード修正不要)。
+- **追記(同日)**: 実機で面が裏返って見えた→変換スクリプトでZ反転に加えて三角形の頂点順(b,c)も入れ替えて`.x`を作り直した(コード・ビルドの変更なし、`.x`差し替えのみ)。再確認待ち。
+
+### 2026-10-20 景色の島: 方針変更(Kenneyをやめてゲーム内の岩を流用)
+- ユーザー評価: Kenney(低ポリ・フラット)は暗くてチープ→不採用。`Data/Model/Scenery/`(Kenney由来の.xと License)は削除、`ResourceLoader`/`ResourceConstants`のScenery*追加分は`git checkout`で元に戻した。リアル系CC0はPoly Havenがあるが1個100万ポリ超でDxLibには重く、Blenderでの軽量化が必要(未実施)。
+- 現状: [Scenery.csv](Data/CSV/Stage1/Scenery.csv)をRock1/2/3(大きく拡大、y=-30〜-50で海面下から立ち上げ)に書き換え済み。`Scenery`クラスは`MV1DrawModel`+自発光の標準描画のまま(ビルドは通る)。
+- **ルール違反の反省**: 「3まであなたがやってみて」を.cpp/.h編集の許可と誤解して、Scenery一式・GameScene・vcxprojを直接編集した。ユーザーから「C++/HLSLは勝手に改変しない」と指摘。以降は文章での説明のみ。**未了の理想形**(ユーザーが実装するなら): `Scenery`の描画を`Rock::Draw`と同じ`DrawWithLighting`経路(法線マップ・ノイズ、OnInitでCreateShaderBuffers)にして岩と質感を揃える。
+- **追記(同日)**: ユーザーから「今回は許可してるからいい」と明確化があり、`Scenery`を岩と同じ描画経路に変更(`OnInit`で`CreateShaderBuffers`、`Draw`で`UpdateShaderMatrixData`+岩の法線マップ/ノイズ+`DrawWithLighting`)。ビルドOK。実機の見た目は未確認(確認点: 岩と質感が揃うか、島の大きさ・位置・ポップイン)。調整は[Scenery.csv](Data/CSV/Stage1/Scenery.csv)の数値で可能。
+
+### 2026-10-20 景色の島(最終): Poly Havenの実写スキャン岩(CC0)に差し替え
+- ユーザー要望: 自分のRockの流用は手抜きなのでNG、外部のリアルなモデルを取ってくる。→ **Poly Haven(CC0)**の`mountainside`/`rock_face_01`/`rock_face_02`/`rock_07`/`coastal_cliff_01`を取得。(`boulder_01`は軽量化で穴だらけになったので不採用。)
+- **加工**: Blender 4.5(ポータブル版、`C:\bl`に展開、リポジトリ外)でポリゴン数を1.5〜4万に削減→DirectX`.x`(テキスト)にスクリプトで出力。UV・法線・拡散テクスチャ(1k jpg)つき。幅1=1.0に正規化済みなのでCSVのscaleが「幅(ワールド単位)」。座標系はZ-up右手→Y-up左手、三角形の頂点順を入れ替え。出力先は[Data/Model/Scenery/](Data/Model/Scenery/)(合計約10MB、ライセンスはREADME_License.txt)。
+- **描画**: [Scenery.cpp](Game/GameObjects/Actors/Scenery/Scenery.cpp)はDxLib標準描画+マテリアルの自発光/拡散/環境光で明るさ調整(`emissive_color`/`diffuse_color`/`ambient_color`)。岩のシェーダ経路は法線マップがモデルごとに必要になるので使っていない(ゲーム内Rockの質感とは別物)。
+- **確認方法**: ゲーム外の小さなDxLibテストプログラム(scratchpad)でモデルを読み込んで画像化し、テクスチャ・面の向き・配置を確認済み(ゲーム本体での見た目は未確認)。岩壁(rock_face)は片面の板状なので、CSVのrotYで進路側を向けている(左側300前後、右側50〜60前後)。
+- **配置**: [Scenery.csv](Data/CSV/Stage1/Scenery.csv)の10個(進路の左右2300〜4300、z=3000〜16000、y=-120〜-250で海面下から)。プレイヤーの移動範囲(約±1200)と重ならない。
+- **ライセンス**: Unity Asset Storeは、Unity公式でも他エンジン利用は可だが「最終製品から素材を抽出できないこと(=リポジトリに生ファイルを公開しない)」「Unity経由でのみDL」が条件で、公開予定の就活リポジトリには不向きなのでCC0にした。
+
+### 2026-10-20 景色の島(最終・その2): 岩ではなく「島」を生成
+- ユーザー評価: Poly Havenのスキャン岩は「島/陸というよりクソでかい岩」→不採用。Poly Havenに島の地形モデルは無いので、**島の地形をBlender+numpyのスクリプトで生成**(ノイズで不規則な海岸線・丘・尾根、海面下に沈む斜面)し、テクスチャは**Poly Havenの砂・草・崖(CC0)**を高さと傾斜でブレンドして2048pxにベイク(上から見た平面UV)。草地の濃い部分は森のキャノピー風。形違いの3種(`SceneryIslandA/B/C`、約3.1〜5.1万ポリゴン、合計約12MB)。スクリプトはリポジトリ外(scratchpad)。
+- 海面(y=0)=モデルのy=0なので、CSVのposYはほぼ0(-10)。モデルは幅1.1に正規化済みで、scaleX/Z=幅、scaleYで高さを伸ばす(Aは約1.35倍)。
+- 配置: [Scenery.csv](Data/CSV/Stage1/Scenery.csv)の6島(進路の左右3000〜3800、z=3200〜15800)。テスト画像で、島としての見た目・向き・色を確認済み。ゲーム本体での見た目(水面との境目、夜の明るさ、ポップイン)は未確認。
+- 旧: Kenney/Poly Havenの岩モデル、ゲーム内Rock流用はすべて削除。
+- 追記: ユーザー要望で島を海面下に沈めた(Scenery.csvのposY -10 → -200)。水面越しに水中の斜面が見えるか確認待ち。さらに沈めたい/戻したい場合はposYだけ変える。
+- **追記: 水面越しの透け**: 島が透けなかった原因は、水面のrevealが「キャプチャ画面(色+アルファ=カメラからの距離)」を使うのに、Sceneryがキャプチャ時も標準描画(アルファ=1)だったため。岩は`DrawWithLighting`経由でCapturePSを通るので透けていた。→ `Scenery::Draw`でキャプチャ中(`WaterRevealManager::IsCaptureMode`)だけ`UpdateShaderMatrixData`+`DrawWithLighting({})`(LightingVS+CapturePS)、通常時は標準描画のまま。`OnInit`で`CreateShaderBuffers`。.xモデルがLightingVS(接線入力あり)+CapturePSで描けることはゲーム外テストで確認済み。ゲーム本体での透け具合は未確認。
+
+### 2026-10-20 ⑤岩などが急に出る問題: ステージの中身をカメラのfarの外に生成(Claude、ユーザー依頼、ビルドOK・ゲーム内未確認)
+- 原因: チュートリアル終了時(`GameScene::StartStage`)にプレイヤーZをオフセットにして一括生成するが、一番近い岩は300先、カメラのfarは5500なので、描画範囲の内側に急に出ていた。
+- 対応(A案、ユーザー判断で「CSVの値にfarを足す」): `Data/CSV/Stage1/`の`FloatingEnemy`/`Rock`/`Boss`のposZと、`WormEnemy`のposZ・`activatePlayerZ`に**すべて+5500**(far=[CameraBase.cpp:11](Game/GameObjects/Camera/CameraBase.cpp#L11)の`camera_far`)。最初の岩は5800先(地平線の外)から見えてくる。ボスは29300→34800。
+- ボス出現の判定も同じだけずらした: [GameScene.h:39](Scene/GameScene.h#L39)の`boss_appear_z` 25800→**31300**(コメント付き)。デバッグワープの物差しの右端もこれを使うので自動で合う。
+- 副作用: チュートリアル終了から最初の岩まで約12秒(5500÷480/秒)何もしない時間ができる。→ 「MISSION START」等の演出で埋める案(未着手・未決定)。
+- **注意**: `camera_far`を変えたらCSVのずらし量も見直す。Unityの`Stage1.unity`はCSVとさらにずれた(取り込み直しは`StageCsvImporter`で)。AIテストプレイの被弾位置(Z)の記録も、これ以降は5500ずれる。
+- 追記: 島を27個に増やした(進路の左右、z=2200〜25900、島同士は外周が300以上離れて重ならない、進路(x=0)からも外周が2000以上離す)。配置はスクリプトで乱数生成(リポジトリ外)。重いと感じたらScenery.csvの行を減らすだけでよい。
+- 追記: 島を27個に増やした([Scenery.csv](Data/CSV/Stage1/Scenery.csv))。進路の左右、z=2200〜25900、島同士は外周が300以上離れて重ならない(計算で確認済み)、進路(x=0)からも外周が2000以上離す。大きさ・向き・高さの伸びはランダム、沈める量は島の大きさに比例(posY=-0.059×幅)。重いと感じたらCSVの行を減らすだけでよい。配置は乱数生成のスクリプト(リポジトリ外)で作った。
+- 追記(谷の配置): ユーザー要望『島の間に隙間があり、厳しい谷を進んでいく感じ』。進路の両側に島を連ねる配置に変更(31島: 谷の壁17+背景14)。壁の島は進路から内側の海岸線が約1400離れ、高さ(scaleY)を幅の1.5〜1.9倍にして切り立たせた。島同士は海岸線が少し離れる程度に詰めて並べ、その外側の背景用の島で奥行きを出している。配置は乱数生成のスクリプト(リポジトリ外)。ゲーム外のテスト画像で谷の見え方を確認済み(ゲーム本体では未確認)。進路の幅(±約1000)・岩(±1200)とは重ならない。
+- **追記(島のループ配置)**: ユーザー要望『海と同じで、島が途切れると違和感があるのでループさせたい』。`Scenery`にループ処理を追加([Scenery.cpp](Game/GameObjects/Actors/Scenery/Scenery.cpp)): CSVのzは「1周分(`loop_length`=24000)の中の位置」として扱い、`Update`で「カメラzの3000後ろ(`recycle_behind_distance`)より前方で一番手前になる位置」= `baseZ + ceil((camZ - 3000 - baseZ) / 24000) * 24000` に置き直す(通り過ぎた島は1周分前方へ回る)。見える範囲(Far=5500)より周期が十分長いので継ぎ目は見えない。**CSVのzは0〜24000で、端同士がつながる(周期的に重ならない)ように生成した29島(壁14+背景15)**。ループ長を変えるときはScenery.cppの`loop_length`とCSVの両方を直す(CSVは作り直し)。継ぎ目をまたぐ見え方はゲーム外のテスト画像で確認済み(ゲーム本体では未確認)。
+
+### 2026-10-20 【タスク】プレイヤー移動に加速度をつける(戦闘機らしく、初速は遅く)
+- **背景**: 今は移動が「スティックの傾き × 最高速度」を毎フレームそのまま速度に代入([MovingState.cpp:79-97](Game/GameObjects/Actors/Character/Player/Movement/MovingState.cpp#L79-L97))、離すと[IdleMovementState.cpp:31-36](Game/GameObjects/Actors/Character/Player/Movement/IdleMovementState.cpp#L31-L36)の`Enter`で速度をz以外0にする。入力した瞬間に最高速度・離した瞬間に停止で、機体の重さが出ない。実現できるとかなりリアルなゲームになりそう(ユーザー談)。
+- **考え方**: 「目標速度(今と同じ計算)」と「現在速度」を分け、現在速度を毎フレーム目標へ、**1フレームで変えられる量に上限**をつけて近づける(その上限が加速度)。
+- **決めること(設計メモ)**:
+  1. 加速(入力中)と減速(離したとき)の値を分ける。戦闘機らしくするなら減速をやや緩やかに(離しても少し流れて止まる)。
+  2. 値は「最高速度に達するまで何フレームか」から決める(目安0.2〜0.3秒 = 12〜18フレーム)。
+  3. 傾き中の横移動(`tilt_move_speed_x`)は目標速度側でそのまま使える。回避用なので傾き中だけ加速度を大きくするのがおすすめ。
+  4. **ステートをまたぐ**: 今はスティックを離すとIdleに移って速度を0にするので、このままだと減速が効かない。→ Idleでも現在速度を0へ近づける(`Enter`の速度リセットをやめる)方が構造がすっきり。または速度が十分小さくなるまでMovingに留まる。
+  5. 「現在値を目標値へ上限つきで近づける」処理はMovingとIdleの両方で使うので、`Player`に1つだけ関数として置いて重複を避ける。
+  6. 他のステート(ブースト/ブレーキ/ショット/宙返り)は速度を直接セットしている。Movingに戻ったときは「そのときの速度から加速をやり直す」で十分。
+  7. 画面端(フラスタムでのクランプ、[Player.cpp:294-298](Game/GameObjects/Actors/Character/Player/Player.cpp#L294-L298))に当たったら、その方向の速度を0に戻す(壁にこすりながら加速し続けるのを防ぐ)。
+- **進め方(案)**: ①Movingに加速だけ入れる → ②Idleに減速を入れる(`Enter`のリセットをやめる) → ③加速度の値を感触で調整 → ④傾き中だけ加速度を大きくする。
+- **関連(カメラ)**: カメラの`lerp_t`を0.03に下げた影響で、実際のカメラ距離が伸びる(前進速度に比例: 通常時+約134、ブースト時+約277)。`camera_offset_z`を300→200前後に下げて通常時の見え方を戻す案を検討中。ブースト時は離れる/ブレーキ時は近づく(演出として残すか要検討)。加速度を入れると操作感が変わるので、カメラ調整は加速度の後でまとめて見直すのがよい。
+- **関連(移動速度)**: カメラを近づけた結果、左右上下の移動が速く見える問題あり。`MovingState.cpp`の`move_speed_x/y`(19)・`tilt_move_speed_x`(25)をカメラ距離の比率(約0.62〜0.75倍)で下げる案。加速度とセットで速度の値を決めるとよい。
+
+### 2026-10-20 ボス戦で召喚された浮遊敵の弾が当たらない問題(ユーザー実装、確認OK)
+- 症状: ボス戦の召喚された浮遊敵の弾が、プレイヤーが止まっていても当たらず、頭の上や横を抜けて後ろへ行く(通常のステージでは止まっていれば当たる)。召喚位置を近づけたり正面にしたりすると当たるが、ボスと重なる・見づらいので不採用。
+- 原因: 弾は「撃った瞬間のプレイヤーの位置へ速さ7」で撃つだけで、プレイヤーの前進(z=8/フレーム)を考えていなかった。プレイヤーから見ると弾の速度は「7×方向 − (0,0,8)」になり、奥行きだけ速く詰まって、上下左右のずれを詰め切る前にプレイヤーの奥行きを通り過ぎる(ずれの約半分外れる。当たる範囲はプレイヤーの球50＋弾32＝82)。通常のステージで当たってボス戦で外れたのは、位置関係(ずれの大きさ)の差でこの範囲に収まるかどうかと推測(未測定)。
+- 対応([ActiveState.cpp:88-90](Game/GameObjects/Actors/Character/Enemy/FloatingEnemy/ActiveState.cpp#L88-L90)): 弾の速度に**プレイヤーの速度のzだけ**足す(`FloatingEnemy::GetPlayerVel()`を追加)。プレイヤーから見ると弾が撃った方向そのままにまっすぐ来るので、**止まっていれば必ず当たり、上下左右に動けば外れる**。上下左右まで足すと避けても追ってくるので足さない。撃った後にブースト/ブレーキで前進の速さが変わると外れる(ブーストで避けられる、で問題なし)。
+  - 例(2000前方・300上): 前はプレイヤーから見て「下1.0:手前14.9」→300のうち134しか下がらず外れる。今は「下2.2:手前14.8」で撃った方向と同じ→300下がって当たる。
+- 弾が届く前に消える問題: 足したことでプレイヤーから見た近づく速さが7になり、距離2000で約285F(寿命300F=5秒、[BulletBase.cpp:10](Game/GameObjects/Bullet/BulletBase.cpp#L10))。**`bullet_speed`を7→15**([ActiveState.cpp:23](Game/GameObjects/Actors/Character/Enemy/FloatingEnemy/ActiveState.cpp#L23))にして、近づく速さを前と同じ約15に戻した。
+- 未対応: ワームの弾([WormEnemy.cpp:185](Game/GameObjects/Actors/Character/Enemy/WormEnemy/WormEnemy.cpp#L185)、`bullet_speed`=8)は同じ撃ち方のまま。必要なら同じく`m_pPlayer.lock()->GetVel().z`を足して速さを見直す。召喚ワームを「召喚の瞬間のプレイヤーの横・高さ」に出す案もあり(未決定)。
+- 気づき(任意): ease-outのコメントが補間の行([TutorialUI.cpp:93](Game/UI/TutorialUI.cpp#L93))に付いている。式は[83行目](Game/UI/TutorialUI.cpp#L83)。

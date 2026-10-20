@@ -19,6 +19,9 @@ public:
 	//光の情報を持ってる定数バッファのハンドルを返す
 	int GetLightCBuffer() const { return m_cbufferLightInfo; }
 
+	//ディゾルブの基準距離を設定する
+	void SetStartDisolveDist(float cameraToPlayerDist) { m_startDisolveDist = cameraToPlayerDist; }
+
 private:
 	//コンストラクタ
 	LightingManager();
@@ -31,6 +34,9 @@ private:
 	{
 		Vector3 lightDir;//光の方向ベクトル
 		float isDisolveShader;//ディゾルブ対象かどうか(0:false,1:true)
+		float startDisolveDist;//ディゾルブを開始する距離
+		float compDisolveDist;//ディゾルブで完全に消える距離
+		float padding[2];//16バイトアライメント
 	};
 	int m_cbufferLightInfo = -1;//バッファのハンドル
 	LightBuffer* m_pCBuffLightData = nullptr;//光の情報バッファへのポインタ
@@ -43,4 +49,7 @@ private:
 
 	//光の方向ベクトル
 	Vector3 m_lightDir;
+
+	//ディゾルブを開始する距離
+	float m_startDisolveDist;
 };

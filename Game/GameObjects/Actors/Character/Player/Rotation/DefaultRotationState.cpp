@@ -7,13 +7,13 @@
 
 namespace
 {
-	constexpr float rot_lerp_t = 0.1f;//Lerpに使うtの値
+	constexpr float rot_lerp_t = 0.03f;//Lerpに使うtの値
 	constexpr float stick_dead_zone = 0.1f;//スティックのデッドゾーン
 
 	//アナログスティックの入力値を-1～1に正規化するための割る数
 	constexpr float stick_input_max = 1000.0f;
 	//スティック入力から求める機体の最大傾き角度
-	constexpr float max_tilt_angle = DX_PI_F / 8.0f;
+	constexpr float max_tilt_angle = DX_PI_F / 5.0f;
 
 	//ローリングボタン連続入力を二回押しと判定するまでの許容フレーム
 	constexpr int double_press_frame = 30;
@@ -91,6 +91,9 @@ void DefaultRotationState::Update()
 	//回転を行う
 	targetAngle = DX_PI_F + (stick.x * max_tilt_angle);
 	pPlayer->LerpToAngleY(targetAngle, rot_lerp_t);
+	//Z軸回転
+	targetAngle =(stick.x * max_tilt_angle);
+	pPlayer->LerpToAngleZ(targetAngle, rot_lerp_t);
 
 	//ローリングボタンが一回押されていたらフレーム更新
 	if (m_pushRightRollFrame > 0)

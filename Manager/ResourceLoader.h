@@ -22,6 +22,9 @@ public:
 		Rock3,//岩3
 		Stage,//ステージ
 		Boss,//ボス
+		SceneryIslandA,//景色用の島(IslandA)
+		SceneryIslandB,//景色用の島(IslandB)
+		SceneryIslandC,//景色用の島(IslandC)
 	};
 
 	//グラフィックの種類

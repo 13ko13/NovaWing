@@ -32,6 +32,8 @@
 #include "Game/GameObjects/Actors/Rock/Rock.h"
 #include "Manager/WaterRevealManager.h"
 #include "Rock/RockDataSetter.h"
+#include "Game/GameObjects/Actors/Scenery/Scenery.h"
+#include "Game/GameObjects/Actors/Scenery/SceneryDataSetter.h"
 #include "Game/GameObjects/Actors/Character/Enemy/FloatingEnemy/FloatingEnemyDataSetter.h"
 #include "Stage/Stage.h"
 #include "Game/GameObjects/Actors/Character/Enemy/WormEnemy/WormEnemyDataSetter.h"
@@ -205,6 +207,13 @@ void GameScene::Init()
 	m_pStage = std::make_shared<Stage>(ResourceLoader::ModelID::Stage,
 	m_pCamera);
 	m_pStage->Init();
+
+	//景色の生成&初期化(位置はステージのオフセットに関係なく固定)
+	m_pSceneries = SceneryDataSetter::CreateScenery(m_pCamera);
+	for (std::shared_ptr<Scenery> pScenery : m_pSceneries)
+	{
+		pScenery->Init();
+	}
 
 	// ライトの方向ベクトルをセットする
 	LightingManager::GetInstance().SetLightDirection(Game::light_direction);

@@ -12,6 +12,10 @@ namespace
 	constexpr const wchar_t* rock3_model_path = L"Data/Model/Rock3.mv1";
 	constexpr const wchar_t* stage_model_path = L"Data/Model/Stage.mv1";
 	constexpr const wchar_t* boss_model_path = L"Data/Model/Boss.mv1";
+	//景色用の島(地形は生成、テクスチャはPoly Haven・CC0)
+	constexpr const wchar_t* scenery_islanda_model_path = L"Data/Model/Scenery/SceneryIslandA.x";
+	constexpr const wchar_t* scenery_islandb_model_path = L"Data/Model/Scenery/SceneryIslandB.x";
+	constexpr const wchar_t* scenery_islandc_model_path = L"Data/Model/Scenery/SceneryIslandC.x";
 
 	//---------- 画像のパス ----------
 	//プレイヤー
@@ -136,6 +140,9 @@ namespace
 	constexpr const wchar_t* floating_enemy_csv_name = L"FloatingEnemy";
 	constexpr const wchar_t* worm_head_csv_name = L"WormHead";
 	constexpr const wchar_t* boss_csv_name = L"Boss";
+	constexpr const wchar_t* scenery_islanda_csv_name = L"SceneryIslandA";
+	constexpr const wchar_t* scenery_islandb_csv_name = L"SceneryIslandB";
+	constexpr const wchar_t* scenery_islandc_csv_name = L"SceneryIslandC";
 
 	//---------- エフェクトの再生スケール ----------
 	constexpr float player_bullet_effect_scale = 2.0f;

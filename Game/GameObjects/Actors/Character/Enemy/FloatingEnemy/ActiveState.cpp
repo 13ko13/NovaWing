@@ -20,7 +20,7 @@ namespace
 	//何秒ごとに弾を発射するか
 	constexpr int bullet_interval = 30;
 	//弾の速度
-	constexpr float bullet_speed = 7.0f;
+	constexpr float bullet_speed = 15.0f;
 	//弾の攻撃力
 	constexpr int bullet_power = 5;
 }
@@ -85,6 +85,9 @@ void ActiveState::Update()
 		toPlayerDir = toPlayerDir.Normalized();
 		//方向に速度をかける
 		Vector3 shootVel = toPlayerDir * bullet_speed;
+		//プレイヤーと同じzの速度分足すことでプレイヤーが左右上下に動いていなければ
+		//絶対に当たるようにする
+		shootVel.z += pEnemy->GetPlayerVel().z;
 
 		//敵からカメラを取得
 		std::shared_ptr<CameraBase> pCamera = m_pEnemy.lock()->GetCamera().lock();

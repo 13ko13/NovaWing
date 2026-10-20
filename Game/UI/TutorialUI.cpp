@@ -80,6 +80,7 @@ void TutorialUI::Draw()
 	float boxWidth = (task_box_margin * 2 + check_box_center_to_end * 2 +
 		 check_to_text_space) * uiScale + m_textWidth;
 
+	//最初は速く最後にゆっくり止まる(イースアウト)
 	slideAnimProgress = 1.0f - (1.0f - slideAnimProgress) * (1.0f - slideAnimProgress);
 
 	//画面外の右端

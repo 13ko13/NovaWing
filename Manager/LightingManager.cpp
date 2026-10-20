@@ -5,6 +5,14 @@
 #include "WaterRevealManager.h"
 #include "Constants/ShaderRegister.h"
 
+namespace
+{
+	//プレイヤーとカメラの間の距離がどのぐらいの比率になったら完全に消すか
+	constexpr float comp_disolve_ratio = 0.55f;
+	//消し始める距離
+	constexpr float start_disolve_dist = 400.0f;
+}
+
 LightingManager& LightingManager::GetInstance()
 {
 	static LightingManager instance;
@@ -15,6 +23,7 @@ LightingManager::LightingManager()
 {
 	//シェーダをロード
 	LoadShader();
+	m_startDisolveDist = start_disolve_dist;
 }
 
 void LightingManager::SetLightDirection(const Vector3& lightDir)
@@ -31,6 +40,12 @@ void LightingManager::ApplyShader(bool isSkinning,float isDisolve)
 	//ライトの方向をセットする
 	m_pCBuffLightData->lightDir = m_lightDir;
 	m_pCBuffLightData->isDisolveShader = isDisolve;
+	//薄れ始める距離をセットする
+	m_pCBuffLightData->startDisolveDist = m_startDisolveDist;
+	//完全にディゾルブで消える距離をセットする
+	m_pCBuffLightData->compDisolveDist = m_startDisolveDist * comp_disolve_ratio;
+
+
 	//情報を入れたので定数バッファが変わったことをシェーダに知らせる
 	UpdateShaderConstantBuffer(m_cbufferLightInfo);
 

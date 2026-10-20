@@ -14,6 +14,7 @@ class UIManager;
 class WaterManager;
 class SkyBox;
 class Rock;
+class Scenery;
 class Stage;
 class BossEnemy;
 class EnemyFactory;
@@ -34,7 +35,8 @@ public:
 
 	//ボスを登場させるプレイヤーのZ座標(ステージ開始位置からの距離)
 	//デバッグのワープの物差しの右端にも使う
-	static constexpr float boss_appear_z = 25800.0f;
+	//Stage1のCSVはカメラのfar(5500)ぶん奥にずらしてあるので、ここも同じだけ足している(25800+5500)
+	static constexpr float boss_appear_z = 31300.0f;
 
 	//デバッグ用:プレイヤーを通常ステージの指定Z座標(ステージ開始位置からの距離)へ移動する
 	//チュートリアル中ならチュートリアルをスキップして、その場から通常ステージを始める
@@ -105,6 +107,8 @@ private:
 	std::shared_ptr<SkyBox> m_pSkyBox;
 	//岩へのポインタの配列
 	std::vector<std::shared_ptr<Rock>> m_pRocks;
+	//景色(島など、ゲームに関与しないオブジェクト)へのポインタの配列
+	std::vector<std::shared_ptr<Scenery>> m_pSceneries;
 	//ステージへのポインタ
 	std::shared_ptr<Stage> m_pStage;
 	//ボスへのポインタ

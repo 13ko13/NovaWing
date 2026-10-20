@@ -179,6 +179,15 @@ Vector3 FloatingEnemy::GetPlayerPos() const
 	return pPlayer->GetPos();
 }
 
+Vector3 FloatingEnemy::GetPlayerVel() const
+{
+	//shared_ptrに変換
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+
+	//速度を取得して返す
+	return pPlayer->GetVel();
+}
+
 Vector3 FloatingEnemy::GetPlayerFoward() const
 {
 	//shared_ptrに変換

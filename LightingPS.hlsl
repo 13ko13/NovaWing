@@ -22,6 +22,8 @@ cbuffer LightingBuffer : register(b4)
 {
     float3 lightVec;//光の方向ベクトル
 	float isDisolve;//ディゾルブを行うか(0:false,1:true)
+	float startDisolveDist;//ディゾルブがかかり始める距離
+	float compDisolveDist;//完全にディゾルブで消える距離
 };
 
 cbuffer CameraBuffer : register(b6)
@@ -30,11 +32,7 @@ cbuffer CameraBuffer : register(b6)
     float padding;
 }
 
-//カメラ
-static const float near = 200.0f;//カメラのニア
-
 //ディゾルブ
-static const float start_disolve = 400.0f;//ディゾルブ開始距離
 static const float noise_uv_scale = 100.0f;//ノイズUVの縮小率
 
 float4 main(PS_INPUT input) : SV_TARGET
@@ -45,7 +43,7 @@ float4 main(PS_INPUT input) : SV_TARGET
 		//カメラからピクセルまでの距離を求める
 		float cameraToPixelD = distance(cameraPos,input.worldPos);
 		//この距離がNearに近づくにつれてノイズの閾値をあげていく
-		float noise_threshold = 1.0f - smoothstep(near,start_disolve,cameraToPixelD);
+		float noise_threshold = 1.0f - smoothstep(compDisolveDist,startDisolveDist,cameraToPixelD);
 		//ノイズをサンプリングする
 		//岩のuvが変なので、worldPosを使ったuvを作成する
 		float2 worldBaseUV = input.worldPos.xy / noise_uv_scale;

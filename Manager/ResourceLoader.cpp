@@ -104,6 +104,9 @@ namespace
 		{ ResourceLoader::ModelID::Rock3, rock3_model_path },//岩3
 		{ ResourceLoader::ModelID::Stage, stage_model_path },//ステージ
 		{ ResourceLoader::ModelID::Boss, boss_model_path },//ボス
+		{ ResourceLoader::ModelID::SceneryIslandA, scenery_islanda_model_path },//景色用の島(IslandA)
+		{ ResourceLoader::ModelID::SceneryIslandB, scenery_islandb_model_path },//景色用の島(IslandB)
+		{ ResourceLoader::ModelID::SceneryIslandC, scenery_islandc_model_path },//景色用の島(IslandC)
 	};
 
 	//音IDとパスの対応表
@@ -436,7 +439,8 @@ void ResourceLoader::InitSceneResources()
     SceneResources game;
     game.models = {
         ModelID::Player, ModelID::Stage, ModelID::Rock1, ModelID::Rock2,
-        ModelID::Rock3, ModelID::FloatingEnemy, ModelID::WormHead, ModelID::Boss
+        ModelID::Rock3, ModelID::FloatingEnemy, ModelID::WormHead, ModelID::Boss,
+        ModelID::SceneryIslandA, ModelID::SceneryIslandB, ModelID::SceneryIslandC
     };
     game.graphics = {
         GraphicID::SkyBoxFront, GraphicID::SkyBoxBack, GraphicID::SkyBoxLeft,
@@ -635,6 +639,9 @@ ResourceLoader::ModelID ResourceLoader::WStringToModelID(const std::wstring id)
 		{floating_enemy_csv_name,ModelID::FloatingEnemy},
 		{worm_head_csv_name,ModelID::WormHead},
 		{boss_csv_name,ModelID::Boss},
+		{scenery_islanda_csv_name,ModelID::SceneryIslandA},
+		{scenery_islandb_csv_name,ModelID::SceneryIslandB},
+		{scenery_islandc_csv_name,ModelID::SceneryIslandC},
 	};
 	//受け取ったidを使ってtableからそのモデルのIDを受け取る
 	auto it = table.find(id);

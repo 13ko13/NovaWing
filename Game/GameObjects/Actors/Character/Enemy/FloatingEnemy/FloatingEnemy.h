@@ -32,6 +32,8 @@ public:
 
 	//プレイヤーの位置を返す
 	Vector3 GetPlayerPos() const;
+	//プレイヤー速度を返す
+	Vector3 GetPlayerVel() const;
 	//プレイヤーの前方向
 	Vector3 GetPlayerFoward() const;
 
