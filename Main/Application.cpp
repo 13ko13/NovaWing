@@ -1,4 +1,5 @@
-﻿#include <memory>
+﻿#define NOMINMAX
+#include <memory>
 #include <cassert>
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
@@ -13,11 +14,11 @@
 
 namespace
 {
-	
+
 }
 
-Application::Application():
-	m_windowSize{Game::screen_width,Game::screen_height}
+Application::Application() :
+	m_windowSize{ Game::screen_width,Game::screen_height }
 {
 
 }
@@ -56,7 +57,7 @@ bool Application::Init()
 	{
 		return false;
 	}
-	if(Effekseer_Init(8000) == -1)
+	if (Effekseer_Init(8000) == -1)
 	{
 		return false;
 	}
@@ -96,7 +97,7 @@ void Application::Run()
 		if (DebugManager::GetInstance().IsDebugDrawEnabled())
 		{
 			float fps = 1000000.0f / (GetNowHiPerformanceCount() - startTime);
-			DrawFormatString(600,15,0x0000ff,L"FPS:%f",fps);
+			DrawFormatString(600, 15, 0x0000ff, L"FPS:%f", fps);
 		}
 #endif
 
@@ -133,4 +134,25 @@ float Application::GetUIScale() const
 {
 	//基準解像度に対する実際のウィンドウ幅の比率をUIスケールとする
 	return static_cast<float>(m_windowSize.width) / static_cast<float>(Game::base_screen_width);
+}
+
+void Application::StartSlow(float scale, int frame)
+{
+	//タイムスケールとスローの時間を設定
+	//すでにスロー中であれば残りフレームが長い方を設定
+	m_timeScale = scale;
+	m_slowFrame = std::max(m_slowFrame, frame);
+}
+
+void Application::UpdateTimeScale()
+{
+	if (m_slowFrame > 0)
+	{
+		m_slowFrame--;
+		//0になればタイムスケールを通常に戻す
+		if (m_slowFrame == 0)
+		{
+			m_timeScale = 1.0f;
+		}
+	}
 }

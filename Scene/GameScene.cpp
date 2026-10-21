@@ -311,6 +311,19 @@ void GameScene::WarpPlayer(float stageZ)
 
 void GameScene::Update()
 {
+	//今の時間の速さぶん、進み具合をためる
+	m_timeProgress += Application::GetInstance().GetTimeScale();
+	//1フレーム分貯まるごとに、ゲームの世界を1回更新
+	while(m_timeProgress >= 1.0f)
+	{
+		m_timeProgress -= 1.0f;
+		//インゲーム中の世界の更新
+		UpdateGameWorld();
+	}
+
+	//タイムスケールの更新
+	Application::GetInstance().UpdateTimeScale();
+
 	//フレームカウンターの更新
 	m_frame++;
 
@@ -321,23 +334,6 @@ void GameScene::Update()
 		StartStage();
 	}
 
-	//全GameObjectのUpdateを呼ぶ
-	GameObjectManager::GetInstance().UpdateAll();
-
-	//エフェクトマネージャーの更新
-	m_pEffectManager->Update();
-
-	//衝突判定マネージャーの更新
-	m_pCollisionManager->Update();
-
-	//バレットマネージャーの更新
-	m_pBulletManager->Update();
-
-	//タッゲットマネージャーの更新
-	m_pTargetManager->Update();
-
-	//水マネージャーの更新
-	m_pWaterManager->Update();
 
 	//UIマネージャーの更新
 	m_pUIManager->Update();
@@ -501,6 +497,27 @@ void GameScene::Update()
 
 	//チュートリアルコントローラーの更新
 	m_pTutorialController->Update();
+}
+
+void GameScene::UpdateGameWorld()
+{
+	//全GameObjectのUpdateを呼ぶ
+	GameObjectManager::GetInstance().UpdateAll();
+
+	//エフェクトマネージャーの更新
+	m_pEffectManager->Update();
+
+	//衝突判定マネージャーの更新
+	m_pCollisionManager->Update();
+
+	//バレットマネージャーの更新
+	m_pBulletManager->Update();
+
+	//タッゲットマネージャーの更新
+	m_pTargetManager->Update();
+
+	//水マネージャーの更新
+	m_pWaterManager->Update();
 }
 
 void GameScene::Draw()

@@ -146,8 +146,10 @@ void WarningUI::Draw()
 		1.0f,
 		static_cast<float>(m_frame) / edge_fade_frame,
 		static_cast<float>(m_totalFrame - m_frame) / edge_fade_frame });
+	
 	float edgePulse = 0.5f + 0.5f * std::sin(m_frame * DX_TWO_PI_F / edge_pulse_interval);
 	float edgeAlpha = (edge_alpha_base + edge_alpha_range * edgePulse) * edgeFade;
+	
 	DrawGraphToShaderByCenter(
 		screen_center_x * uiScale, screen_center_y * uiScale, uiScale,
 		resourceL.GetGraphic(ResourceLoader::GraphicID::WarningEdge),

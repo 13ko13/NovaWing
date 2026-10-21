@@ -54,6 +54,15 @@ public:
 	//ゲーム終了をリクエストされるときに呼んでもらう
 	void RequestExit() { m_isExitRequested = true; }
 
+	//スローを開始する
+	void StartSlow(float scale, int frame);
+	//タイムスケールを返す
+	float GetTimeScale() const { return m_timeScale; }
+	//タイムスケールの更新
+	void UpdateTimeScale();
+
+private:
+
 private:
 	Size m_windowSize;//ウィンドウサイズ
 private:
@@ -63,5 +72,8 @@ private:
 	//終了リクエストをもらったか
 	bool m_isExitRequested = false;
 
-	//void SoundLoad(SoundManager& sm);
+	//タイムスケール
+	float m_timeScale = 1.0f;
+	//スローの残りフレーム
+	int m_slowFrame = 0;
 };

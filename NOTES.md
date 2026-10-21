@@ -1849,3 +1849,12 @@
 - 弾が届く前に消える問題: 足したことでプレイヤーから見た近づく速さが7になり、距離2000で約285F(寿命300F=5秒、[BulletBase.cpp:10](Game/GameObjects/Bullet/BulletBase.cpp#L10))。**`bullet_speed`を7→15**([ActiveState.cpp:23](Game/GameObjects/Actors/Character/Enemy/FloatingEnemy/ActiveState.cpp#L23))にして、近づく速さを前と同じ約15に戻した。
 - 未対応: ワームの弾([WormEnemy.cpp:185](Game/GameObjects/Actors/Character/Enemy/WormEnemy/WormEnemy.cpp#L185)、`bullet_speed`=8)は同じ撃ち方のまま。必要なら同じく`m_pPlayer.lock()->GetVel().z`を足して速さを見直す。召喚ワームを「召喚の瞬間のプレイヤーの横・高さ」に出す案もあり(未決定)。
 - 気づき(任意): ease-outのコメントが補間の行([TutorialUI.cpp:93](Game/UI/TutorialUI.cpp#L93))に付いている。式は[83行目](Game/UI/TutorialUI.cpp#L83)。
+
+### 設計決定(2026-10-21・カウンター成功時のリアクション: スロー＋カメラの揺れ＋白いフラッシュ)
+- **方針(ユーザー)**: スローはカウンター専用にしない(他の場面でも使う)。**GameSceneは各オブジェクトの初期化・更新・描画を呼ぶだけ**にして、「回数を毎フレーム見比べて反応する」ような処理は入れない。先輩(ProjectNeaR)の作りを参考にする。
+- 先輩の作り: `Application`がタイムスケール(`SetTimeScale`/`GetTimeScale`)とポストエフェクト(`ShaderPostProcess`、グリッチ等の状態をどこからでも`AddPostEffectState`)を持つ。ヒットストップは当たりを知っている`AttackManager`が自分で起こし、カメラは`GameScene::Init`で`SetPlayerCamera`として渡すだけ。物体ごとに速度・カウンターへタイムスケールを掛けている。
+- NovaWingでの形(ユーザー了承):
+  - **タイムスケール**: `Application`に`m_timeScale`/`m_slowFrame`、`StartSlow(scale, frame)`(重なったら残りの長い方)、`UpdateTimeScale()`(毎フレーム、0で1.0に戻す)、`GetTimeScale()`、(予定)`ResetTimeScale()`。効かせ方は先輩と違い**GameSceneで「進み具合を貯めて1以上でゲームの世界を1回更新」**(`m_timeProgress`、`UpdateGameWorld()`に`UpdateAll`〜`WaterManager`を切り出し)。物体ごとにタイムスケールを掛ける先輩方式は、移動約30か所・フレームカウンター約45か所(18ファイル)・エフェクトの書き換えが要るので見送り。呼ぶ側(`StartSlow`)は先輩と同じなので、後で移行しても呼び出し側は変わらない。**(ユーザー実装済み)**
+  - **反応を起こす場所**: 当たり判定を管理する`CollisionManager`のカウンター成功の分岐([CollisionManager.cpp:259-271](Manager/CollisionManager.cpp#L259-L271))。`StartSlow`、カメラの揺れ(`CollisionManager`は元から`m_pCamera`=GameCameraを持つ→`OnShake`)、フラッシュを呼ぶ。
+  - **フラッシュはUIではなく画面効果**: `ScreenEffect`(仮)を`Application`が持ち、`Flash(frame, alpha)`。メインループの`controller.Draw()`の後([Application.cpp:93](Main/Application.cpp#L93))で`Update`/`Draw`(白い四角を半透明で重ねるだけ、UIの上にも掛かる)。将来グリッチ(オフスクリーン→シェーダ)もここに足す。
+  - `GameScene::Init`ではスローと画面効果のリセットを呼ぶだけ。
