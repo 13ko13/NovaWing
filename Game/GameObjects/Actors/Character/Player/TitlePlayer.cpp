@@ -3,7 +3,6 @@
 #include "TitlePlayer.h"
 #include "Constants/ShaderRegister.h"
 #include "Manager/LightingManager.h"
-#include "Manager/DebugManager.h"
 #include "Manager/EffectManager.h"
 
 namespace
@@ -134,14 +133,6 @@ void TitlePlayer::Draw()
 
 	//DrawWithLightingに渡してモデルを描画
 	DrawWithLighting(textures);
-
-#ifdef _DEBUG
-	if (DebugManager::GetInstance().IsDebugDrawEnabled())
-	{
-		//プレイヤーの位置表示
-		DrawFormatString(0, 15, 0xffffff, L"playerPosZ : %f", m_pos.z);
-	}
-#endif
 }
 
 void TitlePlayer::StartSomersault()

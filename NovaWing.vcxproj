@@ -274,7 +274,27 @@
     <ClCompile Include="DebugTools\AutoPlay\AutoPlaySystem.cpp" />
     <ClCompile Include="DebugTools\AutoPlay\AutoPlayWorld.cpp" />
     <ClCompile Include="DebugTools\AutoPlay\AutoPlayBot.cpp" />
-    <ClCompile Include="DebugTools\AutoPlay\PlaytestRecorder.cpp" />  </ItemGroup>
+    <ClCompile Include="DebugTools\AutoPlay\PlaytestRecorder.cpp" />
+    <ClCompile Include="DebugTools\DebugUI\DebugUI.cpp" />
+    <ClCompile Include="DebugTools\ImGui\imgui.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="DebugTools\ImGui\imgui_draw.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="DebugTools\ImGui\imgui_tables.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="DebugTools\ImGui\imgui_widgets.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="DebugTools\ImGui\imgui_impl_dx11.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="DebugTools\ImGui\imgui_impl_win32.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Constants\StageConfig.cpp" />  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
     <ClInclude Include="Game\Collision\CounterCollider.h" />
@@ -400,7 +420,9 @@
     <ClInclude Include="DebugTools\AutoPlay\AutoPlaySystem.h" />
     <ClInclude Include="DebugTools\AutoPlay\AutoPlayWorld.h" />
     <ClInclude Include="DebugTools\AutoPlay\AutoPlayBot.h" />
-    <ClInclude Include="DebugTools\AutoPlay\PlaytestRecorder.h" />  </ItemGroup>
+    <ClInclude Include="DebugTools\AutoPlay\PlaytestRecorder.h" />
+    <ClInclude Include="DebugTools\DebugUI\DebugUI.h" />
+    <ClInclude Include="Constants\StageConfig.h" />  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

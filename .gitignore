@@ -417,3 +417,6 @@ StageEditor/[Uu]ser[Ss]ettings/
 StageEditor/.vs/
 StageEditor/*.csproj
 StageEditor/*.sln
+
+# Dear ImGuiのウィンドウ位置などの保存ファイル
+DebugTools/ImGui/imgui.ini

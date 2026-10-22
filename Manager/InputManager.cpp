@@ -1,6 +1,11 @@
 ﻿#include "InputManager.h"
 #include <DxLib.h>
 #include <cmath>
+#include <algorithm>
+#include <iterator>
+#ifdef _DEBUG
+#include "../DebugTools/DebugUI/DebugUI.h"
+#endif
 
 namespace
 {
@@ -60,18 +65,6 @@ InputManager::InputManager() :
 
 	m_inputTable[InputEvent::left_rolling] = { {PeripheralType::pad1, XINPUT_BUTTON_LEFT_SHOULDER } };//RBボタン
 
-#ifdef _DEBUG
-	m_inputTable[InputEvent::gaugeUp] = { {PeripheralType::keyboard, KEY_INPUT_UP} };		// キーボード:上
-	m_inputTable[InputEvent::gaugeDown] = { {PeripheralType::keyboard, KEY_INPUT_DOWN} }; // キーボード:下
-	m_inputTable[InputEvent::killBoss] = { {PeripheralType::keyboard, KEY_INPUT_K} }; // キーボード:K
-	m_inputTable[InputEvent::upScanlineFrequency] =
-		{ {PeripheralType::keyboard, KEY_INPUT_Q} }; // キーボード:Q
-	m_inputTable[InputEvent::downScanlineFrequency] =
-	{ { PeripheralType::keyboard, KEY_INPUT_E } }; // キーボード:E
-	m_inputTable[InputEvent::Tutorial] =
-	{ { PeripheralType::keyboard, KEY_INPUT_T } }; // キーボード:T
-#endif
-
 	// あらかじめ入力データのための枠を開けておく
 	// ここで枠を開けておかないと、チェックの際にAt関数でクラッシュする可能性がある(Null)
 	for (const auto& inputInfo : m_inputTable) // forのinputInfoが変更されないようにconstにする
@@ -90,6 +83,13 @@ void InputManager::Update()
 	// まず入力情報を取得
 	char keyState[256];
 	GetHitKeyStateAll(keyState);					   // 生のキーボード情報
+#ifdef _DEBUG
+	// デバッグ用ウィンドウで文字入力中は、ゲーム側にキー入力を渡さない
+	if (DebugUI::GetInstance().WantCaptureKeyboard())
+	{
+		std::fill(std::begin(keyState), std::end(keyState), 0);
+	}
+#endif
 
 	// XInputの状態をまとめて取得(ボタン・左右スティックすべてここから読む)
 	XINPUT_STATE xinputState;

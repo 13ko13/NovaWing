@@ -22,16 +22,6 @@ enum class InputEvent
 	close,
 	right_rolling,
 	left_rolling,
-
-#ifdef _DEBUG
-	//デバッグ用
-	gaugeUp,
-	gaugeDown,
-	killBoss,
-	downScanlineFrequency,
-	upScanlineFrequency,
-	Tutorial
-#endif
 };
 
 /// <summary>

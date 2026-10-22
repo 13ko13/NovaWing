@@ -43,6 +43,13 @@ public:
 	void WarpPlayer(float stageZ);
 	
 	private:
+#ifdef _DEBUG
+	/// <summary>
+	/// デバッグ用ウィンドウ(DebugUI)に、このシーンの操作項目を登録する
+	/// </summary>
+	void RegisterDebugItems();
+#endif
+
 	/// <summary>
 	/// デバッグ用のグリッドを描画する
 	/// </summary>

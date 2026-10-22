@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <set>
+#include <algorithm>
 
 #include "../Actor.h"
 #include "DamageSource.h"
@@ -26,6 +27,11 @@ public:
 	int GetHealth() const { return m_health; }//HPを取得
 	//最大HPを取得
 	int GetMaxHealth() const;
+
+#ifdef _DEBUG
+	//デバッグ用:HPを直接設定する(0〜最大HPに収める。死亡処理などは通らない)
+	void DebugSetHealth(int health) { m_health = std::clamp(health, 0, m_maxHealth); }
+#endif
 
 	//既にそのダメージ源から受けているか
 	bool IsTakingDamageFrom(const DamageSource& source) const;

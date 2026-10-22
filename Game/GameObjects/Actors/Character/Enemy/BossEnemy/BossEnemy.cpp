@@ -3,7 +3,6 @@
 #include "BossIdleState.h"
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
 #include "BossBeamState.h"
-#include "Manager/InputManager.h"
 #include "Manager/DebugManager.h"
 #include "Manager/SoundManager.h"
 #include "Manager/EffectManager.h"
@@ -265,14 +264,6 @@ void BossEnemy::Update()
 				Vector3(legPos.x, legPos.y, legPos.z));
 		}
 	}
-
-#ifdef _DEBUG
-	//ボスをワンボタンキル
-	if (InputManager::GetInstance().IsTriggered(InputEvent::killBoss))
-	{
-		m_health -= m_maxHealth;
-	}
-#endif
 }
 
 void BossEnemy::Draw()
@@ -292,9 +283,6 @@ void BossEnemy::Draw()
 #ifdef _DEBUG
 	if (DebugManager::GetInstance().IsDebugDrawEnabled())
 	{
-		//HP
-		DrawFormatString(800, 15, 0xff0000, L"BossHP : %d",m_health);
-
 		//無敵判定球の描画
 		m_invincibleHitCol->Draw(0xff0000);
 		//ダメージ判定球の描画

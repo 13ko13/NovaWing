@@ -9,7 +9,6 @@
 #include "Constants/Game.h"
 #include "Manager/WaterRevealManager.h"
 #include "Constants/ShaderRegister.h"
-#include "Manager/DebugManager.h"
 
 namespace
 {
@@ -138,13 +137,6 @@ void WaterManager::Draw()
 	{
 		SetUseTextureToShader(i, -1);
 	}
-
-#ifdef _DEBUG
-	if (DebugManager::GetInstance().IsDebugDrawEnabled())
-	{
-		DrawFormatString(0, 500, 0xff0000, L"frame : %f", m_pCBufferWaterData->time);
-	}
-#endif
 }
 
 void WaterManager::CreateIndicesData()

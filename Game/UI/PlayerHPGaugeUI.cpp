@@ -9,8 +9,6 @@
 #include "Utility/Size.h"
 #include "Utility/GraphShaderDraw.h"
 #include "Utility/Vector2.h"
-#include "Manager/InputManager.h"
-#include "Manager/DebugManager.h"
 #include "Main/Application.h"
 
 namespace
@@ -30,27 +28,6 @@ PlayerHPGaugeUI::PlayerHPGaugeUI(std::weak_ptr<Player> pPlayer) :
 
 PlayerHPGaugeUI::~PlayerHPGaugeUI()
 {
-}
-
-void PlayerHPGaugeUI::Update()
-{
-	GaugeUIBase::Update();
-
-#ifdef _DEBUG
-	//デバッグのため、スキャンラインを入れる周期を上げ下げできるようにしておく
-	if (InputManager::GetInstance().IsPressed(
-		InputEvent::upScanlineFrequency))
-	{
-		m_scanlineFrequency++;
-	}
-	if (InputManager::GetInstance().IsPressed(
-		InputEvent::downScanlineFrequency))
-	{
-		m_scanlineFrequency--;
-	}
-	/*m_pCBuffGlitchData->scanlineFrequency = m_scanlineFrequency;
-	UpdateShaderConstantBuffer(m_cbufferGlitch);*/
-#endif
 }
 
 void PlayerHPGaugeUI::Draw()
@@ -80,11 +57,4 @@ void PlayerHPGaugeUI::Draw()
 		hpGaugeHandle,
 		frameDrawPos,
 		ratio);
-
-#ifdef _DEBUG
-	if (DebugManager::GetInstance().IsDebugDrawEnabled())
-	{
-		DrawFormatString(0, 115, 0xffffff, L"scanlineFrequency : %f", m_scanlineFrequency);
-	}
-#endif
 }

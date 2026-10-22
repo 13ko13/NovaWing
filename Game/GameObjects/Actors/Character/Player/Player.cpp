@@ -255,18 +255,6 @@ void Player::Update()
 		m_invincibleFrame--;
 	}
 
-#ifdef _DEBUG
-	// ボタンでゲージを減らしたり増やしたりできるようにする
-	if (input.IsPressed(InputEvent::gaugeUp))
-	{
-		m_health++;
-	}
-	else if (input.IsPressed(InputEvent::gaugeDown))
-	{
-		m_health--;
-	}
-
-#endif
 	// HPのクランプを行う
 	m_health = std::clamp(m_health, 0, max_health);
 }
@@ -487,20 +475,12 @@ void Player::Draw()
 #ifdef _DEBUG
 	if (DebugManager::GetInstance().IsDebugDrawEnabled())
 	{
-		DrawFormatString(0, 300, 0xffffff, L"playerPosX:%f,Y : %f,Z:%f", m_pos.x, m_pos.y, m_pos.z);
-		DrawFormatString(0, 250, 0xffffff, L"Gauge : %f", m_gauge);
-		DrawFormatString(1080, 20, 0xffffff, L"Health : %d", m_health);
-		DrawFormatString(0, 365, 0xffffff, L"IsFocus : %d", IsFocus());
-
 		// 当たり判定の球を描画
 		m_pHitCollider->GetSphere()->Draw(0xff0000);
 		if (m_pCounterCollider->IsCollisionActive())
 		{
 			m_pCounterCollider->GetSphere()->Draw(0x0000ff);
 		}
-
-		//無敵時間
-		DrawFormatString(0, 550, 0xffffff, L"InvincibleTime : %d", m_invincibleFrame);
 	}
 #endif
 }
@@ -553,6 +533,13 @@ void Player::DrawPlayer()
 
 void Player::TakeDamage(int damage)
 {
+#ifdef _DEBUG
+	//デバッグ用の無敵中はダメージを受けない
+	if (DebugManager::GetInstance().IsPlayerInvincible())
+	{
+		return;
+	}
+#endif
 	// HPを減らす
 	m_health -= damage;
 

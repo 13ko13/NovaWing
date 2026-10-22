@@ -11,6 +11,9 @@
 #include "../Constants/Game.h"
 #include "../Manager/ResourceLoader.h"
 #include "../Scene/TitleScene.h"
+#ifdef _DEBUG
+#include "../DebugTools/DebugUI/DebugUI.h"
+#endif
 
 namespace
 {
@@ -61,6 +64,13 @@ bool Application::Init()
 	{
 		return false;
 	}
+#ifdef _DEBUG
+	//デバッグ用ウィンドウ(Dear ImGui)を初期化
+	if (!DebugUI::GetInstance().Init())
+	{
+		return false;
+	}
+#endif
 
 	// Zバッファを有効にする。
 	SetUseZBuffer3D(TRUE);
@@ -85,6 +95,10 @@ void Application::Run()
 		auto startTime = GetNowHiPerformanceCount();
 
 		ClearDrawScreen();
+#ifdef _DEBUG
+		//デバッグ用ウィンドウの組み立て(入力の取得より先に行い、文字入力中かどうかを入力側へ反映させる)
+		DebugUI::GetInstance().BeginFrame();
+#endif
 		InputManager::GetInstance().Update();
 
 		//シーンの更新
@@ -93,12 +107,8 @@ void Application::Run()
 		controller.Draw();
 
 #ifdef _DEBUG
-		//FPSを表示
-		if (DebugManager::GetInstance().IsDebugDrawEnabled())
-		{
-			float fps = 1000000.0f / (GetNowHiPerformanceCount() - startTime);
-			DrawFormatString(600, 15, 0x0000ff, L"FPS:%f", fps);
-		}
+		//デバッグ用ウィンドウをゲーム画面の上に描画
+		DebugUI::GetInstance().Render();
 #endif
 
 		ScreenFlip();
@@ -120,6 +130,9 @@ void Application::Terminate()
 {
 	//リソースを解放する
 	ResourceLoader::GetInstance().ReleaseAll();
+#ifdef _DEBUG
+	DebugUI::GetInstance().Terminate();
+#endif
 	//先にEffekseerを終了する
 	Effkseer_End();
 	DxLib_End();

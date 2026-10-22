@@ -2,7 +2,6 @@
 
 #include "MovingState.h"
 #include "Manager/InputManager.h"
-#include "Manager/DebugManager.h"
 #include "Character/Player/Player.h"
 #include "IdleMovementState.h"
 
@@ -104,13 +103,6 @@ void MovingState::Update()
 	{
 		ChangeState(std::make_shared<IdleMovementState>(m_pPlayer));
 	}
-
-#ifdef _DEBUG
-	if (DebugManager::GetInstance().IsDebugDrawEnabled())
-	{
-		DrawFormatString(0, 100, 0xffffff, L"stickX:%f,stickY:%f", stick.x, stick.y);
-	}
-#endif
 }
 
 void MovingState::Exit()

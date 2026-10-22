@@ -7,7 +7,6 @@
 #include "Manager/BulletManager.h"
 #include "Manager/SoundManager.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
-#include "Manager/DebugManager.h"
 
 namespace
 {
@@ -58,12 +57,6 @@ void ActiveState::Update()
 	//敵の速度に適用する
 	
 	pEnemy->SetVel(vel);
-#ifdef _DEBUG
-	if (DebugManager::GetInstance().IsDebugDrawEnabled())
-	{
-		DrawFormatString(0, 230, 0xffffff, L"velY : %f", vel.y);
-	}
-#endif
 
 	//弾の発射
 	//一定周期で弾を打ってくる

@@ -13,13 +13,8 @@ public:
 
     //描画
     void Draw() override;
-    //更新
-    void Update() override;
 
 private:
-#ifdef _DEBUG
-    float m_scanlineFrequency = 0.0f;
-#endif
 	//プレイヤーの弱参照
 	std::weak_ptr<Player> m_pPlayer;
 };

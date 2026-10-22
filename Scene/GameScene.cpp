@@ -51,6 +51,9 @@
 #include "Game/UI/WarningUI.h"
 #include "PauseScene.h"
 #include "Manager/TutorialController.h"
+#ifdef _DEBUG
+#include "DebugTools/DebugUI/DebugUI.h"
+#endif
 
 namespace
 {
@@ -106,7 +109,10 @@ GameScene::GameScene(SceneController& controller) :
 
 GameScene::~GameScene()
 {
-
+#ifdef _DEBUG
+	//登録したデバッグ項目は、このシーンのオブジェクトを参照しているので解除する
+	DebugUI::GetInstance().RemoveOwner(this);
+#endif
 }
 
 void GameScene::Init()
@@ -223,6 +229,11 @@ void GameScene::Init()
 
 	//チュートリアルコントローラーの初期化
 	m_pTutorialController = std::make_shared<TutorialController>(m_pPlayer, m_controller, m_pUIManager, m_pEnemyFactory);
+
+#ifdef _DEBUG
+	//デバッグ用ウィンドウに、このシーンで使う項目を登録する
+	RegisterDebugItems();
+#endif
 }
 
 void GameScene::CreateStageObjects(float offsetZ)
@@ -311,6 +322,78 @@ void GameScene::WarpPlayer(float stageZ)
 	pos.z = m_stageOffsetZ + stageZ;
 	m_pPlayer->SetPos(pos);
 }
+
+#ifdef _DEBUG
+void GameScene::RegisterDebugItems()
+{
+	DebugUI& debugUI = DebugUI::GetInstance();
+
+	//ステージ
+	debugUI.AddButton(this, L"Stage", L"最初からやり直す", [this]()
+		{
+			m_controller.ChangeScene(std::make_shared<GameScene>(m_controller), 0.0f);
+		});
+	debugUI.AddButton(this, L"Stage", L"チュートリアルをスキップ", [this]()
+		{
+			m_pTutorialController->Skip();
+		});
+	debugUI.AddSliderAction(this, L"Stage",
+		L"ステージ上のZ座標", 0.0f, boss_appear_z, L"プレイヤーをその位置へ移動",
+		[this](float stageZ) { WarpPlayer(stageZ); });
+	debugUI.AddText(this, L"Stage", [this]()
+		{
+			//ステージ開始位置からの距離(ワープのスライダーと同じ物差し)
+			return L"プレイヤーZ: " +
+				std::to_wstring(static_cast<int>(m_pPlayer->GetPos().z - m_stageOffsetZ));
+		});
+
+	//プレイヤー
+	debugUI.AddText(this, L"Player", [this]()
+		{
+			const Vector3 pos = m_pPlayer->GetPos();
+			return L"座標: (" + std::to_wstring(static_cast<int>(pos.x)) +
+				L", " + std::to_wstring(static_cast<int>(pos.y)) +
+				L", " + std::to_wstring(static_cast<int>(pos.z)) + L")";
+		});
+	debugUI.AddText(this, L"Player", [this]()
+		{
+			return L"HP: " + std::to_wstring(m_pPlayer->GetHealth()) +
+				L" / " + std::to_wstring(m_pPlayer->GetMaxHealth());
+		});
+	debugUI.AddText(this, L"Player", [this]()
+		{
+			return L"ゲージ: " + std::to_wstring(static_cast<int>(m_pPlayer->GetSpecialGauge())) +
+				L" / " + std::to_wstring(static_cast<int>(m_pPlayer->GetMaxSpecialGauge()));
+		});
+	debugUI.AddText(this, L"Player", [this]()
+		{
+			return std::wstring(L"被弾後の無敵: ") + (m_pPlayer->IsInvincible() ? L"中" : L"なし");
+		});
+	debugUI.AddButton(this, L"Player", L"HPを全回復", [this]()
+		{
+			m_pPlayer->DebugSetHealth(m_pPlayer->GetMaxHealth());
+		});
+	debugUI.AddSliderAction(this, L"Player",
+		L"HP", 0.0f, static_cast<float>(m_pPlayer->GetMaxHealth()), L"HPを設定",
+		[this](float health) { m_pPlayer->DebugSetHealth(static_cast<int>(health)); });
+
+	//ボス
+	debugUI.AddText(this, L"Boss", [this]()
+		{
+			return L"HP: " + std::to_wstring(m_pBoss->GetHealth()) +
+				L" / " + std::to_wstring(m_pBoss->GetMaxHealth());
+		});
+	debugUI.AddButton(this, L"Boss", L"ボスのHPを1にする", [this]()
+		{
+			m_pBoss->DebugSetHealth(1);
+		});
+	debugUI.AddButton(this, L"Boss", L"ボスを倒す", [this]()
+		{
+			//通常のダメージ処理を通すので、死亡演出なども本番と同じ流れになる
+			m_pBoss->TakeDamage(m_pBoss->GetMaxHealth());
+		});
+}
+#endif
 
 void GameScene::Update()
 {
@@ -487,8 +570,7 @@ void GameScene::Update()
 	{
 		//ポーズを開くときも決定音を鳴らす
 		m_pSoundManager->Play(SoundManager::SoundType::Decision);
-		m_controller.PushScene(std::make_shared<PauseScene>(m_controller, m_pSoundManager,
-			[this](float stageZ) { WarpPlayer(stageZ); }));
+		m_controller.PushScene(std::make_shared<PauseScene>(m_controller, m_pSoundManager));
 	}
 
 	//チュートリアルコントローラーの更新
@@ -538,14 +620,6 @@ void GameScene::Draw()
 
 	//グリッドの描画
 	DrawGrid();
-
-#ifdef _DEBUG
-	if (DebugManager::GetInstance().IsDebugDrawEnabled())
-	{
-		DrawString(0, 0, L"GameScene", 0xffffff);
-		DrawFormatString(0, 16, 0xffffff, L"FRAME:%d", m_frame);
-	}
-#endif //DEBUG
 
 	//全GameObjectのDrawを呼ぶ
 	GameObjectManager::GetInstance().DrawAll();
