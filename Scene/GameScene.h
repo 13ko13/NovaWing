@@ -74,8 +74,6 @@ private:
 
 	//敵を出現させたか
 	bool m_isAppearEnemy = false;
-	//ゲームの世界を進める量がどれだけ貯まっているか
-	float m_timeProgress = 0.0f;
 
 	//ボス登場時の演出ステート
 	enum class BossApearState

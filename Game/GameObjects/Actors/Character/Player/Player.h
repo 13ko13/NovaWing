@@ -36,6 +36,9 @@ public:
 
 	void TakeDamage(int damage) override;
 
+	//タイムスケールの対象か
+	bool IsAffectedByTimeScale() const override { return false; }
+
 	//プレイヤーのモデルが逆向きなので
 	//初期回転を常に保存しておく
 	Quaternion GetInitRotation() const { return m_initRotation; }

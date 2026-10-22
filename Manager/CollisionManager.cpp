@@ -18,6 +18,7 @@
 #include "Game/Collision/BossBeamCollider.h"
 #include "Game/GameObjects/Bullet/ReflectedBullet.h"
 #include "Game/Collision/BulletCollider.h"
+#include "Main/Application.h"
 
 namespace
 {
@@ -25,6 +26,7 @@ namespace
 	constexpr float shake_power = 7.0f;
 	//プレイヤーがダメージを食らった時にどのくらいの時間カメラを揺らすか
 	constexpr int shake_frame = 18;
+	//プレイヤーがカウンター成功させたときの
 
 	//判定を行うタグの組み合わせ
 	struct TagPair
@@ -98,6 +100,15 @@ namespace
 
 	//反射弾をもとの弾のどれぐらいの速度で反射させるか
 	constexpr float reflect_bullet_speed_rate = 5.5f;
+
+	//カウンター中のスローの速さ
+	constexpr float counter_slow_scale = 0.2f;
+	//カウンター中のスローの長さ
+	constexpr float counter_slow_frame = 60;
+	//カウンター中のカメラの揺れの強さ
+	constexpr float counter_shake_power = 5.0f;
+	//カウンター中の揺れの長さ
+	constexpr float counter_shake_frame = 12;
 }
 
 CollisionManager::CollisionManager(
@@ -267,11 +278,30 @@ void CollisionManager::OnHit(ICollider& a, ICollider& b)
 		}
 		//敵弾反射の関数にそのコライダーを渡す
 		ReflectEnemyBullet(static_cast<BulletCollider&>(*pBulletCollider));
+		//カウンター成功時のリアクション
+		StartCounterReaction();
 
 		//お互いの反応はそれぞれのコライダーに任せる
 		a.OnCollision(b);
 		b.OnCollision(a);
 		return;
+	}
+
+	//ボスのビームの先端とカウンターのコライダーが当たった時のみ
+	//カウンターがビームを跳ね返した場合は専用処理を行う
+	bool isCounterVsBossBeam;
+	if ((a.GetTag() == ColliderTag::Counter && b.GetTag() == ColliderTag::BossBeamTip) ||
+	(a.GetTag() == ColliderTag::BossBeamTip && b.GetTag() == ColliderTag::Counter))
+	{
+		isCounterVsBossBeam = true;
+	}
+	else isCounterVsBossBeam = false;
+
+	//カウンター成功の場合
+	if (isCounterVsBossBeam)
+	{
+		//スローと揺れを起こす(跳ね返す処理はOnCollisionで行う)
+		StartCounterReaction();
 	}
 
 	//判定の組み合わせ上、プレイヤーが関わる衝突はすべてプレイヤーの被弾
@@ -303,6 +333,14 @@ void CollisionManager::OnHit(ICollider& a, ICollider& b)
 		//カメラを揺らす
 		m_pCamera.lock()->OnShake(shake_power, shake_frame);
 	}
+}
+
+void CollisionManager::StartCounterReaction()
+{
+	//スローにする
+	Application::GetInstance().StartSlow(counter_slow_scale, static_cast<int>(counter_slow_frame));
+	//カメラを揺らす
+	m_pCamera.lock()->OnShake(counter_shake_power, static_cast<int>(counter_shake_frame));
 }
 
 void CollisionManager::ReflectEnemyBullet(BulletCollider& bulletCollider)

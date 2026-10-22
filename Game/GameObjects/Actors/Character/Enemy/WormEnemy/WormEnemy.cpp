@@ -10,6 +10,7 @@
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/DebugManager.h"
 #include "CSVData/EnemyStatusData.h"
+#include "Main/Application.h"
 
 namespace
 {
@@ -131,8 +132,11 @@ void WormEnemy::Update()
 		//初期回転を適用したうえで螺旋回転を適用する
 		m_rotation = rotZ * initRot;
 
+		//タイムスケール
+		float timeScale = Application::GetInstance().GetTimeScale();
+
 		//頭の移動を螺旋状にする
-		m_pos.z += move_speed * m_moveDirection;
+		m_pos.z += move_speed * timeScale * m_moveDirection;
 		m_pos.x = m_spiralCenter.x + cosf(m_rotationAngle * DX_PI_F / 180.0f) *
 			spiral_radius;
 		m_pos.y = m_spiralCenter.y + sinf(m_rotationAngle * DX_PI_F / 180.0f) *

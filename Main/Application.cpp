@@ -156,3 +156,10 @@ void Application::UpdateTimeScale()
 		}
 	}
 }
+
+void Application::ResetTimeScale()
+{
+	//タイムスケールをリセットさせる
+	m_timeScale = 1.0f;
+	m_slowFrame = 0;
+}

@@ -66,7 +66,7 @@ namespace
 	//スコアとして計算するときの倍率
 	constexpr int score_multiplier = 100;
 	//キルのみ倍率をあげる
-	constexpr int kill_score_multiplier = 5000;
+	constexpr int kill_score_multiplier = 1000;
 
 	//キル数、クリアタイム、スコアを描画する色
 	constexpr int score_color = 0x00ffaa;

@@ -3,6 +3,7 @@
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/DebugManager.h"
 #include "Manager/EffectManager.h"
+#include "Main/Application.h"
 
 namespace
 {
@@ -19,7 +20,7 @@ BulletBase::BulletBase(
 	float radius,
 	std::weak_ptr<CameraBase> pCamera,
 	ColliderTag tag,
-	std::weak_ptr<EffectManager> pEffectManager):
+	std::weak_ptr<EffectManager> pEffectManager) :
 	m_attackPower(attackPower),
 	m_lifeTime(0),
 	m_radius(radius),
@@ -40,8 +41,10 @@ BulletBase::~BulletBase()
 
 void BulletBase::Update()
 {
-	//位置を更新
-	m_pos += m_velocity;
+	//位置の更新
+	float timeScale = Application::GetInstance().GetTimeScale();
+	m_pos += m_velocity * timeScale;
+
 
 	//オブジェクトの寿命を更新
 	m_lifeTime++;

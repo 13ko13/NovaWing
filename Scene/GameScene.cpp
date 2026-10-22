@@ -111,6 +111,9 @@ GameScene::~GameScene()
 
 void GameScene::Init()
 {
+	//タイムスケールのリセットを行う
+	Application::GetInstance().ResetTimeScale();
+
 	//ゲームオブジェクトマネージャーの初期化
 	GameObjectManager::GetInstance().ClearAll();
 
@@ -311,15 +314,8 @@ void GameScene::WarpPlayer(float stageZ)
 
 void GameScene::Update()
 {
-	//今の時間の速さぶん、進み具合をためる
-	m_timeProgress += Application::GetInstance().GetTimeScale();
-	//1フレーム分貯まるごとに、ゲームの世界を1回更新
-	while(m_timeProgress >= 1.0f)
-	{
-		m_timeProgress -= 1.0f;
-		//インゲーム中の世界の更新
-		UpdateGameWorld();
-	}
+	//インゲーム中の世界の更新
+	UpdateGameWorld();
 
 	//タイムスケールの更新
 	Application::GetInstance().UpdateTimeScale();

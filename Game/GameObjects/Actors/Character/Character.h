@@ -19,6 +19,9 @@ public:
 	virtual void Draw() = 0;
 	virtual void TakeDamage(int damage) = 0;//ダメージを受ける
 
+	//タイムスケールの対象か
+	virtual bool IsAffectedByTimeScale() const { return true; }
+
 	//HP
 	int GetHealth() const { return m_health; }//HPを取得
 	//最大HPを取得

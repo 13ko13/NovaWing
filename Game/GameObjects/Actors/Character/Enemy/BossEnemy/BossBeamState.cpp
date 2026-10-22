@@ -10,6 +10,7 @@
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
 #include "BossIdleState.h"
 #include "Manager/DebugManager.h"
+#include "Main/Application.h"
 
 namespace
 {
@@ -136,9 +137,11 @@ void BossBeamState::Enter()
 		ResourceLoader::EffectID::BossBeam, m_beamPosR);
 	SetBeamEffectDir(m_rightBeamEffectPlayH, m_beamMoveDirR);
 
+	float timeScale = Application::GetInstance().GetTimeScale();
+
 	//ビームの先端をターゲットに向けて一定速度で進ませる 
-	m_beamPosL += leftToTargetDir * beam_speed;
-	m_beamPosR += rightToTargetDir * beam_speed;
+	m_beamPosL += leftToTargetDir * beam_speed * timeScale;
+	m_beamPosR += rightToTargetDir * beam_speed * timeScale;
 
 	//配列をクリアする
 	m_beamSpheresL.clear();

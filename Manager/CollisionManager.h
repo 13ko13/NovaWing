@@ -31,6 +31,8 @@ public:
 private:
 	//2つのコライダーが当たった時の処理
 	void OnHit(ICollider& a, ICollider& b);
+	//カウンター時のリアクションを開始する
+	void StartCounterReaction();
 	//敵弾を反射するときの処理
 	void ReflectEnemyBullet(BulletCollider& bulletCollider);
 

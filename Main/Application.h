@@ -60,6 +60,8 @@ public:
 	float GetTimeScale() const { return m_timeScale; }
 	//タイムスケールの更新
 	void UpdateTimeScale();
+	//タイムスケールのリセット
+	void ResetTimeScale();
 
 private:
 
