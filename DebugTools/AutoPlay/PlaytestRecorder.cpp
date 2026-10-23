@@ -10,7 +10,7 @@
 #include <DxLib.h>
 
 #include "AutoPlayWorld.h"
-#include "Scene/GameScene.h"
+#include "Constants/StageConfig.h"
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
 #include "Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.h"
 
@@ -26,6 +26,14 @@ namespace
 	constexpr int sample_interval = 30;
 	//ボス登場とみなすZ座標の手前の余裕
 	constexpr float boss_appear_margin = 100.0f;
+	//AIテストプレイで遊ぶステージ(1面)
+	constexpr int autoplay_stage_no = 0;
+
+	//ボスが登場するZ座標(ステージ開始位置からの距離)
+	float GetBossAppearZ()
+	{
+		return StageConfig(autoplay_stage_no).GetBossAppearZ();
+	}
 
 	//書き出すファイル名
 	constexpr const wchar_t* latest_js_name = L"latest.js";
@@ -252,7 +260,7 @@ void PlaytestRecorder::UpdateRun(const AutoPlayWorld& world)
 	//ボス登場(ボスの位置まで来て操作できなくなったら)
 	bool isDisabled = pPlayer->IsDisabled();
 	if (m_isStageStarted && !m_isBossPhase && isDisabled && !m_wasDisabled &&
-		m_lastStageZ > GameScene::boss_appear_z - boss_appear_margin)
+		m_lastStageZ > GetBossAppearZ() - boss_appear_margin)
 	{
 		AddEvent(world, "boss_appear");
 		//ここから先の出来事はボス戦として印を付ける(ボス戦中もZは進み続けるため)
@@ -388,7 +396,7 @@ std::string PlaytestRecorder::BuildJson() const
 		<< ",\"runs\":" << m_info.runCount
 		<< ",\"seed\":" << m_info.seed
 		<< ",\"fps\":60},\n";
-	out << "\"stage\":{\"bossAppearZ\":" << Num(GameScene::boss_appear_z) << ",\"layout\":[";
+	out << "\"stage\":{\"bossAppearZ\":" << Num(GetBossAppearZ()) << ",\"layout\":[";
 	for (size_t i = 0; i < m_layout.size(); i++)
 	{
 		const LayoutItem& item = m_layout[i];

@@ -336,7 +336,7 @@ void ClearScene::Update()
 					//ゲームシーンに遷移する
 					m_controller.ChangeScene(
 						std::make_shared<GameScene>(
-							m_controller), scene_change_frame);
+							m_controller,m_resultData.stageNo), scene_change_frame);
 					break;
 				}
 				case ClearSelect::BackTitle:

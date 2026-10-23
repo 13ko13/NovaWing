@@ -86,13 +86,15 @@ TutorialController::TutorialController(
 	std::weak_ptr<Player> pPlayer,
 	SceneController& controller,
 	std::weak_ptr<UIManager> uiManager,
-		std::shared_ptr<EnemyFactory> pEnemyFactory) :
+		std::shared_ptr<EnemyFactory> pEnemyFactory,
+	const std::wstring& csvFolderName) :
 	m_pPlayer(pPlayer),
 	m_controller(controller),
 	m_pEnemyFactory(pEnemyFactory)
 {
 	//Tutorial.csvの1行ずつをStepDataに詰め替えてm_stepsに入れる
-	auto stepData = CSVDataLoader::GetInstance().LoadCSV(L"Stage1/Tutorial");
+	std::wstring stepCsvPath = csvFolderName + L"/Tutorial";//csvフォルダの名前/csvファイル名
+	auto stepData = CSVDataLoader::GetInstance().LoadCSV(stepCsvPath.c_str());
 	for (auto& row : stepData)
 	{
 		//その行の文字列をステップ用のデータクラスに変換
@@ -116,7 +118,8 @@ TutorialController::TutorialController(
 	}
 
 	//TutorialEnemy.csvの1行(敵1体)ずつ、対応するステップのspawnDataに入れる
-	auto enemyData = CSVDataLoader::GetInstance().LoadCSV(L"Stage1/TutorialEnemy");
+	std::wstring enemyCsvPath = csvFolderName + L"/TutorialEnemy";//csvフォルダの名前/csvファイル名
+	auto enemyData = CSVDataLoader::GetInstance().LoadCSV(enemyCsvPath.c_str());
 	for (auto& row : enemyData)
 	{
 		TutorialEnemyData csvEnemy = TutorialEnemyData(row);

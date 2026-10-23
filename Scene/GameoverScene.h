@@ -8,7 +8,7 @@ class SoundManager;
 class GameoverScene : public Scene
 {
 public:
-	GameoverScene(SceneController& controller);
+	GameoverScene(SceneController& controller,int stageNo);
 	~GameoverScene();
 
 	void Init() override;
@@ -53,4 +53,7 @@ private:
 
 	//サウンドマネージャー
 	std::shared_ptr<SoundManager> m_pSoundManager;
+
+	//ステージ番号
+	int m_stageNo;
 };

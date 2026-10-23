@@ -75,6 +75,9 @@ namespace
 
 	//タイトルロゴ出現時の衝撃音を鳴らすフレーム
 	constexpr int frame_of_title_impact = 5;
+
+	//最初のステージ番号(仮)
+	constexpr int first_stage_no = 0;
 }
 
 TitleScene::TitleScene(SceneController& controller):
@@ -285,7 +288,7 @@ void TitleScene::Update()
 				//ゲームシーンに遷移する
 				m_controller.ChangeScene(
 					std::make_shared<GameScene>(
-						m_controller), to_gamescene_fade_time);
+						m_controller,first_stage_no), to_gamescene_fade_time);
 				break;
 			}
 			case TitleSelect::ExitGame:

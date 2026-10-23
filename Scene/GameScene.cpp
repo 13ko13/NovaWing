@@ -51,6 +51,7 @@
 #include "Game/UI/WarningUI.h"
 #include "PauseScene.h"
 #include "Manager/TutorialController.h"
+#include "Constants/StageConfig.h"
 #ifdef _DEBUG
 #include "DebugTools/DebugUI/DebugUI.h"
 #endif
@@ -93,7 +94,7 @@ namespace
 	constexpr float boss_death_bgm_fade_out_time = 30.0f;
 }
 
-GameScene::GameScene(SceneController& controller) :
+GameScene::GameScene(SceneController& controller,int stageNo) :
 	Scene(controller),
 	m_frame(0)
 {
@@ -105,6 +106,9 @@ GameScene::GameScene(SceneController& controller) :
 
 	//SoundManagerも同様にプレイヤーより先に生成しておく
 	m_pSoundManager = std::make_shared<SoundManager>();
+
+	//ステージ設定用のクラスのインスタンスを生成
+	m_pStageConfig = std::make_unique<StageConfig>(stageNo);
 }
 
 GameScene::~GameScene()
@@ -165,7 +169,8 @@ void GameScene::Init()
 		m_pCamera,
 		m_pBulletManager,
 		m_pSoundManager,
-		m_pEffectManager);
+		m_pEffectManager,
+		m_pStageConfig->GetCSVFolderName());
 	m_pBoss->Init();
 
 	//衝突判定マネージャーの初期化
@@ -218,7 +223,7 @@ void GameScene::Init()
 	m_pStage->Init();
 
 	//景色の生成&初期化(位置はステージのオフセットに関係なく固定)
-	m_pSceneries = SceneryDataSetter::CreateScenery(m_pCamera);
+	m_pSceneries = SceneryDataSetter::CreateScenery(m_pCamera, m_pStageConfig->GetCSVFolderName());
 	for (std::shared_ptr<Scenery> pScenery : m_pSceneries)
 	{
 		pScenery->Init();
@@ -227,8 +232,11 @@ void GameScene::Init()
 	// ライトの方向ベクトルをセットする
 	LightingManager::GetInstance().SetLightDirection(Game::light_direction);
 
-	//チュートリアルコントローラーの初期化
-	m_pTutorialController = std::make_shared<TutorialController>(m_pPlayer, m_controller, m_pUIManager, m_pEnemyFactory);
+	//チュートリアルがある場合のみコントローラーの初期化
+	if(m_pStageConfig->HasTutorial())
+	{
+		m_pTutorialController = std::make_shared<TutorialController>(m_pPlayer, m_controller, m_pUIManager, m_pEnemyFactory, m_pStageConfig->GetCSVFolderName());
+	}
 
 #ifdef _DEBUG
 	//デバッグ用ウィンドウに、このシーンで使う項目を登録する
@@ -246,8 +254,9 @@ void GameScene::CreateStageObjects(float offsetZ)
 		m_pBulletManager,
 		m_pSoundManager,
 		m_pEffectManager,
-		offsetZ
-	);
+		offsetZ,
+		m_pStageConfig->GetCSVFolderName()
+		);
 	//それぞれの初期化
 	for (std::shared_ptr<EnemyBase> pEnemy : floatingEnemies)
 	{
@@ -267,7 +276,8 @@ void GameScene::CreateStageObjects(float offsetZ)
 		m_pBulletManager,
 		m_pSoundManager,
 		m_pEffectManager,
-		offsetZ
+		offsetZ,
+		m_pStageConfig->GetCSVFolderName()
 	);
 	for (std::shared_ptr<EnemyBase> pEnemy : wormEnemies)
 	{
@@ -281,7 +291,7 @@ void GameScene::CreateStageObjects(float offsetZ)
 	}
 
 	//岩の生成&初期化
-	m_pRocks = RockDataSetter::CreateRock(m_pCamera, offsetZ);
+	m_pRocks = RockDataSetter::CreateRock(m_pCamera, offsetZ, m_pStageConfig->GetCSVFolderName());
 	//それぞれの岩の初期化
 	for (std::shared_ptr<Rock> pRock : m_pRocks)
 	{
@@ -331,14 +341,14 @@ void GameScene::RegisterDebugItems()
 	//ステージ
 	debugUI.AddButton(this, L"Stage", L"最初からやり直す", [this]()
 		{
-			m_controller.ChangeScene(std::make_shared<GameScene>(m_controller), 0.0f);
+			m_controller.ChangeScene(std::make_shared<GameScene>(m_controller,m_pStageConfig->GetStageNo()), 0.0f);
 		});
 	debugUI.AddButton(this, L"Stage", L"チュートリアルをスキップ", [this]()
 		{
 			m_pTutorialController->Skip();
 		});
 	debugUI.AddSliderAction(this, L"Stage",
-		L"ステージ上のZ座標", 0.0f, boss_appear_z, L"プレイヤーをその位置へ移動",
+		L"ステージ上のZ座標", 0.0f, m_pStageConfig->GetBossAppearZ(), L"プレイヤーをその位置へ移動",
 		[this](float stageZ) { WarpPlayer(stageZ); });
 	debugUI.AddText(this, L"Stage", [this]()
 		{
@@ -422,7 +432,7 @@ void GameScene::Update()
 
 	//プレイヤーが特定のz座標まで到達したら
 	//カメラを揺らしてボスを登場させる
-	if (m_pPlayer->GetPos().z > boss_appear_z + m_stageOffsetZ &&
+	if (m_pPlayer->GetPos().z > m_pStageConfig->GetBossAppearZ() + m_stageOffsetZ &&
 		m_isAppearEnemy)
 	{
 		//ボスが出現していない場合のみ行う
@@ -535,6 +545,7 @@ void GameScene::Update()
 		resultData.clearTime = m_frame;
 		resultData.defeatedEnemyCount = m_pPlayer->GetDefeatedEnemyCount();
 		resultData.hitCount = m_pPlayer->GetHitCount();
+		resultData.stageNo = m_pStageConfig->GetStageNo();
 
 		m_controller.ChangeScene(
 			std::make_shared<ClearScene>(
@@ -560,7 +571,7 @@ void GameScene::Update()
 	//プレイヤーが死亡したらゲームオーバーにする
 	if (m_pPlayer->IsDead())
 	{
-		m_controller.ChangeScene(std::make_shared<GameoverScene>(m_controller), frame_per_second);
+		m_controller.ChangeScene(std::make_shared<GameoverScene>(m_controller,m_pStageConfig->GetStageNo()), frame_per_second);
 	}
 
 	//pauseをsceneに上乗せする
@@ -677,4 +688,9 @@ void GameScene::DrawGrid()
 SceneID GameScene::GetSceneID() const
 {
 	return SceneID::Game;
+}
+
+bool GameScene::IsFinishedTutorial() const
+{
+	return !m_pTutorialController || m_pTutorialController->IsFinished();
 }

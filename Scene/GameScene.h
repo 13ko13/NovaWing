@@ -22,44 +22,46 @@ class SoundManager;
 class EffectManager;
 class WarningUI;
 class TutorialController;
+class StageConfig;
 class GameScene :public Scene
 {
 public:
-	GameScene(SceneController& controller);
+	GameScene(SceneController& controller, int stageNo);
 	~GameScene();
 
 	void Init() override;
 	void Update() override;
 	void Draw() override;
 	SceneID GetSceneID() const override;//自身のシーンIDを返す
-	
-	//ボスを登場させるプレイヤーのZ座標(ステージ開始位置からの距離)
-	//デバッグのワープの物差しの右端にも使う
-	//Stage1のCSVはカメラのfar(5500)ぶん奥にずらしてあるので、ここも同じだけ足している(25800+5500)
-	static constexpr float boss_appear_z = 31300.0f;
-	
+
+#ifdef _DEBUG
 	//デバッグ用:プレイヤーを通常ステージの指定Z座標(ステージ開始位置からの距離)へ移動する
 	//チュートリアル中ならチュートリアルをスキップして、その場から通常ステージを始める
 	void WarpPlayer(float stageZ);
-	
-	private:
+#endif
+
+private:
 #ifdef _DEBUG
 	/// <summary>
 	/// デバッグ用ウィンドウ(DebugUI)に、このシーンの操作項目を登録する
 	/// </summary>
 	void RegisterDebugItems();
+
+	//チュートリアルが終わったかを返す
+	bool IsFinishedTutorial() const;
+
 #endif
 
 	/// <summary>
 	/// デバッグ用のグリッドを描画する
 	/// </summary>
 	void DrawGrid();
-	
+
 	//チュートリアル終了を検知して、終了していたら
 	//エネミーや岩を出現させる
 	//プレイヤーがチュートリアルを終了したZ座標を渡す必要がある
 	void CreateStageObjects(float offsetZ);
-	
+
 	//プレイヤーの今の位置を基準に通常ステージを始める
 	void StartStage();
 
@@ -132,4 +134,6 @@ private:
 	std::shared_ptr<WarningUI> m_pWarningUI;
 	//チュートリアルコントローラーへのポインタ
 	std::shared_ptr<TutorialController> m_pTutorialController;
+	//ステージ設定用のクラスへのポインタ
+	std::unique_ptr<StageConfig> m_pStageConfig;
 };

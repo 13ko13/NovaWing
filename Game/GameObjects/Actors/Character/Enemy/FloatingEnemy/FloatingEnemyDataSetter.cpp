@@ -12,56 +12,58 @@
 
 namespace
 {
-    //CSVファイル名
-	const wchar_t* const floating_csv_name = L"Stage1/FloatingEnemy";
+	//CSVファイル名
+	const wchar_t* const floating_csv_name = L"FloatingEnemy";
 }
 
 std::vector<std::shared_ptr<EnemyBase>> FloatingEnemyDataSetter::CreateEnemy(
-    std::weak_ptr<Player> pPlayer,
-     std::weak_ptr<CameraBase> pCamera,
-      std::weak_ptr<BulletManager> pBulletManager,
-      std::weak_ptr<SoundManager> pSoundManager,
+	std::weak_ptr<Player> pPlayer,
+	 std::weak_ptr<CameraBase> pCamera,
+	  std::weak_ptr<BulletManager> pBulletManager,
+	  std::weak_ptr<SoundManager> pSoundManager,
 	  std::weak_ptr<EffectManager> pEffectManager,
-	  float offsetZ)
+	  float offsetZ,
+	const std::wstring& csvFolderName)
 {
-    //最終的な返り値
-    std::vector<std::shared_ptr<EnemyBase>> pEnemies;
+	//最終的な返り値
+	std::vector<std::shared_ptr<EnemyBase>> pEnemies;
 
-    //CSVLoaderにCSVをロードさせる
-    CSVDataLoader& loader = CSVDataLoader::GetInstance();
+	//CSVLoaderにCSVをロードさせる
+	CSVDataLoader& loader = CSVDataLoader::GetInstance();
 
-    //CSVデータのリストを受け取る
-    std::vector<std::shared_ptr<CSVData>> pData = loader.LoadCSV(floating_csv_name);
+	//CSVデータのリストを受け取る
+	std::wstring csvPath = csvFolderName + L"/" + floating_csv_name;//csvフォルダの名前/csvファイル名
+	std::vector<std::shared_ptr<CSVData>> pData = loader.LoadCSV(csvPath.c_str());
 
-    //受け取ったCSVの文字列を入れる変数
-    std::vector<std::wstring> dataString;
-    //リストをループしてそれぞれのデータを受け取る
-    for(std::shared_ptr<CSVData> data : pData)
-    {
-        //CSVから読み取った値を受け取る
-        dataString = data->GetData();
-        
-        //モデルID(文字列)をModelIDに変換
-        ResourceLoader::ModelID modelID =
-            ResourceLoader::WStringToModelID(dataString[0]);
+	//受け取ったCSVの文字列を入れる変数
+	std::vector<std::wstring> dataString;
+	//リストをループしてそれぞれのデータを受け取る
+	for (std::shared_ptr<CSVData> data : pData)
+	{
+		//CSVから読み取った値を受け取る
+		dataString = data->GetData();
 
-        //位置(文字列)をVector3に変換
-        Vector3 pos = Vector3::FromWString(
+		//モデルID(文字列)をModelIDに変換
+		ResourceLoader::ModelID modelID =
+			ResourceLoader::WStringToModelID(dataString[0]);
+
+		//位置(文字列)をVector3に変換
+		Vector3 pos = Vector3::FromWString(
 			dataString[1], dataString[2], dataString[3]);
 
 		pos.z += offsetZ;
 
-        //その位置と、pCameraで敵を一つ作成する
-        pEnemies.push_back(std::make_shared<FloatingEnemy>(
-            pPlayer,//プレイヤー
-            modelID,//モデルID
-            pBulletManager,//バレットマネージャー
-            pCamera,//カメラ
-            pos,//位置
-            pSoundManager,
-            pEffectManager
-            ));
-    }
+		//その位置と、pCameraで敵を一つ作成する
+		pEnemies.push_back(std::make_shared<FloatingEnemy>(
+			pPlayer,//プレイヤー
+			modelID,//モデルID
+			pBulletManager,//バレットマネージャー
+			pCamera,//カメラ
+			pos,//位置
+			pSoundManager,
+			pEffectManager
+		));
+	}
 
-    return pEnemies; 
+	return pEnemies;
 }

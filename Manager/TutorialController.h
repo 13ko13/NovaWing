@@ -33,7 +33,8 @@ public:
 		std::weak_ptr<Player> pPlayer,
 		SceneController& controller,
 		std::weak_ptr<UIManager> uiManager,
-		std::shared_ptr<EnemyFactory> pEnemyFactory
+		std::shared_ptr<EnemyFactory> pEnemyFactory,
+		const std::wstring& csvFolderName
 		);
 	virtual ~TutorialController();
 

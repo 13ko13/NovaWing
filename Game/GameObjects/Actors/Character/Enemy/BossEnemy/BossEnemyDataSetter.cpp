@@ -8,7 +8,7 @@
 namespace
 {
     //CSVファイル名
-    const wchar_t* const boss_csv_name = L"Stage1/Boss";
+    const wchar_t* const boss_csv_name = L"Boss";
 }
 
 std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
@@ -16,7 +16,8 @@ std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
         std::weak_ptr<CameraBase> pCamera,
         std::weak_ptr<BulletManager> pBulletManager,
         std::weak_ptr<SoundManager> pSoundManager,
-        std::weak_ptr<EffectManager> pEffectManager
+        std::weak_ptr<EffectManager> pEffectManager,
+        const std::wstring& csvFolderName
 )
 {
     std::shared_ptr<BossEnemy> pEnemy;
@@ -25,7 +26,8 @@ std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
     CSVDataLoader& loader = CSVDataLoader::GetInstance();
 
     //CSVデータのリストを受け取る
-    std::vector<std::shared_ptr<CSVData>> pData = loader.LoadCSV(boss_csv_name);
+    std::wstring csvPath = csvFolderName + L"/" + boss_csv_name;//csvフォルダの名前/csvファイル名
+    std::vector<std::shared_ptr<CSVData>> pData = loader.LoadCSV(csvPath.c_str());
 
     //受け取ったCSVの文字列を入れる変数
     std::vector<std::wstring> dataString;

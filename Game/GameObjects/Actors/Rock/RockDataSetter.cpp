@@ -9,7 +9,7 @@
 
 namespace
 {
-    const wchar_t* const rock_csv_name = L"Stage1/Rock";//CSVの名前
+    const wchar_t* const rock_csv_name = L"Rock";//CSVの名前
     const int model_id_number = 0;//モデルのIDの要素番号
     const int model_x_number = 1;//モデルのX位置要素番号
     const int model_y_number = 2;//モデルのY位置要素番号
@@ -36,7 +36,8 @@ namespace
 
 std::vector<std::shared_ptr<Rock>> RockDataSetter::CreateRock(
 	std::weak_ptr<CameraBase> pCamera,
-	float offsetZ)
+	float offsetZ,
+	const std::wstring& csvFolderName)
 {
     //最終的な返り値
     std::vector<std::shared_ptr<Rock>> pRocks;
@@ -44,8 +45,9 @@ std::vector<std::shared_ptr<Rock>> RockDataSetter::CreateRock(
     //CSVLoaderにCSVをロードさせる
     CSVDataLoader& loader = CSVDataLoader::GetInstance();
 
-    //CSVデータのリストを受け取る
-    std::vector<std::shared_ptr<CSVData>> pData = loader.LoadCSV(rock_csv_name);
+	//CSVデータのリストを受け取る
+	std::wstring csvPath = csvFolderName + L"/" + rock_csv_name;
+	std::vector<std::shared_ptr<CSVData>> pData = loader.LoadCSV(csvPath.c_str());
 
     //受け取ったCSVの文字列を入れる変数
     std::vector<std::wstring> dataString;

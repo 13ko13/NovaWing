@@ -16,6 +16,8 @@ public:
 	float GetBossAppearZ() const { return m_bossAppearZ; }
 	//最後のステージかどうか
 	bool IsLastStage() const;
+	//ステージ番号を返す
+	int GetStageNo() const { return m_stageNo; }
 
 private:
 	//ステージに使用するデータが入ったcsvのフォルダ名

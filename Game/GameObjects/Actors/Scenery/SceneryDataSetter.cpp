@@ -8,7 +8,7 @@
 
 namespace
 {
-	const wchar_t* const scenery_csv_name = L"Stage1/Scenery";//CSVの名前
+	const wchar_t* const scenery_csv_name = L"Scenery";//CSVの名前
 	const int model_id_number = 0;//モデルのIDの要素番号
 	const int model_x_number = 1;//モデルのX位置要素番号
 	const int model_y_number = 2;//モデルのY位置要素番号
@@ -20,14 +20,16 @@ namespace
 }
 
 std::vector<std::shared_ptr<Scenery>> SceneryDataSetter::CreateScenery(
-	std::weak_ptr<CameraBase> pCamera)
+	std::weak_ptr<CameraBase> pCamera,
+	const std::wstring& csvFolderName)
 {
 	//最終的な返り値
 	std::vector<std::shared_ptr<Scenery>> pSceneries;
 
 	//CSVDataLoaderにCSVをロードさせる
 	CSVDataLoader& loader = CSVDataLoader::GetInstance();
-	std::vector<std::shared_ptr<CSVData>> pData = loader.LoadCSV(scenery_csv_name);
+	std::wstring csvPath = csvFolderName + L"/" + scenery_csv_name;//csvフォルダの名前/csvファイル名
+	std::vector<std::shared_ptr<CSVData>> pData = loader.LoadCSV(csvPath.c_str());
 
 	for (std::shared_ptr<CSVData> sceneryData : pData)
 	{

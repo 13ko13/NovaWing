@@ -14,6 +14,7 @@ public:
 		int defeatedEnemyCount;
 		int clearTime;
 		int hitCount;
+		int stageNo;
 	};
 
     ClearScene(SceneController& controller,const ClearResultData& data);
