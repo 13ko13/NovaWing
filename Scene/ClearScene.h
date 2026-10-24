@@ -5,6 +5,8 @@
 #include "Scene.h"
 
 class SoundManager;
+class ResourceLoader;
+struct Size;
 class ClearScene : public Scene
 {
 public:
@@ -24,10 +26,16 @@ public:
 	void Update() override;
 	void Draw() override;
 	SceneID GetSceneID() const override;//自身のシーンIDを返す
-
-private:
+	
+	private:
 	//現在のLerp値でテキストオフスクリーンを書き直す
 	void DrawResultText(int fontHandle);
+	
+	//選択肢画像と選択肢背景を描画
+	void DrawSelect(ResourceLoader& loader, Size& wsize, float uiScale);
+
+	//現在選べる選択肢の数(最後のステージかどうかで変わるため)
+	int GetSelectCount() const;
 
 private:
 	//クリアシーンの選択肢
@@ -35,6 +43,7 @@ private:
 	{
 		ReTry,//リトライ
 		BackTitle,//タイトルに戻る
+		NextStage,//次のステージへ
 
 		SelectMax,//選択肢の最大数
 	};

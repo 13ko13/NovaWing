@@ -78,6 +78,10 @@ namespace
 	constexpr const wchar_t* back_title_path = L"Data/Image/SelectFrame/Back_Title.png";
 	//カーソルが乗っているときのタイトルに戻る選択肢画像
 	constexpr const wchar_t* back_title_on_cursor_path = L"Data/Image/SelectFrame/Back_Title_OnCursor.png";
+	//次のステージ選択肢画像
+	constexpr const wchar_t* next_stage_path = L"Data/Image/SelectFrame/Next_Stage.png";
+	//カーソルが乗っているときの次のステージ選択肢画像
+	constexpr const wchar_t* next_stage_on_cursor_path = L"Data/Image/SelectFrame/Next_Stage_OnCursor.png";
 	//スペシャルゲージの枠画像
 	constexpr const wchar_t* special_gauge_frame_path = L"Data/Image/SpecialGauge/Special_Frame.png";
 	//スペシャルゲージの画像

@@ -73,6 +73,8 @@ namespace
 		{ ResourceLoader::GraphicID::ReTryOnCursor, retry_on_cursor_path },//カーソルが乗っているときのリトライ選択肢画像
 		{ ResourceLoader::GraphicID::BackTitle, back_title_path },//タイトルに戻る選択肢画像
 		{ ResourceLoader::GraphicID::BackTitleOnCursor, back_title_on_cursor_path },//カーソルが乗っているときのタイトルに戻る選択肢画像
+		{ ResourceLoader::GraphicID::NextStage, next_stage_path },//次のステージ選択肢画像
+		{ ResourceLoader::GraphicID::NextStageOnCursor, next_stage_on_cursor_path },//カーソルが乗っているときの次のステージ選択肢画像
 
 		//スペシャルゲージ
 		{ ResourceLoader::GraphicID::SpecialGaugeFrame, special_gauge_frame_path },//枠
@@ -487,8 +489,9 @@ void ResourceLoader::InitSceneResources()
         GraphicID::ResultTemplete, GraphicID::SelectBackGround,
         GraphicID::ReTry, GraphicID::ReTryOnCursor,
         GraphicID::BackTitle, GraphicID::BackTitleOnCursor,
-        GraphicID::ButtonA, GraphicID::DecideText, GraphicID::NextText
-    };
+		GraphicID::ButtonA, GraphicID::DecideText, GraphicID::NextText,
+		GraphicID::NextStage,GraphicID::NextStageOnCursor
+	};
     clear.sounds = {
         SoundID::ResultBGM, SoundID::DataAppear, SoundID::ScoreCount,
         SoundID::Decision, SoundID::OnCursor

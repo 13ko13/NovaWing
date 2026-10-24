@@ -11,9 +11,30 @@
 #include "Utility/GraphShaderDraw.h"
 #include "Constants/ShaderRegister.h"
 #include "Manager/SoundManager.h"
+#include "Constants/StageConfig.h"
 
 namespace
 {
+	//選択肢画像の情報をまとめておく
+	struct SelectData
+	{
+		ResourceLoader::GraphicID graph;//通常選択肢画像
+		ResourceLoader::GraphicID onCursorGraph;//カーソルが乗っているときの選択肢画像
+	};
+	const SelectData select_datas[] =
+	{
+		{ ResourceLoader::GraphicID::ReTry,ResourceLoader::GraphicID::ReTryOnCursor },
+		{ ResourceLoader::GraphicID::BackTitle,ResourceLoader::GraphicID::BackTitleOnCursor },
+		{ ResourceLoader::GraphicID::NextStage,ResourceLoader::GraphicID::NextStageOnCursor }
+	};
+	//選択肢の割合位置x
+	constexpr float select_pos_ratio_x = 0.5f;
+
+	//選択肢の並びの中心の高さ
+	constexpr float select_center_pos_ratio_y = 0.53f;
+	//選択肢の並びの間隔
+	constexpr float select_spacing = 0.2f;
+
 	//決定キーの遷移先に切り替わるまでのフレーム数
 	constexpr float scene_change_frame = 60.0f;
 
@@ -90,12 +111,7 @@ namespace
 	//選択肢画像のサイズ
 	constexpr double select_graph_scale = 1.2;
 	//選択肢の背景画像のサイズ
-	constexpr double background_graph_scale = 2.25;
-
-	//リトライ選択肢の位置
-	const Vector2 retry_ratio = Vector2(0.5f, 0.43f);//画面に対してどのあたりにしたいか
-	//タイトルに戻る選択肢の位置
-	const Vector2 back_title_ratio = Vector2(0.5f, 0.63f);//画面に対してどのあたりにしたいか
+	constexpr double background_graph_scale = 2.5;
 
 	//カーソルが乗った時に何秒で画像を切り替えるか
 	constexpr int wipe_max = 15;
@@ -210,7 +226,7 @@ void ClearScene::Update()
 		m_currentScore = std::lerp(
 			m_currentScore,
 			static_cast<float>(m_score),
-			score_count_lerp_speed 
+			score_count_lerp_speed
 		);
 
 		//lerpはぴったり止まらない可能性があるので、
@@ -305,7 +321,7 @@ void ClearScene::Update()
 				m_selectIndex =
 					static_cast<ClearSelect>(
 						(static_cast<int>(m_selectIndex) + 1) %
-						static_cast<int>(ClearSelect::SelectMax));
+						GetSelectCount());
 				//選択音を鳴らす
 				m_pSoundManager->Play(SoundManager::SoundType::OnCursor);
 			}
@@ -317,7 +333,7 @@ void ClearScene::Update()
 				m_selectIndex =
 					static_cast<ClearSelect>(
 						(static_cast<int>(m_selectIndex) - 1 + static_cast<int>(ClearSelect::SelectMax)) %
-						static_cast<int>(ClearSelect::SelectMax));
+						GetSelectCount());
 				//選択音を鳴らす
 				m_pSoundManager->Play(SoundManager::SoundType::OnCursor);
 			}
@@ -336,7 +352,7 @@ void ClearScene::Update()
 					//ゲームシーンに遷移する
 					m_controller.ChangeScene(
 						std::make_shared<GameScene>(
-							m_controller,m_resultData.stageNo), scene_change_frame);
+							m_controller, m_resultData.stageNo), scene_change_frame);
 					break;
 				}
 				case ClearSelect::BackTitle:
@@ -347,6 +363,14 @@ void ClearScene::Update()
 							m_controller), scene_change_frame);
 					break;
 				}
+				case ClearSelect::NextStage:
+					//次のステージへ遷移
+					m_controller.ChangeScene(
+						std::make_shared<GameScene>(
+							m_controller, m_resultData.stageNo + 1
+						), scene_change_frame
+					);
+					break;
 				}
 			}
 
@@ -432,117 +456,10 @@ void ClearScene::Draw()
 		1.0, m_textRenderTargetH,
 		1.0f, uvMaxU, uvMinU
 	);
-
+	//次へボタンが押されていたら選択肢画像を描画
 	if (m_isPushNextButton)
 	{
-		//画像をカーテンのように開く感じで表示するために
-		//進行度計算
-		openProgress = static_cast<float>(m_backGroundOpenFrame) /
-			static_cast<float>(background_opne_max_frame);
-
-		//中心を基準に左右対称の範囲を計算
-		uvMinU = 0.5f - openProgress * 0.5f;
-		uvMaxU = 0.5f + openProgress * 0.5f;
-
-		//選択肢背景画像
-		int backgroundH = loader.GetGraphic(ResourceLoader::GraphicID::SelectBackGround);
-		DrawGraphToShaderByCenter(
-			wsize.width * 0.5f, wsize.height * 0.5f,
-			background_graph_scale * uiScale, backgroundH,
-			1.0f,
-			uvMaxU,
-			uvMinU
-		);
-
-		//リトライ選択肢画像
-		int retryHandle = loader.GetGraphic(ResourceLoader::GraphicID::ReTry);
-		//タイトルに戻る選択肢画像
-		int backTitleHandle = loader.GetGraphic(ResourceLoader::GraphicID::BackTitle);
-		//カーソルが乗っているときのリトライ選択肢画像
-		int retryOnCursorHandle = loader.GetGraphic(ResourceLoader::GraphicID::ReTryOnCursor);
-		//カーソルが乗っているときのタイトルに戻る選択肢画像
-		int backTitleOnCursorHandle = loader.GetGraphic(ResourceLoader::GraphicID::BackTitleOnCursor);
-
-		//選択肢の描画
-		//開く演出中(openProgressが1未満)は、まだワイプを考慮せず
-		//通常画像2つを開く演出の範囲(uvMaxU/uvMinU)で描画する
-		if (openProgress != 1.0f)
-		{
-			//リトライ選択肢を描画
-			DrawGraphToShaderByCenter(
-				wsize.width * retry_ratio.x,
-				wsize.height * retry_ratio.y,
-				select_graph_scale * uiScale, retryHandle,
-				1.0f,
-				uvMaxU,
-				uvMinU
-			);
-			//タイトルに戻る選択肢を描画
-			DrawGraphToShaderByCenter(
-				wsize.width * back_title_ratio.x,
-				wsize.height * back_title_ratio.y,
-				select_graph_scale * uiScale, backTitleHandle,
-				1.0f,
-				uvMaxU,
-				uvMinU
-			);
-		}
-		//開く演出が終わっていたら、選ばれている方だけカーソルオン画像を
-		//ワイプ進行度で重ね描きし、選ばれていない方は常にフル表示する
-		else
-		{
-			switch (m_selectIndex)
-			{
-			case ClearSelect::ReTry:
-			{
-				//リトライ選択肢描画
-				//もしゲームスタートのワイプ進行度が0より大きければ
-				//カーソルが乗っている画像を左から進行度の範囲だけ切り取って描画
-				if (m_wipeProgress[static_cast<int>(ClearSelect::ReTry)] > 0.0f)
-				{
-					//リトライ選択肢を描画
-					DrawGraphToShaderByCenter(
-						wsize.width * retry_ratio.x,
-						wsize.height * retry_ratio.y,
-						select_graph_scale * uiScale, retryOnCursorHandle,
-						1.0f,
-						m_wipeProgress[static_cast<int>(ClearSelect::ReTry)]
-					);
-				}
-				//タイトルに戻る選択肢を描画
-				DrawGraphToShaderByCenter(
-					wsize.width * back_title_ratio.x,
-					wsize.height * back_title_ratio.y,
-					select_graph_scale * uiScale, backTitleHandle,
-					1.0f
-				);
-				break;
-			}
-			case ClearSelect::BackTitle:
-			{
-				//タイトルに戻るのほうのワイプ進行度が0より大きければ
-				//タイトルに戻るの方に進行度を適用する
-				if (m_wipeProgress[static_cast<int>(ClearSelect::BackTitle)] > 0.0f)
-				{
-					//タイトルに戻る選択肢を描画
-					DrawGraphToShaderByCenter(
-						wsize.width * back_title_ratio.x,
-						wsize.height * back_title_ratio.y,
-						select_graph_scale * uiScale, backTitleOnCursorHandle,
-						1.0f, m_wipeProgress[static_cast<int>(ClearSelect::BackTitle)]
-					);
-				}
-				//リトライ選択肢を描画
-				DrawGraphToShaderByCenter(
-					wsize.width * retry_ratio.x,
-					wsize.height * retry_ratio.y,
-					select_graph_scale * uiScale, retryHandle,
-					1.0f
-				);
-				break;
-			}
-			}
-		}
+		DrawSelect(loader, wsize, uiScale);
 	}
 
 	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
@@ -581,6 +498,82 @@ void ClearScene::Draw()
 			static_cast<int>(wsize.height * next_graph_pos.y),
 			next_graph_scale * uiScale, 0.0, nextHandle, true
 		);
+	}
+}
+
+void ClearScene::DrawSelect(ResourceLoader& loader, Size& wsize, float uiScale)
+{
+	//画像をカーテンのように開く感じで表示するために
+	//進行度計算
+	float openProgress = static_cast<float>(m_backGroundOpenFrame) /
+		static_cast<float>(background_opne_max_frame);
+
+	//中心を基準に左右対称の範囲を計算
+	float uvMinU = 0.5f - openProgress * 0.5f;
+	float uvMaxU = 0.5f + openProgress * 0.5f;
+
+	//選択肢背景画像
+	int backgroundH = loader.GetGraphic(ResourceLoader::GraphicID::SelectBackGround);
+	DrawGraphToShaderByCenter(
+		wsize.width * 0.5f, wsize.height * 0.5f,
+		background_graph_scale * uiScale, backgroundH,
+		1.0f,
+		uvMaxU,
+		uvMinU
+	);
+
+	//選択肢の描画
+	//開く演出中(openProgressが1未満)は、まだワイプを考慮せず
+	//全部の選択肢を開く演出の範囲(uvMaxU/uvMinU)で描画する
+	int selectCount = GetSelectCount();
+	for (int i = 0; i < selectCount; i++)
+	{
+		//選択肢(i)の画像を取得
+		const SelectData& data = select_datas[i];
+
+		//i番目の選択肢の位置(全体が縦の真ん中にそろうように計算)
+		float posRatioY = select_center_pos_ratio_y -
+			(selectCount - 1) * select_spacing * 0.5f +
+			i * select_spacing;
+		float x = wsize.width * select_pos_ratio_x;
+		float y = wsize.height * posRatioY;
+
+		//開く演出中は全部の選択肢を通常画像で、開く範囲だけ描く
+		if (openProgress != 1.0f)
+		{
+			DrawGraphToShaderByCenter(
+				x, y,
+				select_graph_scale * uiScale, loader.GetGraphic(data.graph),
+				1.0f,
+				uvMaxU, uvMinU
+			);
+			//一つの選択肢を描画したら次の選択肢に移る
+			continue;
+		}
+
+		//開き終わっていて選ばれている選択肢は
+		//カーソルが乗っている画像をワイプの進み具合分だけ描く
+		if (i == static_cast<int>(m_selectIndex))
+		{
+			if (m_wipeProgress[i] > 0.0f)
+			{
+				DrawGraphToShaderByCenter(
+				x, y,
+				select_graph_scale * uiScale, loader.GetGraphic(data.onCursorGraph),
+				1.0f,
+				m_wipeProgress[i]
+				);
+			}
+		}
+		//選ばれていない選択肢は通常画像で描く
+		else
+		{
+			DrawGraphToShaderByCenter(
+				x, y,
+				select_graph_scale * uiScale,
+				loader.GetGraphic(data.graph), 1.0f
+			);
+		}
 	}
 }
 
@@ -672,6 +665,17 @@ void ClearScene::DrawResultText(int fontHandle)
 		DX_GRAPH_FILTER_GAUSS,
 		blur_range, blur_strength
 	);
+}
+
+int ClearScene::GetSelectCount() const
+{
+	//ゲームシーンから受け取ったステージが最後のステージであれば
+	//選択肢の数を-1して次のステージという選択肢をなくす
+	if (StageConfig(m_resultData.stageNo).IsLastStage())
+	{
+		return static_cast<int>(ClearSelect::SelectMax) - 1;
+	}
+	return static_cast<int>(ClearSelect::SelectMax);
 }
 
 SceneID ClearScene::GetSceneID() const

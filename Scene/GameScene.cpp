@@ -94,7 +94,7 @@ namespace
 	constexpr float boss_death_bgm_fade_out_time = 30.0f;
 }
 
-GameScene::GameScene(SceneController& controller,int stageNo) :
+GameScene::GameScene(SceneController& controller, int stageNo) :
 	Scene(controller),
 	m_frame(0)
 {
@@ -233,7 +233,7 @@ void GameScene::Init()
 	LightingManager::GetInstance().SetLightDirection(Game::light_direction);
 
 	//チュートリアルがある場合のみコントローラーの初期化
-	if(m_pStageConfig->HasTutorial())
+	if (m_pStageConfig->HasTutorial())
 	{
 		m_pTutorialController = std::make_shared<TutorialController>(m_pPlayer, m_controller, m_pUIManager, m_pEnemyFactory, m_pStageConfig->GetCSVFolderName());
 	}
@@ -256,7 +256,7 @@ void GameScene::CreateStageObjects(float offsetZ)
 		m_pEffectManager,
 		offsetZ,
 		m_pStageConfig->GetCSVFolderName()
-		);
+	);
 	//それぞれの初期化
 	for (std::shared_ptr<EnemyBase> pEnemy : floatingEnemies)
 	{
@@ -318,7 +318,7 @@ void GameScene::StartStage()
 void GameScene::WarpPlayer(float stageZ)
 {
 	//チュートリアル中ならスキップして、ワープ前の位置から通常ステージを始める
-	if (!m_pTutorialController->IsFinished())
+	if (!IsFinishedTutorial())
 	{
 		m_pTutorialController->Skip();
 	}
@@ -341,12 +341,15 @@ void GameScene::RegisterDebugItems()
 	//ステージ
 	debugUI.AddButton(this, L"Stage", L"最初からやり直す", [this]()
 		{
-			m_controller.ChangeScene(std::make_shared<GameScene>(m_controller,m_pStageConfig->GetStageNo()), 0.0f);
+			m_controller.ChangeScene(std::make_shared<GameScene>(m_controller, m_pStageConfig->GetStageNo()), 0.0f);
 		});
-	debugUI.AddButton(this, L"Stage", L"チュートリアルをスキップ", [this]()
-		{
-			m_pTutorialController->Skip();
-		});
+	if (m_pTutorialController)
+	{
+		debugUI.AddButton(this, L"Stage", L"チュートリアルをスキップ", [this]()
+			{
+				m_pTutorialController->Skip();
+			});
+	}
 	debugUI.AddSliderAction(this, L"Stage",
 		L"ステージ上のZ座標", 0.0f, m_pStageConfig->GetBossAppearZ(), L"プレイヤーをその位置へ移動",
 		[this](float stageZ) { WarpPlayer(stageZ); });
@@ -417,7 +420,7 @@ void GameScene::Update()
 	m_frame++;
 
 	//チュートリアルが終わっていれば通常ステージの敵や岩を生成する
-	if (m_pTutorialController->IsFinished() &&
+	if (IsFinishedTutorial() &&
 		!m_isAppearEnemy)
 	{
 		StartStage();
@@ -571,7 +574,7 @@ void GameScene::Update()
 	//プレイヤーが死亡したらゲームオーバーにする
 	if (m_pPlayer->IsDead())
 	{
-		m_controller.ChangeScene(std::make_shared<GameoverScene>(m_controller,m_pStageConfig->GetStageNo()), frame_per_second);
+		m_controller.ChangeScene(std::make_shared<GameoverScene>(m_controller, m_pStageConfig->GetStageNo()), frame_per_second);
 	}
 
 	//pauseをsceneに上乗せする
@@ -583,9 +586,11 @@ void GameScene::Update()
 		m_pSoundManager->Play(SoundManager::SoundType::Decision);
 		m_controller.PushScene(std::make_shared<PauseScene>(m_controller, m_pSoundManager));
 	}
-
-	//チュートリアルコントローラーの更新
-	m_pTutorialController->Update();
+	if (m_pTutorialController)
+	{
+		//チュートリアルコントローラーの更新
+		m_pTutorialController->Update();
+	}
 }
 
 void GameScene::UpdateGameWorld()

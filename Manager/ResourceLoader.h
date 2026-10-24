@@ -81,6 +81,8 @@ public:
 		ReTryOnCursor,//カーソルが乗っているときのリトライ選択肢画像
 		BackTitle,//タイトルへ戻る選択肢画像
 		BackTitleOnCursor,//カーソルが乗っているときのタイトルへ戻る選択肢画像
+		NextStage,//次のステージ選択肢画像
+		NextStageOnCursor,//カーソルが乗っているときの次のステージ選択肢画像
 
 		SpecialGaugeFrame,//プレイヤーのスペシャルゲージの枠
 		SpecialGauge,//スペシャルゲージ
