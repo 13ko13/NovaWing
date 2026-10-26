@@ -102,11 +102,13 @@ Player::Player(
 	ResourceLoader::ModelID modelID,
 	std::weak_ptr<CameraBase> camera,
 	std::weak_ptr<SoundManager> soundManager,
-	std::weak_ptr<EffectManager> effectManager) :
+	std::weak_ptr<EffectManager> effectManager,
+	bool isSeaStage) :
 	Character(modelID, camera),
 	m_pBulletManager(bulletManager),
 	m_pSoundManager(soundManager),
-	m_pEffectManager(effectManager)
+	m_pEffectManager(effectManager),
+	m_isSeaStage(isSeaStage)
 {
 	m_pHitCollider = std::make_unique<PlayerCollider>(*this);
 	m_pCounterCollider = std::make_unique<CounterCollider>(*this);
@@ -245,9 +247,13 @@ void Player::Update()
 	leftWingPos.z -= sea_splash_offset_z;
 	rightWingPos.z -= sea_splash_offset_z;
 
+	//ステージに海がある場合のみ
 	//この二つの位置に水しぶきのエフェクトを出す
-	UpdateWingSplash(m_leftWingEffectH, leftWingPos,ResourceLoader::EffectID::LeftWingSplash);
-	UpdateWingSplash(m_rightWingEffectH, rightWingPos, ResourceLoader::EffectID::RightWingSplash);
+	if(m_isSeaStage)
+	{
+		UpdateWingSplash(m_leftWingEffectH, leftWingPos, ResourceLoader::EffectID::LeftWingSplash);
+		UpdateWingSplash(m_rightWingEffectH, rightWingPos, ResourceLoader::EffectID::RightWingSplash);
+	}
 
 	//無敵時間の更新
 	if(m_invincibleFrame > 0)

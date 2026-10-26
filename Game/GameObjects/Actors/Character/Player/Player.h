@@ -26,7 +26,8 @@ public:
 		ResourceLoader::ModelID modelID,
 		std::weak_ptr<CameraBase> camera,
 		std::weak_ptr<SoundManager> soundManager,
-		std::weak_ptr<EffectManager> effectManager);
+		std::weak_ptr<EffectManager> effectManager,
+		bool isSeaStage);
 	~Player();
 
 	void OnInit() override;
@@ -222,7 +223,6 @@ private:
 	int m_cbufferDamage = -1;
 	DamageBuffer* m_pCBufferDamageData = nullptr;
 
-
 	//外部クラス参照
 	//借りてくるだけなのでweak_ptrにする
 	std::weak_ptr<BulletManager> m_pBulletManager;//弾の管理
@@ -291,4 +291,7 @@ private:
 
 	//カウンターに成功した回数
 	int m_counterSuccessCount = 0;
+
+	//ステージに水があるか
+	bool m_isSeaStage = false;
 };

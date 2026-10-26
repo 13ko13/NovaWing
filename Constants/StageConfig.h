@@ -18,6 +18,8 @@ public:
 	bool IsLastStage() const;
 	//ステージ番号を返す
 	int GetStageNo() const { return m_stageNo; }
+	//海ありのステージかを返す
+	bool HasSea() const { return m_hasSea; }
 
 private:
 	//ステージに使用するデータが入ったcsvのフォルダ名
@@ -28,4 +30,6 @@ private:
 	float m_bossAppearZ = 0.0f;
 	//ステージの番号
 	int m_stageNo = 0;
+	//海ありか
+	bool m_hasSea = false;
 };

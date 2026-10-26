@@ -144,7 +144,8 @@ void GameScene::Init()
 		m_pBulletManager, ResourceLoader::ModelID::Player,
 		std::weak_ptr<CameraBase>(),//カメラがまだ生成されていないので空のweak_ptrを渡す
 		m_pSoundManager,
-		m_pEffectManager);
+		m_pEffectManager,
+		m_pStageConfig->HasSea());
 
 	//Initでターゲットマネージャーを必要とするので先に生成しておく
 	//ターゲットマネージャーの初期化
@@ -203,9 +204,17 @@ void GameScene::Init()
 	m_pWarningUI = std::make_shared<WarningUI>();
 	m_pUIManager->Register(m_pWarningUI);
 
-	//水マネージャーの初期化
-	m_pWaterManager = std::make_shared<WaterManager>(m_pCamera);
-	m_pWaterManager->Init();
+	//水ありの時のみの処理
+	if (m_pStageConfig->HasSea())
+	{
+		//水マネージャーの初期化
+		m_pWaterManager = std::make_shared<WaterManager>(m_pCamera);
+		m_pWaterManager->Init();
+		//ステージの初期化
+		m_pStage = std::make_shared<Stage>(ResourceLoader::ModelID::Stage,
+		m_pCamera);
+		m_pStage->Init();
+	}
 
 	//スカイボックスの初期化
 	m_pSkyBox = std::make_shared<SkyBox>(
@@ -217,10 +226,6 @@ void GameScene::Init()
 		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxBottom)
 	);
 
-	//ステージの初期化
-	m_pStage = std::make_shared<Stage>(ResourceLoader::ModelID::Stage,
-	m_pCamera);
-	m_pStage->Init();
 
 	//景色の生成&初期化(位置はステージのオフセットに関係なく固定)
 	m_pSceneries = SceneryDataSetter::CreateScenery(m_pCamera, m_pStageConfig->GetCSVFolderName());
@@ -611,23 +616,31 @@ void GameScene::UpdateGameWorld()
 	m_pTargetManager->Update();
 
 	//水マネージャーの更新
-	m_pWaterManager->Update();
+	if (m_pWaterManager)
+	{
+		m_pWaterManager->Update();
+	}
 }
 
 void GameScene::Draw()
 {
 	//WaterRevealManagerのインスタンスを取得
 	WaterRevealManager& revealManager = WaterRevealManager::GetInstance();
-	//キャプチャ開始
-	revealManager.BeginCapture();
-	//視野角とNearFarを再設定
-	m_pCamera->SetUpCamera();
-	//キャプチャのほうに全オブジェクトの描画を行う
-	//これはキャプチャの方に描画しただけなので、のちにまたすべてを描画する必要がある
-	GameObjectManager::GetInstance().DrawAll();
+	//水ありの場合のみ物体が水によって透けるようにする
+	if (m_pStageConfig->HasSea())
+	{
+		//キャプチャ開始
+		revealManager.BeginCapture();
+		//視野角とNearFarを再設定
+		m_pCamera->SetUpCamera();
+		//キャプチャのほうに全オブジェクトの描画を行う
+		//これはキャプチャの方に描画しただけなので、のちにまたすべてを描画する必要がある
+		GameObjectManager::GetInstance().DrawAll();
 
-	//キャプチャを終了
-	revealManager.EndCapture();
+		//キャプチャを終了
+		revealManager.EndCapture();
+	}
+
 	//視野角とNearFarを再設定
 	m_pCamera->SetUpCamera();
 
@@ -641,8 +654,10 @@ void GameScene::Draw()
 	GameObjectManager::GetInstance().DrawAll();
 
 	//水マネージャーの描画
-	m_pWaterManager->Draw();
-
+	if (m_pWaterManager)
+	{
+		m_pWaterManager->Draw();
+	}
 
 	//レティクルよりプレイヤーが優先的に描画されてほしいので
 	//プレイヤーをもう一度描画する
