@@ -109,6 +109,20 @@ namespace
 		{ ResourceLoader::ModelID::SceneryIslandA, scenery_islanda_model_path },//景色用の島(IslandA)
 		{ ResourceLoader::ModelID::SceneryIslandB, scenery_islandb_model_path },//景色用の島(IslandB)
 		{ ResourceLoader::ModelID::SceneryIslandC, scenery_islandc_model_path },//景色用の島(IslandC)
+		//2ステージ目のビル(見た目)
+		{ ResourceLoader::ModelID::BuildingTallBroken, building_tall_broken_model_path },
+		{ ResourceLoader::ModelID::BuildingOfficeGutted, building_office_gutted_model_path },
+		{ ResourceLoader::ModelID::BuildingLeaning, building_leaning_model_path },
+		{ ResourceLoader::ModelID::BuildingCollapsed, building_collapsed_model_path },
+		{ ResourceLoader::ModelID::BuildingAntennaTower, building_antenna_tower_model_path },
+		{ ResourceLoader::ModelID::BuildingBridgeWreck, building_bridge_wreck_model_path },
+		//2ステージ目のビル(当たり判定用の簡易モデル)
+		{ ResourceLoader::ModelID::BuildingTallBrokenCol, building_tall_broken_col_model_path },
+		{ ResourceLoader::ModelID::BuildingOfficeGuttedCol, building_office_gutted_col_model_path },
+		{ ResourceLoader::ModelID::BuildingLeaningCol, building_leaning_col_model_path },
+		{ ResourceLoader::ModelID::BuildingCollapsedCol, building_collapsed_col_model_path },
+		{ ResourceLoader::ModelID::BuildingAntennaTowerCol, building_antenna_tower_col_model_path },
+		{ ResourceLoader::ModelID::BuildingBridgeWreckCol, building_bridge_wreck_col_model_path },
 	};
 
 	//音IDとパスの対応表
@@ -442,7 +456,12 @@ void ResourceLoader::InitSceneResources()
     game.models = {
         ModelID::Player, ModelID::Stage, ModelID::Rock1, ModelID::Rock2,
         ModelID::Rock3, ModelID::FloatingEnemy, ModelID::WormHead, ModelID::Boss,
-        ModelID::SceneryIslandA, ModelID::SceneryIslandB, ModelID::SceneryIslandC
+        ModelID::SceneryIslandA, ModelID::SceneryIslandB, ModelID::SceneryIslandC,
+        //2ステージ目のビル(見た目と当たり判定用)
+        ModelID::BuildingTallBroken, ModelID::BuildingOfficeGutted, ModelID::BuildingLeaning,
+        ModelID::BuildingCollapsed, ModelID::BuildingAntennaTower, ModelID::BuildingBridgeWreck,
+        ModelID::BuildingTallBrokenCol, ModelID::BuildingOfficeGuttedCol, ModelID::BuildingLeaningCol,
+        ModelID::BuildingCollapsedCol, ModelID::BuildingAntennaTowerCol, ModelID::BuildingBridgeWreckCol
     };
     game.graphics = {
         GraphicID::SkyBoxFront, GraphicID::SkyBoxBack, GraphicID::SkyBoxLeft,
@@ -645,6 +664,12 @@ ResourceLoader::ModelID ResourceLoader::WStringToModelID(const std::wstring id)
 		{scenery_islanda_csv_name,ModelID::SceneryIslandA},
 		{scenery_islandb_csv_name,ModelID::SceneryIslandB},
 		{scenery_islandc_csv_name,ModelID::SceneryIslandC},
+		{building_tall_broken_csv_name,ModelID::BuildingTallBroken},
+		{building_office_gutted_csv_name,ModelID::BuildingOfficeGutted},
+		{building_leaning_csv_name,ModelID::BuildingLeaning},
+		{building_collapsed_csv_name,ModelID::BuildingCollapsed},
+		{building_antenna_tower_csv_name,ModelID::BuildingAntennaTower},
+		{building_bridge_wreck_csv_name,ModelID::BuildingBridgeWreck},
 	};
 	//受け取ったidを使ってtableからそのモデルのIDを受け取る
 	auto it = table.find(id);

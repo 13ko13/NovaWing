@@ -294,6 +294,8 @@
     <ClCompile Include="DebugTools\ImGui\imgui_impl_win32.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Game\GameObjects\Actors\Building\Building.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Building\BuildingDataSetter.cpp" />
     <ClCompile Include="Constants\StageConfig.cpp" />  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
@@ -422,6 +424,8 @@
     <ClInclude Include="DebugTools\AutoPlay\AutoPlayBot.h" />
     <ClInclude Include="DebugTools\AutoPlay\PlaytestRecorder.h" />
     <ClInclude Include="DebugTools\DebugUI\DebugUI.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Building\Building.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Building\BuildingDataSetter.h" />
     <ClInclude Include="Constants\StageConfig.h" />  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">

@@ -25,6 +25,20 @@ public:
 		SceneryIslandA,//景色用の島(IslandA)
 		SceneryIslandB,//景色用の島(IslandB)
 		SceneryIslandC,//景色用の島(IslandC)
+		//2ステージ目のビル(見た目)
+		BuildingTallBroken,//上が折れた高層ビル
+		BuildingOfficeGutted,//中身がむき出しのオフィスビル
+		BuildingLeaning,//傾いたビル
+		BuildingCollapsed,//崩れたビル
+		BuildingAntennaTower,//アンテナの塔
+		BuildingBridgeWreck,//崩れた橋
+		//2ステージ目のビル(当たり判定用の簡易モデル)
+		BuildingTallBrokenCol,
+		BuildingOfficeGuttedCol,
+		BuildingLeaningCol,
+		BuildingCollapsedCol,
+		BuildingAntennaTowerCol,
+		BuildingBridgeWreckCol,
 	};
 
 	//グラフィックの種類

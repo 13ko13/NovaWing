@@ -16,6 +16,20 @@ namespace
 	constexpr const wchar_t* scenery_islanda_model_path = L"Data/Model/Scenery/SceneryIslandA.x";
 	constexpr const wchar_t* scenery_islandb_model_path = L"Data/Model/Scenery/SceneryIslandB.x";
 	constexpr const wchar_t* scenery_islandc_model_path = L"Data/Model/Scenery/SceneryIslandC.x";
+	//2ステージ目のビル(見た目)
+	constexpr const wchar_t* building_tall_broken_model_path = L"Data/Model/Building/Building_TallBroken.mv1";
+	constexpr const wchar_t* building_office_gutted_model_path = L"Data/Model/Building/Building_OfficeGutted.mv1";
+	constexpr const wchar_t* building_leaning_model_path = L"Data/Model/Building/Building_Leaning.mv1";
+	constexpr const wchar_t* building_collapsed_model_path = L"Data/Model/Building/Building_Collapsed.mv1";
+	constexpr const wchar_t* building_antenna_tower_model_path = L"Data/Model/Building/Building_AntennaTower.mv1";
+	constexpr const wchar_t* building_bridge_wreck_model_path = L"Data/Model/Building/Building_BridgeWreck.mv1";
+	//2ステージ目のビル(当たり判定用の簡易モデル)
+	constexpr const wchar_t* building_tall_broken_col_model_path = L"Data/Model/Building/Building_TallBroken_Col.x";
+	constexpr const wchar_t* building_office_gutted_col_model_path = L"Data/Model/Building/Building_OfficeGutted_Col.x";
+	constexpr const wchar_t* building_leaning_col_model_path = L"Data/Model/Building/Building_Leaning_Col.x";
+	constexpr const wchar_t* building_collapsed_col_model_path = L"Data/Model/Building/Building_Collapsed_Col.x";
+	constexpr const wchar_t* building_antenna_tower_col_model_path = L"Data/Model/Building/Building_AntennaTower_Col.x";
+	constexpr const wchar_t* building_bridge_wreck_col_model_path = L"Data/Model/Building/Building_BridgeWreck_Col.x";
 
 	//---------- 画像のパス ----------
 	//プレイヤー
@@ -147,6 +161,13 @@ namespace
 	constexpr const wchar_t* scenery_islanda_csv_name = L"SceneryIslandA";
 	constexpr const wchar_t* scenery_islandb_csv_name = L"SceneryIslandB";
 	constexpr const wchar_t* scenery_islandc_csv_name = L"SceneryIslandC";
+	//2ステージ目のビル(UnityのStageCsvExporterが書き出す名前)
+	constexpr const wchar_t* building_tall_broken_csv_name = L"Building_TallBroken";
+	constexpr const wchar_t* building_office_gutted_csv_name = L"Building_OfficeGutted";
+	constexpr const wchar_t* building_leaning_csv_name = L"Building_Leaning";
+	constexpr const wchar_t* building_collapsed_csv_name = L"Building_Collapsed";
+	constexpr const wchar_t* building_antenna_tower_csv_name = L"Building_AntennaTower";
+	constexpr const wchar_t* building_bridge_wreck_csv_name = L"Building_BridgeWreck";
 
 	//---------- エフェクトの再生スケール ----------
 	constexpr float player_bullet_effect_scale = 2.0f;
