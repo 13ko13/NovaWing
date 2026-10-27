@@ -80,24 +80,9 @@ public static class StageCsvImporter
             p.activatePlayerZ = F(row, "activatePlayerZ");
         }
 
-        // 見た目用の仮の形は、親の大きさに影響されないよう子として置く(LegacyCsvImporterと同じ)
-        var (shape, size) = VisualOf(kind);
-        var visual = GameObject.CreatePrimitive(shape);
-        visual.name = "Visual";
-        Object.DestroyImmediate(visual.GetComponent<Collider>());
+        // 見た目はゲームと同じモデル(無ければ種類ごとの色の仮の形)を子として置く
+        var visual = StageModelCatalog.CreateVisual(modelID, kind);
         visual.transform.SetParent(go.transform, false);
-        visual.transform.localScale = Vector3.one * size;
-    }
-
-    static (PrimitiveType, float) VisualOf(PlacedObject.Kind kind)
-    {
-        switch (kind)
-        {
-            case PlacedObject.Kind.FloatingEnemy: return (PrimitiveType.Sphere, 2.6f);
-            case PlacedObject.Kind.WormEnemy: return (PrimitiveType.Capsule, 2f);
-            case PlacedObject.Kind.Boss: return (PrimitiveType.Cube, 20f);
-            default: return (PrimitiveType.Cube, 3f);
-        }
     }
 
     static float F(Dictionary<string, string> row, string key) => float.Parse(row[key], CultureInfo.InvariantCulture);

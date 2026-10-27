@@ -203,6 +203,14 @@ PublishScripts/
 **/[Pp]ackages/*
 # except build/, which is used as an MSBuild target.
 !**/[Pp]ackages/build/
+# Unity(StageEditor)のパッケージ一覧は家と学校で共有する(本体はUnityが自動で取ってくる)
+!StageEditor/Packages/manifest.json
+!StageEditor/Packages/packages-lock.json
+# Unityの.meta(スクリプトやモデルの識別番号)は家と学校で同じにしないと、シーンからスクリプトが外れる
+# (上の *.meta はVisual Studio用。Unityのフォルダだけ例外にする)
+!StageEditor/**/*.meta
+# Unityに入れたゲームのモデル(岩はOBJ)。上の *.obj はコンパイラの中間ファイル用
+!StageEditor/Assets/**/*.obj
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/[Pp]ackages/repositories.config
 # NuGet v3's project.json files produces more ignorable files
