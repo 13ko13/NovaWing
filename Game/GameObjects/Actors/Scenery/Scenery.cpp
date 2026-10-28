@@ -20,12 +20,14 @@ namespace
 
 Scenery::Scenery(std::weak_ptr<CameraBase> pCamera, const SceneryData& data) :
 	Actor(data.modelId, pCamera),
-	m_scale(data.scale),
 	m_baseZ(data.pos.z)
 {
 	//位置と回転をセット
 	SetPos(data.pos);
 	m_rotation = Quaternion(Vector3(0.0f, 1.0f, 0.0f), data.rotYRadian);
+
+	//大きさを設定
+	m_scale = data.scale;
 
 	//マテリアルごとに明るさを設定する
 	int matNum = MV1GetMaterialNum(m_modelHandle);

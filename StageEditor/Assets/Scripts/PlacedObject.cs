@@ -2,6 +2,8 @@ using UnityEngine;
 
 // ステージに置くオブジェクトの目印。
 // StageCsvExporter がシーン内のこのコンポーネントを集めて、種類(kind)ごとにCSVへ書き出す。
+// シーンビューで見た目(子のVisual)をクリックしても、書き出される親が選ばれるようにする(SelectionBase)
+[SelectionBase]
 public class PlacedObject : MonoBehaviour
 {
     public enum Kind

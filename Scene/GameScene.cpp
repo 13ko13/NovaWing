@@ -32,6 +32,8 @@
 #include "Game/GameObjects/Actors/Rock/Rock.h"
 #include "Manager/WaterRevealManager.h"
 #include "Rock/RockDataSetter.h"
+#include "Building/BuildingDataSetter.h"
+#include "Building/Building.h"
 #include "Game/GameObjects/Actors/Scenery/Scenery.h"
 #include "Game/GameObjects/Actors/Scenery/SceneryDataSetter.h"
 #include "Game/GameObjects/Actors/Character/Enemy/FloatingEnemy/FloatingEnemyDataSetter.h"
@@ -305,6 +307,14 @@ void GameScene::CreateStageObjects(float offsetZ)
 		m_pCollisionManager->RegisterRock(pRock);
 	}
 
+	//ビルの生成&初期化
+	m_pBuildings = BuildingDataSetter::CreateBuilding(m_pCamera, offsetZ, m_pStageConfig->GetCSVFolderName());
+	//それぞれのビルの初期化
+	for (std::shared_ptr<Building> pBuilding : m_pBuildings)
+	{
+		pBuilding->Init();
+	}
+
 	//ボスの位置も改めてセットする
 	Vector3 bossPos = m_pBoss->GetPos();
 	bossPos.z += m_stageOffsetZ;
@@ -320,6 +330,7 @@ void GameScene::StartStage()
 	m_isAppearEnemy = true;
 }
 
+#ifdef _DEBUG
 void GameScene::WarpPlayer(float stageZ)
 {
 	//チュートリアル中ならスキップして、ワープ前の位置から通常ステージを始める
@@ -338,7 +349,6 @@ void GameScene::WarpPlayer(float stageZ)
 	m_pPlayer->SetPos(pos);
 }
 
-#ifdef _DEBUG
 void GameScene::RegisterDebugItems()
 {
 	DebugUI& debugUI = DebugUI::GetInstance();

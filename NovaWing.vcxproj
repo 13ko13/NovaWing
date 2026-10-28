@@ -296,6 +296,7 @@
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Actors\Building\Building.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Building\BuildingDataSetter.cpp" />
+    <ClCompile Include="Game\Collision\MeshShape.cpp" />
     <ClCompile Include="Constants\StageConfig.cpp" />  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
@@ -426,6 +427,7 @@
     <ClInclude Include="DebugTools\DebugUI\DebugUI.h" />
     <ClInclude Include="Game\GameObjects\Actors\Building\Building.h" />
     <ClInclude Include="Game\GameObjects\Actors\Building\BuildingDataSetter.h" />
+    <ClInclude Include="Game\Collision\MeshShape.h" />
     <ClInclude Include="Constants\StageConfig.h" />  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">

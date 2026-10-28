@@ -25,8 +25,6 @@ public:
 	void Draw() override;
 
 private:
-	//モデルのサイズ
-	Vector3 m_scale;
 	//CSVに書かれたz座標(ループ1周分の中での位置)
 	float m_baseZ;
 };

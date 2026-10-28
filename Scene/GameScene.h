@@ -14,6 +14,7 @@ class UIManager;
 class WaterManager;
 class SkyBox;
 class Rock;
+class Building;
 class Scenery;
 class Stage;
 class BossEnemy;
@@ -46,11 +47,10 @@ private:
 	/// デバッグ用ウィンドウ(DebugUI)に、このシーンの操作項目を登録する
 	/// </summary>
 	void RegisterDebugItems();
+#endif
 
 	//チュートリアルが終わったかを返す
 	bool IsFinishedTutorial() const;
-
-#endif
 
 	/// <summary>
 	/// デバッグ用のグリッドを描画する
@@ -118,6 +118,8 @@ private:
 	std::shared_ptr<SkyBox> m_pSkyBox;
 	//岩へのポインタの配列
 	std::vector<std::shared_ptr<Rock>> m_pRocks;
+	//ビルへのポインタの配列
+	std::vector<std::shared_ptr<Building>> m_pBuildings;
 	//景色(島など、ゲームに関与しないオブジェクト)へのポインタの配列
 	std::vector<std::shared_ptr<Scenery>> m_pSceneries;
 	//ステージへのポインタ

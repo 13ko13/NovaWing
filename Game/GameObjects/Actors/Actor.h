@@ -29,8 +29,13 @@ public:
 		Quaternion& rotation, int modelHandle);
 
 	//カメラをセットする
-	void SetCamera(std::weak_ptr<CameraBase> pCamera){m_pCamera = pCamera;}
-	
+	void SetCamera(std::weak_ptr<CameraBase> pCamera) { m_pCamera = pCamera; }
+
+	//モデルの大きさ変更
+	void SetScale(const Vector3& scale) { m_scale = scale; }
+	//モデルの大きさを取得
+	Vector3 GetScale() { return m_scale; }
+
 private:
 
 protected:
@@ -58,6 +63,9 @@ protected:
 
 	//機体情報
 	int m_modelHandle = -1;//モデルハンドル
+
+	//モデルの大きさ
+	Vector3 m_scale = Vector3(1.0f, 1.0f, 1.0f);
 
 protected:
 	//シェーダに渡す定数バッファを作成

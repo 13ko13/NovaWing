@@ -6,6 +6,7 @@
 enum class Shape
 {
 	Sphere,//球
+	Mesh,//メッシュ
 };
 
 /// <summary>
