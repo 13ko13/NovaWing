@@ -9,6 +9,10 @@ namespace
 	constexpr int worm_contact_damage = 20;
 	//プレイヤーが岩に当たった時のダメージ
 	constexpr int hit_rock_damage = 20;
+	//プレイヤーがビルに当たった時のダメージ
+	constexpr int hit_building_damage = 20;
+	//突進する敵に当たった時のダメージ
+	constexpr int hit_rush_enemy_damage = 20;
 }
 
 PlayerCollider::PlayerCollider(Player& owner):
@@ -33,11 +37,17 @@ void PlayerCollider::OnCollision(const ICollider& other)
 	case ColliderTag::BossBeam:
 		m_owner.TakeDamage(static_cast<const BossBeamCollider&>(other).GetDamage());
 		break;
+	case ColliderTag::RushEnemy:
+		m_owner.TakeDamage(hit_rush_enemy_damage);
+		break;
 	case ColliderTag::Worm:
 		m_owner.TakeDamage(worm_contact_damage);
 		break;
 	case ColliderTag::Rock:
 		m_owner.TakeDamage(hit_rock_damage);
+		break;
+	case ColliderTag::Building:
+		m_owner.TakeDamage(hit_building_damage);
 		break;
 	default:
 		break;

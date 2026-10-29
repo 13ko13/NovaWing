@@ -30,6 +30,8 @@ namespace
 	constexpr const wchar_t* building_collapsed_col_model_path = L"Data/Model/Building/Building_Collapsed_Col.x";
 	constexpr const wchar_t* building_antenna_tower_col_model_path = L"Data/Model/Building/Building_AntennaTower_Col.x";
 	constexpr const wchar_t* building_bridge_wreck_col_model_path = L"Data/Model/Building/Building_BridgeWreck_Col.x";
+	//2ステージ目の敵
+	constexpr const wchar_t* rush_enemy_model_path = L"Data/Model/RushEnemy/RushEnemy.mv1";
 
 	//---------- 画像のパス ----------
 	//プレイヤー
@@ -44,6 +46,10 @@ namespace
 	constexpr const wchar_t* worm_head_metalic_map_path = L"Data/Model/Worm_fix.fbm/Worm_Metallic.png";
 	constexpr const wchar_t* worm_head_emission_map_path = L"Data/Model/Worm_fix.fbm/Worm_Emission_Orange.png";
 	constexpr const wchar_t* worm_body_diffuse_map_path = L"Data/Model/Worm_fix.fbm/T_Space_Drone_D_Blue.png";
+	//突進する敵
+	constexpr const wchar_t* rush_enemy_normal_map_path = L"Data/Model/RushEnemy/RushEnemy_Normal.png";
+	constexpr const wchar_t* rush_enemy_metalic_map_path = L"Data/Model/RushEnemy/RushEnemy_Metallic.png";
+	constexpr const wchar_t* rush_enemy_emission_map_path = L"Data/Model/RushEnemy/RushEnemy_Emission.png";
 	//レティクル
 	constexpr const wchar_t* normal_reticle_path = L"Data/Image/NormalReticle.png";
 	constexpr const wchar_t* charge_reticle_path = L"Data/Image/ChargeReticle.png";
@@ -158,6 +164,7 @@ namespace
 	constexpr const wchar_t* floating_enemy_csv_name = L"FloatingEnemy";
 	constexpr const wchar_t* worm_head_csv_name = L"WormHead";
 	constexpr const wchar_t* boss_csv_name = L"Boss";
+	constexpr const wchar_t* rush_enemy_csv_name = L"RushEnemy";
 	constexpr const wchar_t* scenery_islanda_csv_name = L"SceneryIslandA";
 	constexpr const wchar_t* scenery_islandb_csv_name = L"SceneryIslandB";
 	constexpr const wchar_t* scenery_islandc_csv_name = L"SceneryIslandC";

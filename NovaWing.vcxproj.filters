@@ -332,6 +332,7 @@
     </ClCompile>
     <ClCompile Include="Game\UI\WarningUI.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="CSVData\EnemyStatusData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -346,7 +347,6 @@
     </ClCompile>
     <ClCompile Include="CSVData\TutorialStepData.cpp">
       <Filter>ソース ファイル</Filter>
-    </ClCompile>
     </ClCompile>
     <ClCompile Include="CSVData\TutorialEnemyData.cpp">
       <Filter>ソース ファイル</Filter>
@@ -365,7 +365,14 @@
     </ClCompile>
     <ClCompile Include="Constants\StageConfig.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="Game\GameObjects\Actors\Building\Building.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\RushEnemy\RushEnemy.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\EnemySpawner.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Actors\Building\BuildingDataSetter.cpp">
@@ -374,7 +381,10 @@
     <ClCompile Include="Game\Collision\MeshShape.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    </ClCompile>  </ItemGroup>
+    <ClCompile Include="Game\Collision\BuildingCollider.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants\Game.h">
       <Filter>ヘッダー ファイル</Filter>
@@ -720,6 +730,7 @@
     </ClInclude>
     <ClInclude Include="Game\UI\WarningUI.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="CSVData\EnemyStatusData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -734,7 +745,6 @@
     </ClInclude>
     <ClInclude Include="CSVData\TutorialStepData.h">
       <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     </ClInclude>
     <ClInclude Include="CSVData\TutorialEnemyData.h">
       <Filter>ヘッダー ファイル</Filter>
@@ -753,7 +763,14 @@
     </ClInclude>
     <ClInclude Include="Constants\StageConfig.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="Game\GameObjects\Actors\Building\Building.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\RushEnemy\RushEnemy.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\EnemySpawner.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Actors\Building\BuildingDataSetter.h">
@@ -762,7 +779,10 @@
     <ClInclude Include="Game\Collision\MeshShape.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    </ClInclude>  </ItemGroup>
+    <ClInclude Include="Game\Collision\BuildingCollider.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="LightingPS.hlsl" />
     <FxCompile Include="LightingVS.hlsl" />

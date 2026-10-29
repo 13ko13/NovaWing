@@ -1,5 +1,7 @@
 ﻿#include "Building.h"
 #include "Utility/Quaternion.h"
+#include "Game/Collision/BuildingCollider.h"
+#include "Manager/DebugManager.h"
 
 Building::Building(std::weak_ptr<CameraBase> pCamera,const BuildingData& data) :
 	Actor(data.modelId, pCamera)
@@ -16,6 +18,8 @@ Building::Building(std::weak_ptr<CameraBase> pCamera,const BuildingData& data) :
 	ApplyMatrix(m_scale, m_pos, m_rotation, m_colModelHandle);
 	//当たり判定の情報を設定する
 	MV1SetupCollInfo(m_colModelHandle);
+	//当たり判定を生成する
+	m_pCollider = std::make_unique<BuildingCollider>(*this, m_colModelHandle);
 }
 
 Building::~Building()
@@ -36,4 +40,19 @@ void Building::Draw()
 	//モデルに行列を適用
 	ApplyMatrix(m_scale, m_pos, m_rotation, m_modelHandle);
 	MV1DrawModel(m_modelHandle);
+
+#ifdef _DEBUG
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
+	{
+		for (auto& shape : m_pCollider->GetCollision())
+		{
+			shape->Draw(0xff0000);
+		}
+	}
+#endif
+}
+
+ICollider& Building::GetCollider()
+{
+	return *m_pCollider;
 }

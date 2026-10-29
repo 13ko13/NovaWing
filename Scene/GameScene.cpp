@@ -313,6 +313,8 @@ void GameScene::CreateStageObjects(float offsetZ)
 	for (std::shared_ptr<Building> pBuilding : m_pBuildings)
 	{
 		pBuilding->Init();
+		//当たり判定のマネージャーに登録する
+		m_pCollisionManager->RegisterBuilding(pBuilding);
 	}
 
 	//ボスの位置も改めてセットする

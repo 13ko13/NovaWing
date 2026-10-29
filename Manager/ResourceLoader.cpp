@@ -27,6 +27,11 @@ namespace
 		{ ResourceLoader::GraphicID::WormHeadEmissionMap, worm_head_emission_map_path },//頭のエミッションマップ
 		{ ResourceLoader::GraphicID::WormBodyDiffuseMap, worm_body_diffuse_map_path },//胴体のディフューズマップ
 
+		//突進する敵
+		{ ResourceLoader::GraphicID::RushEnemyNormalMap, rush_enemy_normal_map_path },//法線マップ
+		{ ResourceLoader::GraphicID::RushEnemyMetalicMap, rush_enemy_metalic_map_path },//メタリックマップ
+		{ ResourceLoader::GraphicID::RushEnemyEmissionMap, rush_enemy_emission_map_path },//エミッションマップ
+
 		//レティクル
 		{ ResourceLoader::GraphicID::NormalReticle, normal_reticle_path },//ノーマルレティクル
 		{ ResourceLoader::GraphicID::ChargeReticle, charge_reticle_path },//チャージレティクル
@@ -106,6 +111,7 @@ namespace
 		{ ResourceLoader::ModelID::Rock3, rock3_model_path },//岩3
 		{ ResourceLoader::ModelID::Stage, stage_model_path },//ステージ
 		{ ResourceLoader::ModelID::Boss, boss_model_path },//ボス
+		{ ResourceLoader::ModelID::RushEnemy, rush_enemy_model_path },//突進する敵
 		{ ResourceLoader::ModelID::SceneryIslandA, scenery_islanda_model_path },//景色用の島(IslandA)
 		{ ResourceLoader::ModelID::SceneryIslandB, scenery_islandb_model_path },//景色用の島(IslandB)
 		{ ResourceLoader::ModelID::SceneryIslandC, scenery_islandc_model_path },//景色用の島(IslandC)
@@ -182,31 +188,31 @@ namespace
 	const std::unordered_map<ResourceLoader::EffectID, EffectInfo> effect_infos =
 	{
 		//プレイヤー
-		{ ResourceLoader::EffectID::PlayerBullet, { player_bullet_effect_path, player_bullet_effect_scale } },//弾
-		{ ResourceLoader::EffectID::PlayerChargeBullet, { player_charge_bullet_effect_path, player_charge_bullet_effect_scale } },//チャージ弾
-		{ ResourceLoader::EffectID::ChargeExplosion, { charge_explosion_effect_path, charge_explosion_effect_scale } },//チャージ弾の着弾爆発
-		{ ResourceLoader::EffectID::Charging, { charging_effect_path, charging_effect_scale } },//チャージ中
-		{ ResourceLoader::EffectID::Boost, { boost_effect_path, boost_effect_scale } },//ブースト
-		{ ResourceLoader::EffectID::LeftWingSplash, { left_wing_splash_effect_path, left_wing_splash_effect_scale } },//左羽の水しぶき
-		{ ResourceLoader::EffectID::RightWingSplash, { right_wing_splash_effect_path, right_wing_splash_effect_scale } },//右羽の水しぶき
-		{ ResourceLoader::EffectID::LeftBarrelRoll, { left_barrel_roll_effect_path, left_barrel_roll_effect_scale } },//左バレルロール
-		{ ResourceLoader::EffectID::RightBarrelRoll, { right_barrel_roll_effect_path, right_barrel_roll_effect_scale } },//右バレルロール
+		{ ResourceLoader::EffectID::PlayerBullet,{ player_bullet_effect_path, player_bullet_effect_scale } },//弾
+		{ ResourceLoader::EffectID::PlayerChargeBullet,{ player_charge_bullet_effect_path, player_charge_bullet_effect_scale } },//チャージ弾
+		{ ResourceLoader::EffectID::ChargeExplosion,{ charge_explosion_effect_path, charge_explosion_effect_scale } },//チャージ弾の着弾爆発
+		{ ResourceLoader::EffectID::Charging,{ charging_effect_path, charging_effect_scale } },//チャージ中
+		{ ResourceLoader::EffectID::Boost,{ boost_effect_path, boost_effect_scale } },//ブースト
+		{ ResourceLoader::EffectID::LeftWingSplash,{ left_wing_splash_effect_path, left_wing_splash_effect_scale } },//左羽の水しぶき
+		{ ResourceLoader::EffectID::RightWingSplash,{ right_wing_splash_effect_path, right_wing_splash_effect_scale } },//右羽の水しぶき
+		{ ResourceLoader::EffectID::LeftBarrelRoll,{ left_barrel_roll_effect_path, left_barrel_roll_effect_scale } },//左バレルロール
+		{ ResourceLoader::EffectID::RightBarrelRoll,{ right_barrel_roll_effect_path, right_barrel_roll_effect_scale } },//右バレルロール
 
 		//敵
-		{ ResourceLoader::EffectID::EnemyBullet, { enemy_bullet_effect_path, enemy_bullet_effect_scale } },//敵の弾
-		{ ResourceLoader::EffectID::WormDeath, { worm_death_effect_path, worm_death_effect_scale } },//ワームの死亡
-		{ ResourceLoader::EffectID::FloatingDeath, { floating_death_effect_path, floating_death_effect_scale } },//浮遊敵の死亡
+		{ ResourceLoader::EffectID::EnemyBullet,{ enemy_bullet_effect_path, enemy_bullet_effect_scale } },//敵の弾
+		{ ResourceLoader::EffectID::WormDeath,{ worm_death_effect_path, worm_death_effect_scale } },//ワームの死亡
+		{ ResourceLoader::EffectID::FloatingDeath,{ floating_death_effect_path, floating_death_effect_scale } },//浮遊敵の死亡
 
 		//ボス
-		{ ResourceLoader::EffectID::Splash, { splash_effect_path, splash_effect_scale } },//水しぶき
-		{ ResourceLoader::EffectID::SummonFloating, { summon_floating_eff_path, summon_floating_eff_scale } },//浮遊敵召喚
-		{ ResourceLoader::EffectID::SummonWorm, { summon_worm_eff_path, summon_worm_eff_scale } },//ワーム召喚
-		{ ResourceLoader::EffectID::BossBeam, { boss_beam_eff_patgh, boss_beam_eff_scale } },//ビーム
-		{ ResourceLoader::EffectID::BossShield, { boss_shield_effect_path, boss_shield_eff_scale } },//無敵シールド
-		{ ResourceLoader::EffectID::BossDeath, { boss_death_eff_path, boss_death_eff_scale } },//死亡
+		{ ResourceLoader::EffectID::Splash,{ splash_effect_path, splash_effect_scale } },//水しぶき
+		{ ResourceLoader::EffectID::SummonFloating,{ summon_floating_eff_path, summon_floating_eff_scale } },//浮遊敵召喚
+		{ ResourceLoader::EffectID::SummonWorm,{ summon_worm_eff_path, summon_worm_eff_scale } },//ワーム召喚
+		{ ResourceLoader::EffectID::BossBeam,{ boss_beam_eff_patgh, boss_beam_eff_scale } },//ビーム
+		{ ResourceLoader::EffectID::BossShield,{ boss_shield_effect_path, boss_shield_eff_scale } },//無敵シールド
+		{ ResourceLoader::EffectID::BossDeath,{ boss_death_eff_path, boss_death_eff_scale } },//死亡
 
 		//共通
-		{ ResourceLoader::EffectID::HitEffect, { hit_effect_path, hit_effect_scale } },//被弾(敵味方共通)
+		{ ResourceLoader::EffectID::HitEffect,{ hit_effect_path, hit_effect_scale } },//被弾(敵味方共通)
 	};
 
 	//フォントの読み込みに必要な情報
@@ -238,7 +244,7 @@ namespace
 			message_font_thick,
 			message_font_type,
 			font_space } },//メッセージ用
-			
+
 		{ ResourceLoader::FontID::Task,{
 			message_font_path,
 			message_font_name,
@@ -265,7 +271,7 @@ ResourceLoader::ResourceLoader()
 void ResourceLoader::LoadGraphic(GraphicID id)
 {
 	//m_graphicHandlesにidが存在するか確認
-	if(m_graphicHandles.find(id) != m_graphicHandles.end())
+	if (m_graphicHandles.find(id) != m_graphicHandles.end())
 	{
 		//すでに読み込まれている場合は何もしない
 		return;
@@ -273,7 +279,7 @@ void ResourceLoader::LoadGraphic(GraphicID id)
 
 	//読み込み
 	auto it = graphic_paths.find(id);
-	if(it == graphic_paths.end())
+	if (it == graphic_paths.end())
 	{
 		assert(false && "グラフィックIDが見つかりません");
 		return;
@@ -288,7 +294,7 @@ void ResourceLoader::ReleaseAll()
 {
 	//進行中の非同期読み込みが残っていると
 	//解放時にクラッシュするため、完了を待ってから同期に戻す
-		WaitHandleASyncLoadAll();
+	WaitHandleASyncLoadAll();
 	EndAsyncLoad();
 
 	//すべてのリソースを解放する
@@ -341,7 +347,7 @@ void ResourceLoader::LoadModel(ModelID id)
 
 	//読み込みを行う
 	auto it = model_paths.find(id);
-	if(it == model_paths.end())
+	if (it == model_paths.end())
 	{
 		assert(false && "モデルIDが見つかりません");
 		return;
@@ -406,7 +412,7 @@ void ResourceLoader::LoadSound(SoundID id)
 
 	//読み込みを行う
 	auto it = sound_paths.find(id);
-	if(it == sound_paths.end())
+	if (it == sound_paths.end())
 	{
 		assert(false && "サウンドIDが見つかりません");
 		return;
@@ -445,95 +451,98 @@ void ResourceLoader::InitSceneResources()
 		GraphicID::PlayerEmissionMap
 	};
 	title.effects = { EffectID::Boost };
-    title.sounds = {
-        SoundID::TitleBoost, SoundID::TitleBGM, SoundID::TitleLogoImpact,
-        SoundID::OnCursor, SoundID::Decision
-    };
-    m_sceneResources[SceneID::Title] = title;
+	title.sounds = {
+		SoundID::TitleBoost, SoundID::TitleBGM, SoundID::TitleLogoImpact,
+		SoundID::OnCursor, SoundID::Decision
+	};
+	m_sceneResources[SceneID::Title] = title;
 
-    //ゲーム(ポーズ分を含む)
-    SceneResources game;
-    game.models = {
-        ModelID::Player, ModelID::Stage, ModelID::Rock1, ModelID::Rock2,
-        ModelID::Rock3, ModelID::FloatingEnemy, ModelID::WormHead, ModelID::Boss,
-        ModelID::SceneryIslandA, ModelID::SceneryIslandB, ModelID::SceneryIslandC,
-        //2ステージ目のビル(見た目と当たり判定用)
-        ModelID::BuildingTallBroken, ModelID::BuildingOfficeGutted, ModelID::BuildingLeaning,
-        ModelID::BuildingCollapsed, ModelID::BuildingAntennaTower, ModelID::BuildingBridgeWreck,
-        ModelID::BuildingTallBrokenCol, ModelID::BuildingOfficeGuttedCol, ModelID::BuildingLeaningCol,
-        ModelID::BuildingCollapsedCol, ModelID::BuildingAntennaTowerCol, ModelID::BuildingBridgeWreckCol
-    };
-    game.graphics = {
-        GraphicID::SkyBoxFront, GraphicID::SkyBoxBack, GraphicID::SkyBoxLeft,
-        GraphicID::SkyBoxRight, GraphicID::SkyBoxUp, GraphicID::SkyBoxBottom,
-        GraphicID::Caustics, GraphicID::RockNorm, GraphicID::DissolveNoise,
-        GraphicID::PlayerNormalMap, GraphicID::PlayerMetalicMap, GraphicID::PlayerEmissionMap,
-        GraphicID::FloatingNormalMap, GraphicID::FloatingEmissionMap,
-        GraphicID::WormHeadNormalMap, GraphicID::WormHeadMetalicMap, GraphicID::WormHeadEmissionMap,
-        GraphicID::WormBodyDiffuseMap, GraphicID::BossNormal, GraphicID::BossEmission,
-        GraphicID::NormalReticle, GraphicID::ChargeReticle,
-        GraphicID::PlayerHPFrame, GraphicID::PlayerHPGauge,
-        GraphicID::BossHPFrame, GraphicID::BossHPGauge,
-        GraphicID::SpecialGaugeFrame, GraphicID::SpecialGauge,
-        GraphicID::WarningFrame, GraphicID::WarningText, GraphicID::WarningSubText,
-        GraphicID::WarningIcon, GraphicID::WarningEdge, GraphicID::BossAppearMovie,
-        GraphicID::SelectBackGround, GraphicID::BackGame, GraphicID::BackGameOnCursor,
-        GraphicID::BackTitle, GraphicID::BackTitleOnCursor,
-        GraphicID::ButtonA, GraphicID::NextText//チュートリアルのメッセージの「Aで次へ」
-    };
-    game.effects = {
-        EffectID::PlayerBullet, EffectID::PlayerChargeBullet, EffectID::ChargeExplosion, EffectID::Charging,
-        EffectID::EnemyBullet, EffectID::HitEffect, EffectID::Boost,
-        EffectID::LeftWingSplash, EffectID::RightWingSplash,
-        EffectID::LeftBarrelRoll, EffectID::RightBarrelRoll,
-        EffectID::FloatingDeath, EffectID::WormDeath,
-        EffectID::SummonFloating, EffectID::SummonWorm,
-        EffectID::BossBeam, EffectID::BossShield, EffectID::BossDeath, EffectID::Splash
-    };
-    game.sounds = {
-        SoundID::GameBGM, SoundID::BossQuake, SoundID::BossBGM, SoundID::Decision,
-        SoundID::PlayerDamage, SoundID::PlayerDeath, SoundID::ChargeShoot,
-        SoundID::Somersoult, SoundID::Charging, SoundID::ChargeComplete,
-        SoundID::NormalShoot, SoundID::Brake, SoundID::Boost,
-        SoundID::BossMove, SoundID::BossDeath, SoundID::BossDamage, SoundID::BossRecovery,
-        SoundID::BossBeam, SoundID::BossSummon, SoundID::EnemyShoot,
-        SoundID::FloatingBoot, SoundID::EnemyDeath, SoundID::OnCursor
+	//ゲーム(ポーズ分を含む)
+	SceneResources game;
+	game.models = {
+		ModelID::Player, ModelID::Stage, ModelID::Rock1, ModelID::Rock2,
+		ModelID::Rock3, ModelID::FloatingEnemy, ModelID::WormHead, ModelID::Boss,
+		ModelID::SceneryIslandA, ModelID::SceneryIslandB, ModelID::SceneryIslandC,
+		//2ステージ目のビル(見た目と当たり判定用)
+		ModelID::BuildingTallBroken, ModelID::BuildingOfficeGutted, ModelID::BuildingLeaning,
+		ModelID::BuildingCollapsed, ModelID::BuildingAntennaTower, ModelID::BuildingBridgeWreck,
+		ModelID::BuildingTallBrokenCol, ModelID::BuildingOfficeGuttedCol, ModelID::BuildingLeaningCol,
+		ModelID::BuildingCollapsedCol, ModelID::BuildingAntennaTowerCol, ModelID::BuildingBridgeWreckCol,
+		//2ステージ目の敵
+		ModelID::RushEnemy,
+	};
+	game.graphics = {
+		GraphicID::SkyBoxFront, GraphicID::SkyBoxBack, GraphicID::SkyBoxLeft,
+		GraphicID::SkyBoxRight, GraphicID::SkyBoxUp, GraphicID::SkyBoxBottom,
+		GraphicID::Caustics, GraphicID::RockNorm, GraphicID::DissolveNoise,
+		GraphicID::PlayerNormalMap, GraphicID::PlayerMetalicMap, GraphicID::PlayerEmissionMap,
+		GraphicID::FloatingNormalMap, GraphicID::FloatingEmissionMap,
+		GraphicID::WormHeadNormalMap, GraphicID::WormHeadMetalicMap, GraphicID::WormHeadEmissionMap,
+		GraphicID::WormBodyDiffuseMap, GraphicID::BossNormal, GraphicID::BossEmission,
+		GraphicID::RushEnemyNormalMap, GraphicID::RushEnemyMetalicMap, GraphicID::RushEnemyEmissionMap,
+		GraphicID::NormalReticle, GraphicID::ChargeReticle,
+		GraphicID::PlayerHPFrame, GraphicID::PlayerHPGauge,
+		GraphicID::BossHPFrame, GraphicID::BossHPGauge,
+		GraphicID::SpecialGaugeFrame, GraphicID::SpecialGauge,
+		GraphicID::WarningFrame, GraphicID::WarningText, GraphicID::WarningSubText,
+		GraphicID::WarningIcon, GraphicID::WarningEdge, GraphicID::BossAppearMovie,
+		GraphicID::SelectBackGround, GraphicID::BackGame, GraphicID::BackGameOnCursor,
+		GraphicID::BackTitle, GraphicID::BackTitleOnCursor,
+		GraphicID::ButtonA, GraphicID::NextText//チュートリアルのメッセージの「Aで次へ」
+	};
+	game.effects = {
+		EffectID::PlayerBullet, EffectID::PlayerChargeBullet, EffectID::ChargeExplosion, EffectID::Charging,
+		EffectID::EnemyBullet, EffectID::HitEffect, EffectID::Boost,
+		EffectID::LeftWingSplash, EffectID::RightWingSplash,
+		EffectID::LeftBarrelRoll, EffectID::RightBarrelRoll,
+		EffectID::FloatingDeath, EffectID::WormDeath,
+		EffectID::SummonFloating, EffectID::SummonWorm,
+		EffectID::BossBeam, EffectID::BossShield, EffectID::BossDeath, EffectID::Splash
+	};
+	game.sounds = {
+		SoundID::GameBGM, SoundID::BossQuake, SoundID::BossBGM, SoundID::Decision,
+		SoundID::PlayerDamage, SoundID::PlayerDeath, SoundID::ChargeShoot,
+		SoundID::Somersoult, SoundID::Charging, SoundID::ChargeComplete,
+		SoundID::NormalShoot, SoundID::Brake, SoundID::Boost,
+		SoundID::BossMove, SoundID::BossDeath, SoundID::BossDamage, SoundID::BossRecovery,
+		SoundID::BossBeam, SoundID::BossSummon, SoundID::EnemyShoot,
+		SoundID::FloatingBoot, SoundID::EnemyDeath, SoundID::OnCursor
 	};
 	game.fonts = { FontID::Message, FontID::Task };
 	m_sceneResources[SceneID::Game] = game;
 
-    //クリア
-    SceneResources clear;
-    clear.graphics = {
-        GraphicID::ResultTemplete, GraphicID::SelectBackGround,
-        GraphicID::ReTry, GraphicID::ReTryOnCursor,
-        GraphicID::BackTitle, GraphicID::BackTitleOnCursor,
+	//クリア
+	SceneResources clear;
+	clear.graphics = {
+		GraphicID::ResultTemplete, GraphicID::SelectBackGround,
+		GraphicID::ReTry, GraphicID::ReTryOnCursor,
+		GraphicID::BackTitle, GraphicID::BackTitleOnCursor,
 		GraphicID::ButtonA, GraphicID::DecideText, GraphicID::NextText,
 		GraphicID::NextStage,GraphicID::NextStageOnCursor
 	};
-    clear.sounds = {
-        SoundID::ResultBGM, SoundID::DataAppear, SoundID::ScoreCount,
-        SoundID::Decision, SoundID::OnCursor
-    };
-    clear.fonts = { FontID::Result };
-    m_sceneResources[SceneID::Clear] = clear;
+	clear.sounds = {
+		SoundID::ResultBGM, SoundID::DataAppear, SoundID::ScoreCount,
+		SoundID::Decision, SoundID::OnCursor
+	};
+	clear.fonts = { FontID::Result };
+	m_sceneResources[SceneID::Clear] = clear;
 
-    //ゲームオーバー
-    SceneResources gameover;
-    gameover.graphics = {
-        GraphicID::SelectBackGround, GraphicID::ReTry, GraphicID::ReTryOnCursor,
-        GraphicID::GameEnd, GraphicID::GameEndOnCursor,
-        GraphicID::ButtonA, GraphicID::DecideText
-    };
-    gameover.sounds = { SoundID::GameoverBGM, SoundID::OnCursor, SoundID::Decision };
-    m_sceneResources[SceneID::Gameover] = gameover;
+	//ゲームオーバー
+	SceneResources gameover;
+	gameover.graphics = {
+		GraphicID::SelectBackGround, GraphicID::ReTry, GraphicID::ReTryOnCursor,
+		GraphicID::GameEnd, GraphicID::GameEndOnCursor,
+		GraphicID::ButtonA, GraphicID::DecideText
+	};
+	gameover.sounds = { SoundID::GameoverBGM, SoundID::OnCursor, SoundID::Decision };
+	m_sceneResources[SceneID::Gameover] = gameover;
 }
 
 int ResourceLoader::GetModel(ResourceLoader::ModelID id) const
 {
 	//IDをもとにハンドルを返す
 	auto it = m_modelHandles.find(id);
-	
+
 	//it != m_modelHandles.end()は、idに対応するハンドルが見つかったかどうかをチェックしている
 	//end()は、マップの最後を指すイテレータで、find()が見つからなかったときに返される
 	if (it != m_modelHandles.end())
@@ -552,7 +561,7 @@ int ResourceLoader::GetGraphic(GraphicID id) const
 	//IDをもとにハンドルを返す
 	auto it = m_graphicHandles.find(id);
 
-	if(it != m_graphicHandles.end())
+	if (it != m_graphicHandles.end())
 	{
 		return it->second;
 	}
@@ -567,7 +576,7 @@ int ResourceLoader::GetEffect(EffectID id) const
 {
 	auto it = m_effectHandles.find(id);
 
-	if(it != m_effectHandles.end())
+	if (it != m_effectHandles.end())
 	{
 		return it->second;
 	}
@@ -655,21 +664,22 @@ ResourceLoader::ModelID ResourceLoader::WStringToModelID(const std::wstring id)
 	//wstringとmodelIDの対応表を作成
 	static std::unordered_map <std::wstring, ResourceLoader::ModelID> table =
 	{
-		{rock1_csv_name,ModelID::Rock1},
-		{rock2_csv_name,ModelID::Rock2},
-		{rock3_csv_name,ModelID::Rock3},
-		{floating_enemy_csv_name,ModelID::FloatingEnemy},
-		{worm_head_csv_name,ModelID::WormHead},
-		{boss_csv_name,ModelID::Boss},
-		{scenery_islanda_csv_name,ModelID::SceneryIslandA},
-		{scenery_islandb_csv_name,ModelID::SceneryIslandB},
-		{scenery_islandc_csv_name,ModelID::SceneryIslandC},
-		{building_tall_broken_csv_name,ModelID::BuildingTallBroken},
-		{building_office_gutted_csv_name,ModelID::BuildingOfficeGutted},
-		{building_leaning_csv_name,ModelID::BuildingLeaning},
-		{building_collapsed_csv_name,ModelID::BuildingCollapsed},
-		{building_antenna_tower_csv_name,ModelID::BuildingAntennaTower},
-		{building_bridge_wreck_csv_name,ModelID::BuildingBridgeWreck},
+		{ rock1_csv_name,ModelID::Rock1 },
+		{ rock2_csv_name,ModelID::Rock2 },
+		{ rock3_csv_name,ModelID::Rock3 },
+		{ floating_enemy_csv_name,ModelID::FloatingEnemy },
+		{ worm_head_csv_name,ModelID::WormHead },
+		{ rush_enemy_csv_name,ModelID::RushEnemy },
+		{ boss_csv_name,ModelID::Boss },
+		{ scenery_islanda_csv_name,ModelID::SceneryIslandA },
+		{ scenery_islandb_csv_name,ModelID::SceneryIslandB },
+		{ scenery_islandc_csv_name,ModelID::SceneryIslandC },
+		{ building_tall_broken_csv_name,ModelID::BuildingTallBroken },
+		{ building_office_gutted_csv_name,ModelID::BuildingOfficeGutted },
+		{ building_leaning_csv_name,ModelID::BuildingLeaning },
+		{ building_collapsed_csv_name,ModelID::BuildingCollapsed },
+		{ building_antenna_tower_csv_name,ModelID::BuildingAntennaTower },
+		{ building_bridge_wreck_csv_name,ModelID::BuildingBridgeWreck },
 	};
 	//受け取ったidを使ってtableからそのモデルのIDを受け取る
 	auto it = table.find(id);
@@ -731,7 +741,7 @@ void ResourceLoader::KeepModel()
 void ResourceLoader::KeepGraph()
 {
 	//試しに、対応表をループしてLoadGraphを呼び出す
-	for (auto& [id,path] : graphic_paths)
+	for (auto& [id, path] : graphic_paths)
 	{
 		LoadGraphic(id);
 	}
@@ -741,12 +751,12 @@ void ResourceLoader::KeepEffect()
 {
 	//Effekseerのエフェクトをロードする
 	//プレイヤーの弾
-	int handle = LoadEffekseerEffect(player_bullet_effect_path,player_bullet_effect_scale);
+	int handle = LoadEffekseerEffect(player_bullet_effect_path, player_bullet_effect_scale);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::PlayerBullet] = handle;
 
 	//ワームエネミーの死亡エフェクト
-	handle = LoadEffekseerEffect(worm_death_effect_path,worm_death_effect_scale);
+	handle = LoadEffekseerEffect(worm_death_effect_path, worm_death_effect_scale);
 	assert(handle >= 0);
 	m_effectHandles[ResourceLoader::EffectID::WormDeath] = handle;
 

@@ -23,12 +23,19 @@ public:
 		std::weak_ptr<EffectManager> pEffectManager);
 	~FloatingEnemy();
 
-	void OnInit() override;//初期化処理
-	void Update() override;//更新処理
+	//初期化処理
+	void OnInit() override;
+	//更新処理
+	void Update() override;
 	//描画
 	void Draw() override;
-	
-	void TakeDamage(int damage) override;//ダメージを受ける
+	//ダメージを受ける
+	void TakeDamage(int damage) override;
+
+	//当たり判定を返す
+	std::vector<std::shared_ptr<SphereShape>> GetCollisionSpheres() const override;
+	//当たり判定インターフェースを返す
+	std::vector<ICollider*> GetColliders() override { return { &m_collider }; }
 
 	//プレイヤーの位置を返す
 	Vector3 GetPlayerPos() const;
@@ -47,10 +54,6 @@ public:
 	//所有者の1人になってしまうため参照でポインタを返す
 	ModelAnimator& GetAnimator() { return *m_pAnimator; }
 
-	//当たり判定を返す
-	std::vector<std::shared_ptr<SphereShape>> GetCollisionSpheres() const override;
-	//当たり判定インターフェースを返す
-	std::vector<ICollider*> GetColliders() override { return { &m_collider }; }
 
 	//サウンドマネージャー取得
 	std::weak_ptr<SoundManager> GetSoundManager() const { return m_pSoundManager; }

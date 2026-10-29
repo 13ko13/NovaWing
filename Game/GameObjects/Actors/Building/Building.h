@@ -2,6 +2,8 @@
 #include "Actor.h"
 #include "Manager/ResourceLoader.h"
 
+class BuildingCollider;
+class ICollider;
 
 class Building : public Actor
 {
@@ -23,7 +25,12 @@ public:
 	void Update() override;
 	void Draw() override;
 
+	//ビルの当たり判定取得
+	ICollider& GetCollider();
+
 private:
 	//当たり判定用のモデルハンドル
 	int m_colModelHandle = -1;
+	//ビルの当たり判定
+	std::unique_ptr<BuildingCollider> m_pCollider;
 };

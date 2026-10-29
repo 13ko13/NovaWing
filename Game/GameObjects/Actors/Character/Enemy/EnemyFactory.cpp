@@ -1,6 +1,7 @@
 ﻿#include "EnemyFactory.h"
 #include "Game/GameObjects/Actors/Character/Enemy/FloatingEnemy/FloatingEnemy.h"
 #include "Game/GameObjects/Actors/Character/Enemy/WormEnemy/WormEnemy.h"
+#include "Game/GameObjects/Actors/Character/Enemy/RushEnemy/RushEnemy.h"
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/TargetManager.h"
@@ -106,6 +107,35 @@ std::shared_ptr<EnemyBase> EnemyFactory::Create(
 		return pWorm;
 	}
 	break;
+
+	case EnemyType::RushEnemy:
+	{
+		//突進する敵に必要な情報を詰める
+		RushEnemy::RushEnemyData rushEnemyData;
+		rushEnemyData.modelID = ResourceLoader::ModelID::RushEnemy;
+		rushEnemyData.pBulletManager = m_pBulletManager;
+		rushEnemyData.pCamera = m_pCamera;
+		rushEnemyData.pEffectManager = m_pEffectManager;
+		rushEnemyData.pos = pos;
+		rushEnemyData.pPlayer = m_pPlayer;
+		rushEnemyData.pSoundManager = m_pSoundManager;
+	
+		//突進する敵に情報を渡して生成
+		std::shared_ptr<RushEnemy> pRushEnemy = std::make_shared<RushEnemy>(rushEnemyData);
+		//初期化
+		pRushEnemy->Init();
+		//ターゲットマネージャーと当たり判定マネージャーに登録
+		if (m_pTargetManager.lock() != nullptr)
+		{
+			m_pTargetManager.lock()->Register(pRushEnemy);
+		}
+		if (m_pCollisionManager.lock() != nullptr)
+		{
+			m_pCollisionManager.lock()->Register(pRushEnemy);
+		}
+		//この突進敵のポインタを返す
+		return pRushEnemy;
+	}
 
 	default:
 		return nullptr;

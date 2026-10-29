@@ -39,6 +39,8 @@ public:
 		BuildingCollapsedCol,
 		BuildingAntennaTowerCol,
 		BuildingBridgeWreckCol,
+		//2ステージ目の敵
+		RushEnemy,//突進する敵
 	};
 
 	//グラフィックの種類
@@ -55,6 +57,10 @@ public:
 		WormHeadMetalicMap,//ワームの頭のメタリックマップ
 		WormHeadEmissionMap,//ワームの頭のエミッションマップ
 		WormBodyDiffuseMap,//ワームの胴体のディフューズマップ
+
+		RushEnemyNormalMap,//突進する敵の法線マップ
+		RushEnemyMetalicMap,//突進する敵のメタリックマップ
+		RushEnemyEmissionMap,//突進する敵のエミッションマップ
 
 		NormalReticle,//ノーマル状態のレティクル
 		ChargeReticle,//チャージ状態のレティクル

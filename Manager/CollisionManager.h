@@ -13,6 +13,7 @@ class GameCamera;
 class BossEnemy;
 class ICollider;
 class BulletCollider;
+class Building;
 class CollisionManager
 {
 public:
@@ -25,7 +26,10 @@ public:
 
 	//敵を配列に格納する
 	void Register(std::shared_ptr<EnemyBase> pEnemy);
+	//岩を配列に格納
 	void RegisterRock(std::shared_ptr<Rock> pRock);
+	//ビルを配列に格納
+	void RegisterBuilding(std::shared_ptr<Building> pBuilding);
 	void Update();//更新処理
 
 private:
@@ -47,6 +51,8 @@ private:
 	std::vector<std::weak_ptr<EnemyBase>> m_pEnemies;
 	//岩の配列
 	std::vector<std::weak_ptr<Rock>> m_pRocks;
+	//ビルの配列
+	std::vector<std::weak_ptr<Building>> m_pBuildings;
 	//ボス
 	std::weak_ptr<BossEnemy> m_pBoss;
 

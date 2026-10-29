@@ -1961,6 +1961,45 @@
     - **デストラクタで`MV1DeleteModel`しない**(ハンドルはビルの`m_colModelHandle`を借りるだけ。ビルのデストラクタが消す)。
     - [MeshShape.h:3](Game/Collision/MeshShape.h#L3)のincludeが`"../Game/Collision/ColliderShape.h"`になっている(同じフォルダなので`"ColliderShape.h"`でよい。今のパスはフォルダの位置がずれていて見つからない可能性がある)。
     - その後: ②`IsHit`に球×メッシュ([CollisionManager.cpp:62-79](Manager/CollisionManager.cpp#L62-L79)) → ③`BuildingCollider` → ④ダメージ・`hit_pairs` → ⑤登録。
+  - **(10/29完了・ユーザー実装、動作確認OK)ビルの当たり判定**: `MeshShape(int modelHandle)`(ハンドルは借りるだけ、`Draw`はワイヤーフレーム)、`CollisionManager`の`IsHitSphereAndMesh`(表面=`MV1CollCheck_Sphere`、**中にいるか=球の中心から真上へ`inside_check_length`(100000)の線を`MV1CollCheck_LineDim`し、つき抜けた回数が奇数なら中**)と`IsHit`の球×球/球×メッシュ/メッシュ×球の分岐、`BuildingCollider`(`ColliderTag::Building`、`GetOwnerID`)、`Building`が`unique_ptr<BuildingCollider>`を持ち`GetCollider()`、`DamageSourceType::Building`・`TryGetDamageSource`・`PlayerCollider`のダメージ・`hit_pairs`に`{Building, Player}`、`RegisterBuilding`と`Update`での収集、`GameScene`で登録。ビルの`Draw`でデバッグ表示時に当たり判定を描く。
+    - コスト表「2面の建物をUnityで配置して読み込む」: 見積3h/**実4hで完了**。プロト残7h(突進する敵2h・固定砲台の敵2h・B: 移動の加速度2h・岩の当たり判定1h・難易度調整0h)。
+    - つまずき(参考): `MV1CollCheck_Sphere`は表面のポリゴンしか見ないので、ビルの中に完全に入ると「離れた」扱いになり、出るときにもう一度ダメージを受けた→中にいるかの判定を追加(線が短いとビルの上まで届かず数えられない)。`IsHit`の球どうしで結果を捨てて`return true`していなかった(全部当たらなくなるところだった)。`Building.h`で`ICollider`の前方宣言が抜けてビルドエラー。
   - (10/28)ビルが見えない→Unityで子の`Visual`を動かしていて、親(書き出される方)はZ=0のままだった。`PlacedObject`に`[SelectionBase]`を付け、シーンビューでモデルをクリックしても親が選ばれるようにした(Claude)。
   - 進め方: ①StageEditorにProBuilder(`com.unity.probuilder`)とFBX Exporter(`com.unity.formats.fbx`)を入れる(未導入) ②1種類だけ作って書き出し→ゲームで読み込み、**大きさ・向き・単位(Unity1=ゲーム100、FBXの単位)が見た目と合うか先に確認** ③残りの種類→配置CSVと読み込み→`ICollider`の仕組みにつなぐ(球×メッシュの判定を足す)。
   - **(10/27完了・Claude、ユーザー依頼)1. ビルのモデルの登録(コメントは「2面」ではなく「2ステージ目」と書く、ユーザー指定)**: `ModelID`に見た目6種(`BuildingTallBroken`/`OfficeGutted`/`Leaning`/`Collapsed`/`AntennaTower`/`BridgeWreck`)と当たり判定用6種(各`...Col`)、`ResourceConstants.h`にパス12個(見た目`.mv1`、当たり判定`_Col.x`)とCSV名6個(Unityの`StageModelCatalog.cs`と同じ`Building_○○`)、`ResourceLoader.cpp`の対応表・`game.models`・`WStringToModelID`に追加。Debugビルド成功。**ゲーム内で`_Col.x`が読めるか(assertで止まらないか)は未確認**。当たり判定のモデルも`ModelID`で登録したのは、読み込み・解放を`ResourceLoader`に任せるため。※`KeepModel()`(ResourceLoader.cpp)はどこからも呼ばれていない古い処理なので足していない。
+
+### 2026-10-29 突進する敵の仕様(ユーザー了承)と、タスク2つ(ユーザー報告)
+- **突進する敵の仕様(合意)**: 置いたままだと何もしていないうちに倒せてしまうので、**プレイヤーが一定の位置まで来たら画面外から現れる**。
+  1. ゲーム開始時に作っておくが、出てくるまでは見えない・当たらない・ロックオンできない。
+  2. プレイヤーのZがCSVの`activatePlayerZ`(ワームと同じ考え方)を超えたら、**プレイヤーの位置から決まった分ずれた画面外**に現れる。
+  3. 予備動作(約0.5秒): 画面の端から少し入って止まり、プレイヤーを向いて震える。
+  4. 突進: そのときのプレイヤーの位置へまっすぐ速く(追いかけない)。
+  5. すれ違って画面外に出たら消える。ぶつかったらプレイヤーにダメージ20。
+  6. 倒すと浮遊敵と同じ爆発。HPは少なめ(`EnemyStatus.csv`)。
+  - モデルはユーザーが後で拾う。それまで今あるモデル(浮遊敵のドローン)を仮で使う。
+  - 配置はUnity: 置いた位置のZ=`activatePlayerZ`、X・Y=プレイヤーからのずれ、前後のずれは別の数字で持つ。
+- **【タスク・ユーザー報告】farの外で見えない敵をロックオンできてしまうバグ**: ロックオン候補の判定は[TargetManager.cpp:154-169](Manager/TargetManager.cpp#L154-L169)の`IsOnScreen`(画面内+`screenPos.z >= 1.0f`で奥を除外)。カメラのfarは[CameraBase.cpp:11](Game/GameObjects/Camera/CameraBase.cpp#L11)の5500。原因は未調査。
+- **【タスク・ユーザー報告】浮遊敵の弾を撃つタイミングが全員同じで、弾が散らばらない**: 浮遊敵は最初から配置しているため。コスト表の「敵全体＞個体ごとに動きと攻撃のタイミングをずらす」(A・アルファ)に当たる。
+  - いずれ浮遊敵も「画面外から生まれる」仕様にしたい(今は直さない、ユーザー)。
+  - (10/29)コスト表に追加: 「バグ修正＞　ーfarの外の敵をロックオンできる」1h・B・ベータ、「敵全体＞　ー浮遊敵を画面外から出現させる」4h・C・アルファ。バグ修正の親を未完了に戻した。プロト 81/残7、アルファ 78/68、ベータ 45.5/36.5、合計204.5/残111.5。
+- **(10/29)突進する敵の実装・進捗**: 作り方を変更。最初から作って隠すのではなく、**プレイヤーが決めたZまで来たら`EnemyFactory::Create`で作る**(`EnemySpawner`がCSVを持つ。いずれ浮遊敵にも使う)。位置は、Appear/Chargeの間は「プレイヤーの位置＋待機位置のずれ」。Rushでは`m_pos`を直接動かし、Zだけプレイヤーの前進分を足す(横に動けば避けられる)。
+  - 手順1(済・ユーザー): `ModelID::RushEnemy`(モデルは仮で`Drone_fix.mv1`)、CSV名`RushEnemy`、[EnemyStatus.csv](Data/CSV/Params/EnemyStatus.csv)に`RushEnemy,30,132,10,0`。
+  - 手順2(済・ユーザー): `ColliderTag::RushEnemy`・`DamageSourceType::RushEnemy`・`hit_pairs`4つ・`TryGetDamageSource`・[PlayerCollider.cpp](Game/Collision/PlayerCollider.cpp)でダメージ20。
+  - 手順3: [RushEnemy.h](Game/GameObjects/Actors/Character/Enemy/RushEnemy/RushEnemy.h)/[.cpp](Game/GameObjects/Actors/Character/Enemy/RushEnemy/RushEnemy.cpp)を、Claudeが「クラスの追加」と同じ作ったばかりの形(`EnemyBase`継承、コンストラクタ・デストラクタだけ)で作成、vcxproj登録済み(ユーザー依頼)。中身はユーザーが書く。`EnemyBase()`の引数を書くまではビルドエラー。
+  - ついでに、`NovaWing.vcxproj.filters`の閉じタグのずれ(`WarningUI`の行が閉じておらず、末尾に余分な閉じタグ)を直した。
+  - 残り: 手順3の中身 → 4. `EnemyType::RushEnemy` → 5. `EnemySpawner`+`GameScene` → 6. Unityの配置・書き出し(Claude)・AIテストプレイが突進する敵を認識するようにする(Claude)。
+  - モデル: ロケット型で顔付きのモデルを、ユーザーがClaude Desktopで作る(.x、機首-Z、全長約260)。届いたら`rush_enemy_model_path`を差し替える。
+  - (10/29・Claude、ユーザー依頼)突進する敵のモデルが届いた(`Data/Model/RushEnemy/`、ユーザーが`.x`→`.mv1`に変換)。`rush_enemy_model_path`を`RushEnemy.mv1`に変更し、`GraphicID::RushEnemyNormalMap/MetalicMap/EmissionMap`をパス・対応表・`game.graphics`に登録。Debugビルド成功。`.x`の頂点の範囲はX±75・Y-51〜86・Z±130(全長260、細い機首が-Z側＝プレイヤーの方を向く)。**`model_scale`は1倍**(ドローンの2倍ではない)。
+  - (10/29・Claude、ユーザー依頼)[EnemySpawner.h](Manager/EnemySpawner.h)/[.cpp](Manager/EnemySpawner.cpp)を作ったばかりの形(コンストラクタ・デストラクタだけ)で作成、vcxproj登録、Debugビルド成功。中身はユーザーが書く。仮の[Data/CSV/Stage2/RushEnemy.csv](Data/CSV/Stage2/RushEnemy.csv)(列: `modelID,posX,posY,posZ,rot×3,scale×3,frontOffset`。posZ=出てくるタイミング(ステージ開始からの距離)、posX/posY=プレイヤーからの左右・上下のずれ、frontOffset=どれだけ前か)。2体(Z=3000で右上、Z=6000で左上)。Unityの書き出しはこの形に合わせる(Claude、未着手)。
+- **(10/29帰宅時点)突進する敵の進み具合**
+  - 完了: 手順1・2(ModelID・ステータス・当たり判定のタグ)、`RushEnemy`クラス(Appear→Charge→Rush、Draw・TakeDamage・GetCollisionSpheres)、`EnemyFactory`の`EnemyType::RushEnemy`、モデルとテクスチャの登録、`EnemySpawner`の.hとコンストラクタ。Debugビルド成功。**まだゲームの中で動かしていない**。
+  - **次回(ユーザーが書く)**:
+    1. [EnemySpawner.cpp](Manager/EnemySpawner.cpp)の`LoadRushEnemy`: [WormEnemyDataSetter.cpp:38-89](Game/GameObjects/Actors/Character/Enemy/WormEnemy/WormEnemyDataSetter.cpp#L38-L89)と同じ読み方。include `Manager/CSVDataLoader.h`・`CSVData/CSVData.h`。定数はCSVのファイル名`L"RushEnemy"`(ResourceConstants.hの`rush_enemy_csv_name`と名前がぶつかったら`rush_enemy_file_name`に)と`front_offset_number = 10`。1行ごとに`posX`(1)・`posY`(2)・`posZ`(3)・`frontOffset`(10)を`std::stof`し、`SpawnData{ RushEnemy, posZ + offsetZ, Vector3(posX, posY, frontOffset) }`を`m_spawnDatas`に`push_back`する(敵はまだ作らない)。
+    2. `Update`: `m_spawnDatas`を見て、`プレイヤーのZ >= activatePlayerZ`なら`m_pEnemyFactory.lock()->Create(プレイヤーの位置 + offset, type)`して一覧から消す(`erase`+`remove_if`、[TargetManager.cpp:38-45](Manager/TargetManager.cpp#L38-L45)と同じ書き方)。
+    3. `GameScene`: .hに`std::unique_ptr<EnemySpawner> m_pEnemySpawner;`(前方宣言)。[CreateStageObjects](Scene/GameScene.cpp#L254)のビルの下で`make_unique`して`LoadRushEnemy(m_pStageConfig->GetCSVFolderName(), offsetZ)`。[UpdateGameWorld](Scene/GameScene.cpp#L616)の`UpdateAll()`の下で`if (m_pEnemySpawner) m_pEnemySpawner->Update();`。
+    4. ゲームで確認: 2ステージ目で、ステージ開始から3000進むと右上、6000で左上から入ってきて、震えてから突っ込んでくるか。モデルの向き(機首=顔がプレイヤーの方)・大きさ・HP30の硬さ・`posX/posY`(画面の端から入ってくるか)を見て調整する。
+  - 細かい直し: [RushEnemy.cpp:258](Game/GameObjects/Actors/Character/Enemy/RushEnemy/RushEnemy.cpp#L258)のコメントが「メタリックマップはないので-1」のまま(中身は直っている)。[EnemySpawner.h](Manager/EnemySpawner.h)のクラスの説明コメント(`/// <summary>`)が消えている。
+  - Claudeがやること: Unityで突進する敵を置いて、`RushEnemy.csv`(`frontOffset`列付き)を書き出せるようにする。AIのテストプレイが突進する敵を敵と分かるようにする([AutoPlayWorld.cpp:163-164](DebugTools/AutoPlay/AutoPlayWorld.cpp#L163-L164)のタグ判定に`RushEnemy`を足す)。
+  - 別件(ユーザー報告待ち): ワームがfarの外に出て消えるとき([WormEnemy.cpp:114](Game/GameObjects/Actors/Character/Enemy/WormEnemy/WormEnemy.cpp#L114))が`OnEnemyDead()`なので、倒していなくても撃破数が増える。
+  - **要確認**: `Data/Model/Drone.mv1`・`Drone_fix.mv1`が10/29 17:05に変わっていて、`Data/Model/Drone.FBX`が消えている(git上は変更・削除)。突進する敵の`.mv1`を作った時刻(17:06)と同じなので、モデルビューアで開いたときに上書きされた可能性がある。わざとでなければ、コミットする前に元に戻す(GitHub Desktopでその3つを「Discard changes」)。
+  - 未コミット: 建物の当たり判定一式・突進する敵一式・`EnemySpawner`・`Data/Model/RushEnemy/`・`Data/CSV/Stage2/RushEnemy.csv`・コスト表など。

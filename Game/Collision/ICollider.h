@@ -23,6 +23,8 @@ enum class ColliderTag
 	BossBeamReflect,//ボスのビームの反射後の判定(ボスにダメージを与えるため)
 	ChargeBullet,//チャージショット本体
 	ChargeExplosion,//チャージショットで発生する爆発。雑魚しかダメージ受けない
+	Building,//ビル
+	RushEnemy,//突進する敵
 };
 
 /// <summary>

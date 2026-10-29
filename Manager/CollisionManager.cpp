@@ -19,6 +19,9 @@
 #include "Game/GameObjects/Bullet/ReflectedBullet.h"
 #include "Game/Collision/BulletCollider.h"
 #include "Main/Application.h"
+#include "Game/Collision/MeshShape.h"
+#include "Game/Collision/BuildingCollider.h"
+#include "Game/GameObjects/Actors/Building/Building.h"
 
 namespace
 {
@@ -26,7 +29,9 @@ namespace
 	constexpr float shake_power = 7.0f;
 	//プレイヤーがダメージを食らった時にどのくらいの時間カメラを揺らすか
 	constexpr int shake_frame = 18;
-	//プレイヤーがカウンター成功させたときの
+	//ビルの中にプレイヤーが入っているかを判定するための
+	//線の長さ
+	constexpr float inside_check_length = 100000.0f;
 
 	//判定を行うタグの組み合わせ
 	struct TagPair
@@ -39,6 +44,10 @@ namespace
 	const TagPair hit_pairs[] =
 	{
 		{ ColliderTag::PlayerBullet, ColliderTag::Floating },
+		{ ColliderTag::PlayerBullet,ColliderTag::RushEnemy },
+		{ ColliderTag::ChargeBullet,ColliderTag::RushEnemy },
+		{ ColliderTag::ChargeExplosion,ColliderTag::RushEnemy },
+		{ ColliderTag::RushEnemy,ColliderTag::Player },
 		{ ColliderTag::PlayerBullet, ColliderTag::Worm },
 		{ ColliderTag::EnemyBullet,ColliderTag::Counter },
 		{ ColliderTag::EnemyBullet, ColliderTag::Player },
@@ -56,7 +65,34 @@ namespace
 		{ ColliderTag::BossBeam, ColliderTag::Player },
 		{ ColliderTag::Worm, ColliderTag::Player },
 		{ ColliderTag::Rock, ColliderTag::Player },
+		{ ColliderTag::Building,ColliderTag::Player },
 	};
+
+	bool IsHitSphereAndMesh(const SphereShape& sphere, const MeshShape& mesh)
+	{
+		//当たったポリゴンの数と、ヒット情報の配列を保持する
+		MV1_COLL_RESULT_POLY_DIM result = MV1CollCheck_Sphere(
+			mesh.GetModelHandle(), -1, sphere.GetPos().ToDxLib(), sphere.GetRadius()
+		);
+		//当たったポリゴンの数が1以上であれば当たっている
+		bool isHit = result.HitNum > 0;
+		//情報を消す(メモリにたまるのを防ぐ)
+		MV1CollResultPolyDimTerminate(result);
+
+		//中にいるかを判定
+		//球の真上に線を伸ばして、板を突き抜けた回数が奇数なら中とする
+		Vector3 start = sphere.GetPos();
+		Vector3 end = start + Vector3(0.0f, inside_check_length, 0.0f);
+		MV1_COLL_RESULT_POLY_DIM line = MV1CollCheck_LineDim(
+			mesh.GetModelHandle(), -1, start.ToDxLib(), end.ToDxLib()
+		);
+		//当たった数が2で割り切れるなら外、割り切れずに1になるなら中にいる
+		bool isInside = (line.HitNum % 2) == 1;
+		MV1CollResultPolyDimTerminate(line);
+
+		//中にいるか、当たっている最中なら当たっているとする
+		return isHit || isInside;
+	}
 
 	//2つのコライダーの形状のどれかが重なっているか
 	bool IsHit(const ICollider& a, const ICollider& b)
@@ -67,12 +103,30 @@ namespace
 		{
 			for (const std::shared_ptr<ColliderShape>& shapeB : shapesB)
 			{
-				//今は球同士の判定しかない
-				if (shapeA->GetShape() != Shape::Sphere || shapeB->GetShape() != Shape::Sphere) continue;
-
-				const SphereShape& sphereA = static_cast<const SphereShape&>(*shapeA);
-				const SphereShape& sphereB = static_cast<const SphereShape&>(*shapeB);
-				if (sphereA.HitCollision(sphereB)) return true;
+				//球の場合
+				if (shapeA->GetShape() == Shape::Sphere && shapeB->GetShape() == Shape::Sphere)
+				{
+					const SphereShape& sphereA = static_cast<const SphereShape&>(*shapeA);
+					const SphereShape& sphereB = static_cast<const SphereShape&>(*shapeB);
+					//当たっている場合はtrueを返す
+					if (sphereA.HitCollision(sphereB)) return true;
+				}
+				//Aが球、Bがメッシュの場合
+				else if (shapeA->GetShape() == Shape::Sphere && shapeB->GetShape() == Shape::Mesh)
+				{
+					const SphereShape& sphere = static_cast<const SphereShape&>(*shapeA);
+					const MeshShape& mesh = static_cast<const MeshShape&>(*shapeB);
+					//球とメッシュの当たり判定
+					if (IsHitSphereAndMesh(sphere, mesh)) return true;
+				}
+				//Bが球、Aがメッシュの場合
+				else if (shapeA->GetShape() == Shape::Mesh && shapeB->GetShape() == Shape::Sphere)
+				{
+					const SphereShape& sphere = static_cast<const SphereShape&>(*shapeB);
+					const MeshShape& mesh = static_cast<const MeshShape&>(*shapeA);
+					//球とメッシュの当たり判定
+					if (IsHitSphereAndMesh(sphere, mesh)) return true;
+				}
 			}
 		}
 		return false;
@@ -92,6 +146,12 @@ namespace
 			return true;
 		case ColliderTag::BossBeam:
 			outSource = { DamageSourceType::Beam, static_cast<const BossBeamCollider&>(collider).GetOwnerID() };
+			return true;
+		case ColliderTag::Building:
+			outSource = { DamageSourceType::Building,static_cast<const BuildingCollider&>(collider).GetOwnerID() };
+			return true;
+		case ColliderTag::RushEnemy:
+			outSource = { DamageSourceType::RushEnemy,static_cast<const EnemyCollider&>(collider).GetOwnerID() };
 			return true;
 		default:
 			return false;
@@ -138,6 +198,12 @@ void CollisionManager::RegisterRock(std::shared_ptr<Rock> pRock)
 {
 	//渡された岩を配列として管理する
 	m_pRocks.push_back(pRock);
+}
+
+void CollisionManager::RegisterBuilding(std::shared_ptr<Building> pBuilding)
+{
+	//渡された岩を配列として管理する
+	m_pBuildings.push_back(pBuilding);
 }
 
 void CollisionManager::Update()
@@ -217,6 +283,14 @@ void CollisionManager::Update()
 		keepAlive.push_back(pRock);
 		addCollider(pRock->GetCollider());
 	}
+	//ビル
+	for (std::weak_ptr<Building>& weakBuilding : m_pBuildings)
+	{
+		std::shared_ptr<Building> pBuilding = weakBuilding.lock();
+		if (!pBuilding) continue;
+		keepAlive.push_back(pBuilding);
+		addCollider(pBuilding->GetCollider());
+	}
 
 	//決められた組み合わせだけ判定する
 	for (const TagPair& pair : hit_pairs)
@@ -260,7 +334,7 @@ void CollisionManager::OnHit(ICollider& a, ICollider& b)
 {
 	//カウンターが敵弾を跳ね返した場合は専用処理を行う
 	bool isCounterVsEnemyBullet;
-	if((a.GetTag() == ColliderTag::Counter && b.GetTag() == ColliderTag::EnemyBullet) ||
+	if ((a.GetTag() == ColliderTag::Counter && b.GetTag() == ColliderTag::EnemyBullet) ||
 	(a.GetTag() == ColliderTag::EnemyBullet && b.GetTag() == ColliderTag::Counter))
 	{
 		isCounterVsEnemyBullet = true;
@@ -268,11 +342,11 @@ void CollisionManager::OnHit(ICollider& a, ICollider& b)
 	else isCounterVsEnemyBullet = false;
 
 	//カウンター成功の場合
-	if(isCounterVsEnemyBullet)
+	if (isCounterVsEnemyBullet)
 	{
 		//タグが敵弾の方のコライダーを保持しておく
 		ICollider* pBulletCollider = &a;
-		if(a.GetTag() != ColliderTag::EnemyBullet)
+		if (a.GetTag() != ColliderTag::EnemyBullet)
 		{
 			pBulletCollider = &b;
 		}

@@ -6,6 +6,8 @@ enum class DamageSourceType
 	Rock,//岩
 	Worm,//ワームエネミー
 	Beam,//ボスのビーム
+	Building,//ビル
+	RushEnemy,//突進する敵
 };
 
 //ダメージの発生源(種類+個体ID)

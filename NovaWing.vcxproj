@@ -245,6 +245,7 @@
     <ClCompile Include="Game\GameObjects\Actors\Character\Player\SpecialAction\SomersaultState.cpp" />
     <ClCompile Include="Scene\TitleScene.cpp" />
     <ClCompile Include="Manager\TargetManager.cpp" />
+    <ClCompile Include="Manager\EnemySpawner.cpp" />
     <ClCompile Include="Game\UI\UIBase.cpp" />
     <ClCompile Include="Manager\UIManager.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Stage\Stage.cpp" />
@@ -295,8 +296,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Actors\Building\Building.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\RushEnemy\RushEnemy.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Building\BuildingDataSetter.cpp" />
     <ClCompile Include="Game\Collision\MeshShape.cpp" />
+    <ClCompile Include="Game\Collision\BuildingCollider.cpp" />
     <ClCompile Include="Constants\StageConfig.cpp" />  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
@@ -391,6 +394,7 @@
     <ClInclude Include="Game\GameObjects\Actors\Character\Player\SpecialAction\SomersaultState.h" />
     <ClInclude Include="Scene\TitleScene.h" />
     <ClInclude Include="Manager\TargetManager.h" />
+    <ClInclude Include="Manager\EnemySpawner.h" />
     <ClInclude Include="Game\UI\UIBase.h" />
     <ClInclude Include="Manager\UIManager.h" />
     <ClInclude Include="Game\GameObjects\Actors\Stage\Stage.h" />
@@ -426,8 +430,10 @@
     <ClInclude Include="DebugTools\AutoPlay\PlaytestRecorder.h" />
     <ClInclude Include="DebugTools\DebugUI\DebugUI.h" />
     <ClInclude Include="Game\GameObjects\Actors\Building\Building.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\RushEnemy\RushEnemy.h" />
     <ClInclude Include="Game\GameObjects\Actors\Building\BuildingDataSetter.h" />
     <ClInclude Include="Game\Collision\MeshShape.h" />
+    <ClInclude Include="Game\Collision\BuildingCollider.h" />
     <ClInclude Include="Constants\StageConfig.h" />  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">
