@@ -37,13 +37,14 @@ public:
 	std::vector<ICollider*> GetColliders() override;
 
 private:
-
 	//状態ごとの更新
 	void UpdateAppear(const Vector3& playerPos);
 	void UpdateCharge(const Vector3& playerPos);
 	void UpdateRush(const Vector3& playerPos);
 	//敵を描画
 	void DrawEnemy();
+	//モデルの正面を毎フレーム向きたい方向に回す
+	void LookAtDir(const Vector3& dir);
 
 private:
 	//ステート
@@ -59,6 +60,8 @@ private:
 	float m_stateTimer = 0.0f;
 	//プレイヤーから見た待機場所のずれ
 	Vector3 m_standbyOffset;
+	//予備動作中の震えの中心位置
+	Vector3 m_chargeCenter;
 	//突進する方向
 	Vector3 m_rushDir;
 	//前のフレームのプレイヤーのZ

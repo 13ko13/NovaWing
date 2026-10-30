@@ -54,6 +54,7 @@
 #include "PauseScene.h"
 #include "Manager/TutorialController.h"
 #include "Constants/StageConfig.h"
+#include "Manager/EnemySpawner.h"
 #ifdef _DEBUG
 #include "DebugTools/DebugUI/DebugUI.h"
 #endif
@@ -195,6 +196,8 @@ void GameScene::Init()
 	);
 	//ボスに工場をセットする
 	m_pBoss->SetEnemyFactory(m_pEnemyFactory);
+	//敵出現管理の初期化
+	m_pEnemySpawner = std::make_unique<EnemySpawner>(m_pPlayer, m_pEnemyFactory);
 
 	//UIManagerの初期化
 	m_pUIManager = std::make_shared<UIManager>();
@@ -296,6 +299,9 @@ void GameScene::CreateStageObjects(float offsetZ)
 		//生存を保持するための配列に格納
 		m_pEnemies.push_back(pEnemy);
 	}
+
+	//突進する敵の出現予定を読み込む
+	m_pEnemySpawner->LoadRushEnemy(m_pStageConfig->GetCSVFolderName(), offsetZ);
 
 	//岩の生成&初期化
 	m_pRocks = RockDataSetter::CreateRock(m_pCamera, offsetZ, m_pStageConfig->GetCSVFolderName());
@@ -614,6 +620,9 @@ void GameScene::UpdateGameWorld()
 {
 	//全GameObjectのUpdateを呼ぶ
 	GameObjectManager::GetInstance().UpdateAll();
+
+	//プレイヤーが出現位置まで来たら敵を出す
+	m_pEnemySpawner->Update();
 
 	//エフェクトマネージャーの更新
 	m_pEffectManager->Update();

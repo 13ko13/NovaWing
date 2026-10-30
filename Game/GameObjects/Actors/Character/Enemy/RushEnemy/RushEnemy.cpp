@@ -13,9 +13,9 @@ namespace
 {
 	//出現中
 	//出現にかけるフレーム数
-	constexpr float appear_frame = 20.0f;
+	constexpr float appear_frame = 60.0f;
 	//画面外のどれだけ外側から入ってくるか
-	constexpr float appear_distance = 1500.0f;
+	constexpr float appear_distance =6000.0f;
 
 	//予備動作中
 	//予備動作にかけるフレーム数
@@ -30,7 +30,13 @@ namespace
 	constexpr float delete_distance = 500.0f;
 
 	//モデルの大きさ
-	const Vector3 model_scale = Vector3(1.0f, 1.0f, 1.0f);
+	const Vector3 model_scale = Vector3(2.0f, 2.0f, 2.0f);
+
+	//モデルの正面の向き
+	const Vector3 model_forward = Vector3(0.0f, -1.0f, 0.0f);
+
+	//モデルの正面と向きたい方向がほぼ同じかの閾値
+	constexpr float forward_and_dir_threshold = 0.9999f;
 }
 
 RushEnemy::RushEnemy(const RushEnemyData& data) :
@@ -44,12 +50,17 @@ RushEnemy::RushEnemy(const RushEnemyData& data) :
 	m_pSoundManager = data.pSoundManager;
 	m_pEffectManager = data.pEffectManager;
 
-	//初期位置設定
-	SetPos(data.pos);
 	//待機位置のずれ
 	//プレイヤーの位置からどれだけ離れた位置に待機するか
 	Vector3 playerPos = m_pPlayer.lock()->GetPos();//プレイヤーの位置
 	m_standbyOffset = data.pos - playerPos;
+
+	//初期位置設定
+	//最初は待機位置から画面の外側に離れたところに置く
+	Vector3 outward = Vector3(m_standbyOffset.x, m_standbyOffset.y, 0.0f);
+	if (outward.Length() == 0.0f) outward = Vector3(0.0f, 1.0f, 0.0f);
+	else outward.Normalize();
+	SetPos(data.pos + outward * appear_distance);
 }
 
 RushEnemy::~RushEnemy()
@@ -194,7 +205,12 @@ void RushEnemy::UpdateAppear(const Vector3& playerPos)
 		m_state = State::Charge;
 		//ステートの更新用フレームもリセットする
 		m_stateTimer = 0.0f;
+		//震えの中心を現在の出現完了後の位置とする
+		m_chargeCenter = m_pos;
 	}
+	//プレイヤーへの向きを渡してモデルの正面を
+	//プレイヤーに向けるようにする
+	LookAtDir(playerPos - m_pos);
 }
 
 void RushEnemy::UpdateCharge(const Vector3& playerPos)
@@ -204,8 +220,9 @@ void RushEnemy::UpdateCharge(const Vector3& playerPos)
 	float shakeAmountY = static_cast<float>(GetRand(shake_width * 2) - shake_width);//-shake_widthからshake_width
 	Vector3 shakeAmount = Vector3(shakeAmountX, shakeAmountY, 0.0f);//Vector3にまとめる
 
-	//位置に足す
-	m_pos = playerPos + m_standbyOffset + shakeAmount;
+	//前後だけプレイヤーが進んだ分ついていく
+	m_chargeCenter.z += playerPos.z - m_prevPlayerZ;
+	m_pos = m_chargeCenter + shakeAmount;
 
 	//チャージの時間が終了したら
 	if (m_stateTimer >= charge_frame)
@@ -217,6 +234,10 @@ void RushEnemy::UpdateCharge(const Vector3& playerPos)
 		//ステートタイマーリセット
 		m_stateTimer = 0.0f;
 	}
+
+	//プレイヤーへの向きを渡してモデルの正面を
+	//プレイヤーに向けるようにする
+	LookAtDir(playerPos - m_pos);
 }
 
 void RushEnemy::UpdateRush(const Vector3& playerPos)
@@ -228,6 +249,10 @@ void RushEnemy::UpdateRush(const Vector3& playerPos)
 	m_pos += m_rushDir * rush_speed * timeScale;
 	//プレイヤーが前に進んだ分だけ、一緒に前に進む
 	m_pos.z += playerPos.z - m_prevPlayerZ;
+
+	//モデルが突進方向を向くようにする
+	LookAtDir(m_rushDir);
+
 	//プレイヤーの後ろまで行った値が閾値を超えたら消す
 	if (m_pos.z < playerPos.z - delete_distance) OnDead();
 }
@@ -248,17 +273,47 @@ void RushEnemy::DrawEnemy()
 		ResourceLoader::GraphicID::RushEnemyMetalicMap);
 
 	//ディゾルブ用ノイズ
-    int noiseHandle = ResourceLoader::GetInstance().GetGraphic(
-        ResourceLoader::GraphicID::DissolveNoise
-    );
+	int noiseHandle = ResourceLoader::GetInstance().GetGraphic(
+		ResourceLoader::GraphicID::DissolveNoise
+	);
 
 	//ハンドルとレジスタ番号をセットで保持しておく
-    std::vector<std::pair<int,int>> textures;
-    textures.push_back({ShaderRegister::tex_normal,normGraphH});//法線マップ
-    textures.push_back({ShaderRegister::tex_metalic,metalicGraphH});//メタリックマップはないので-1
-    textures.push_back({ShaderRegister::tex_emission,emissionGraphH});//エミッション
-    textures.push_back({ShaderRegister::tex_noise,noiseHandle});//ノイズテクスチャ
+	std::vector<std::pair<int, int>> textures;
+	textures.push_back({ ShaderRegister::tex_normal,normGraphH });//法線マップ
+	textures.push_back({ ShaderRegister::tex_metalic,metalicGraphH });//メタリックマップ
+	textures.push_back({ ShaderRegister::tex_emission,emissionGraphH });//エミッション
+	textures.push_back({ ShaderRegister::tex_noise,noiseHandle });//ノイズテクスチャ
 
-    //DrawWithLightingにペアの配列を渡してモデルを描画
-    DrawWithLighting(textures);
+	//DrawWithLightingにペアの配列を渡してモデルを描画
+	DrawWithLighting(textures);
+}
+
+void RushEnemy::LookAtDir(const Vector3& dir)
+{
+	//向きたい方向
+	Vector3 to = dir.Normalized();
+	//正面と向きたい方向がどれだけ同じ向きか
+	float dot = Vector3::Dot(model_forward, to);
+
+	//正面と向きたい方向がほぼ同じ向きなら回さない
+	if (dot > forward_and_dir_threshold)
+	{
+		m_rotation = Quaternion();
+		return;
+	}
+	//真逆だと外積が0になって位置が決まらないので
+	//正面と直角なX軸で180度回転する
+	if (dot < -forward_and_dir_threshold)
+	{
+		m_rotation = Quaternion(Vector3(1.0f, 0.0f, 0.0f), DX_PI_F);
+		return;
+	}
+
+	//2本のベクトルに直角な軸を中心に
+	//間の角度だけ回す
+	//dotは長さ1のベクトル同士だと2本の間の角度のcosとなるので
+	//cosの逆の計算をしてcosから角度を計算
+	Vector3 axis = Vector3::Cross(model_forward, to).Normalized();
+	float angle = std::acosf(dot);
+	m_rotation = Quaternion(axis, angle);
 }

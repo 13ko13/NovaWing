@@ -24,6 +24,7 @@ class EffectManager;
 class WarningUI;
 class TutorialController;
 class StageConfig;
+class EnemySpawner;
 class GameScene :public Scene
 {
 public:
@@ -138,4 +139,6 @@ private:
 	std::shared_ptr<TutorialController> m_pTutorialController;
 	//ステージ設定用のクラスへのポインタ
 	std::unique_ptr<StageConfig> m_pStageConfig;
+	//突進する敵などを、プレイヤーが近づいたら出すクラスへのポインタ
+	std::unique_ptr<EnemySpawner> m_pEnemySpawner;
 };

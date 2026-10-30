@@ -2003,3 +2003,23 @@
   - 別件(ユーザー報告待ち): ワームがfarの外に出て消えるとき([WormEnemy.cpp:114](Game/GameObjects/Actors/Character/Enemy/WormEnemy/WormEnemy.cpp#L114))が`OnEnemyDead()`なので、倒していなくても撃破数が増える。
   - **要確認**: `Data/Model/Drone.mv1`・`Drone_fix.mv1`が10/29 17:05に変わっていて、`Data/Model/Drone.FBX`が消えている(git上は変更・削除)。突進する敵の`.mv1`を作った時刻(17:06)と同じなので、モデルビューアで開いたときに上書きされた可能性がある。わざとでなければ、コミットする前に元に戻す(GitHub Desktopでその3つを「Discard changes」)。
   - 未コミット: 建物の当たり判定一式・突進する敵一式・`EnemySpawner`・`Data/Model/RushEnemy/`・`Data/CSV/Stage2/RushEnemy.csv`・コスト表など。
+
+### 2026-10-30 突進する敵がゲームの中で動いた(ユーザー確認)
+- **完了(ユーザーが書いた)**: [EnemySpawner.cpp](Manager/EnemySpawner.cpp)の`LoadRushEnemy`(CSVから`SpawnData`を作って`m_spawnDatas`に入れるだけ、敵はまだ作らない)と`Update`(イテレータで回し、出したら`it = erase(it)`)。`GameScene`は、Initで工場の後に`make_unique`、`CreateStageObjects`で`LoadRushEnemy`、`UpdateGameWorld`の`UpdateAll()`の下で`Update()`。
+- **ちらつきの修正**: Spawnerが作ったフレームは、Updateを通らないまま待機位置に描かれていた(`UpdateAll`の後に作られるため)→ コンストラクタで最初から「待機位置＋外側の方向×`appear_distance`」に置く。
+- **向き**: `m_rotation`を一度も設定しておらず、モデルが下を向いたままだった → `LookAtDir(dir)`を追加(`Cross(model_forward, to)`を軸、`acos(Dot)`を角度、同じ向き・真逆の時は別処理)。Appear・Chargeはプレイヤーの方、Rushは`m_rushDir`を向く。**`model_forward = (0,-1,0)`で正しく向いた**(`.x`の頂点は機首-Zだったが、mv1では-Y)。
+- **予備動作中の位置**: プレイヤーの上下左右の動きについていくのが気持ち悪い(ユーザー) → 出現が終わった位置を`m_chargeCenter`に覚え、予備動作中はZだけプレイヤーの前進分を足す。位置は「中心＋震え」。上下左右についていくのは出現(Appear)の間だけ。
+- **配置(Claude、ユーザー依頼)**: [Data/CSV/Stage2/RushEnemy.csv](Data/CSV/Stage2/RushEnemy.csv)を2体→12体に(3000〜25000、後半ほど同時出現・近い距離。ボスは30000)。Unityの書き出しを作ると上書きされるので、配置はUnity側にも置く。
+- **残り**:
+  - [TitleScene.cpp:80](Scene/TitleScene.cpp#L80)の`first_stage_no`がテスト用の`1`のまま → `0`に戻す。
+  - Claude: Unityで突進する敵を置いて`RushEnemy.csv`(`frontOffset`列付き)を書き出す。AIテストプレイが突進する敵を敵と分かるようにする([AutoPlayWorld.cpp:163-164](DebugTools/AutoPlay/AutoPlayWorld.cpp#L163-L164))。
+  - デバッグワープで出現Zを一気に飛び越えると、飛び越えた分の敵が同じフレームでまとめて出る(デバッグ用なので今は気にしない)。
+- (10/30)出現方向: 真上から来るのがしぶい(ユーザー、上下左右はOK)→ CSVの`posX=0`の2体を変更(8500: `-900,200`=左、17000: `900,400`=右上)。`posX`を0にすると真上/真下から来る。frontOffsetはユーザーが全部+1000に変更済み。
+- **(10/30)コスト表「突進する敵」を完了に(ユーザー申告で実5h)**: 死亡 実1h・プレイヤーに向かって移動 実4h(内訳はClaudeの割り振り)、親も完了。バックアップはscratchpad。**プロト 81/残5**(S: 固定砲台の敵2h、B: 移動の加速度2h・岩の当たり判定1h・難易度調整0h)、合計204.5/残109.5。
+- **(10/30帰宅時点)まとめ・次回やること**
+  - 突進する敵は**完了**(ゲームで確認済み・コスト表も完了)。[TitleScene.cpp:80](Scene/TitleScene.cpp#L80)の`first_stage_no`は`0`に戻っている(確認済み)。古いコメント(「メタリックマップはないので-1」)も無くなっている。
+  - **締め切り10/31(明日)。プロトの残り5h**:
+    1. **固めの固定砲台の敵(2h・S)← 次はこれ**。突進する敵の道具がそのまま使える: 出し方は`EnemySpawner`に`LoadTurretEnemy`(仮)を足す/`EnemyFactory`に`EnemyType`を足す、向きは`LookAtDir`と同じ作り、弾は浮遊敵の撃ち方。CSVは`Data/CSV/Stage2/`に置く。仕様(どこに置くか・動くか・HP・弾の間隔)はまだ決めていない → 最初に決める。
+    2. B(終わらなければアルファへ回してよい): 移動の加速度2h、岩の当たり判定(ノーマル/チャージ)1h、難易度調整0h。
+  - Claudeがやること(急ぎではない): Unityで突進する敵を置いて`RushEnemy.csv`を書き出せるようにする(作ると今の手書きの配置は上書きされるので、配置をUnity側にも置く)。AIテストプレイが突進する敵を認識するようにする([AutoPlayWorld.cpp:163-164](DebugTools/AutoPlay/AutoPlayWorld.cpp#L163-L164)、.cppなのでユーザーの依頼があってから)。
+  - コミット: 突進する敵一式・`EnemySpawner`・`GameScene`の変更・`RushEnemy.csv`・コスト表・NOTES.md。(このPowerShellには`git`が無く、未コミットかどうかは確かめられなかった)
