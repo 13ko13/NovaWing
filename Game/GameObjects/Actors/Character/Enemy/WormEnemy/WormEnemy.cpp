@@ -41,13 +41,11 @@ WormEnemy::WormEnemy(
 	const WormEnemyData& data,//ワームエネミーに必要なデータ
 	std::weak_ptr<SoundManager> pSoundManager,
 	std::weak_ptr<EffectManager> pEffectManager) :
-	EnemyBase(data.modelID, camera, pPlayer, pBulletManager),
+	EnemyBase(data.modelID, camera, pPlayer, pBulletManager, pSoundManager, pEffectManager),
 	m_segmentCount(data.segmentCount),
 	m_headSphere(std::make_shared<SphereShape>(data.pos, 0.0f)),
 	m_moveDirection(data.direction),
 	m_activatePlayerZ(data.activatePlayerZ),
-	m_pSoundManager(pSoundManager),
-	m_pEffectManager(pEffectManager),
 	m_collider(*this, ColliderTag::Worm)
 {
 	//位置を反映

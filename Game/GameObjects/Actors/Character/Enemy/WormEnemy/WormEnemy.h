@@ -77,10 +77,6 @@ private:
 	//死亡エフェクトを出す間隔
 	int m_deathEffectInterval = 0;
 
-	//音のマネージャー
-	std::weak_ptr<SoundManager> m_pSoundManager;
-	//エフェクトのマネージャー
-	std::weak_ptr<EffectManager> m_pEffectManager;
 
 	//当たり判定インターフェース
 	EnemyCollider m_collider;

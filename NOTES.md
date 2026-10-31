@@ -2023,3 +2023,18 @@
     2. B(終わらなければアルファへ回してよい): 移動の加速度2h、岩の当たり判定(ノーマル/チャージ)1h、難易度調整0h。
   - Claudeがやること(急ぎではない): Unityで突進する敵を置いて`RushEnemy.csv`を書き出せるようにする(作ると今の手書きの配置は上書きされるので、配置をUnity側にも置く)。AIテストプレイが突進する敵を認識するようにする([AutoPlayWorld.cpp:163-164](DebugTools/AutoPlay/AutoPlayWorld.cpp#L163-L164)、.cppなのでユーザーの依頼があってから)。
   - コミット: 突進する敵一式・`EnemySpawner`・`GameScene`の変更・`RushEnemy.csv`・コスト表・NOTES.md。(このPowerShellには`git`が無く、未コミットかどうかは確かめられなかった)
+
+### 2026-10-31 突進する敵はプレイヤーに当たったら爆発して消える(ユーザー実装、確認OK)
+- `EnemyBase`に`virtual void OnHitPlayer() {}`を追加(普通の敵は何もしない)。`EnemyCollider::OnCollision`で相手が`ColliderTag::Player`なら`m_owner.OnHitPlayer()`。`RushEnemy`が上書きして死亡処理へ。プレイヤーのダメージは多段ヒット防止で1回だけ。
+- **次**: 固定砲台の敵(コスト表 2h・S)。仕様(了承済み): ビルの屋上などに固定、HP多め(30目安)、プレイヤーが近づいて画面に映っている間だけ一定間隔(1〜1.5秒)で撃つ。モデルは`Base`→`Turret`(Y軸回転)→`Barrel`(上下)のフレームの親子で、ユーザーがClaude Desktopで作る(`Data/Model/TurretEnemy/`、`.x`→`.mv1`はユーザーが変換)。届くまでは`Drone_fix.mv1`を仮で使い、砲塔の回転は後で足す。作り方は最初から置く形(`TurretEnemyDataSetter`、浮遊敵と同じ)。
+
+### 2026-10-31 固定砲台の敵: 登録とファイル作成(Claude、Debugビルド成功)
+- 仕様追加: **接触ダメージ無し**(`ColliderTag::Floating`を使う)。
+- 登録: `ModelID::TurretEnemy`([ResourceLoader.h:44](Manager/ResourceLoader.h#L44))、パス表・`game.models`・`WStringToModelID`([ResourceLoader.cpp:115](Manager/ResourceLoader.cpp#L115)、[473](Manager/ResourceLoader.cpp#L473)、[674](Manager/ResourceLoader.cpp#L674))、モデルは仮で`Drone_fix.mv1`、`EnemyStatus.csv`に`TurretEnemy,30,132,10,0`。
+- ファイル: [TurretEnemy.h](Game/GameObjects/Actors/Character/Enemy/TurretEnemy/TurretEnemy.h)/.cpp(コンストラクタとデストラクタだけ)、[TurretEnemyDataSetter.h](Game/GameObjects/Actors/Character/Enemy/TurretEnemy/TurretEnemyDataSetter.h)/.cpp、[Data/CSV/Stage2/TurretEnemy.csv](Data/CSV/Stage2/TurretEnemy.csv)(ヘッダのみ)。vcxproj登録済み。
+- **次**: ユーザーが中身を書く(データ構造体・Init/Update/Draw/被ダメージ・当たり判定、`CreateEnemy`、[GameScene.cpp:257](Scene/GameScene.cpp#L257)の`CreateStageObjects`で生成)、CSVに配置。
+
+### 2026-10-31 敵の共通部分をEnemyBaseへ移動(Claude、ユーザー依頼)
+- `m_pSoundManager`・`m_pEffectManager`・`m_dyingFrame`を[EnemyBase.h:64](Game/GameObjects/Actors/Character/Enemy/EnemyBase.h#L64)へ。コンストラクタの引数に2つのマネージャーを追加(浮遊敵・ワーム・ボス・突進・砲台を修正)。
+- `TakeDamage`の標準処理を[EnemyBase.cpp:29](Game/GameObjects/Actors/Character/Enemy/EnemyBase.cpp#L29)へ。浮遊敵・突進・砲台は親のものを使う。ワームとボスは今までどおりoverride。当たり判定は敵ごとに違うので子に残した。
+- 全ファイルのコンパイルは成功。リンクは`TurretEnemy`の未実装6関数(`OnInit`・`Update`・`Draw`・`GetCollisionSpheres`・`GetColliders`・`OnHitPlayer`)だけで失敗中。砲台の中身を書くまでゲームは起動できず、動作確認は未実施。`OnHitPlayer`は宣言を消す。

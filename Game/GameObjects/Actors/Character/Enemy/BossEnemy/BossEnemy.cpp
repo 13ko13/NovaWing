@@ -59,10 +59,8 @@ namespace
 
 BossEnemy::BossEnemy(BossEnemyData& data) :
 	EnemyBase(data.Id, data.pCamera, data.pPlayer,
-	data.pBulletManager),
+	data.pBulletManager, data.pSoundManager, data.pEffectManager),
 	m_animator(m_modelHandle),
-	m_pSoundManager(data.pSoundManager),
-	m_pEffectManager(data.pEffectManager),
 	m_damageCollider(*this),
 	m_shieldCollider(*this),
 	m_beamCollider(*this),

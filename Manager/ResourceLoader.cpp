@@ -112,6 +112,7 @@ namespace
 		{ ResourceLoader::ModelID::Stage, stage_model_path },//ステージ
 		{ ResourceLoader::ModelID::Boss, boss_model_path },//ボス
 		{ ResourceLoader::ModelID::RushEnemy, rush_enemy_model_path },//突進する敵
+		{ ResourceLoader::ModelID::TurretEnemy, turret_enemy_model_path },//固定砲台の敵
 		{ ResourceLoader::ModelID::SceneryIslandA, scenery_islanda_model_path },//景色用の島(IslandA)
 		{ ResourceLoader::ModelID::SceneryIslandB, scenery_islandb_model_path },//景色用の島(IslandB)
 		{ ResourceLoader::ModelID::SceneryIslandC, scenery_islandc_model_path },//景色用の島(IslandC)
@@ -469,7 +470,7 @@ void ResourceLoader::InitSceneResources()
 		ModelID::BuildingTallBrokenCol, ModelID::BuildingOfficeGuttedCol, ModelID::BuildingLeaningCol,
 		ModelID::BuildingCollapsedCol, ModelID::BuildingAntennaTowerCol, ModelID::BuildingBridgeWreckCol,
 		//2ステージ目の敵
-		ModelID::RushEnemy,
+		ModelID::RushEnemy, ModelID::TurretEnemy,
 	};
 	game.graphics = {
 		GraphicID::SkyBoxFront, GraphicID::SkyBoxBack, GraphicID::SkyBoxLeft,
@@ -670,6 +671,7 @@ ResourceLoader::ModelID ResourceLoader::WStringToModelID(const std::wstring id)
 		{ floating_enemy_csv_name,ModelID::FloatingEnemy },
 		{ worm_head_csv_name,ModelID::WormHead },
 		{ rush_enemy_csv_name,ModelID::RushEnemy },
+		{ turret_enemy_csv_name,ModelID::TurretEnemy },
 		{ boss_csv_name,ModelID::Boss },
 		{ scenery_islanda_csv_name,ModelID::SceneryIslandA },
 		{ scenery_islandb_csv_name,ModelID::SceneryIslandB },

@@ -2,9 +2,7 @@
 #include "RushEnemy.h"
 #include "Game/Collision/EnemyCollider.h"
 #include "Game/Collision/SphereShape.h"
-#include "Manager/SoundManager.h"
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
-#include "Manager/EffectManager.h"
 #include "Main/Application.h"
 #include "Manager/DebugManager.h"
 #include "Constants/ShaderRegister.h"
@@ -40,15 +38,13 @@ namespace
 }
 
 RushEnemy::RushEnemy(const RushEnemyData& data) :
-	EnemyBase(data.modelID, data.pCamera, data.pPlayer, data.pBulletManager)
+	EnemyBase(data.modelID, data.pCamera, data.pPlayer, data.pBulletManager,
+		data.pSoundManager, data.pEffectManager)
 {
 	//当たり判定の生成
 	m_colSphere = std::make_shared<SphereShape>(data.pos, 0.0f);
 	m_pCollider = std::make_unique<EnemyCollider>(*this, ColliderTag::RushEnemy);
 
-	//サウンドマネージャーとエフェクトマネージャーの受け取る
-	m_pSoundManager = data.pSoundManager;
-	m_pEffectManager = data.pEffectManager;
 
 	//待機位置のずれ
 	//プレイヤーの位置からどれだけ離れた位置に待機するか
@@ -144,28 +140,6 @@ void RushEnemy::Draw()
 #endif
 }
 
-void RushEnemy::TakeDamage(int damage)
-{
-	//死亡待機中は死亡処理を二重に行わない
-	if (m_isDying) return;
-
-	//体力を減らす
-	m_health -= damage;
-	//体力が0以下になったら死亡処理
-	if (m_health <= 0)
-	{
-		//死亡待機状態をtrueにする
-		m_isDying = true;
-
-		//死亡音を鳴らす
-		m_pSoundManager.lock()->Play(SoundManager::SoundType::EnemyDeath);
-
-		//死亡エフェクトの再生を依頼する
-		m_pEffectManager.lock()->PlayOneShot(
-			ResourceLoader::EffectID::FloatingDeath, m_pos);
-	}
-}
-
 std::vector<std::shared_ptr<SphereShape>> RushEnemy::GetCollisionSpheres() const
 {
 	if (m_isDying) return {};
@@ -176,6 +150,12 @@ std::vector<ICollider*> RushEnemy::GetColliders()
 {
 	//生ポインタを取得して返す
 	return { m_pCollider.get() };
+}
+
+void RushEnemy::OnHitPlayer()
+{
+	//突進して爆発して死ぬ感じにする
+	TakeDamage(m_health);
 }
 
 void RushEnemy::UpdateAppear(const Vector3& playerPos)

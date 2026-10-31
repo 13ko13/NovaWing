@@ -3,3 +3,4 @@ FloatingEnemy,5,132,10,0
 WormHead,100,40,0,13
 Boss,2000,0,330,0
 RushEnemy,30,132,10,0
+TurretEnemy,30,132,10,0

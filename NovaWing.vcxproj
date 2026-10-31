@@ -300,7 +300,9 @@
     <ClCompile Include="Game\GameObjects\Actors\Building\BuildingDataSetter.cpp" />
     <ClCompile Include="Game\Collision\MeshShape.cpp" />
     <ClCompile Include="Game\Collision\BuildingCollider.cpp" />
-    <ClCompile Include="Constants\StageConfig.cpp" />  </ItemGroup>
+    <ClCompile Include="Constants\StageConfig.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\TurretEnemy\TurretEnemy.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\TurretEnemy\TurretEnemyDataSetter.cpp" />  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
     <ClInclude Include="Game\Collision\CounterCollider.h" />
@@ -434,7 +436,9 @@
     <ClInclude Include="Game\GameObjects\Actors\Building\BuildingDataSetter.h" />
     <ClInclude Include="Game\Collision\MeshShape.h" />
     <ClInclude Include="Game\Collision\BuildingCollider.h" />
-    <ClInclude Include="Constants\StageConfig.h" />  </ItemGroup>
+    <ClInclude Include="Constants\StageConfig.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\TurretEnemy\TurretEnemy.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\TurretEnemy\TurretEnemyDataSetter.h" />  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

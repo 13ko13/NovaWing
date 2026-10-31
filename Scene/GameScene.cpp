@@ -55,6 +55,7 @@
 #include "Manager/TutorialController.h"
 #include "Constants/StageConfig.h"
 #include "Manager/EnemySpawner.h"
+#include "Game/GameObjects/Actors/Character/Enemy/TurretEnemy/TurretEnemyDataSetter.h"
 #ifdef _DEBUG
 #include "DebugTools/DebugUI/DebugUI.h"
 #endif
@@ -290,6 +291,26 @@ void GameScene::CreateStageObjects(float offsetZ)
 		m_pStageConfig->GetCSVFolderName()
 	);
 	for (std::shared_ptr<EnemyBase> pEnemy : wormEnemies)
+	{
+		pEnemy->Init();
+		//衝突判定マネージャーに敵を登録する
+		m_pCollisionManager->Register(pEnemy);
+		//ターゲットマネージャーにエネミーを登録する
+		m_pTargetManager->Register(pEnemy);
+		//生存を保持するための配列に格納
+		m_pEnemies.push_back(pEnemy);
+	}
+	//タレット敵の初期化
+	std::vector<std::shared_ptr<EnemyBase>> turretEnemys = TurretEnemyDataSetter::CreateEnemy(
+		m_pPlayer,
+		m_pCamera,
+		m_pBulletManager,
+		m_pSoundManager,
+		m_pEffectManager,
+		offsetZ,
+		m_pStageConfig->GetCSVFolderName()
+	);
+	for (std::shared_ptr<EnemyBase> pEnemy : turretEnemys)
 	{
 		pEnemy->Init();
 		//衝突判定マネージャーに敵を登録する

@@ -1,0 +1,4 @@
+modelID,posX,posY,posZ,rotX,rotY,rotZ,scaleX,scaleY,scaleZ
+TurretEnemy,-1000,400,6500,0,0,0,1,1,1
+TurretEnemy,1000,400,9500,0,0,0,1,1,1
+TurretEnemy,0,700,12500,0,0,0,1,1,1

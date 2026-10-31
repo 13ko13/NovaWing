@@ -4,8 +4,6 @@
 #include "HideState.h"
 #include "Manager/LightingManager.h"
 #include "Constants/ShaderRegister.h"
-#include "Manager/SoundManager.h"
-#include "Manager/EffectManager.h"
 #include "Manager/DebugManager.h"
 
 namespace
@@ -21,10 +19,8 @@ FloatingEnemy::FloatingEnemy(const std::weak_ptr<Player> pPlayer,
 	const Vector3& pos,
 	std::weak_ptr<SoundManager> pSoundManager,
 	std::weak_ptr<EffectManager> pEffectManager) :
-	EnemyBase(Id,camera,pPlayer,pBulletManager),
+	EnemyBase(Id,camera,pPlayer,pBulletManager,pSoundManager,pEffectManager),
 	m_colSphere(std::make_shared<SphereShape>(pos, 0.0f)),
-	m_pSoundManager(pSoundManager),
-	m_pEffectManager(pEffectManager),
 	m_collider(*this, ColliderTag::Floating)
 {
 	//位置を反映
@@ -142,28 +138,6 @@ void FloatingEnemy::DrawEnemy()
 
     //DrawWithLightingにペアの配列を渡してモデルを描画
     DrawWithLighting(textures);
-}
-
-void FloatingEnemy::TakeDamage(int damage)
-{
-	//死亡待機中は死亡処理を二重に行わない
-	if (m_isDying) return;
-
-	//体力を減らす
-	m_health -= damage;
-	//体力が0以下になったら死亡処理
-	if (m_health <= 0)
-	{
-		//死亡待機状態をtrueにする
-		m_isDying = true;
-
-		//死亡音を鳴らす
-		m_pSoundManager.lock()->Play(SoundManager::SoundType::EnemyDeath);
-
-		//死亡エフェクトの再生を依頼する
-		m_pEffectManager.lock()->PlayOneShot(
-			ResourceLoader::EffectID::FloatingDeath, m_pos);
-	}
 }
 
 Vector3 FloatingEnemy::GetPlayerPos() const

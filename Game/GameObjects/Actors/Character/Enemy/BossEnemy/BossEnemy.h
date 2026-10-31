@@ -114,10 +114,6 @@ private:
 	std::shared_ptr<IBossEnemyState> m_pState;
 	//敵生産工場
 	std::weak_ptr<EnemyFactory> m_pEnemyFactory;
-	//音のマネージャー
-	std::weak_ptr<SoundManager> m_pSoundManager;
-	//エフェクトのマネージャー
-	std::weak_ptr<EffectManager> m_pEffectManager;
 
 	//プレイヤーの弾が当たった時に、無敵判定する部分
 	std::shared_ptr<SphereShape> m_invincibleHitCol = std::make_shared<SphereShape>();
@@ -130,8 +126,6 @@ private:
 	//一番最初の着地時のみに使用するフラグ
 	bool m_isFirstLanding = false;
 
-	//死亡待機状態をどのぐらい続けるかを計測
-	int m_dyingFrame = 0;
 
 	//足音のクールタイム計測
 	int m_footstepCT = 0;

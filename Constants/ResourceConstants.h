@@ -32,6 +32,7 @@ namespace
 	constexpr const wchar_t* building_bridge_wreck_col_model_path = L"Data/Model/Building/Building_BridgeWreck_Col.x";
 	//2ステージ目の敵
 	constexpr const wchar_t* rush_enemy_model_path = L"Data/Model/RushEnemy/RushEnemy.mv1";
+	constexpr const wchar_t* turret_enemy_model_path = L"Data/Model/Drone_fix.mv1";//仮モデル
 
 	//---------- 画像のパス ----------
 	//プレイヤー
@@ -165,6 +166,7 @@ namespace
 	constexpr const wchar_t* worm_head_csv_name = L"WormHead";
 	constexpr const wchar_t* boss_csv_name = L"Boss";
 	constexpr const wchar_t* rush_enemy_csv_name = L"RushEnemy";
+	constexpr const wchar_t* turret_enemy_csv_name = L"TurretEnemy";
 	constexpr const wchar_t* scenery_islanda_csv_name = L"SceneryIslandA";
 	constexpr const wchar_t* scenery_islandb_csv_name = L"SceneryIslandB";
 	constexpr const wchar_t* scenery_islandc_csv_name = L"SceneryIslandC";

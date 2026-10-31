@@ -29,12 +29,14 @@ public:
 	void OnInit() override;
 	void Update() override;
 	void Draw() override;
-	void TakeDamage(int damage) override;
 
 	//当たり判定を返す
 	std::vector<std::shared_ptr<SphereShape>> GetCollisionSpheres() const override;
 	//当たり判定インターフェースを返す
 	std::vector<ICollider*> GetColliders() override;
+
+	//プレイヤーに当たった時の処理
+	void OnHitPlayer() override;
 
 private:
 	//状態ごとの更新
@@ -66,14 +68,8 @@ private:
 	Vector3 m_rushDir;
 	//前のフレームのプレイヤーのZ
 	float m_prevPlayerZ = 0.0f;
-	//死亡待機の時間数える
-	int m_dyingFrame = 0;
 	//当たり判定の球
 	std::shared_ptr<SphereShape> m_colSphere;
 	//当たり判定インターフェース
 	std::unique_ptr<EnemyCollider> m_pCollider;
-	//音のマネージャー
-	std::weak_ptr<SoundManager> m_pSoundManager;
-	//エフェクトマネージャー
-	std::weak_ptr<EffectManager> m_pEffectManager;
 };

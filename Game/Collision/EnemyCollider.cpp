@@ -34,6 +34,10 @@ void EnemyCollider::OnCollision(const ICollider& other)
 		m_owner.SetLastDamageSource(EnemyBase::DamageSource::ChargeShot);
 		m_owner.TakeDamage(explosion.GetAttackPower());
 	}
+	else if(other.GetTag() == ColliderTag::Player)
+	{
+		m_owner.OnHitPlayer();
+	}
 }
 
 bool EnemyCollider::IsCollisionActive() const

@@ -30,7 +30,6 @@ public:
 	//描画
 	void Draw() override;
 	//ダメージを受ける
-	void TakeDamage(int damage) override;
 
 	//当たり判定を返す
 	std::vector<std::shared_ptr<SphereShape>> GetCollisionSpheres() const override;
@@ -73,13 +72,7 @@ private:
 	//アニメーター
 	std::shared_ptr<ModelAnimator> m_pAnimator;
 
-	//死亡状態中のフレーム計測
-	int m_dyingFrame = 0;
 
-	//音のマネージャー
-	std::weak_ptr<SoundManager> m_pSoundManager;
-	//エフェクトのマネージャー
-	std::weak_ptr<EffectManager> m_pEffectManager;
 
 	//当たり判定インターフェース
 	EnemyCollider m_collider;
