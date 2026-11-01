@@ -2038,3 +2038,40 @@
 - `m_pSoundManager`・`m_pEffectManager`・`m_dyingFrame`を[EnemyBase.h:64](Game/GameObjects/Actors/Character/Enemy/EnemyBase.h#L64)へ。コンストラクタの引数に2つのマネージャーを追加(浮遊敵・ワーム・ボス・突進・砲台を修正)。
 - `TakeDamage`の標準処理を[EnemyBase.cpp:29](Game/GameObjects/Actors/Character/Enemy/EnemyBase.cpp#L29)へ。浮遊敵・突進・砲台は親のものを使う。ワームとボスは今までどおりoverride。当たり判定は敵ごとに違うので子に残した。
 - 全ファイルのコンパイルは成功。リンクは`TurretEnemy`の未実装6関数(`OnInit`・`Update`・`Draw`・`GetCollisionSpheres`・`GetColliders`・`OnHitPlayer`)だけで失敗中。砲台の中身を書くまでゲームは起動できず、動作確認は未実施。`OnHitPlayer`は宣言を消す。
+
+### 2026-11-01 固定砲台の敵のモデルを登録(Claude、ユーザーが`.mv1`に変換)
+- `turret_enemy_model_path`を`Data/Model/TurretEnemy/TurretEnemy.mv1`に変更。`GraphicID::TurretEnemyNormalMap/MetalicMap/EmissionMap`をパス・対応表・`game.graphics`に登録。
+- 変換はDxLibModelViewerの「名前を付けて保存」。モデルの原点は底面の中心、正面は-Z、`Turret`はY軸(原点0,115,0)、`Barrel`はX軸(Turretから0,64,-78、±50°)。
+- **次(ユーザー)**: `DrawEnemy`のテクスチャ差し替え、`model_scale`を1倍で確認、当たり判定の球と発射位置を上にずらす、ステート、回転。
+
+### 2026-11-01 固定砲台の敵が土台に埋まって見える原因(調査のみ、未修正)
+- モデルは正常。`TurretEnemy.mv1`をDxLib標準の描画で表示すると正しい形で、フレーム位置も`Turret`=(0,115,0)、`Barrel`=(0,179,-78)。
+- 原因は描画側: [Actor.cpp:63](Game/GameObjects/Actors/Actor.cpp#L63)がモデル全体の行列だけを渡し、`LightingVS.hlsl`がそれで全頂点を変換するので、フレームのずれが消える。
+- 直し方(案、未検証): `Actor`に、フレームごとに`MV1GetFrameLocalWorldMatrix`→`world`へ入れて`UpdateShaderConstantBuffer`→`MV1DrawFrame`する描画関数を足す。`DrawWithLighting`とのテクスチャ処理の重複は切り出す。砲塔の回転もこれで見えるようになるはずなので、ステートより先に直す。
+- 補足: ボスは`DrawWithLighting(textures, true)`で`SkinnedLightingVS`(フレームごとの行列を使う)、プレイヤーは`MV1DrawModel`なので同じ現象は起きない。突進・ワーム・浮遊敵・岩はメッシュを持つフレームにずれがない。砲台の頂点はボーン情報を持たないので`true`では直らない。
+- **要確認**: 砲台の頂点は`type0`で接線の情報が無い(他のモデルは`type4`、ボスは`type5`)。法線マップが正しく効かない可能性がある。原因は未調査。フレーム描画を直してから見た目で確認し、問題があれば`.fbx`から変換するなど出力形式を見直す。
+
+### 2026-11-01 固定砲台の敵の表示を修正(ユーザー実装、確認OK)
+- `Actor::DrawFrameWithLighting`を追加(フレームごとに`MV1GetFrameLocalWorldMatrix`→`world`→`MV1DrawFrame`)。テクスチャ処理は`SetTexturesToShader`/`ReleaseTexturesToShader`に切り出した。砲台の見た目は「良い感じ」とユーザー確認。
+- **次**: 当たり判定の球を上にずらす → ステート → `Shoot` → 砲塔と砲身の回転。
+
+### 2026-11-01 固定砲台の敵のステートと発射(ユーザー実装、確認OK)
+- `Wait`/`Aim`のステート、`CanAttack`、`Shoot`が完成。発射位置は`Barrel`フレームから取る。今は砲身の根元(回転軸)から弾が出る。
+- **次**: 砲塔と砲身の回転、銃口の位置まで発射位置を前へ。`first_stage_no`は確認後`0`に戻す。
+
+### 2026-11-01 固定砲台の敵の回転(ユーザー実装、向きの確認OK)
+- `UpdateAimAngle`(砲塔`atan2(-x,-z)`、砲身は±50°)と`ApplyFrameRotation`(`MMult(回転, MV1GetFrameBaseLocalMatrix)`→`MV1SetFrameUserLocalMatrix`)。今は一瞬で向く。
+- **次**: 少しずつ回す(差を-180〜180°に直す)、発射10F前に止めて`m_aimPos`へ撃つ、発射位置を銃口(`Barrel`の`0,0,-132`)へ。
+
+### 2026-11-01 固定砲台の敵: 回転と予備動作が完成(ユーザー実装、確認OK「めちゃめちゃいい感じ」)
+- 砲塔と砲身は1フレーム3度まで、近い方向に回る。発射の`aim_lock_frame`(10F)前に回転を止め、`m_aimPos`(止まる直前のプレイヤー位置)へ撃つ。止まるのが発射の合図で、横に動けば避けられる。
+- **残り**: 発射位置を銃口へ、CSVの配置をビルの上へ、`first_stage_no`を`0`に戻す。
+
+### 2026-11-01 2ステージ目は地上のステージにする(ユーザー決定)
+- 固定砲台の敵はビルの上に置かない(10/31の仕様「ビルの屋上などに固定」を変更)。地上に置く。
+- 後で道路のモデルを探してきて敷き詰め、ステージにする予定。道路の高さが決まったら`Data/CSV/Stage2/TurretEnemy.csv`のYを合わせる(今は仮の400〜700)。
+
+### 2026-11-01 固定砲台の敵が完成(ユーザー実装、確認OK)
+- 発射位置を銃口へ: `MV1GetFrameLocalWorldMatrix`(`Barrel`)で`(0,0,-barrel_to_muzzle_distance)`を`VTransform`。
+- 残り: `first_stage_no`を`0`に戻す、地上の道路を敷いたらCSVのYを合わせる。プロトの残りはB(移動の加速度2h、岩の当たり判定1h、難易度調整)。
+- **(11/01)コスト表「固めの固定砲台の敵」を完了に(ユーザー申告で実3h)**: 死亡 実1h・弾 実2h(内訳はClaudeの割り振り)、親も完了。バックアップはscratchpad。

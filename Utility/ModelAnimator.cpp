@@ -1,5 +1,7 @@
-﻿#include "ModelAnimator.h"
-#include <DxLib.h>
+﻿#include <DxLib.h>
+
+#include "Main/Application.h"
+#include "ModelAnimator.h"
 
 namespace
 {
@@ -73,8 +75,11 @@ void ModelAnimator::Update(float blendTime)
 	//アニメーションなし状態なら処理をスキップ
 	if (m_currentAttachIdx < 0) return;
 
-	m_currentTime += anim_delta_time * m_animSpeed;//アニメーションの時間を更新
-	m_prevTime += anim_delta_time * m_animSpeed;
+	//タイムスケール
+	float timeScale = Application::GetInstance().GetTimeScale();
+
+	m_currentTime += anim_delta_time * m_animSpeed * timeScale;//アニメーションの時間を更新
+	m_prevTime += anim_delta_time * m_animSpeed * timeScale;
 
 	float totalTime = MV1GetAttachAnimTotalTime(m_modelHandle, m_currentAttachIdx);
 	//アニメーションがループされていて、

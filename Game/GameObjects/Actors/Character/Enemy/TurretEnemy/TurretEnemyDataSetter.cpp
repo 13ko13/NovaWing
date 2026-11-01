@@ -57,7 +57,7 @@ std::vector<std::shared_ptr<EnemyBase>> TurretEnemyDataSetter::CreateEnemy(
 		turretData.pos = pos;
 		turretData.pSoundManager = pSoundManager;
 
-		//その位置と、pCameraで敵を一つ作成する
+		//敵を一つ作成する
 		pEnemies.push_back(std::make_shared<TurretEnemy>(turretData));
 	}
 

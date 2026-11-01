@@ -300,7 +300,7 @@ void GameScene::CreateStageObjects(float offsetZ)
 		//生存を保持するための配列に格納
 		m_pEnemies.push_back(pEnemy);
 	}
-	//タレット敵の初期化
+	//固定砲台の敵の初期化
 	std::vector<std::shared_ptr<EnemyBase>> turretEnemys = TurretEnemyDataSetter::CreateEnemy(
 		m_pPlayer,
 		m_pCamera,

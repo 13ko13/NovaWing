@@ -32,6 +32,11 @@ namespace
 		{ ResourceLoader::GraphicID::RushEnemyMetalicMap, rush_enemy_metalic_map_path },//メタリックマップ
 		{ ResourceLoader::GraphicID::RushEnemyEmissionMap, rush_enemy_emission_map_path },//エミッションマップ
 
+		//固定砲台の敵
+		{ ResourceLoader::GraphicID::TurretEnemyNormalMap, turret_enemy_normal_map_path },//法線マップ
+		{ ResourceLoader::GraphicID::TurretEnemyMetalicMap, turret_enemy_metalic_map_path },//メタリックマップ
+		{ ResourceLoader::GraphicID::TurretEnemyEmissionMap, turret_enemy_emission_map_path },//エミッションマップ
+
 		//レティクル
 		{ ResourceLoader::GraphicID::NormalReticle, normal_reticle_path },//ノーマルレティクル
 		{ ResourceLoader::GraphicID::ChargeReticle, charge_reticle_path },//チャージレティクル
@@ -481,6 +486,7 @@ void ResourceLoader::InitSceneResources()
 		GraphicID::WormHeadNormalMap, GraphicID::WormHeadMetalicMap, GraphicID::WormHeadEmissionMap,
 		GraphicID::WormBodyDiffuseMap, GraphicID::BossNormal, GraphicID::BossEmission,
 		GraphicID::RushEnemyNormalMap, GraphicID::RushEnemyMetalicMap, GraphicID::RushEnemyEmissionMap,
+		GraphicID::TurretEnemyNormalMap, GraphicID::TurretEnemyMetalicMap, GraphicID::TurretEnemyEmissionMap,
 		GraphicID::NormalReticle, GraphicID::ChargeReticle,
 		GraphicID::PlayerHPFrame, GraphicID::PlayerHPGauge,
 		GraphicID::BossHPFrame, GraphicID::BossHPGauge,

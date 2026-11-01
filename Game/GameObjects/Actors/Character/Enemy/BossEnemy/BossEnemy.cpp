@@ -6,6 +6,7 @@
 #include "Manager/DebugManager.h"
 #include "Manager/SoundManager.h"
 #include "Manager/EffectManager.h"
+#include "Main/Application.h"
 
 namespace
 {

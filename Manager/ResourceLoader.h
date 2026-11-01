@@ -62,6 +62,9 @@ public:
 		RushEnemyNormalMap,//突進する敵の法線マップ
 		RushEnemyMetalicMap,//突進する敵のメタリックマップ
 		RushEnemyEmissionMap,//突進する敵のエミッションマップ
+		TurretEnemyNormalMap,//固定砲台の敵の法線マップ
+		TurretEnemyMetalicMap,//固定砲台の敵のメタリックマップ
+		TurretEnemyEmissionMap,//固定砲台の敵のエミッションマップ
 
 		NormalReticle,//ノーマル状態のレティクル
 		ChargeReticle,//チャージ状態のレティクル

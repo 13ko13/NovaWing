@@ -52,12 +52,17 @@ private:
 	//敵を描画
 	void DrawEnemy();
 
+	//角度を目標へ近づける
+	void UpdateAimAngle(const Vector3& playerPos);
+	//角度をフレームに反映する
+	void ApplyFrameRotation();
+
 private:
 	//ステート
 	enum class State
 	{
 		Wait,//待機
-		Aim,//呼び動作
+		Aim,//予備動作
 	};
 	State m_state = State::Wait;
 
@@ -67,4 +72,11 @@ private:
 	std::shared_ptr<SphereShape> m_colSphere;
 	//当たり判定インターフェース
 	std::unique_ptr<EnemyCollider> m_pCollider;
+
+	//砲塔の角度(Y軸)
+	float m_turretAngleY = 0.0f;
+	//砲身の角度(X軸)
+	float m_barrelAngleX = 0.0f;
+	//狙う位置
+	Vector3 m_aimPos;
 };

@@ -13,15 +13,15 @@ Actor::Actor(ResourceLoader::ModelID modelID,
 	//受け取ったモデルIDをもとにモデルを複製してハンドルを取得する
 	m_modelHandle = MV1DuplicateModel(
 		ResourceLoader::GetInstance().GetModel(modelID));
-	
+
 	//マテリアル単位でブレンド無しを明示する
-    //(全体のSetDrawBlendModeはMV1描画時にマテリアル設定で上書きされるため)
+	//(全体のSetDrawBlendModeはMV1描画時にマテリアル設定で上書きされるため)
 	//これをしておかないと、水に埋まっている部分が見えなくなってしまう
-    int matNum = MV1GetMaterialNum(m_modelHandle);
-    for (int i = 0; i < matNum; i++)
-    {
-        MV1SetMaterialDrawBlendMode(m_modelHandle, i, DX_BLENDMODE_NOBLEND);
-    }
+	int matNum = MV1GetMaterialNum(m_modelHandle);
+	for (int i = 0; i < matNum; i++)
+	{
+		MV1SetMaterialDrawBlendMode(m_modelHandle, i, DX_BLENDMODE_NOBLEND);
+	}
 }
 
 Actor::~Actor()
@@ -88,19 +88,35 @@ void Actor::ReleaseShaderBuffers()
 
 Vector3 Actor::GetCameraPos() const
 {
-    //shared_ptrに変換して位置を返す
+	//shared_ptrに変換して位置を返す
 	return m_pCamera.lock()->GetPos();
+}
+
+void Actor::ReleaseTexturesToShader(const std::vector<std::pair<int, int>>& textures)
+{
+	//テクスチャを開放する
+	for (const std::pair<int, int>& tex : textures)
+	{
+		//テクスチャを解除
+		SetUseTextureToShader(tex.first, -1);
+	}
+}
+
+void Actor::SetTexturesToShader(const std::vector<std::pair<int, int>>& textures)
+{
+	//テクスチャの中身を1つずつ取り出し、テクスチャレジスタにセット
+	for (const std::pair<int, int>& tex : textures)
+	{
+		//テクスチャをセット
+		SetUseTextureToShader(tex.first, tex.second);
+	}
 }
 
 void Actor::DrawWithLighting(const std::vector<std::pair<int, int>>& textures,
 	bool isSkinned)
 {
-	//テクスチャの中身を1つずつ取り出し、テクスチャレジスタにセット
-	for(const std::pair<int,int>& tex : textures)
-	{
-		//テクスチャをセット
-		SetUseTextureToShader(tex.first,tex.second);
-	}
+	//テクスチャをセット
+	SetTexturesToShader(textures);
 
 	//シェーダを適用
 	LightingManager::GetInstance().ApplyShader(isSkinned);
@@ -108,12 +124,43 @@ void Actor::DrawWithLighting(const std::vector<std::pair<int, int>>& textures,
 	//モデルを描画
 	MV1DrawModel(m_modelHandle);
 
-	//テクスチャを開放する
-	for(const std::pair<int,int>& tex : textures)
+	//テクスチャを解除
+	ReleaseTexturesToShader(textures);
+	//シェーダを解除
+	LightingManager::GetInstance().ResetShader();
+	//開放する
+	ReleaseShaderBuffers();
+}
+
+void Actor::DrawFrameWithLighting(const std::vector<std::pair<int, int>>& textures)
+{
+	//フレームの数を取得
+	int frameNum = MV1GetFrameNum(m_modelHandle);
+
+	//テクスチャをセット
+	SetTexturesToShader(textures);
+
+	//シェーダを適用
+	LightingManager::GetInstance().ApplyShader();
+	BindShaderBuffers();//シェーダをセットする
+
+	for (int i = 0; i < frameNum; i++)
 	{
-		//テクスチャを解除
-		SetUseTextureToShader(tex.first,-1);
+		//フレームのローカルワールド行列を取得して
+		//シェーダに渡す用のバッファに入れる
+		m_pCbufferMatrixData->world = MV1GetFrameLocalWorldMatrix(m_modelHandle, i);
+
+		//定数バッファを更新
+		UpdateShaderConstantBuffer(m_cbufferMatrix);
+
+		//そのフレームの描画を行う
+		MV1DrawFrame(m_modelHandle, i);
+
 	}
+	
+	//テクスチャを解除
+	ReleaseTexturesToShader(textures);
+
 	//シェーダを解除
 	LightingManager::GetInstance().ResetShader();
 	//開放する

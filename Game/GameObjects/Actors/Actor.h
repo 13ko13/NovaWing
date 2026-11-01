@@ -78,9 +78,15 @@ protected:
 	void ReleaseShaderBuffers();
 	//カメラの位置を取得する
 	Vector3 GetCameraPos() const;
+	//シェーダーに渡す用のテクスチャをテクスチャレジスタにセットする
+	void SetTexturesToShader(const std::vector<std::pair<int, int>>& textures);
+	//シェーダに渡したテクスチャを解放する
+	void ReleaseTexturesToShader(const std::vector<std::pair<int, int>>& textures);
 
 	//テクスチャをテクスチャレジスタにセットして描画する
 	void DrawWithLighting(const std::vector<std::pair<int,int>>& textures,
 		bool isSkinned = false);
+	//フレームごとにライティングを適用して描画する
+	void DrawFrameWithLighting(const std::vector<std::pair<int, int>>& textures);
 };
 
