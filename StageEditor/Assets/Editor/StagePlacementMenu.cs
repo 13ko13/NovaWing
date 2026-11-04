@@ -43,6 +43,8 @@ public static class StagePlacementMenu
     [MenuItem("NovaWing/Add/Rock/Rock2")] static void AddRock2() => Add(PlacedObject.Kind.Rock, "Rock2", 1f, true);
     [MenuItem("NovaWing/Add/Rock/Rock3")] static void AddRock3() => Add(PlacedObject.Kind.Rock, "Rock3", 1f, true);
     [MenuItem("NovaWing/Add/Boss")] static void AddBoss() => Add(PlacedObject.Kind.Boss, "Boss", 1f, false);
+    // 砲台は地面の高さがステージで違う(段差がある)ので、高さは0にせず注視点のまま置く
+    [MenuItem("NovaWing/Add/Turret Enemy")] static void AddTurret() => Add(PlacedObject.Kind.TurretEnemy, "TurretEnemy", 1f, false);
 
     static void AddBuilding(string id) => Add(PlacedObject.Kind.Building, id, DefaultBuildingScale, true);
 

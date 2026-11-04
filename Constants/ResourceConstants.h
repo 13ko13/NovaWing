@@ -30,6 +30,28 @@ namespace
 	constexpr const wchar_t* building_collapsed_col_model_path = L"Data/Model/Building/Building_Collapsed_Col.x";
 	constexpr const wchar_t* building_antenna_tower_col_model_path = L"Data/Model/Building/Building_AntennaTower_Col.x";
 	constexpr const wchar_t* building_bridge_wreck_col_model_path = L"Data/Model/Building/Building_BridgeWreck_Col.x";
+	//2ステージ目の地面
+	constexpr const wchar_t* road_straight_model_path = L"Data/Model/Road/Road_Straight.mv1";
+	constexpr const wchar_t* road_damaged_model_path = L"Data/Model/Road/Road_Damaged.mv1";
+	constexpr const wchar_t* road_debris_model_path = L"Data/Model/Road/Road_Debris.mv1";
+	constexpr const wchar_t* rail_straight_model_path = L"Data/Model/Road/Rail_Straight.mv1";
+	constexpr const wchar_t* rail_damaged_model_path = L"Data/Model/Road/Rail_Damaged.mv1";
+	constexpr const wchar_t* ground_rubble_model_path = L"Data/Model/Road/Ground_Rubble.mv1";
+	constexpr const wchar_t* ground_side_right_model_path = L"Data/Model/Road/Ground_Side_Right.mv1";
+	constexpr const wchar_t* ground_side_left_model_path = L"Data/Model/Road/Ground_Side_Left.mv1";
+	constexpr const wchar_t* road_slope_up400_model_path = L"Data/Model/Road/Road_Slope_Up400.mv1";
+	constexpr const wchar_t* road_slope_down400_model_path = L"Data/Model/Road/Road_Slope_Down400.mv1";
+	constexpr const wchar_t* rail_slope_up400_model_path = L"Data/Model/Road/Rail_Slope_Up400.mv1";
+	constexpr const wchar_t* rail_slope_down400_model_path = L"Data/Model/Road/Rail_Slope_Down400.mv1";
+	constexpr const wchar_t* ground_rubble_slope_up400_model_path = L"Data/Model/Road/Ground_Rubble_Slope_Up400.mv1";
+	constexpr const wchar_t* ground_rubble_slope_down400_model_path = L"Data/Model/Road/Ground_Rubble_Slope_Down400.mv1";
+	constexpr const wchar_t* wall_side_model_path = L"Data/Model/Road/Wall_Side.mv1";
+	constexpr const wchar_t* wall_side_slope_model_path = L"Data/Model/Road/Wall_Side_Slope.mv1";
+	constexpr const wchar_t* wall_front_model_path = L"Data/Model/Road/Wall_Front.mv1";
+	//2ステージ目の帯の上の構造物
+	constexpr const wchar_t* overpass_cross_model_path = L"Data/Model/Road/Overpass_Cross.mv1";
+	constexpr const wchar_t* overpass_cross_broken_model_path = L"Data/Model/Road/Overpass_Cross_Broken.mv1";
+	constexpr const wchar_t* sign_gantry_model_path = L"Data/Model/Road/Sign_Gantry.mv1";
 	//2ステージ目の敵
 	constexpr const wchar_t* rush_enemy_model_path = L"Data/Model/RushEnemy/RushEnemy.mv1";
 	constexpr const wchar_t* turret_enemy_model_path = L"Data/Model/TurretEnemy/TurretEnemy.mv1";
@@ -59,12 +81,12 @@ namespace
 	constexpr const wchar_t* normal_reticle_path = L"Data/Image/NormalReticle.png";
 	constexpr const wchar_t* charge_reticle_path = L"Data/Image/ChargeReticle.png";
 	//スカイボックス
-	constexpr const wchar_t* skybox_front_path = L"Data/Image/SkyBoxNight/skybox_front.png";
-	constexpr const wchar_t* skybox_back_path = L"Data/Image/SkyBoxNight/skybox_back.png";
-	constexpr const wchar_t* skybox_right_path = L"Data/Image/SkyBoxNight/skybox_right.png";
-	constexpr const wchar_t* skybox_left_path = L"Data/Image/SkyBoxNight/skybox_left.png";
-	constexpr const wchar_t* skybox_up_path = L"Data/Image/SkyBoxNight/skybox_up.png";
-	constexpr const wchar_t* skybox_bottom_path = L"Data/Image/SkyBoxNight/skybox_bottom.png";
+	constexpr const wchar_t* skybox_front_path = L"Data/Image/SkyBox/skybox_front.png";
+	constexpr const wchar_t* skybox_back_path = L"Data/Image/SkyBox/skybox_back.png";
+	constexpr const wchar_t* skybox_right_path = L"Data/Image/SkyBox/skybox_right.png";
+	constexpr const wchar_t* skybox_left_path = L"Data/Image/SkyBox/skybox_left.png";
+	constexpr const wchar_t* skybox_up_path = L"Data/Image/SkyBox/skybox_up.png";
+	constexpr const wchar_t* skybox_bottom_path = L"Data/Image/SkyBox/skybox_bottom.png";
 	//岩
 	constexpr const wchar_t* rock_normal_map_path = L"Data/Model/Rock.fbm/rocks_nm_new.png";
 	//タイトル
@@ -181,6 +203,28 @@ namespace
 	constexpr const wchar_t* building_collapsed_csv_name = L"Building_Collapsed";
 	constexpr const wchar_t* building_antenna_tower_csv_name = L"Building_AntennaTower";
 	constexpr const wchar_t* building_bridge_wreck_csv_name = L"Building_BridgeWreck";
+	//2ステージ目の地面(ビルと同じBuilding.csvに書き出される)
+	constexpr const wchar_t* road_straight_csv_name = L"Road_Straight";
+	constexpr const wchar_t* road_damaged_csv_name = L"Road_Damaged";
+	constexpr const wchar_t* road_debris_csv_name = L"Road_Debris";
+	constexpr const wchar_t* rail_straight_csv_name = L"Rail_Straight";
+	constexpr const wchar_t* rail_damaged_csv_name = L"Rail_Damaged";
+	constexpr const wchar_t* ground_rubble_csv_name = L"Ground_Rubble";
+	constexpr const wchar_t* ground_side_right_csv_name = L"Ground_Side_Right";
+	constexpr const wchar_t* ground_side_left_csv_name = L"Ground_Side_Left";
+	constexpr const wchar_t* road_slope_up400_csv_name = L"Road_Slope_Up400";
+	constexpr const wchar_t* road_slope_down400_csv_name = L"Road_Slope_Down400";
+	constexpr const wchar_t* rail_slope_up400_csv_name = L"Rail_Slope_Up400";
+	constexpr const wchar_t* rail_slope_down400_csv_name = L"Rail_Slope_Down400";
+	constexpr const wchar_t* ground_rubble_slope_up400_csv_name = L"Ground_Rubble_Slope_Up400";
+	constexpr const wchar_t* ground_rubble_slope_down400_csv_name = L"Ground_Rubble_Slope_Down400";
+	constexpr const wchar_t* wall_side_csv_name = L"Wall_Side";
+	constexpr const wchar_t* wall_side_slope_csv_name = L"Wall_Side_Slope";
+	constexpr const wchar_t* wall_front_csv_name = L"Wall_Front";
+	//2ステージ目の帯の上の構造物(これもBuilding.csvに書き出される)
+	constexpr const wchar_t* overpass_cross_csv_name = L"Overpass_Cross";
+	constexpr const wchar_t* overpass_cross_broken_csv_name = L"Overpass_Cross_Broken";
+	constexpr const wchar_t* sign_gantry_csv_name = L"Sign_Gantry";
 
 	//---------- エフェクトの再生スケール ----------
 	constexpr float player_bullet_effect_scale = 2.0f;

@@ -1,4 +1,13 @@
 modelID,posX,posY,posZ,rotX,rotY,rotZ,scaleX,scaleY,scaleZ
-TurretEnemy,-1000,400,6500,0,0,0,1,1,1
-TurretEnemy,1000,400,9500,0,0,0,1,1,1
-TurretEnemy,0,700,12500,0,0,0,1,1,1
+TurretEnemy,-2600,390,4100,0,0,0,1,1,1
+TurretEnemy,0,510,4450,0,0,0,1,1,1
+TurretEnemy,3600,790,6100,0,0,0,1,1,1
+TurretEnemy,2600,390,8100,0,0,0,1,1,1
+TurretEnemy,0,390,12300,0,0,0,1,1,1
+TurretEnemy,-3600,790,14100,0,0,0,1,1,1
+TurretEnemy,2600,390,16100,0,0,0,1,1,1
+TurretEnemy,-950,10,18500,0,0,0,1,1,1
+TurretEnemy,-1975,390,19600,0,0,0,1,1,1
+TurretEnemy,-2600,390,24100,0,0,0,1,1,1
+TurretEnemy,-3600,790,26100,0,0,0,1,1,1
+TurretEnemy,-950,10,27000,0,0,0,1,1,1

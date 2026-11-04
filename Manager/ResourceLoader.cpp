@@ -135,6 +135,28 @@ namespace
 		{ ResourceLoader::ModelID::BuildingCollapsedCol, building_collapsed_col_model_path },
 		{ ResourceLoader::ModelID::BuildingAntennaTowerCol, building_antenna_tower_col_model_path },
 		{ ResourceLoader::ModelID::BuildingBridgeWreckCol, building_bridge_wreck_col_model_path },
+		//2ステージ目の地面
+		{ ResourceLoader::ModelID::RoadStraight, road_straight_model_path },
+		{ ResourceLoader::ModelID::RoadDamaged, road_damaged_model_path },
+		{ ResourceLoader::ModelID::RoadDebris, road_debris_model_path },
+		{ ResourceLoader::ModelID::RailStraight, rail_straight_model_path },
+		{ ResourceLoader::ModelID::RailDamaged, rail_damaged_model_path },
+		{ ResourceLoader::ModelID::GroundRubble, ground_rubble_model_path },
+		{ ResourceLoader::ModelID::GroundSideRight, ground_side_right_model_path },
+		{ ResourceLoader::ModelID::GroundSideLeft, ground_side_left_model_path },
+		{ ResourceLoader::ModelID::RoadSlopeUp400, road_slope_up400_model_path },
+		{ ResourceLoader::ModelID::RoadSlopeDown400, road_slope_down400_model_path },
+		{ ResourceLoader::ModelID::RailSlopeUp400, rail_slope_up400_model_path },
+		{ ResourceLoader::ModelID::RailSlopeDown400, rail_slope_down400_model_path },
+		{ ResourceLoader::ModelID::GroundRubbleSlopeUp400, ground_rubble_slope_up400_model_path },
+		{ ResourceLoader::ModelID::GroundRubbleSlopeDown400, ground_rubble_slope_down400_model_path },
+		{ ResourceLoader::ModelID::WallSide, wall_side_model_path },
+		{ ResourceLoader::ModelID::WallSideSlope, wall_side_slope_model_path },
+		{ ResourceLoader::ModelID::WallFront, wall_front_model_path },
+		//2ステージ目の帯の上の構造物
+		{ ResourceLoader::ModelID::OverpassCross, overpass_cross_model_path },
+		{ ResourceLoader::ModelID::OverpassCrossBroken, overpass_cross_broken_model_path },
+		{ ResourceLoader::ModelID::SignGantry, sign_gantry_model_path },
 	};
 
 	//音IDとパスの対応表
@@ -474,6 +496,15 @@ void ResourceLoader::InitSceneResources()
 		ModelID::BuildingCollapsed, ModelID::BuildingAntennaTower, ModelID::BuildingBridgeWreck,
 		ModelID::BuildingTallBrokenCol, ModelID::BuildingOfficeGuttedCol, ModelID::BuildingLeaningCol,
 		ModelID::BuildingCollapsedCol, ModelID::BuildingAntennaTowerCol, ModelID::BuildingBridgeWreckCol,
+		//2ステージ目の地面
+		ModelID::RoadStraight, ModelID::RoadDamaged, ModelID::RoadDebris,
+		ModelID::RailStraight, ModelID::RailDamaged, ModelID::GroundRubble,
+		ModelID::GroundSideRight, ModelID::GroundSideLeft,
+		ModelID::RoadSlopeUp400, ModelID::RoadSlopeDown400, ModelID::RailSlopeUp400,
+		ModelID::RailSlopeDown400, ModelID::GroundRubbleSlopeUp400, ModelID::GroundRubbleSlopeDown400,
+		ModelID::WallSide, ModelID::WallSideSlope, ModelID::WallFront,
+		//2ステージ目の帯の上の構造物
+		ModelID::OverpassCross, ModelID::OverpassCrossBroken, ModelID::SignGantry,
 		//2ステージ目の敵
 		ModelID::RushEnemy, ModelID::TurretEnemy,
 	};
@@ -688,6 +719,26 @@ ResourceLoader::ModelID ResourceLoader::WStringToModelID(const std::wstring id)
 		{ building_collapsed_csv_name,ModelID::BuildingCollapsed },
 		{ building_antenna_tower_csv_name,ModelID::BuildingAntennaTower },
 		{ building_bridge_wreck_csv_name,ModelID::BuildingBridgeWreck },
+		{ road_straight_csv_name,ModelID::RoadStraight },
+		{ road_damaged_csv_name,ModelID::RoadDamaged },
+		{ road_debris_csv_name,ModelID::RoadDebris },
+		{ rail_straight_csv_name,ModelID::RailStraight },
+		{ rail_damaged_csv_name,ModelID::RailDamaged },
+		{ ground_rubble_csv_name,ModelID::GroundRubble },
+		{ ground_side_right_csv_name,ModelID::GroundSideRight },
+		{ ground_side_left_csv_name,ModelID::GroundSideLeft },
+		{ road_slope_up400_csv_name,ModelID::RoadSlopeUp400 },
+		{ road_slope_down400_csv_name,ModelID::RoadSlopeDown400 },
+		{ rail_slope_up400_csv_name,ModelID::RailSlopeUp400 },
+		{ rail_slope_down400_csv_name,ModelID::RailSlopeDown400 },
+		{ ground_rubble_slope_up400_csv_name,ModelID::GroundRubbleSlopeUp400 },
+		{ ground_rubble_slope_down400_csv_name,ModelID::GroundRubbleSlopeDown400 },
+		{ wall_side_csv_name,ModelID::WallSide },
+		{ wall_side_slope_csv_name,ModelID::WallSideSlope },
+		{ wall_front_csv_name,ModelID::WallFront },
+		{ overpass_cross_csv_name,ModelID::OverpassCross },
+		{ overpass_cross_broken_csv_name,ModelID::OverpassCrossBroken },
+		{ sign_gantry_csv_name,ModelID::SignGantry },
 	};
 	//受け取ったidを使ってtableからそのモデルのIDを受け取る
 	auto it = table.find(id);

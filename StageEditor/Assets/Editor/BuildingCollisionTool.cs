@@ -64,9 +64,9 @@ public static class BuildingCollisionTool
         "Building_Leaning", "Building_OfficeGutted", "Building_TallBroken",
     };
 
-    // 自動で作る箱: ビルを高さ方向に何段に切るか / 隣の段と大きさの差がこの割合以内なら1つの箱にまとめる
-    const int AutoSliceCount = 10;
-    const float AutoMergeTolerance = 0.15f;
+    // 自動で作る箱の細かさ(ファイルの数値。ビルは大きさ6〜10で置くので、ゲームでは60〜100)。
+    // ビルの表面をこの大きさの立方体(ボクセル)で拾うので、小さいほど見た目に近くなり、箱の数は増える
+    const float AutoVoxelSize = 8f;
 
     // 全部のビルについて、形から当たり判定の箱を自動で作って書き出す(作業用シーンは使わない)
     [MenuItem("NovaWing/Building Collision/Auto Generate All (形から自動で作る)")]
@@ -89,73 +89,124 @@ public static class BuildingCollisionTool
     // バッチ用の入口
     public static void AutoGenerateAllBatch() => AutoGenerateAll();
 
-    // ビルの頂点(ファイルの数値)を高さ方向に輪切りにして、段ごとに収まる箱を root の子に作る。箱の大きさは1/100
+    // ビルの形(ファイルの数値)から、見た目に沿った箱を root の子に作る。箱の大きさは1/100。
+    // 1. 三角形の表面を細かく拾って、表面が通るボクセルに印を付ける
+    // 2. 高さの段ごとに、外側から届かないボクセル(壁に囲まれた中身)も埋める
+    // 3. 段ごとに、埋まったボクセルを長方形にまとめ、上下の段で同じ長方形はつなげて1つの箱にする
+    // 以前は段ごとに全部を囲む箱1つにしていたため、L字・飛び出し・傾きの分だけ見た目より大きかった
     static int BuildAutoBoxes(string buildingID, Transform root)
     {
         var model = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Models/" + buildingID + ".fbx");
         if (model == null) { Debug.LogError($"[BuildingCollision] モデルがありません: {buildingID}"); return 0; }
 
-        // ファイルの数値のままの頂点(原点・大きさ1で置いたときのワールド座標)を集める
+        // ファイルの数値のままの三角形(原点・大きさ1で置いたときのワールド座標)を集める
         var inst = (GameObject)Object.Instantiate(model);
-        var points = new System.Collections.Generic.List<Vector3>();
+        var tris = new System.Collections.Generic.List<Vector3>();
         foreach (var mf in inst.GetComponentsInChildren<MeshFilter>())
         {
-            foreach (var v in mf.sharedMesh.vertices) points.Add(mf.transform.TransformPoint(v));
+            var mv = mf.sharedMesh.vertices;
+            foreach (int t in mf.sharedMesh.triangles) tris.Add(mf.transform.TransformPoint(mv[t]));
         }
         Object.DestroyImmediate(inst);
-        if (points.Count == 0) return 0;
+        if (tris.Count == 0) return 0;
 
-        float minY = float.MaxValue, maxY = float.MinValue;
-        foreach (var p in points) { minY = Mathf.Min(minY, p.y); maxY = Mathf.Max(maxY, p.y); }
-        float step = (maxY - minY) / AutoSliceCount;
+        Vector3 min = tris[0], max = tris[0];
+        foreach (var p in tris) { min = Vector3.Min(min, p); max = Vector3.Max(max, p); }
+        float v = AutoVoxelSize;
+        // 外側を1マスずつ空けておく(外から塗るときの出発点にする)
+        int nx = Mathf.CeilToInt((max.x - min.x) / v) + 2;
+        int ny = Mathf.CeilToInt((max.y - min.y) / v);
+        int nz = Mathf.CeilToInt((max.z - min.z) / v) + 2;
+        ny = Mathf.Max(ny, 1);
+        var solid = new bool[nx, ny, nz];
 
-        // 段ごとの箱(XZの範囲)
-        var slices = new System.Collections.Generic.List<Bounds>();
-        for (int i = 0; i < AutoSliceCount; i++)
+        // 1. 表面を拾う(三角形の上を、ボクセルの半分より細かい間隔でなぞる)
+        for (int i = 0; i + 2 < tris.Count; i += 3)
         {
-            float y0 = minY + step * i, y1 = y0 + step;
-            bool found = false;
-            Bounds b = new Bounds();
-            foreach (var p in points)
+            Vector3 a = tris[i], b = tris[i + 1], c = tris[i + 2];
+            float longest = Mathf.Max((b - a).magnitude, (c - a).magnitude, (c - b).magnitude);
+            int n = Mathf.Max(1, Mathf.CeilToInt(longest / (v * 0.5f)));
+            for (int s = 0; s <= n; s++)
             {
-                if (p.y < y0 || p.y > y1) continue;
-                if (!found) { b = new Bounds(new Vector3(p.x, (y0 + y1) * 0.5f, p.z), Vector3.zero); found = true; }
-                else b.Encapsulate(new Vector3(p.x, (y0 + y1) * 0.5f, p.z));
-            }
-            if (!found) continue;
-            // 高さは段の高さそのもの
-            b.center = new Vector3(b.center.x, (y0 + y1) * 0.5f, b.center.z);
-            b.size = new Vector3(b.size.x, step, b.size.z);
-            slices.Add(b);
-        }
-
-        // 上下の段の箱がほぼ同じなら1つにまとめる
-        var merged = new System.Collections.Generic.List<Bounds>();
-        foreach (var s in slices)
-        {
-            if (merged.Count > 0)
-            {
-                var last = merged[merged.Count - 1];
-                float tol = AutoMergeTolerance * Mathf.Max(last.size.x, last.size.z, 1f);
-                bool touching = Mathf.Abs(last.max.y - s.min.y) < step * 0.01f + 0.001f;
-                if (touching &&
-                    Mathf.Abs(last.min.x - s.min.x) < tol && Mathf.Abs(last.max.x - s.max.x) < tol &&
-                    Mathf.Abs(last.min.z - s.min.z) < tol && Mathf.Abs(last.max.z - s.max.z) < tol)
+                for (int t = 0; t <= n - s; t++)
                 {
-                    // XZは両方を含む範囲、Yはつなげる
-                    var min = Vector3.Min(last.min, s.min);
-                    var max = Vector3.Max(last.max, s.max);
-                    var m = new Bounds(); m.SetMinMax(min, max);
-                    merged[merged.Count - 1] = m;
-                    continue;
+                    Vector3 p = a + (b - a) * (s / (float)n) + (c - a) * (t / (float)n);
+                    int ix = Mathf.Clamp(Mathf.FloorToInt((p.x - min.x) / v) + 1, 1, nx - 2);
+                    int iy = Mathf.Clamp(Mathf.FloorToInt((p.y - min.y) / v), 0, ny - 1);
+                    int iz = Mathf.Clamp(Mathf.FloorToInt((p.z - min.z) / v) + 1, 1, nz - 2);
+                    solid[ix, iy, iz] = true;
                 }
             }
-            merged.Add(s);
         }
+
+        // 2. 段ごとに、外側から空いているマスをたどり、たどれなかった所(中身)を埋める
+        var outside = new bool[nx, nz];
+        var queue = new System.Collections.Generic.Queue<Vector2Int>();
+        for (int y = 0; y < ny; y++)
+        {
+            System.Array.Clear(outside, 0, outside.Length);
+            queue.Clear();
+            for (int x = 0; x < nx; x++) { queue.Enqueue(new Vector2Int(x, 0)); queue.Enqueue(new Vector2Int(x, nz - 1)); }
+            for (int z = 0; z < nz; z++) { queue.Enqueue(new Vector2Int(0, z)); queue.Enqueue(new Vector2Int(nx - 1, z)); }
+            while (queue.Count > 0)
+            {
+                var q = queue.Dequeue();
+                if (q.x < 0 || q.y < 0 || q.x >= nx || q.y >= nz) continue;
+                if (outside[q.x, q.y] || solid[q.x, y, q.y]) continue;
+                outside[q.x, q.y] = true;
+                queue.Enqueue(new Vector2Int(q.x + 1, q.y)); queue.Enqueue(new Vector2Int(q.x - 1, q.y));
+                queue.Enqueue(new Vector2Int(q.x, q.y + 1)); queue.Enqueue(new Vector2Int(q.x, q.y - 1));
+            }
+            for (int x = 0; x < nx; x++)
+                for (int z = 0; z < nz; z++)
+                    if (!outside[x, z]) solid[x, y, z] = true;
+        }
+
+        // 3. 段ごとに長方形にまとめ、上下で同じ長方形をつなげる(キー: x0,z0,x1,z1 → 始まりの段)
+        var open = new System.Collections.Generic.Dictionary<(int, int, int, int), int>();
+        var boxes = new System.Collections.Generic.List<Bounds>();
+        System.Action<(int x0, int z0, int x1, int z1), int, int> addBox = (r, y0, y1) =>
+        {
+            var bmin = new Vector3(min.x + (r.x0 - 1) * v, min.y + y0 * v, min.z + (r.z0 - 1) * v);
+            var bmax = new Vector3(min.x + r.x1 * v, min.y + y1 * v, min.z + r.z1 * v);
+            var bb = new Bounds(); bb.SetMinMax(bmin, bmax);
+            boxes.Add(bb);
+        };
+        var used = new bool[nx, nz];
+        for (int y = 0; y < ny; y++)
+        {
+            System.Array.Clear(used, 0, used.Length);
+            var rects = new System.Collections.Generic.HashSet<(int, int, int, int)>();
+            for (int z = 0; z < nz; z++)
+            {
+                for (int x = 0; x < nx; x++)
+                {
+                    if (!solid[x, y, z] || used[x, z]) continue;
+                    int x1 = x;
+                    while (x1 + 1 < nx && solid[x1 + 1, y, z] && !used[x1 + 1, z]) x1++;
+                    int z1 = z;
+                    while (z1 + 1 < nz)
+                    {
+                        bool row = true;
+                        for (int k = x; k <= x1; k++) if (!solid[k, y, z1 + 1] || used[k, z1 + 1]) { row = false; break; }
+                        if (!row) break;
+                        z1++;
+                    }
+                    for (int k = x; k <= x1; k++) for (int m = z; m <= z1; m++) used[k, m] = true;
+                    rects.Add((x, z, x1 + 1, z1 + 1));
+                }
+            }
+            // 前の段から続かなかった長方形は、そこで箱として閉じる
+            var closing = new System.Collections.Generic.List<(int, int, int, int)>();
+            foreach (var kv in open) if (!rects.Contains(kv.Key)) closing.Add(kv.Key);
+            foreach (var key in closing) { addBox(key, open[key], y); open.Remove(key); }
+            foreach (var r in rects) if (!open.ContainsKey(r)) open[r] = y;
+        }
+        foreach (var kv in open) addBox(kv.Key, kv.Value, ny);
 
         // 箱を作る(1/100)
         int index = 0;
-        foreach (var b in merged)
+        foreach (var b in boxes)
         {
             var box = GameObject.CreatePrimitive(PrimitiveType.Cube);
             box.name = "Box" + (++index);
@@ -164,7 +215,7 @@ public static class BuildingCollisionTool
             box.transform.localPosition = b.center / 100f;
             box.transform.localScale = b.size / 100f;
         }
-        return merged.Count;
+        return boxes.Count;
     }
 
     // root を原点に戻して、ゲーム用の .x(Data/Model/Building)と、Unityで続きを直す用の FBX(Assets/Models)を書き出す。

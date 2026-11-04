@@ -34,6 +34,28 @@ namespace
 		{ ResourceLoader::ModelID::BuildingLeaning,ResourceLoader::ModelID::BuildingLeaningCol },
 		//壊れたオフィスがあるビル
 		{ ResourceLoader::ModelID::BuildingOfficeGutted,ResourceLoader::ModelID::BuildingOfficeGuttedCol },
+		//2ステージ目の地面と擁壁は、見た目のモデルをそのまま当たり判定にも使う
+		{ ResourceLoader::ModelID::RoadStraight,ResourceLoader::ModelID::RoadStraight },
+		{ ResourceLoader::ModelID::RoadDamaged,ResourceLoader::ModelID::RoadDamaged },
+		{ ResourceLoader::ModelID::RoadDebris,ResourceLoader::ModelID::RoadDebris },
+		{ ResourceLoader::ModelID::RailStraight,ResourceLoader::ModelID::RailStraight },
+		{ ResourceLoader::ModelID::RailDamaged,ResourceLoader::ModelID::RailDamaged },
+		{ ResourceLoader::ModelID::GroundRubble,ResourceLoader::ModelID::GroundRubble },
+		{ ResourceLoader::ModelID::GroundSideRight,ResourceLoader::ModelID::GroundSideRight },
+		{ ResourceLoader::ModelID::GroundSideLeft,ResourceLoader::ModelID::GroundSideLeft },
+		{ ResourceLoader::ModelID::RoadSlopeUp400,ResourceLoader::ModelID::RoadSlopeUp400 },
+		{ ResourceLoader::ModelID::RoadSlopeDown400,ResourceLoader::ModelID::RoadSlopeDown400 },
+		{ ResourceLoader::ModelID::RailSlopeUp400,ResourceLoader::ModelID::RailSlopeUp400 },
+		{ ResourceLoader::ModelID::RailSlopeDown400,ResourceLoader::ModelID::RailSlopeDown400 },
+		{ ResourceLoader::ModelID::GroundRubbleSlopeUp400,ResourceLoader::ModelID::GroundRubbleSlopeUp400 },
+		{ ResourceLoader::ModelID::GroundRubbleSlopeDown400,ResourceLoader::ModelID::GroundRubbleSlopeDown400 },
+		{ ResourceLoader::ModelID::WallSide,ResourceLoader::ModelID::WallSide },
+		{ ResourceLoader::ModelID::WallSideSlope,ResourceLoader::ModelID::WallSideSlope },
+		{ ResourceLoader::ModelID::WallFront,ResourceLoader::ModelID::WallFront },
+		//2ステージ目の帯の上の構造物も、見た目のモデルをそのまま当たり判定に使う
+		{ ResourceLoader::ModelID::OverpassCross,ResourceLoader::ModelID::OverpassCross },
+		{ ResourceLoader::ModelID::OverpassCrossBroken,ResourceLoader::ModelID::OverpassCrossBroken },
+		{ ResourceLoader::ModelID::SignGantry,ResourceLoader::ModelID::SignGantry },
 	};
 }
 

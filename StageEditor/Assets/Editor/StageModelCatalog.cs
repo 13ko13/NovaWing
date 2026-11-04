@@ -19,8 +19,12 @@ public static class StageModelCatalog
         public string model;   // Assets/Models/ からのファイル名
         public string texture; // Assets/Models/ からのファイル名
         public Vector3 scale;  // ゲーム側の model_scale
-        public Entry(string model, string texture, Vector3 scale) { this.model = model; this.texture = texture; this.scale = scale; }
+        public float visualRotY; // 見た目だけ回す角度(読み込んだ向きがゲームと違うモデル用。CSVには関係しない)
+        public Entry(string model, string texture, Vector3 scale, float visualRotY = 0f) { this.model = model; this.texture = texture; this.scale = scale; this.visualRotY = visualRotY; }
     }
+
+    // 2ステージ目の地面のFBXは、Unityで読むとゲームに対してY軸で180°回った向きになる(XとZが逆)ので、見た目だけ戻す
+    const float GroundVisualRotY = 180f;
 
     // ワームの頭はゲームの大きさのままだと小さすぎて見えにくいので、Unityの表示だけ大きくする倍率。
     // 見た目だけの話で、書き出すCSVやゲームには関係しない(枠・螺旋・胴体の球はゲームと同じ大きさのまま)
@@ -44,6 +48,29 @@ public static class StageModelCatalog
         { "Building_Leaning",      new Entry("Building_Leaning.fbx",      "Building_Leaning.jpg",      Vector3.one) },
         { "Building_OfficeGutted", new Entry("Building_OfficeGutted.fbx", "Building_OfficeGutted.jpg", Vector3.one) },
         { "Building_TallBroken",   new Entry("Building_TallBroken.fbx",   "Building_TallBroken.jpg",   Vector3.one) },
+        // 2ステージ目の地面(Data/Model/Road)。テクスチャはUnityで見るだけなので1024のjpgに縮めたもの
+        { "Road_Straight",     new Entry("Road_Straight.fbx",     "Road_Straight.jpg",     Vector3.one, GroundVisualRotY) },
+        { "Road_Damaged",      new Entry("Road_Damaged.fbx",      "Road_Damaged.jpg",      Vector3.one, GroundVisualRotY) },
+        { "Road_Debris",       new Entry("Road_Debris.fbx",       "Road_Debris.jpg",       Vector3.one, GroundVisualRotY) },
+        { "Rail_Straight",     new Entry("Rail_Straight.fbx",     "Rail_Straight.jpg",     Vector3.one, GroundVisualRotY) },
+        { "Rail_Damaged",      new Entry("Rail_Damaged.fbx",      "Rail_Damaged.jpg",      Vector3.one, GroundVisualRotY) },
+        { "Ground_Rubble",     new Entry("Ground_Rubble.fbx",     "Ground_Rubble.jpg",     Vector3.one, GroundVisualRotY) },
+        { "Ground_Side_Right", new Entry("Ground_Side_Right.fbx", "Ground_Side_Right.jpg", Vector3.one, GroundVisualRotY) },
+        { "Ground_Side_Left",  new Entry("Ground_Side_Left.fbx",  "Ground_Side_Left.jpg",  Vector3.one, GroundVisualRotY) },
+        // 坂(テクスチャは直線版と同じ)と擁壁
+        { "Road_Slope_Up400",            new Entry("Road_Slope_Up400.fbx",            "Road_Straight.jpg", Vector3.one, GroundVisualRotY) },
+        { "Road_Slope_Down400",          new Entry("Road_Slope_Down400.fbx",          "Road_Straight.jpg", Vector3.one, GroundVisualRotY) },
+        { "Rail_Slope_Up400",            new Entry("Rail_Slope_Up400.fbx",            "Rail_Straight.jpg", Vector3.one, GroundVisualRotY) },
+        { "Rail_Slope_Down400",          new Entry("Rail_Slope_Down400.fbx",          "Rail_Straight.jpg", Vector3.one, GroundVisualRotY) },
+        { "Ground_Rubble_Slope_Up400",   new Entry("Ground_Rubble_Slope_Up400.fbx",   "Ground_Rubble.jpg", Vector3.one, GroundVisualRotY) },
+        { "Ground_Rubble_Slope_Down400", new Entry("Ground_Rubble_Slope_Down400.fbx", "Ground_Rubble.jpg", Vector3.one, GroundVisualRotY) },
+        { "Wall_Side",       new Entry("Wall_Side.fbx",       "Wall_Concrete.jpg", Vector3.one, GroundVisualRotY) },
+        { "Wall_Side_Slope", new Entry("Wall_Side_Slope.fbx", "Wall_Concrete.jpg", Vector3.one, GroundVisualRotY) },
+        { "Wall_Front",      new Entry("Wall_Front.fbx",      "Wall_Concrete.jpg", Vector3.one, GroundVisualRotY) },
+        // 帯の上の構造物(くぐる・越える)
+        { "Overpass_Cross",        new Entry("Overpass_Cross.fbx",        "Overpass.jpg",    Vector3.one, GroundVisualRotY) },
+        { "Overpass_Cross_Broken", new Entry("Overpass_Cross_Broken.fbx", "Overpass.jpg",    Vector3.one, GroundVisualRotY) },
+        { "Sign_Gantry",           new Entry("Sign_Gantry.fbx",           "Sign_Gantry.jpg", Vector3.one, GroundVisualRotY) },
     };
 
     // 見た目のオブジェクトを作って返す(親は呼ぶ側で設定する)
@@ -65,6 +92,8 @@ public static class StageModelCatalog
                     r.sharedMaterials = mats;
                 }
                 go.transform.localScale = e.scale / UnityToGame;
+                // モデルがもともと持っている向きは残し、その上から回す
+                go.transform.localRotation = Quaternion.Euler(0f, e.visualRotY, 0f) * go.transform.localRotation;
                 // ワームはUnityの表示だけ大きくするので、ゲームの当たり判定とは合わせられない。
                 // 置いた位置(螺旋の中心)にモデルの中心が来るように置く(モデルの原点は中心から上にずれているため)
                 if (kind == PlacedObject.Kind.WormEnemy)

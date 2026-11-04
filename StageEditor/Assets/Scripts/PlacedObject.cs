@@ -14,6 +14,8 @@ public class PlacedObject : MonoBehaviour
         Boss,
         // 2面のビル(障害物)。並びの数字がシーンに保存されているので、新しい種類は必ず末尾に足す
         Building,
+        // 固定砲台の敵(モデルの原点は底面の中心なので、地面の高さに置く)
+        TurretEnemy,
     }
 
     [Tooltip("CSVの1列目の名前(ゲーム側のモデルID。例: Rock1, FloatingEnemy, WormHead, Boss, Building_Leaning)")]
@@ -66,6 +68,8 @@ public class PlacedObject : MonoBehaviour
         bool isSelected = UnityEditor.Selection.Contains(gameObject);
         var cam = UnityEditor.SceneView.currentDrawingSceneView != null ? UnityEditor.SceneView.currentDrawingSceneView.camera : null;
         bool isNear = cam != null && Vector3.Distance(cam.transform.position, transform.position) < LabelDistance;
+        // 地面(道路・線路など)は数が多く文字で埋まるので、選んでいるときだけ出す
+        if (IsGround(kind, modelID)) isNear = false;
         if (!isSelected && !isNear) return;
 
         string label = JapaneseName(kind, modelID);
@@ -93,9 +97,16 @@ public class PlacedObject : MonoBehaviour
             case Kind.WormEnemy: return "ワーム";
             case Kind.Boss: return "ボス";
             case Kind.Rock: return "岩" + (id != null && id.StartsWith("Rock") ? id.Substring(4) : "");
-            case Kind.Building: return id != null && id.StartsWith("Building_") ? id.Substring(9) : "ビル";
+            case Kind.Building: return id != null && id.StartsWith("Building_") ? id.Substring(9) : (id ?? "ビル");
+            case Kind.TurretEnemy: return "砲台";
             default: return id;
         }
+    }
+
+    // 地面のパーツか(ビルと同じBuilding.csvに書き出すが、名前がBuilding_で始まらないもの)
+    static bool IsGround(Kind k, string id)
+    {
+        return k == Kind.Building && id != null && !id.StartsWith("Building_");
     }
 #endif
 
@@ -109,6 +120,7 @@ public class PlacedObject : MonoBehaviour
             case Kind.WormEnemy: return Color.magenta;
             case Kind.Boss: return Color.red;
             case Kind.Building: return Color.yellow;
+            case Kind.TurretEnemy: return new Color(1f, 0.5f, 0f);
             default: return Color.white;
         }
     }

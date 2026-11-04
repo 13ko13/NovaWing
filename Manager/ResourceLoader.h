@@ -39,6 +39,28 @@ public:
 		BuildingCollapsedCol,
 		BuildingAntennaTowerCol,
 		BuildingBridgeWreckCol,
+		//2ステージ目の地面(見た目と当たり判定の両方に使う)
+		RoadStraight,//道路(まっすぐ)
+		RoadDamaged,//道路(穴・めくれ)
+		RoadDebris,//道路(がれき・焼けた車)
+		RailStraight,//線路(まっすぐ)
+		RailDamaged,//線路(曲がったレール・倒れた架線柱)
+		GroundRubble,//がれきの空き地
+		GroundSideRight,//外側の地面(右)
+		GroundSideLeft,//外側の地面(左)
+		RoadSlopeUp400,//道路の上り坂(+400)
+		RoadSlopeDown400,//道路の下り坂(-400)
+		RailSlopeUp400,//線路の上り坂(+400)
+		RailSlopeDown400,//線路の下り坂(-400)
+		GroundRubbleSlopeUp400,//空き地の上り坂(+400)
+		GroundRubbleSlopeDown400,//空き地の下り坂(-400)
+		WallSide,//横の段差の擁壁
+		WallSideSlope,//坂の横の擁壁
+		WallFront,//正面の段差の擁壁
+		//2ステージ目の帯の上の構造物(見た目と当たり判定の両方に使う)
+		OverpassCross,//陸橋
+		OverpassCrossBroken,//崩れた陸橋
+		SignGantry,//門型の標識柱
 		//2ステージ目の敵
 		RushEnemy,//突進する敵
 		TurretEnemy,//固定砲台の敵
