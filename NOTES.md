@@ -2140,4 +2140,12 @@
 - (以下は登録前に書いたメモ)**次(ユーザーが書く、ビルの登録と同じ場所)**: `ModelID`に地面8種(＋坂6・壁3)([ResourceLoader.h:34](Manager/ResourceLoader.h#L34)付近)、パス([ResourceConstants.h:25](Constants/ResourceConstants.h#L25)付近、`Data/Model/Road/○○.mv1`)、CSV名([ResourceConstants.h:183](Constants/ResourceConstants.h#L183)付近、Unityと同じ`Road_Straight`など)、[ResourceLoader.cpp](Manager/ResourceLoader.cpp)の対応表(130行目付近)・`game.models`(474行目付近)・`WStringToModelID`(690行目付近)、[BuildingDataSetter.cpp:23](Game/GameObjects/Actors/Building/BuildingDataSetter.cpp#L23)の`col_model_ids`に「地面→地面自身」。`Ground_Side_*`の`.mv1`変換も。
 
 ### 2026-11-04 ブーストのポストエフェクト`BoostingEffect`(ユーザー実装中)
-- [BoostingEffect.cpp](Constants/BoostingEffect.cpp)はユーザーが自分で考えながら書いている途中。**Claudeは方法だけを伝える方針**(ユーザーが聞いたことに答えるだけで、コードの指摘や答えは先回りして出さない)。
+- [BoostingEffect.cpp](ShaderEffect/BoostingEffect.cpp)はユーザーが自分で考えながら書いている途中。**Claudeは方法だけを伝える方針**(ユーザーが聞いたことに答えるだけで、コードの指摘や答えは先回りして出さない)。
+- **(11/04)参考記事: CSDN「径向模糊shader」(思依_xuni、2016-12-23、https://blog.csdn.net/mansir123/article/details/53840446)の日本語訳(Claudeが訳した。CC 4.0 BY-SA)。** 放射ブラー(ズームブラー)の考え方。**コードは読んで自分の言葉で設計する(写さない)。** 原文の「原理」の図は取れていない。
+  - 要点: ①`dir = 0.5 - uv`(画面中心を向くベクトル)、`dist = length(dir)`、`dir /= dist`で正規化 ②元の色`color = tex.Sample(uv)` ③`samples[10]`(-0.08〜0.08の10個のずれ)で、`uv + dir * samples[i] * fSampleDist`を10回サンプリングして`sum`に足す ④`sum /= 11`(元の色を入れて11個) ⑤`t = saturate(dist * fSampleStrength)`(中心から遠いほど強く) ⑥`lerp(color, sum, t)`。パラメータは`fSampleDist`(サンプリング距離)と`fSampleStrength`(強さ)の2つ。動的に変えるとスピード感が出る。
+  - 原文HLSL(コメントのみ訳): `float2 dir = 0.5 - texCoord; float dist = length(dir); dir /= dist; float4 color = tex2D(Texture0, texCoord); float4 sum = color; for (int i = 0; i < 10; ++i) { sum += tex2D(Texture0, texCoord + dir * samples[i] * fSampleDist); } sum /= 11.0; float t = saturate(dist * fSampleStrength); return lerp(color, sum, t);`
+  - 気づき(Claudeから): `samples[i]`と`dist`はぼける長さに別々の形で関わる。符号(中心を向くか外を向くか)の扱いが「中心側のピクセルが外ににじむ」設計に関係する。
+- **(11/04)ブーストエフェクトの設計(ユーザーの発想)**: 中心付近は何もかけず、画面の端ほど中心側のピクセルが外側へにじむ。= 放射ブラー。ファイルは`ShaderEffect/`に移動済み([BoostingEffect.h](ShaderEffect/BoostingEffect.h)・[BoostingEffectPS.hlsl](BoostingEffectPS.hlsl)は今はビネットのみ)。
+- **(11/04・方針)「一回で全部やろうとしない」**: 「まずはこれ→ダメならこれ→できたらこれ」と1歩ずつ進める(AIがない時代の作り方をAIありで)。全体の計画・機能一覧を一度に出さない。
+- **(11/04・ユーザー実装、確認OK)ブースト中だけ描き先を切り替える**: `BoostingEffect`に`ChangeBoostEffectRT`/`ChangeNormalRT`(`m_screenH`はコンストラクタで`MakeScreen`)。[GameScene::Draw](Scene/GameScene.cpp#L667)で、`SetUpCamera`の前と`m_pEffectManager->Draw()`の後(UIの前)に呼ぶ。ブースト中はUIだけが映れば成功(3Dは`m_screenH`の中)。`ChangeNormalRT`の`ClearDrawScreen`は不要(バックバッファは`Application.cpp:97`で毎フレーム先頭にクリア済み)。
+- **次の1歩**: `m_screenH`を画面に出す(まずシェーダー無しで`DrawGraph(0,0,...)`)→ブースト中も普通に映る。その後、放射ブラーのシェーダー(上の参考記事)。

@@ -56,6 +56,7 @@
 #include "Constants/StageConfig.h"
 #include "Manager/EnemySpawner.h"
 #include "Game/GameObjects/Actors/Character/Enemy/TurretEnemy/TurretEnemyDataSetter.h"
+#include "ShaderEffect/BoostingEffect.h"
 #ifdef _DEBUG
 #include "DebugTools/DebugUI/DebugUI.h"
 #endif
@@ -232,6 +233,8 @@ void GameScene::Init()
 		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxBottom)
 	);
 
+	//ブーストエフェクトの初期化
+	m_pBoostingEffect = std::make_unique<BoostingEffect>();
 
 	//景色の生成&初期化(位置はステージのオフセットに関係なく固定)
 	m_pSceneries = SceneryDataSetter::CreateScenery(m_pCamera, m_pStageConfig->GetCSVFolderName());
@@ -683,6 +686,9 @@ void GameScene::Draw()
 		revealManager.EndCapture();
 	}
 
+	//描画先をブーストエフェクト用のオフスクリーンに切り替え
+	m_pBoostingEffect->ChangeBoostEffectRT();
+
 	//視野角とNearFarを再設定
 	m_pCamera->SetUpCamera();
 
@@ -707,6 +713,9 @@ void GameScene::Draw()
 
 	//エフェクトの描画
 	m_pEffectManager->Draw();
+
+	//UIだけバックバッファに描画する
+	m_pBoostingEffect->ChangeNormalRT();
 
 	//全てのUIを描画する
 	m_pUIManager->Draw();

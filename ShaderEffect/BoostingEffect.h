@@ -4,15 +4,15 @@ class BoostingEffect
 {
 public:
     BoostingEffect();
-    virtual ~BoostingEffect();
-    /// ブースト開始
-    void StartBoost();
-    /// ブースト終了
-    void EndBoost();
-    /// 描画
-    void Draw();
-    /// 更新
-    void Update(bool isBoosting);
+	virtual ~BoostingEffect();
+	
+	/// 更新
+	void Update(bool isBoosting);
+
+	//描画先をブーストエフェクト用のレンダーターゲットに変更
+	void ChangeBoostEffectRT();
+	//描画先をもとに戻す
+	void ChangeNormalRT();
 
 private:
 	//ブースト用のピクセルシェーダーハンドル

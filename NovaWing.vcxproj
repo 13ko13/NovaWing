@@ -302,8 +302,9 @@
     <ClCompile Include="Game\Collision\BuildingCollider.cpp" />
     <ClCompile Include="Constants\StageConfig.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\TurretEnemy\TurretEnemy.cpp" />
-    <ClCompile Include="Constants\BoostingEffect.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\TurretEnemy\TurretEnemyDataSetter.cpp" />  </ItemGroup>
+    <ClCompile Include="ShaderEffect\BoostingEffect.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\TurretEnemy\TurretEnemyDataSetter.cpp" />
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
     <ClInclude Include="Game\Collision\CounterCollider.h" />
@@ -439,8 +440,9 @@
     <ClInclude Include="Game\Collision\BuildingCollider.h" />
     <ClInclude Include="Constants\StageConfig.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\TurretEnemy\TurretEnemy.h" />
-    <ClInclude Include="Constants\BoostingEffect.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\TurretEnemy\TurretEnemyDataSetter.h" />  </ItemGroup>
+    <ClInclude Include="ShaderEffect\BoostingEffect.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\TurretEnemy\TurretEnemyDataSetter.h" />
+  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="CapturePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

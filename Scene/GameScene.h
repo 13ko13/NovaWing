@@ -25,6 +25,7 @@ class WarningUI;
 class TutorialController;
 class StageConfig;
 class EnemySpawner;
+class BoostingEffect;
 class GameScene :public Scene
 {
 public:
@@ -141,4 +142,6 @@ private:
 	std::unique_ptr<StageConfig> m_pStageConfig;
 	//突進する敵などを、プレイヤーが近づいたら出すクラスへのポインタ
 	std::unique_ptr<EnemySpawner> m_pEnemySpawner;
+	//ブーストエフェクトクラスへのポインタ
+	std::unique_ptr<BoostingEffect> m_pBoostingEffect;
 };
