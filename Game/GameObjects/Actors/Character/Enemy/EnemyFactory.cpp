@@ -6,6 +6,7 @@
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Manager/TargetManager.h"
 #include "Manager/CollisionManager.h"
+#include "Game/GameObjects/Actors/Character/Enemy/ButterflyEnemy/ButterflyEnemy.h"
 
 namespace
 {
@@ -135,6 +136,34 @@ std::shared_ptr<EnemyBase> EnemyFactory::Create(
 		}
 		//この突進敵のポインタを返す
 		return pRushEnemy;
+	}
+
+	case EnemyType::ButterflyEnemy:
+	{
+		//蝶型の敵に必要な情報を詰める
+		ButterflyEnemy::ButterflyEnemyData butterflyEnemyData;
+		butterflyEnemyData.modelID = ResourceLoader::ModelID::ButterflyEnemy;
+		butterflyEnemyData.pBulletManager = m_pBulletManager;
+		butterflyEnemyData.pCamera = m_pCamera;
+		butterflyEnemyData.pEffectManager = m_pEffectManager;
+		butterflyEnemyData.pos = pos;
+		butterflyEnemyData.pPlayer = m_pPlayer;
+		butterflyEnemyData.pSoundManager = m_pSoundManager;
+
+		//蝶型の敵に情報を渡して生成
+		std::shared_ptr<ButterflyEnemy> pButterflyEnemy = std::make_shared<ButterflyEnemy>(butterflyEnemyData);
+		//初期化
+		pButterflyEnemy->Init();
+		//ターゲットマネージャーと当たり判定マネージャーに登録
+		if (m_pTargetManager.lock() != nullptr)
+		{
+			m_pTargetManager.lock()->Register(pButterflyEnemy);
+		}
+		if (m_pCollisionManager.lock() != nullptr)
+		{
+			m_pCollisionManager.lock()->Register(pButterflyEnemy);
+		}
+		return pButterflyEnemy;
 	}
 
 	default:

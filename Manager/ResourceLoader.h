@@ -64,6 +64,7 @@ public:
 		//2ステージ目の敵
 		RushEnemy,//突進する敵
 		TurretEnemy,//固定砲台の敵
+		ButterflyEnemy,//蝶型の敵
 	};
 
 	//グラフィックの種類

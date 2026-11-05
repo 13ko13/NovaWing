@@ -8,7 +8,7 @@
 namespace
 {
 	constexpr float camera_near = 50.0f; // カメラのNear
-	constexpr float camera_far = 5500.0f; // カメラのFar
+	constexpr float camera_far = 9000.0f; // カメラのFar
 
 	// カメラの視野角
 	constexpr float fov = DX_PI_F / 2.0f;

@@ -473,7 +473,6 @@ void GameScene::Update()
 		StartStage();
 	}
 
-
 	//UIマネージャーの更新
 	m_pUIManager->Update();
 
@@ -716,6 +715,12 @@ void GameScene::Draw()
 
 	//UIだけバックバッファに描画する
 	m_pBoostingEffect->ChangeNormalRT();
+
+	//視野角とNearFarを再設定
+	m_pCamera->SetUpCamera();
+
+	//ブースト中であればブーストエフェクトを描画
+	m_pBoostingEffect->Draw(m_pPlayer->IsBoosting());
 
 	//全てのUIを描画する
 	m_pUIManager->Draw();

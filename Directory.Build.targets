@@ -1,0 +1,49 @@
+<Project>
+  <!--
+    シェーダーの登録漏れ・BOMでビルドが通らない問題を防ぐ(MSBuildがビルドのたびに自動で読み込む。このファイルを消せば元どおり)
+    1. プロジェクト直下の *PS.hlsl / *VS.hlsl のうち、vcxprojに登録されていないものもコンパイルする(.pso/.vsoはプロジェクト直下)
+    2. 直下の .hlsl/.hlsli がBOM付きUTF-8なら、BOMだけ外す(fxcはBOMを読めず X3000: Illegal character になる)
+  -->
+  <UsingTask TaskName="NovaWingStripUtf8Bom" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <Files ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.IO" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+foreach (var item in Files)
+{
+    var path = item.GetMetadata("FullPath");
+    var bytes = File.ReadAllBytes(path);
+    if (bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF)
+    {
+        var body = new byte[bytes.Length - 3];
+        System.Array.Copy(bytes, 3, body, 0, body.Length);
+        File.WriteAllBytes(path, body);
+        Log.LogMessage(MessageImportance.High, "BOMを外しました: " + item.ItemSpec);
+    }
+}
+]]></Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="NovaWingPrepareShaders" BeforeTargets="FxCompile" Condition="'$(MSBuildProjectName)' == 'NovaWing'">
+    <ItemGroup>
+      <_NovaWingNewPS Include="*PS.hlsl" Exclude="@(FxCompile)" />
+      <_NovaWingNewVS Include="*VS.hlsl" Exclude="@(FxCompile)" />
+      <FxCompile Include="@(_NovaWingNewPS)">
+        <ShaderType>Pixel</ShaderType>
+        <ShaderModel>5.0</ShaderModel>
+        <ObjectFileOutput>$(ProjectDir)%(_NovaWingNewPS.Filename).pso</ObjectFileOutput>
+      </FxCompile>
+      <FxCompile Include="@(_NovaWingNewVS)">
+        <ShaderType>Vertex</ShaderType>
+        <ShaderModel>5.0</ShaderModel>
+        <ObjectFileOutput>$(ProjectDir)%(_NovaWingNewVS.Filename).vso</ObjectFileOutput>
+      </FxCompile>
+      <_NovaWingShaderSources Include="*.hlsl;*.hlsli" />
+    </ItemGroup>
+    <Message Importance="High" Text="vcxprojに未登録のシェーダーもコンパイルします: @(_NovaWingNewPS);@(_NovaWingNewVS)" Condition="'@(_NovaWingNewPS)@(_NovaWingNewVS)' != ''" />
+    <NovaWingStripUtf8Bom Files="@(_NovaWingShaderSources)" />
+  </Target>
+</Project>

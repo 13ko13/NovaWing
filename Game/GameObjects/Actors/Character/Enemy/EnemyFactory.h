@@ -31,6 +31,7 @@ public:
 		FloatingEnemy,//浮遊敵
 		WormEnemy,//ワームエネミー
 		RushEnemy,//突進敵
+		ButterflyEnemy,//蝶型敵
 
 		Max,//数
 	};

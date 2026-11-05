@@ -414,6 +414,9 @@
     <ClCompile Include="DebugTools\ImGui\imgui_impl_win32.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\ButterflyEnemy\ButterflyEnemy.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants\Game.h">
@@ -824,6 +827,9 @@
     <ClInclude Include="DebugTools\DebugUI\DebugUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\ButterflyEnemy\ButterflyEnemy.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="LightingPS.hlsl" />
@@ -835,6 +841,7 @@
     <FxCompile Include="GlitchPS.hlsl" />
     <FxCompile Include="DamagePS.hlsl" />
     <FxCompile Include="SkinnedLightingVS.hlsl" />
+    <FxCompile Include="BoostingEffectPS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\CSV\RockData.csv" />

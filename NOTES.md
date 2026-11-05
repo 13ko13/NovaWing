@@ -25,6 +25,7 @@
 - `MV1GetAnimIndex`等の名前検索APIは大文字小文字を区別する。`-1`が返ってきたら`MV1GetAnimNum`+`MV1GetAnimName`で実際の名前を列挙して確認する。
 - DxLibの固定機能2D描画(`DrawRotaGraph`系)は独自ピクセルシェーダーを反映できない。シェーダーを効かせるには`DrawPolygonIndexed2DToShader`で頂点を自前で組み立てる必要がある。その際`PS_Input`はDxLib側の頂点出力順（`SV_POSITION→COLOR0→COLOR1→TEXCOORD0→TEXCOORD1`）と完全一致させること。
 - `SetDrawScreen`はカメラの投影設定・位置設定を両方リセットする。オフスクリーン処理の後は再設定が必要。
+- `.hlsl`を新しく作ったら、vcxprojの`FxCompile`に登録しないと`.pso`/`.vso`ができず、`LoadPixelShader`が-1を返す。**UTF-8のBOM付きだとfxcが`X3000: Illegal character`(1行1文字目)で止まる**ので、BOM無しで保存する。
 
 ### DxLibの乗算済みアルファ・ブレンド
 - アルファ付きオフスクリーンへのMV1描画で、マテリアル単位のブレンド設定がグローバルな`SetDrawBlendMode`を上書きし、値が化けることがある。`MV1SetMaterialDrawBlendMode(handle, i, DX_BLENDMODE_NOBLEND)`を全マテリアルに適用するのが確実（グローバル設定はMV1描画では効かない）。
@@ -2149,3 +2150,32 @@
 - **(11/04・方針)「一回で全部やろうとしない」**: 「まずはこれ→ダメならこれ→できたらこれ」と1歩ずつ進める(AIがない時代の作り方をAIありで)。全体の計画・機能一覧を一度に出さない。
 - **(11/04・ユーザー実装、確認OK)ブースト中だけ描き先を切り替える**: `BoostingEffect`に`ChangeBoostEffectRT`/`ChangeNormalRT`(`m_screenH`はコンストラクタで`MakeScreen`)。[GameScene::Draw](Scene/GameScene.cpp#L667)で、`SetUpCamera`の前と`m_pEffectManager->Draw()`の後(UIの前)に呼ぶ。ブースト中はUIだけが映れば成功(3Dは`m_screenH`の中)。`ChangeNormalRT`の`ClearDrawScreen`は不要(バックバッファは`Application.cpp:97`で毎フレーム先頭にクリア済み)。
 - **次の1歩**: `m_screenH`を画面に出す(まずシェーダー無しで`DrawGraph(0,0,...)`)→ブースト中も普通に映る。その後、放射ブラーのシェーダー(上の参考記事)。
+
+### 2026-11-05 2面のゲーム内確認OK、ブーストのポストエフェクトを再開
+- **(11/05・ユーザー確認)2面は問題なし**: 地面17種・構造物3種・ビルの当たり判定(ボクセル方式)・2面の配置。コスト表「2面の配置」(5h・アルファ)を完了に(ユーザー申告で実5h)。親「ステージ」は未完了の子があるので未完了のまま。バックアップはscratchpad。更新後: プロト 81/残3、アルファ 78/残63、ベータ 45.5/36.5、合計204.5/残102.5。
+- ブーストのポストエフェクト([BoostingEffect.cpp](ShaderEffect/BoostingEffect.cpp))を再開。方針は11/04のまま(Claudeは聞かれたことに答えるだけ、先回りの指摘・答え・全体計画は出さない、1歩ずつ)。
+- **(11/05・ユーザー実装、確認OK)ブースト中に`m_screenH`を画面に出す**: `BoostingEffect::Update`→`Draw(isBoosting)`に改名(中身が描画だけなので。Updateで描くと、このフレームの3Dが`m_screenH`に描かれる前になる)。[GameScene.cpp:720](Scene/GameScene.cpp#L720)で`ChangeNormalRT`の後・UIの前に呼ぶ。`DrawGraph`の座標を`(0,0)`に直して、ブースト中に画面が映った。
+- **(11/05・ユーザー実装、確認OK)ブーストしていないときも画面が映るように**: 3Dは常に`m_screenH`に描かれる(切り替えに条件なし)ので、ブーストしていないときも`DrawGraph(0,0,m_screenH)`で出す。エフェクトがつくのはシェーダーを通して描いたときだけなので、普通に描けばいつもの画面。今は両方の分岐が同じ`DrawGraph`(ブースト中の方をシェーダーに置き換える予定)。
+- **次**: 放射ブラーのシェーダー。ユーザーが先に設計(PS_INPUT・テクスチャ・計算方法)を考え、Claudeはレビューだけ。
+- **(11/05)ブースト中にシェーダー(今はビネット)がかからない → `m_boostingEffectPSH`が-1だった**: `BoostingEffectPS.hlsl`がvcxprojに登録されておらず、`.pso`が作られていなかった。Claudeが[NovaWing.vcxproj](NovaWing.vcxproj)(ほかのPSと同じ設定、`$(ProjectDir)%(Filename).pso`)と`.filters`に登録。さらにファイルが**UTF-8のBOM付き**で、fxcが`error X3000: Illegal character in shader file`(1行1文字目)になったので、BOMだけ外した(ほかの.hlslはBOM無しUTF-8)。Debug x64ビルド成功、`BoostingEffectPS.pso`生成を確認。ゲームでの確認はまだ。
+- **(11/05)再発防止: [Directory.Build.targets](Directory.Build.targets)を追加**(MSBuildがビルドのたびに自動で読む。vcxprojは変えていない。消せば元どおり)。①直下の`*PS.hlsl`/`*VS.hlsl`でvcxprojに未登録のものも、ほかと同じ設定(5.0、`.pso`/`.vso`は直下)でコンパイル ②直下の`.hlsl`/`.hlsli`がBOM付きならビルド前にBOMだけ外す。BOMの原因: [.vscode/settings.json](.vscode/settings.json)の`files.encoding: utf8bom`と、dxlib-devenvの「新しいシェーダーを作成」がわざとBOMを付けること。未登録・BOM付きの仮のシェーダーで、BOMが外れて`.pso`ができることを確認済み(仮のファイルは削除)。
+- **(11/05・ユーザー実装、確認OK)ブースト中にビネットがかかった(画面の端が暗くなる)**: `.pso`が読めても`DrawGraph`では自作PSが効かない(教訓どおり) → ブースト中は`DrawGraphToShaderByCenter`([GraphShaderDraw.cpp](Utility/GraphShaderDraw.cpp)、中で`DrawPolygonIndexed2DToShader`、テクスチャは`t0`)で描く。あわせて、ブーストしていないときの描き方と使い終わったシェーダーの解除を見直し、[BoostingEffectPS.hlsl](BoostingEffectPS.hlsl)の`PS_INPUT`をDxLibの頂点出力の並び(`COLOR1`を含む、[GlitchPS.hlsl](GlitchPS.hlsl)と同じ)に合わせた。
+- **次**: 放射ブラー。ユーザーが設計を先に考え、Claudeはレビューだけ。
+- **(11/05・ユーザー実装、確認OK「いい感じ」)ブースト中の放射ブラー(にじみ)**: 参考はスターフォックスのリメイクのブースト画面(端ほど、中心へ向かう筋が長くなめらかに伸びる)。参考記事の形(前後に10回サンプリング＋距離で混ぜる割合)だと「同じ幅のぼけが端ほど濃く重なる」だけで、イメージと違った。直した点: ①`samples`を全部プラスにして**中心側からだけ**色を借りる(10個とも違う値) ②ずらす量に`toCenterDist`を掛けて**端ほど長く**伸ばす(`float2`の`uv-0.5`を掛けるとx・y別々に掛かり向きが外側に戻るので、長さのスカラーを使う) ③`sample_strength`を2.0に(混ぜる割合が上下左右の端で1に届く)。[BoostingEffectPS.hlsl:41](BoostingEffectPS.hlsl#L41)。
+  - 残り(必要なら): `samples`の間隔がそろっていない(大きい値の間が空く)ので、筋をもっと長くするとコピーが並んで見えるおそれ。筋の長さの倍率は今は無い(四隅で最大約0.067)。
+- **(11/05・ユーザー実装)ブーストのにじみをスーっと出し入れする**: `BoostingEffect`にブースト量(0〜1)を持たせ、定数バッファでシェーダーに渡してずらす量に掛ける。シェーダーを通す条件は`isBoosting`ではなく「ブースト量が0より大きい間」。レビューで指摘した点: C++のスロット(`ShaderRegister::cbuffer_boosting`=8)とシェーダーの`register(b0)`の不一致、`boostAmount`未使用、増え方0.0001/フレームは遅すぎ。
+- **(11/05・ユーザー修正、確認OK)ブースト以外のエフェクト・レティクルの位置がずれた**: 原因は[GameScene.cpp:717](Scene/GameScene.cpp#L717)の`ChangeNormalRT`(`SetDrawScreen`)でカメラ設定がリセットされ、その後のUI(レティクルの3D→画面変換)と次フレームの`Effekseer_Sync3DSetting`([EffectManager.cpp:18](Manager/EffectManager.cpp#L18))・ロックオンの画面内判定がリセット後のカメラを使っていたこと(教訓[NOTES.md:27](NOTES.md#L27)どおり)。描き先を戻した後に`SetUpCamera`し直して解決。
+- **(11/05・仕様合意)蝶みたいな敵(仮名`ButterflyEnemy`、2面、コスト表 計7h・S・アルファ)**: 仕様はユーザーがClaude Desktopでまとめたもの。数値はすべて仮で、単位も気にせず後で調整(ユーザー)。
+  - 小型の戦闘機、V字の翼でオレンジ〜金に発光。1〜3機で出る。出し方は`EnemySpawner`(プレイヤーが決めたZまで来たら)で、**画面外から**出てくる。1〜3機はCSVに1機ずつ。
+  - かくかく移動: 登場(プレイヤー前方の所定の距離まで一気に)→ダッシュ(0.12〜0.2秒、出だし速く最後に急ブレーキ、進行方向へ最大45°傾く)→停止(0.4〜0.8秒ランダム、機首をプレイヤーへ、傾きはすぐ水平、攻撃は止まっている間だけ・毎回ではない)をくり返す→離脱(一定時間か決まった回数で画面外へ高速で抜けて消える)。プレイヤーの前方30〜50m相当を保ってついてくる。次の移動先は上下左右に3〜8m相当、同じ方向に何度も続けない、20%くらいで前後にも動いて詰め寄る。
+  - 回転弾: 撃つ直前に機体の前が0.2〜0.3秒白く光る。3発を等間隔に、見えない軸のまわりを回しながら撃つ。軸は撃った瞬間のプレイヤー位置へまっすぐ(追尾なし〜ごく弱い)、1秒に1〜1.5周、半径は0.5m相当から4〜6m相当へ広がる、回る向きは撃つたびに交互。弾頭は白く光る小さな球、虹色(白→シアン→紫→ピンク)の太い尾が0.3〜0.5秒で消える。当たり判定は弾頭だけ。プレイヤーの後ろへ抜けるか3〜4秒で消える。
+  - **カウンターで跳ね返せる。回転はそのまま、軸の進む向きだけ蝶の方へ変わる**(ユーザー)。
+  - 仮の値(ユーザー未回答、Claudeの案): 離脱は15秒かダッシュ8回、止まったときに撃つ確率50%、HP・弾のダメージは浮遊敵と同じ、体当たりダメージ無し(固定砲台と同じ`ColliderTag::Floating`)。
+  - 見た目: モデルはユーザーがClaude Desktopで作る(プロンプトはClaudeが書いた)。虹色の尾・白い光はEffekseer(エフェクト=ベータの定義、扱いは未決定)。コストは見積なので気にしない(ユーザー)。
+  - **(11/05・Claude、ユーザー依頼)フォルダとクラスの初期状態だけ作成**: [ButterflyEnemy.h](Game/GameObjects/Actors/Character/Enemy/ButterflyEnemy/ButterflyEnemy.h)/[.cpp](Game/GameObjects/Actors/Character/Enemy/ButterflyEnemy/ButterflyEnemy.cpp)(`EnemyBase`継承、コンストラクタ・デストラクタだけ、「クラスの追加」のスクリプトで作成しvcxproj登録済み)。中身はユーザーが書く。`EnemyBase()`の引数を書くまではビルドエラー。モデル・ステータスの登録は本物のモデルが届いてから(それまで`ModelID::FloatingEnemy`、ステータスはモデルIDから引くので浮遊敵と同じになる)。最初の目標は「2面で出てきて浮いているだけ」(クラス→`EnemyType`と工場の`case`→`EnemySpawner`の`LoadButterflyEnemy`)。
+  - **(11/05・ユーザー実装中)クラスの中身を書き始めた**: `ButterflyEnemyData`(突進する敵と同じ中身)、コンストラクタ(`EnemyBase`に引数、当たり判定の生成、待機位置のずれ、画面外の初期位置)、`OnInit`まで。`Update`/`Draw`/`GetCollisionSpheres`/`GetColliders`はまだ空。
+    - **レビューで指摘(ユーザーが後で変える)**: [ButterflyEnemy.cpp:22](Game/GameObjects/Actors/Character/Enemy/ButterflyEnemy/ButterflyEnemy.cpp#L22)の`ColliderTag::ButterflyEnemy`(ユーザーが[ICollider.h:28](Game/Collision/ICollider.h#L28)に追加)は[CollisionManager.cpp:44-69](Manager/CollisionManager.cpp#L44-L69)の`hit_pairs`にないので弾が素通りする。直し方は`ColliderTag::Floating`にする(固定砲台[TurretEnemy.cpp:53](Game/GameObjects/Actors/Character/Enemy/TurretEnemy/TurretEnemy.cpp#L53)と同じ、体当たりダメージなしなのでこれで足りる)か、`hit_pairs`に`PlayerBullet`/`ChargeBullet`/`ChargeExplosion`との組を足すか。
+    - 今は`Update`が空なので画面外(`appear_distance`)に置かれたままでプレイヤーにもついてこない → 次は`UpdateAppear`([RushEnemy.cpp:161](Game/GameObjects/Actors/Character/Enemy/RushEnemy/RushEnemy.cpp#L161)と同じ形)と`Draw`([RushEnemy.cpp:122](Game/GameObjects/Actors/Character/Enemy/RushEnemy/RushEnemy.cpp#L122)と同じ形)。
+- **(11/05)ブーストのエフェクトはひとまず完了(ユーザー)**。コスト表「シェーダ＞ブースト中の集中線」(見積6h)を実3hで完了に。バックアップはscratchpad。更新後: プロト 81/残3、アルファ 78/残57、ベータ 45.5/36.5、合計204.5/残96.5。
+- **(11/05・Claude、ユーザー依頼)VSCodeでHLSLのエラーが出ない → 自作拡張`local.hlsl-check`を入れた**: HLSL Toolsは未宣言の変数(例: `samp`)などを検出しない。書いている途中(止まって0.4秒後)・開いた時・保存時に、Windows Kitsの`fxc.exe`で一時ファイル(BOMを外した写し)をコンパイルし、エラーを赤線と問題パネルに出す。種類はファイル名の末尾(`〇〇PS`→ps_5_0、`〇〇VS`→vs_5_0)、`.hlsli`を変えると開いているシェーダーを再チェック。ソースと`.vsix`は`C:\Users\SakamotoKou\.claude\local-extensions\hlsl-check\`(学校PCには`code --install-extension`でこの`.vsix`を入れる)。入れた後に「ウィンドウの再読み込み」が必要。
+- **(11/05・ユーザー)環境まわり(vcxproj・pso・文字コード)はユーザーが確認する必要はない** → Claudeが調べて直す。聞き返し・1歩ずつの方針はコード・シェーダーの中身だけ。

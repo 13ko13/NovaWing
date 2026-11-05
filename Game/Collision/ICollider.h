@@ -25,6 +25,7 @@ enum class ColliderTag
 	ChargeExplosion,//チャージショットで発生する爆発。雑魚しかダメージ受けない
 	Building,//ビル
 	RushEnemy,//突進する敵
+	ButterflyEnemy,//蝶型の敵
 };
 
 /// <summary>

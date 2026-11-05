@@ -60,4 +60,8 @@ namespace ShaderRegister
 
 	//----------プレイヤーのダメージ専用------
 	constexpr int cbuffer_damage = 7;
+
+	//----------ブーストエフェクト専用------
+	//ブースト量を渡す定数バッファ(ピクセルシェーダ)
+	constexpr int cbuffer_boosting = 8;
 }
