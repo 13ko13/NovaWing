@@ -1,0 +1,97 @@
+{
+  "name": "solution-explorer",
+  "displayName": "NovaWing Solution Explorer",
+  "description": "Visual Studio 風のソリューションエクスプローラー(vcxproj 自動登録つき)",
+  "publisher": "novawing",
+  "version": "0.1.0",
+  "engines": { "vscode": "^1.90.0" },
+  "main": "./extension.js",
+  "activationEvents": ["workspaceContains:*.vcxproj"],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        { "id": "novawingSolutionContainer", "title": "ソリューション エクスプローラー", "icon": "$(project)" }
+      ]
+    },
+    "views": {
+      "novawingSolutionContainer": [
+        { "id": "novawingSolution", "name": "ソリューション エクスプローラー" }
+      ]
+    },
+    "configuration": {
+      "title": "NovaWing Solution Explorer",
+      "properties": {
+        "novawingSolution.exclude": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [".git", ".vs", "x64", "Debug", "Release", "node_modules"],
+          "description": "ツリーに表示しないフォルダ/ファイル名"
+        }
+      }
+    },
+    "commands": [
+      { "command": "novawing.newClass", "title": "新しいクラス..." },
+      { "command": "novawing.newShader", "title": "新しい HLSL..." },
+      { "command": "novawing.newFolder", "title": "新しいフォルダー..." },
+      { "command": "novawing.include", "title": "プロジェクトに含める" },
+      { "command": "novawing.exclude", "title": "プロジェクトから除外" },
+      { "command": "novawing.moveToRoot", "title": "最上位フォルダへ移動" },
+      { "command": "novawing.cut", "title": "切り取り" },
+      { "command": "novawing.paste", "title": "貼り付け" },
+      { "command": "novawing.rename", "title": "名前の変更" },
+      { "command": "novawing.delete", "title": "削除" },
+      { "command": "novawing.revealInOS", "title": "エクスプローラーでフォルダーを開く" },
+      { "command": "novawing.openTerminal", "title": "ターミナルで開く" },
+      { "command": "novawing.build", "title": "ビルド", "icon": "$(tools)" },
+      { "command": "novawing.rebuild", "title": "リビルド", "icon": "$(debug-restart)" },
+      { "command": "novawing.clean", "title": "クリーン", "icon": "$(trash)" },
+      { "command": "novawing.selectConfig", "title": "ビルド構成を選択..." },
+      { "command": "novawing.refresh", "title": "更新", "icon": "$(refresh)" }
+    ],
+    "submenus": [
+      { "id": "novawing.add", "label": "追加" }
+    ],
+    "menus": {
+      "commandPalette": [
+        { "command": "novawing.cut", "when": "false" },
+        { "command": "novawing.paste", "when": "false" },
+        { "command": "novawing.moveToRoot", "when": "false" }
+      ],
+      "view/title": [
+        { "command": "novawing.build", "when": "view == novawingSolution", "group": "navigation@1" },
+        { "command": "novawing.newFolder", "when": "view == novawingSolution", "group": "navigation@2" },
+        { "command": "novawing.refresh", "when": "view == novawingSolution", "group": "navigation@3" },
+        { "command": "novawing.rebuild", "when": "view == novawingSolution", "group": "1_build@1" },
+        { "command": "novawing.clean", "when": "view == novawingSolution", "group": "1_build@2" },
+        { "command": "novawing.selectConfig", "when": "view == novawingSolution", "group": "1_build@3" }
+      ],
+      "novawing.add": [
+        { "command": "novawing.newClass", "group": "1_new@1" },
+        { "command": "novawing.newShader", "group": "1_new@2" },
+        { "command": "novawing.newFolder", "group": "1_new@3" }
+      ],
+      "view/item/context": [
+        { "submenu": "novawing.add", "when": "viewItem == root || viewItem == folder", "group": "1_add@1" },
+        { "command": "novawing.build", "when": "viewItem == root", "group": "2_build@1" },
+        { "command": "novawing.rebuild", "when": "viewItem == root", "group": "2_build@2" },
+        { "command": "novawing.clean", "when": "viewItem == root", "group": "2_build@3" },
+        { "command": "novawing.include", "when": "viewItem == fileOut || viewItem == folder", "group": "3_project@1" },
+        { "command": "novawing.exclude", "when": "viewItem == file || viewItem == folder", "group": "3_project@2" },
+        { "command": "novawing.cut", "when": "viewItem != root", "group": "4_edit@1" },
+        { "command": "novawing.paste", "when": "(viewItem == root || viewItem == folder) && novawing.hasClipboard", "group": "4_edit@2" },
+        { "command": "novawing.moveToRoot", "when": "viewItem != root", "group": "4_edit@3" },
+        { "command": "novawing.delete", "when": "viewItem != root", "group": "4_edit@4" },
+        { "command": "novawing.rename", "when": "viewItem != root", "group": "4_edit@5" },
+        { "command": "novawing.revealInOS", "when": "viewItem == root || viewItem == folder", "group": "5_open@1" },
+        { "command": "novawing.openTerminal", "when": "viewItem == root || viewItem == folder", "group": "5_open@2" }
+      ]
+    },
+    "keybindings": [
+      { "command": "novawing.build", "key": "ctrl+shift+b" },
+      { "command": "novawing.rename", "key": "f2", "when": "focusedView == novawingSolution" },
+      { "command": "novawing.delete", "key": "delete", "when": "focusedView == novawingSolution" },
+      { "command": "novawing.cut", "key": "ctrl+x", "when": "focusedView == novawingSolution" },
+      { "command": "novawing.paste", "key": "ctrl+v", "when": "focusedView == novawingSolution" }
+    ]
+  }
+}

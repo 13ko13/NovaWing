@@ -2179,3 +2179,21 @@
 - **(11/05)ブーストのエフェクトはひとまず完了(ユーザー)**。コスト表「シェーダ＞ブースト中の集中線」(見積6h)を実3hで完了に。バックアップはscratchpad。更新後: プロト 81/残3、アルファ 78/残57、ベータ 45.5/36.5、合計204.5/残96.5。
 - **(11/05・Claude、ユーザー依頼)VSCodeでHLSLのエラーが出ない → 自作拡張`local.hlsl-check`を入れた**: HLSL Toolsは未宣言の変数(例: `samp`)などを検出しない。書いている途中(止まって0.4秒後)・開いた時・保存時に、Windows Kitsの`fxc.exe`で一時ファイル(BOMを外した写し)をコンパイルし、エラーを赤線と問題パネルに出す。種類はファイル名の末尾(`〇〇PS`→ps_5_0、`〇〇VS`→vs_5_0)、`.hlsli`を変えると開いているシェーダーを再チェック。ソースと`.vsix`は`C:\Users\SakamotoKou\.claude\local-extensions\hlsl-check\`(学校PCには`code --install-extension`でこの`.vsix`を入れる)。入れた後に「ウィンドウの再読み込み」が必要。
 - **(11/05・ユーザー)環境まわり(vcxproj・pso・文字コード)はユーザーが確認する必要はない** → Claudeが調べて直す。聞き返し・1歩ずつの方針はコード・シェーダーの中身だけ。
+- **(11/05・Claude、ユーザー依頼)VSCodeに「ソリューション エクスプローラー」拡張を自作**(Visual Studioの使い心地に寄せる): 左のバーにツリー、ドラッグ&ドロップ・切り取り貼り付け・「最上位フォルダへ移動」(VSCode標準だと最上位に置けない問題の解決)、追加(クラス・HLSL・フォルダー)、名前の変更・削除、ビルド/リビルド/クリーン(MSBuild、ステータスバーで構成切り替え、Ctrl+Shift+B)。追加・移動・改名・削除のたびに**vcxprojと.filtersへ自動反映**(BOM・CRLFは維持)、未登録のソースには「(未登録)」表示と「プロジェクトに含める」。「クラスの追加」はダイアログでクラス名と継承元を同時に入力(継承元の.hは自動検索して`#include`を書く)、「新しいHLSL」は種類(3Dモデル用PS・画面全体PS・3Dモデル用VS・スキンメッシュVS・hlsli)ごとの雛形。
+  - **家と学校の両方に入れる**: ソースは[Tools/SolutionExplorer/](Tools/SolutionExplorer/)(gitで同期)。もう一方のPCでpullしたあと[install.ps1](Tools/SolutionExplorer/install.ps1)を実行(`powershell -ExecutionPolicy Bypass -File Tools/SolutionExplorer/install.ps1`)→VSCodeで「Developer: Reload Window」。ソースを直したらこのフォルダを直して再実行。
+  - 画面での動作(ダイアログ・ドラッグ・ビルド)はまだ実機確認していない。
+
+### 2026-11-05〜06 蝶の敵: Draw(ユーザー実装)と、次の手順(学校で続き)
+- **(ユーザー実装・Claudeレビュー済み)[ButterflyEnemy::Draw](Game/GameObjects/Actors/Character/Enemy/ButterflyEnemy/ButterflyEnemy.cpp#L58)と`DrawEnemy`を書いた**([RushEnemy::Draw](Game/GameObjects/Actors/Character/Enemy/RushEnemy/RushEnemy.cpp#L122)と同じ形)。`model_scale`は仮の2倍。`DrawEnemy`のテクスチャは**突進敵のものを仮で使用中**(蝶のに差し替える)。`appear_distance`(今6000)は確認のとき一時的に0にすると、蝶が最初から登場位置に居る。
+- **調べて分かったこと(Claude)**:
+  - [EnemyFactory.cpp:141](Game/GameObjects/Actors/Character/Enemy/EnemyFactory.cpp#L141)の`ButterflyEnemy`の分岐は完成済み。
+  - **生成の入口が無い**: [EnemySpawner::LoadRushEnemy](Manager/EnemySpawner.cpp#L29)は突進敵専用(CSV名`RushEnemy`・種類も[58行目](Manager/EnemySpawner.cpp#L58)で固定)。蝶用のCSVは`Data/CSV/Stage2/`に無い。→ 蝶を1体出す方法を決める(Spawnerを一般化するか、蝶用の読み込みを足すか)。
+  - **モデルの登録が無い(11/06にモデルは届いた)**: `ModelID::ButterflyEnemy`は[ResourceLoader.h](Manager/ResourceLoader.h)にあるだけで、`ResourceLoader.cpp`(パスの対応表・`game.models`・`WStringToModelID`)と`ResourceConstants.h`に無い。モデルは[Data/Model/ButterflyEnemy/](Data/Model/ButterflyEnemy/)(`.fbx`/`.x`＋Albedo/Emission/Metallic/Normalのpng)。**`.mv1`への変換はユーザー(DxLibModelViewerの「名前を付けて保存」)**。変換後、登録とGraphIDの追加はClaudeに頼める(環境まわりなので)。
+- **次の手順(1歩ずつ)**:
+  1. ユーザー: 蝶の`Update`に「登場」だけを書く(`m_stateTimer`にタイムスケールを足す、`appear_frame`定数、進行度と`easeOut`から`m_pos`。ステートの`enum`はまだ作らない)。
+  2. 蝶のモデルを`.mv1`にして、登録(Claude)。
+  3. 蝶を1体出す(Spawner/CSV)→ 画面で登場の動きを確認。
+  4. 当たり判定: `m_colSphere->Update`、`GetCollisionSpheres`/`GetColliders`、[CollisionManager.cpp:44-69](Manager/CollisionManager.cpp#L44-L69)の`hit_pairs`に`ButterflyEnemy`を足す(今は弾が素通り)。
+  5. かくかく移動(ダッシュ・停止・離脱)→ 回転弾 → 死亡 → 逃げる(コスト表の子項目の順)。
+- 気づき(後で): 登場の「外側への方向」の計算はコンストラクタと`UpdateAppear`にあり、突進敵とほぼ同じ。2体目でも同じ形なら`EnemyBase`へ寄せる候補。
+- 未コミット: `ButterflyEnemy.cpp/.h`の変更、`Data/Model/ButterflyEnemy/`、`Tools/`(11/06時点)。

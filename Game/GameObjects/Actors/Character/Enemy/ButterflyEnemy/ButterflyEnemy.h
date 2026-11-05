@@ -34,6 +34,10 @@ public:
 	std::vector<ICollider*> GetColliders() override;
 
 private:
+	//敵を描画
+	void DrawEnemy();
+
+private:
 	//当たり判定の球
 	std::shared_ptr<SphereShape> m_colSphere;
 	//当たり判定インターフェース
