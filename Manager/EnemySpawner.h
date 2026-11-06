@@ -24,7 +24,7 @@ public:
 	virtual ~EnemySpawner();
 
 	//CSVを読み込んで出現予定を作る(offsetZはチュートリアル分のずれ)
-	void LoadRushEnemy(const std::wstring& csvFolderName, float offsetZ);
+	void LoadEnemy(const std::wstring& csvFolderName, const std::wstring& csvName, EnemyFactory::EnemyType type, float offsetZ);
 	//プレイヤーが来た予定の敵を作る
 	void Update();
 

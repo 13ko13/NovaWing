@@ -8,9 +8,7 @@
 
 namespace
 {
-	//CSVファイル名
-	constexpr const wchar_t* rush_csv_name = L"RushEnemy";
-	//突進する敵がプレイヤーのどれだけ前で待機するかのCSV列番号
+	//敵がプレイヤーのどれだけ前で待機するかのCSV列番号
 	constexpr int front_offset_number = 10;
 }
 
@@ -26,13 +24,13 @@ EnemySpawner::~EnemySpawner()
 {
 }
 
-void EnemySpawner::LoadRushEnemy(const std::wstring& csvFolderName, float offsetZ)
+void EnemySpawner::LoadEnemy(const std::wstring& csvFolderName,const std::wstring& csvName,EnemyFactory::EnemyType type, float offsetZ)
 {
 	//CSVLoaderにCSVをロードさせる
 	CSVDataLoader& loader = CSVDataLoader::GetInstance();
 
 	//CSVデータのリストを受け取る
-	std::wstring csvPath = csvFolderName + L"/" + rush_csv_name;
+	std::wstring csvPath = csvFolderName + L"/" + csvName;
 	std::vector<std::shared_ptr<CSVData>> pData = loader.LoadCSV(csvPath.c_str());
 
 	//受け取ったCSVの文字列を入れる変数
@@ -55,7 +53,7 @@ void EnemySpawner::LoadRushEnemy(const std::wstring& csvFolderName, float offset
 
 		//出現予定を作成する
 		SpawnData spawnData;
-		spawnData.type = EnemyFactory::EnemyType::RushEnemy;//敵の種類
+		spawnData.type = type;//敵の種類
 		spawnData.activatePlayerZ = pos.z;//プレイヤーがこのZまで来たら出現
 		spawnData.offset = Vector3(pos.x, pos.y, frontOffset);//待機位置をどのぐらいずらすか
 		m_spawnDatas.push_back(spawnData);

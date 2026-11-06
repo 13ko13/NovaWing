@@ -37,6 +37,11 @@ namespace
 		{ ResourceLoader::GraphicID::TurretEnemyMetalicMap, turret_enemy_metalic_map_path },//メタリックマップ
 		{ ResourceLoader::GraphicID::TurretEnemyEmissionMap, turret_enemy_emission_map_path },//エミッションマップ
 
+		//蝶型の敵
+		{ ResourceLoader::GraphicID::ButterflyEnemyNormalMap, butterfly_enemy_normal_map_path },//法線マップ
+		{ ResourceLoader::GraphicID::ButterflyEnemyMetalicMap, butterfly_enemy_metalic_map_path },//メタリックマップ
+		{ ResourceLoader::GraphicID::ButterflyEnemyEmissionMap, butterfly_enemy_emission_map_path },//エミッションマップ
+
 		//レティクル
 		{ ResourceLoader::GraphicID::NormalReticle, normal_reticle_path },//ノーマルレティクル
 		{ ResourceLoader::GraphicID::ChargeReticle, charge_reticle_path },//チャージレティクル
@@ -118,6 +123,7 @@ namespace
 		{ ResourceLoader::ModelID::Boss, boss_model_path },//ボス
 		{ ResourceLoader::ModelID::RushEnemy, rush_enemy_model_path },//突進する敵
 		{ ResourceLoader::ModelID::TurretEnemy, turret_enemy_model_path },//固定砲台の敵
+		{ ResourceLoader::ModelID::ButterflyEnemy, butterfly_enemy_model_path },//蝶型の敵
 		{ ResourceLoader::ModelID::SceneryIslandA, scenery_islanda_model_path },//景色用の島(IslandA)
 		{ ResourceLoader::ModelID::SceneryIslandB, scenery_islandb_model_path },//景色用の島(IslandB)
 		{ ResourceLoader::ModelID::SceneryIslandC, scenery_islandc_model_path },//景色用の島(IslandC)
@@ -506,7 +512,7 @@ void ResourceLoader::InitSceneResources()
 		//2ステージ目の帯の上の構造物
 		ModelID::OverpassCross, ModelID::OverpassCrossBroken, ModelID::SignGantry,
 		//2ステージ目の敵
-		ModelID::RushEnemy, ModelID::TurretEnemy,
+		ModelID::RushEnemy, ModelID::TurretEnemy, ModelID::ButterflyEnemy,
 	};
 	game.graphics = {
 		GraphicID::SkyBoxFront, GraphicID::SkyBoxBack, GraphicID::SkyBoxLeft,
@@ -518,6 +524,7 @@ void ResourceLoader::InitSceneResources()
 		GraphicID::WormBodyDiffuseMap, GraphicID::BossNormal, GraphicID::BossEmission,
 		GraphicID::RushEnemyNormalMap, GraphicID::RushEnemyMetalicMap, GraphicID::RushEnemyEmissionMap,
 		GraphicID::TurretEnemyNormalMap, GraphicID::TurretEnemyMetalicMap, GraphicID::TurretEnemyEmissionMap,
+		GraphicID::ButterflyEnemyNormalMap, GraphicID::ButterflyEnemyMetalicMap, GraphicID::ButterflyEnemyEmissionMap,
 		GraphicID::NormalReticle, GraphicID::ChargeReticle,
 		GraphicID::PlayerHPFrame, GraphicID::PlayerHPGauge,
 		GraphicID::BossHPFrame, GraphicID::BossHPGauge,
@@ -709,6 +716,7 @@ ResourceLoader::ModelID ResourceLoader::WStringToModelID(const std::wstring id)
 		{ worm_head_csv_name,ModelID::WormHead },
 		{ rush_enemy_csv_name,ModelID::RushEnemy },
 		{ turret_enemy_csv_name,ModelID::TurretEnemy },
+		{ butterfly_enemy_csv_name,ModelID::ButterflyEnemy },
 		{ boss_csv_name,ModelID::Boss },
 		{ scenery_islanda_csv_name,ModelID::SceneryIslandA },
 		{ scenery_islandb_csv_name,ModelID::SceneryIslandB },

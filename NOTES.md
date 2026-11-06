@@ -91,6 +91,10 @@
    - 効果音・BGMの音量バランス・タイミングを、通しプレイで最終確認する。
    - プレイヤーの定数(23個)をCSV化するかは未決定。ProjectNeaR方式なら「種類ごとに変えたい値」だけが対象(参考: `C:\Users\Admin\Documents\GitHub\ProjectNeaR\source\Project\General\CSV\CharaStatusData.h/.cpp`)。
 
+13. **見た目の改善タスク2件（2026-11-06・コスト表に追加済み、未着手）**
+   - 敵・プレイヤーが見づらいのでアウトラインを付ける(コスト表「シェーダ」の下、3時間・S・アルファ)。
+   - 1面ボスの頭(黄色い部分)を攻撃した時に赤く点滅させる。人から言われた要望(コスト表に新設した「ステージ1ボス」の下、1時間・S・アルファ)。
+
 ## 進捗（2026-08-21・タイトルシーン着手：CameraBase分割、TitlePlayer/TitleCamera新設）
 
 **タイトルシーンの演出（プレイヤー前進→宙返り→ブースト消失→ロゴ/選択肢フェードイン、カメラはプレイヤー追従→途中で固定に切り替え）に向けて設計・実装を開始。**
@@ -2197,3 +2201,44 @@
   5. かくかく移動(ダッシュ・停止・離脱)→ 回転弾 → 死亡 → 逃げる(コスト表の子項目の順)。
 - 気づき(後で): 登場の「外側への方向」の計算はコンストラクタと`UpdateAppear`にあり、突進敵とほぼ同じ。2体目でも同じ形なら`EnemyBase`へ寄せる候補。
 - 未コミット: `ButterflyEnemy.cpp/.h`の変更、`Data/Model/ButterflyEnemy/`、`Tools/`(11/06時点)。
+- **(11/06・Claude、ユーザー依頼)蝶のモデルを登録(手順2完了)**: `.mv1`はユーザーが変換。登録した場所: [ResourceConstants.h](Constants/ResourceConstants.h)(モデル・法線/メタリック/エミッションのパス、CSV名`ButterflyEnemy`)、[ResourceLoader.h](Manager/ResourceLoader.h)の`GraphicID::ButterflyEnemyNormalMap/MetalicMap/EmissionMap`、[ResourceLoader.cpp](Manager/ResourceLoader.cpp)(画像とモデルの対応表、ゲームシーンで読むモデル・画像の一覧、`WStringToModelID`)、[EnemyStatus.csv](Data/CSV/Params/EnemyStatus.csv)に`ButterflyEnemy,5,132,10,0`(浮遊敵と同じ仮の値。これが無いと`EnemyBase`のステータス検索で落ちる)。Debug x64ビルド成功。
+  - (ユーザー依頼でClaudeが変更)[ButterflyEnemy::DrawEnemy](Game/GameObjects/Actors/Character/Enemy/ButterflyEnemy/ButterflyEnemy.cpp#L88)のテクスチャを`RushEnemy〇〇Map`から`ButterflyEnemy〇〇Map`に差し替えた。
+- **(11/06・ユーザー実装、確認OK)手順1「登場」**: [ButterflyEnemy::UpdateAppear](Game/GameObjects/Actors/Character/Enemy/ButterflyEnemy/ButterflyEnemy.cpp#L161)(突進敵と同じ、進行度→`easeOut`→残りの距離)。進行度が1になってもステートは`Appear`のまま(次のステートがまだ無い)なので、毎フレーム「プレイヤー位置＋ずれ」に居てついてくる。`appear_frame`=60。ステートの`enum`は`Appear/Charge/Shoot`で先に作ってある(ユーザー)。
+- **(11/06・ユーザー実装、確認OK「でました」)手順3「蝶を1体出す」**: `EnemySpawner::LoadRushEnemy`を一般化して[LoadEnemy](Manager/EnemySpawner.cpp#L27)(csvFolderName, csvName, type, offsetZ)に。[GameScene.cpp:328](Scene/GameScene.cpp#L328)で突進敵と蝶の2回呼ぶ。CSVはClaudeが[Data/CSV/Stage2/ButterflyEnemy.csv](Data/CSV/Stage2/ButterflyEnemy.csv)を作成(1体、Z=800、x=0/y=400、frontOffset=2500、仮)。`appear_distance`は6000に戻した。
+- **(11/06)手順4「当たり判定」**: `GetCollisionSpheres`/`GetColliders`はユーザーが突進敵と同じ形で実装。`hit_pairs`への追加はユーザー依頼でClaudeが[CollisionManager.cpp:51-53](Manager/CollisionManager.cpp#L51-L53)に`PlayerBullet`/`ChargeBullet`/`ChargeExplosion`×`ButterflyEnemy`(体当たりダメージ無しなので`Player`との組は無し)。Debug x64ビルド成功。**(11/06・ユーザー確認OK)弾で倒せた。**
+- **次**: 手順5 かくかく移動(ダッシュ・停止・離脱)。最初の1歩は「登場→停止→ダッシュ→停止…」のくり返しだけ(傾き・機首の向き・同じ方向を続けない・前後・離脱は後)。
+- **(11/06・ユーザー実装、確認OK「大丈夫そう」)停止とダッシュのくり返し**: `State`に`Stop`/`Dash`を追加。[UpdateStop](Game/GameObjects/Actors/Character/Enemy/ButterflyEnemy/ButterflyEnemy.cpp#L215)は`stop_frame`(固定、ユーザー判断)経ったら出発点`m_dashStartPos`=今の`m_standbyOffset`、行き先`m_dashEndPos`=出発点＋方向×距離(300〜800)を決めてダッシュへ。方向は8方向を**角度で**出す(`DX_TWO_PI_F / dash_dir_num * dirIndex`→`cos`/`sin`、長さは最初から1。最初は`enum`＋`switch`で書いていたのを置き換え)。[UpdateDash](Game/GameObjects/Actors/Character/Enemy/ButterflyEnemy/ButterflyEnemy.cpp#L244)は`easeOut`で出発点→行き先、`dash_frame`=20。
+  - 用語: offset(`m_standbyOffset`)は「ずれ」ではなく「プレイヤーから見た位置」と言う(ユーザー)。
+  - 残り(かくかく移動): 画面外へ出ていかない制限、同じ方向を続けない、20%で前後、進行方向へ傾く、止まったら機首をプレイヤーへ、離脱(15秒かダッシュ8回、仮)。
+  - **(11/06・ユーザー)位置の計算はプレイヤーのZだけを使う**(`m_pos = (0,0,playerPos.z) + m_standbyOffset`、x・yはプレイヤーについていかない)。
+- **(11/06・ユーザー実装、確認OK「いい感じ」)蝶をプレイヤーへ向ける[LookAtDir](Game/GameObjects/Actors/Character/Enemy/ButterflyEnemy/ButterflyEnemy.cpp#L274)**: 見せたい向きは「翼の模様が多い面(モデルの+Y、V字の内側)をプレイヤーへ、触覚(モデルの-Z側に生えている)を上」(ユーザー)。突進敵の「正面から一番近い回り方で回す」方式だと上の向きを気にしないので、正面を真後ろに向けるときX軸180°で裏返る → 3つの回転に分けた: `standUp`(X軸+90°でモデルを起こす: +Y→+Z、-Z→+Y)、`pitch`(X軸、`-atan2(dir.y, 水平の長さ)`、プラスだと前が下を向くのでマイナス)、`yaw`(Y軸、`atan2(dir.x, dir.z)`)。`m_rotation = yaw * pitch * standUp`(右から先にかかる)。プロジェクトの`Quaternion`は`q*v*q⁻¹`、`ToMatrix4x4`は行ベクトル用で、回転の向きはDxLibの`MGetRotX`等と同じ。
+- **(11/06・ユーザー、仕様の変更)攻撃のリズム**: 「1回移動して止まったら弾を2回撃つ → また移動」(本家を見て)。前の仕様の「止まったときに撃つ確率50%」は置き換え。
+- **(11/06・ユーザー実装中、続きは次回)離脱**: きっかけは**ダッシュの回数だけ**(時間の条件は必要になったら)。消すときは`OnEnemyDead()`ではなく`OnDead()`(撃破数を増やさない、突進敵が後ろへ抜けたときと同じ)。
+  - できているところ: `State::Leave`、`m_dashNum`(ダッシュに入るとき`++`)、`leave_dash_num`=6(仮)、[UpdateStop:227](Game/GameObjects/Actors/Character/Enemy/ButterflyEnemy/ButterflyEnemy.cpp#L227)で回数を超えたら`Leave`へ。Debug x64ビルドは通る。
+  - **残り**: ①`UpdateLeave`を作る(登場と同じ「プレイヤーから見た位置のx・yの向き」へ、毎フレーム プレイヤーから見た位置 += 方向×速さ(仮80)×タイムスケール、位置は`プレイヤーのZ＋プレイヤーから見た位置`、`m_stateTimer`が仮60を超えたら`OnDead()`) ②`switch`に`case State::Leave:` ③条件が`m_dashNum > leave_dash_num`でコメントは「以上」(`>`だと7回ダッシュしてから離脱。どちらにするか決める)。
+- **その後**: 回転弾(停止中に2回撃つ)→ 死亡 → かくかく移動の残り(画面外へ出ない制限、同じ方向を続けない、前後、傾き)。
+- 11/06のコミットに、ほかのセッションで作ったもの(Effekseerのエフェクトの見直し、`NormalShootState.cpp`、`CLAUDE.md`、`sakurai-knowledge/`、`.claude/skills/`)も入れた。`.claude/settings.local.json`は個人のローカル設定なので入れていない。
+
+### 進捗（2026-11-06・弾を明るい背景でも見えるようにした：加算の芯＋暗い縁/裏打ちの2層）
+- 依頼: 敵・プレイヤーの弾が明るい空・海で埋もれる。加算の「重なるほど輝く」は残す。データ(.efkefc/.efk/テクスチャ)だけで対応、C++/HLSLは未変更。3つとも上書きし倍率50で.efkを書き出した(元はgit履歴)。
+- テクスチャ生成: [gen_outline_textures.ps1](Data/Effect/EnemyBullet/tools/gen_outline_textures.ps1)(リポジトリ直下で実行、3エフェクトのTextureへ出力)。
+- **敵の弾** [EnemyBullet.efkefc](Data/Effect/EnemyBullet/EnemyBullet.efkefc): `Body`追加(Glowの後・Coreの前、通常ブレンド、`EB_Body2.png`=中は白・縁だけ暗いはっきりした円盤、色235,30,140、1.2倍→縁は約55,7,33の暗いマゼンタ)。Coreを0.9→1.1倍。Tailのテクスチャを`EB_TrailRim.png`(縁が暗い帯)に、Tail色を225,30,140,220→150,0,90,0、Ring色を215,20,125,230→150,0,85,0(少し深いマゼンタ)。インスタンス18→19。動的パラメーター(SeaGlow/SeaTrailの式)は未変更。
+- **通常弾** [PlayerBullet.efkefc](Data/Effect/PlayerBullet/PlayerBullet.efkefc): 中身はBullet(None、速度Z0.6)→Trail(Track加算)・Head(Sprite加算)の2つだけだった。`TrailBack`(Track、通常ブレンド、`PB_TrailBack.png`、0,55,25,230、最後の9Fでフェード)を先頭に、`Backing`(Sprite、通常ブレンド、`PB_Backing.png`、0,50,22,210、0.9倍)をHeadの前に追加。TrailとTrailBackは2Fごと・寿命17(元のTrailは1Fごと・18)。インスタンス21→21。明るい海で加算の緑が水色に寄っていたのが緑に戻った。
+- **チャージ弾** [PlayerChargeBullet.efkefc](Data/Effect/PlayerChargeBullet/PlayerChargeBullet.efkefc): 既存`Backing`をはっきりした縁の`CB_Backing.png`に、0,48,26でアルファ90→200、3.2→2.6倍。`TrailBack`(Track、通常ブレンド、`CB_TrailBack.png`、0,55,25,220)を先頭に追加。Trailを1F・16→2F・15に。インスタンス(40F時点)153→151。
+- 確認方法: Effekseer MCPのエディタで、ゲームと同じ画面上の大きさになる距離で撮影(エディタは距離1で440px/単位、ゲームは1280×720・縦90°で360px)。背景は単色(明るい空215,222,232＝スカイボックスの地平線のもや、海40,110,160、夜6,14,24)。エディタの背景画像はキャプチャに写らなかった。比較画像と白黒版で、3背景とも弾が分かれて見えることを確認。
+- 気づき: 暗い背景では通常弾の白い芯が少し小さく見える(Trailの間引きで太い根元が弾頭に重ならなくなったため)。
+- **未確認(ゲーム内)**: 実際の空・海での見え方、弾が多いときにプレイヤーの弾の暗い層が敵の弾に重なって隠さないか(別エフェクト同士の描画順はデータでは決められない)、反射弾(敵の弾と同じ見た目)。
+- **(11/06続き・ユーザー報告「通常弾が変なとこ行く」)原因と修正**: `PlayerBullet.efkefc`の`Bullet`ノードに位置の速度Z=0.6(PVA)が入っていた(10/03に気づいて未確認のままだったもの)。[PlayerBullet::Update](Game/GameObjects/Bullet/PlayerBullet.cpp#L36)が毎フレーム`SetPos`するのに加えて、エフェクト自身もローカル+Zへ毎フレーム60(0.6×倍率100)動くため、弾頭が本当の弾から離れていった。今回の暗い層で目立つようになった。→`Bullet`の位置をFixedに戻し、PVAの速度も0にして、倍率50で.efkを書き出し直した。エディタで外から0.6/F動かして、弾頭が軌跡の先頭に付いてくることを確認。チャージ弾・敵の弾のルートには速度なし(確認済み)。ゲーム内は未確認。
+
+### 進捗（2026-11-06続き・当たったときの火花`HitEffect`とボスのビーム`BossBeam`にも暗い層を追加）
+- 依頼: 弾と同じ方針(加算の明るい芯＋通常ブレンドの暗い層)で、火花とビームを明るい背景でも見えるようにする。データだけで対応、C++/HLSLは未変更。
+- テクスチャ: [gen_outline_textures.ps1](Data/Effect/EnemyBullet/tools/gen_outline_textures.ps1)に`Ring`(輪)と`Needle`(針)を追加し、`HE_SparkDark.png`・`HE_RingDark.png`・`BB_RimDisc2.png`を出力。
+- **火花** [HitEffect.efkefc](Data/Effect/HitEffect/HitEffect.efkefc)(倍率50で[.efk](Data/Effect/HitEffect/HitEffect.efk)も書き出し): `SparksDark`追加(Sparksの前、通常ブレンド、`HE_SparkDark.png`=はっきりした縁の針、12本、寿命10〜16F、0.18×2.1→0.12×0.7、75,26,4,255→55,18,4,0、動きはSparksと同じ)。`Sparks`は32→24本。`RingDark`追加(Ringの前、通常ブレンド、`HE_RingDark.png`、8F、0.5→3.6、80,30,5,230→60,20,5,0)。親`HitEffect`の-Z 0.08はそのまま。インスタンス54→59(3F時点)。
+- **ビーム** [BossBeam_Spiral.efkproj](Data/Effect/BossBeam/BossBeam_Spiral.efkproj)(XMLのまま手で編集)→1.80.6のCLIで[BossBeam_2.efk](Data/Effect/BossBeam/BossBeam_2.efk)に書き出し(倍率50)。`BossBeam_2.efkefc`は触っていない。
+  - `RimDisc`追加(先頭＝いちばん先に描く、通常ブレンド、配置は固定(Billboard 2)、`BB_RimDisc2.png`=太めの輪＋中を薄く塗る、60,15,95,230、1.6倍＝輪の外側が半径0.75≒当たり判定の半径70、10Fごと＝当たり判定の球と同じ間隔、寿命430〜450、位置・回転は生成時のみ)。`TipBack`追加(TipGlowの前、通常ブレンド、同じテクスチャ、60,15,95,220、2.2倍、先端に1個)。
+  - インスタンス(239F時点)127→152。7秒続くと約+43。
+  - 安全手順: 一時フォルダにコピーして編集・書き出し→元の版をCLIで書き出すと今の`BossBeam_2.efk`とバイト一致することを確認→書き出したファイルのサイズ(4574→6090)と参照テクスチャ5つを確認してから本物と置き換えた。エディタではリポジトリのファイルを開いていない。
+  - 跳ね返したビームのフェード(`SetColor`のアルファ)は全体の色に掛かるので、新しい通常ブレンドの層も一緒に消えるはず(未確認)。
+- 確認: 前回と同じ(エディタ440px/単位、背景3色、1:1、白黒版)。火花は敵に命中(26前方→エディタ距離31.8)と自機被弾(4.25前方→5.19)、親の-Z移動はゲームのカメラも同じ速さで進むので、エディタでは打ち消して撮った。ビームは正面(ボスの砲口から約3000、先端が0.2/Fで近づく)と斜め(40°)。
+- 気づき: ビームの暗い輪は10Fごとなので、斜めから見ると「輪の列」に見える(連続した筒ではない)。5Fごとにすると筒に近づくが、インスタンスが約+40%。自機被弾の近距離では、最初の数Fの白い閃光(Core 3.2倍)が機体を大きく覆う(今回の変更前から)。
+- **未確認(ゲーム内)**: 実際の空・海での見え方、連続ヒットで画面が埋まらないか、自機被弾で機体が隠れすぎないか、跳ね返したビームのフェードで暗い層も消えるか。

@@ -325,7 +325,17 @@ void GameScene::CreateStageObjects(float offsetZ)
 	}
 
 	//突進する敵の出現予定を読み込む
-	m_pEnemySpawner->LoadRushEnemy(m_pStageConfig->GetCSVFolderName(), offsetZ);
+	m_pEnemySpawner->LoadEnemy(
+		m_pStageConfig->GetCSVFolderName(),
+		L"RushEnemy", EnemyFactory::EnemyType::RushEnemy,
+		offsetZ
+	);
+	//蝶型の敵の出現予定を読み込む
+	m_pEnemySpawner->LoadEnemy(
+		m_pStageConfig->GetCSVFolderName(),
+		L"ButterflyEnemy", EnemyFactory::EnemyType::ButterflyEnemy,
+		offsetZ
+	);
 
 	//岩の生成&初期化
 	m_pRocks = RockDataSetter::CreateRock(m_pCamera, offsetZ, m_pStageConfig->GetCSVFolderName());

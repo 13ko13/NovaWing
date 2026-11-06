@@ -55,6 +55,7 @@ namespace
 	//2ステージ目の敵
 	constexpr const wchar_t* rush_enemy_model_path = L"Data/Model/RushEnemy/RushEnemy.mv1";
 	constexpr const wchar_t* turret_enemy_model_path = L"Data/Model/TurretEnemy/TurretEnemy.mv1";
+	constexpr const wchar_t* butterfly_enemy_model_path = L"Data/Model/ButterflyEnemy/ButterflyEnemy.mv1";
 
 	//---------- 画像のパス ----------
 	//プレイヤー
@@ -77,6 +78,10 @@ namespace
 	constexpr const wchar_t* turret_enemy_normal_map_path = L"Data/Model/TurretEnemy/TurretEnemy_Normal.png";
 	constexpr const wchar_t* turret_enemy_metalic_map_path = L"Data/Model/TurretEnemy/TurretEnemy_Metallic.png";
 	constexpr const wchar_t* turret_enemy_emission_map_path = L"Data/Model/TurretEnemy/TurretEnemy_Emission.png";
+	//蝶型の敵
+	constexpr const wchar_t* butterfly_enemy_normal_map_path = L"Data/Model/ButterflyEnemy/ButterflyEnemy_Normal.png";
+	constexpr const wchar_t* butterfly_enemy_metalic_map_path = L"Data/Model/ButterflyEnemy/ButterflyEnemy_Metallic.png";
+	constexpr const wchar_t* butterfly_enemy_emission_map_path = L"Data/Model/ButterflyEnemy/ButterflyEnemy_Emission.png";
 	//レティクル
 	constexpr const wchar_t* normal_reticle_path = L"Data/Image/NormalReticle.png";
 	constexpr const wchar_t* charge_reticle_path = L"Data/Image/ChargeReticle.png";
@@ -193,6 +198,7 @@ namespace
 	constexpr const wchar_t* boss_csv_name = L"Boss";
 	constexpr const wchar_t* rush_enemy_csv_name = L"RushEnemy";
 	constexpr const wchar_t* turret_enemy_csv_name = L"TurretEnemy";
+	constexpr const wchar_t* butterfly_enemy_csv_name = L"ButterflyEnemy";
 	constexpr const wchar_t* scenery_islanda_csv_name = L"SceneryIslandA";
 	constexpr const wchar_t* scenery_islandb_csv_name = L"SceneryIslandB";
 	constexpr const wchar_t* scenery_islandc_csv_name = L"SceneryIslandC";

@@ -88,6 +88,9 @@ public:
 		TurretEnemyNormalMap,//固定砲台の敵の法線マップ
 		TurretEnemyMetalicMap,//固定砲台の敵のメタリックマップ
 		TurretEnemyEmissionMap,//固定砲台の敵のエミッションマップ
+		ButterflyEnemyNormalMap,//蝶型の敵の法線マップ
+		ButterflyEnemyMetalicMap,//蝶型の敵のメタリックマップ
+		ButterflyEnemyEmissionMap,//蝶型の敵のエミッションマップ
 
 		NormalReticle,//ノーマル状態のレティクル
 		ChargeReticle,//チャージ状態のレティクル

@@ -5,6 +5,64 @@
     <Children>
       <Node>
         <CommonValues>
+          <MaxGeneration>
+            <Infinite>True</Infinite>
+          </MaxGeneration>
+          <LocationEffectType>1</LocationEffectType>
+          <RotationEffectType>1</RotationEffectType>
+          <ScaleEffectType>1</ScaleEffectType>
+          <Life>
+            <Center>440</Center>
+            <Max>450</Max>
+            <Min>430</Min>
+          </Life>
+          <Generation>
+            <GenerationTime>
+              <Center>10</Center>
+              <Max>10</Max>
+              <Min>10</Min>
+            </GenerationTime>
+          </Generation>
+        </CommonValues>
+        <ScalingValues>
+          <Fixed>
+            <Scale>
+              <X>1.6</X>
+              <Y>1.6</Y>
+              <Z>1.6</Z>
+            </Scale>
+          </Fixed>
+        </ScalingValues>
+        <RendererCommonValues>
+          <ColorTexture>Texture/BB_RimDisc2.png</ColorTexture>
+          <FadeInType>1</FadeInType>
+          <FadeIn>
+            <Frame>3</Frame>
+          </FadeIn>
+          <FadeOutType>1</FadeOutType>
+          <FadeOut>
+            <Frame>10</Frame>
+          </FadeOut>
+        </RendererCommonValues>
+        <DrawingValues>
+          <ColorAll>
+            <Fixed>
+              <R>60</R>
+              <G>15</G>
+              <B>95</B>
+              <A>230</A>
+            </Fixed>
+          </ColorAll>
+          <Sprite>
+            <Billboard>2</Billboard>
+          </Sprite>
+        </DrawingValues>
+        <Name>RimDisc</Name>
+        <Children>
+        </Children>
+      </Node>
+      <Node>
+        <CommonValues>
           <Life>
             <Center>100000</Center>
             <Max>100000</Max>
@@ -269,6 +327,40 @@
             <Children>
             </Children>
           </Node>
+        </Children>
+      </Node>
+      <Node>
+        <CommonValues>
+          <Life>
+            <Center>100000</Center>
+            <Max>100000</Max>
+            <Min>100000</Min>
+          </Life>
+        </CommonValues>
+        <ScalingValues>
+          <Fixed>
+            <Scale>
+              <X>2.2</X>
+              <Y>2.2</Y>
+              <Z>2.2</Z>
+            </Scale>
+          </Fixed>
+        </ScalingValues>
+        <RendererCommonValues>
+          <ColorTexture>Texture/BB_RimDisc2.png</ColorTexture>
+        </RendererCommonValues>
+        <DrawingValues>
+          <ColorAll>
+            <Fixed>
+              <R>60</R>
+              <G>15</G>
+              <B>95</B>
+              <A>220</A>
+            </Fixed>
+          </ColorAll>
+        </DrawingValues>
+        <Name>TipBack</Name>
+        <Children>
         </Children>
       </Node>
       <Node>
