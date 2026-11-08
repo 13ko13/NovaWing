@@ -25,9 +25,9 @@ namespace
 	//攻撃可能距離
 	constexpr float can_attack_distance = 4000.0f;
 	//攻撃の間隔
-	constexpr int attack_interval = 45;
+	constexpr int attack_interval = 70;
 	//予備動作をどのぐらいの時間かけて行うか
-	constexpr int anticipation_frame = 30;
+	constexpr int anticipation_frame = 180;
 
 	//砲身の軸の高さ
 	constexpr float barrel_axis_offset_y = 179.0f;
@@ -35,7 +35,7 @@ namespace
 	constexpr float barrel_angle_limit = 50.0f * DX_PI_F / 180.0f;//+-50まで
 
 	//1フレームで回れる角度の上限
-	constexpr float one_frame_turn_angle = 3.0f * DX_PI_F / 180.0f;//3度
+	constexpr float one_frame_turn_angle = 0.5f * DX_PI_F / 180.0f;//0.1度
 
 	//狙いが決まってから弾を撃つまでの時間
 	constexpr int aim_lock_frame = 10;

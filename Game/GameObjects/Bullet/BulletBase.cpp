@@ -8,7 +8,7 @@
 namespace
 {
 	//寿命
-	constexpr int life_time = 300;//3秒
+	constexpr int life_time = 600;
 	//モデルのサイズ
 	const Vector3 model_size = Vector3(0.4f, 0.4f, 0.4f);
 }
