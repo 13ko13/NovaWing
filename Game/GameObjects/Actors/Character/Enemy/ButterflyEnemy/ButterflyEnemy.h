@@ -43,8 +43,14 @@ private:
 	void UpdateStop(const Vector3& playerPos);
 	//ダッシュ中の更新処理
 	void UpdateDash(const Vector3& playerPos);
+	//離脱中の更新処理
+	void UpdateLeave(const Vector3& playerPos);
 	//モデルを指定の方向に向かせる
 	void LookAtDir(const Vector3& dir);
+	//敵の体が少しでも画面内にあるか
+	bool IsOnScreen() const;
+	//弾を発射
+	void Shoot(const Vector3& playerPos);
 
 private:
 	//ステート
@@ -77,4 +83,10 @@ private:
 
 	//ダッシュした回数を数える
 	int m_dashNum = 0;
+
+	//前のフレームで画面内にいたか
+	bool m_isPrevOnScreen = false;
+
+	//弾を何回撃ったか
+	int m_shootNum = 0;
 };

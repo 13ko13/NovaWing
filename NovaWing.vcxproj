@@ -204,6 +204,7 @@
     <ClCompile Include="Scene\GameoverScene.cpp" />
     <ClCompile Include="Manager\CollisionManager.cpp" />
     <ClCompile Include="Game\GameObjects\Bullet\EnemyBullet.cpp" />
+    <ClCompile Include="Game\GameObjects\Bullet\SpiralBullet.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\ActiveState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\FloatingEnemy.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Player\Movement\BoostState.cpp" />
@@ -356,6 +357,7 @@
     <ClInclude Include="Scene\GameoverScene.h" />
     <ClInclude Include="Manager\CollisionManager.h" />
     <ClInclude Include="Game\GameObjects\Bullet\EnemyBullet.h" />
+    <ClInclude Include="Game\GameObjects\Bullet\SpiralBullet.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\ActiveState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\FloatingEnemy\FloatingEnemy.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Player\Movement\BoostState.h" />

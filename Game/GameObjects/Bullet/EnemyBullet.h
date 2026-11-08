@@ -22,8 +22,10 @@ public:
 	std::weak_ptr<EnemyBase> GetShooter() const { return m_pShooter; }
 
 private:
-	//Effekseerのエフェクト再生中のハンドル
-	int m_effectPlayHandle = -1;
 	//発射元のエネミーを持っておく(プレイヤーのカウンター対象)
 	std::weak_ptr<EnemyBase> m_pShooter;
+
+protected:
+	//Effekseerのエフェクト再生中のハンドル
+	int m_effectPlayHandle = -1;
 };

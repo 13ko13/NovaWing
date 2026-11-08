@@ -44,18 +44,34 @@ public:
 		const ReflectedBullet::ReflectBulletData& data
 	);
 
+	//軸上を回転する弾を生成
+	void CreateSpiralBullet(
+		const Vector3& pos,
+		const Vector3& vel, const int attackPower, std::weak_ptr<CameraBase> pCamera,
+		float startAngle,
+		std::weak_ptr<EnemyBase> pTarget = std::weak_ptr<EnemyBase>()
+	);
+
 	//プレイヤー弾の配列のゲッター
-	const std::vector<std::weak_ptr<PlayerBullet>>& GetPlayerBullets() const 
-	{ return m_pPlayerBullets; }
+	const std::vector<std::weak_ptr<PlayerBullet>>& GetPlayerBullets() const
+	{
+		return m_pPlayerBullets;
+	}
 	//チャージ弾の配列のゲッター
 	const std::vector<std::weak_ptr<ChargeBullet>>& GetChargeBullets() const
-	{ return m_pChargeBullets; }
+	{
+		return m_pChargeBullets;
+	}
 	//敵弾の配列のゲッター
-	const std::vector<std::weak_ptr<EnemyBullet>>& GetEnemyBullets() const 
-	{ return m_pEnemyBullets; }
+	const std::vector<std::weak_ptr<EnemyBullet>>& GetEnemyBullets() const
+	{
+		return m_pEnemyBullets;
+	}
 	//反射弾の配列のゲッター
 	const std::vector<std::weak_ptr<ReflectedBullet>>& GetReflectedBullets() const
-	{ return m_pReflectedBullets; }
+	{
+		return m_pReflectedBullets;
+	}
 
 private:
 	//敵弾の配列

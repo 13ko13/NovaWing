@@ -7,6 +7,7 @@
 #include "Main/Application.h"
 #include "Manager/DebugManager.h"
 #include "Constants/ShaderRegister.h"
+#include "Manager/BulletManager.h"
 
 namespace
 {
@@ -20,7 +21,7 @@ namespace
 	constexpr float appear_frame = 80.0f;
 
 	//何フレーム停止するか
-	constexpr float stop_frame = 60.0f;
+	constexpr float stop_frame = 120.0f;
 	//ダッシュで移動する最低距離
 	constexpr float dash_min_distance = 500.0f;
 	//ダッシュで移動する最大値
@@ -32,7 +33,21 @@ namespace
 	constexpr float dash_frame = 6.0f;
 
 	//ダッシュの回数がこの回数に達したら戦線離脱する
-	constexpr int leave_dash_num = 6;
+	constexpr int leave_dash_num = 3;
+	//離脱速度
+	constexpr float leave_speed = 80.0f;
+
+	//弾の速さ
+	constexpr float bullet_speed = 15.0f;
+	//弾の攻撃力
+	constexpr int bullet_power = 10;
+
+	//停止してから1発目の弾を撃つまでのフレーム
+	constexpr int first_shoot_frame = 60;
+	//停止してから何回弾を撃つか
+	constexpr int max_shoot_num = 2;
+	//弾を撃つ間隔
+	constexpr int shoot_interval = 40;
 }
 
 ButterflyEnemy::ButterflyEnemy(const ButterflyEnemyData& data) :
@@ -105,7 +120,19 @@ void ButterflyEnemy::Update()
 		case State::Dash:
 			UpdateDash(playerPos);
 			break;
+		case State::Leave:
+			UpdateLeave(playerPos);
 		}
+
+		//前フレーム画面内にいて、今フレーム画面外になったら消す
+		//(登場時は最初が画面外なのでここでは消えない)
+		bool isOnScreen = IsOnScreen();
+		if (m_isPrevOnScreen && !isOnScreen)
+		{
+			//倒したわけではないのでOnEnemyDeadではなくOnDead
+			OnDead();
+		}
+		m_isPrevOnScreen = isOnScreen;
 
 		//もし死んでたら処理を止める
 		if (IsDead()) return;
@@ -213,6 +240,8 @@ void ButterflyEnemy::UpdateAppear(const Vector3& playerPos)
 	{
 		m_state = State::Stop;
 		m_stateTimer = 0.0f;
+		//弾を撃った数をリセット
+		m_shootNum = 0;
 	}
 }
 
@@ -223,13 +252,17 @@ void ButterflyEnemy::UpdateStop(const Vector3& playerPos)
 	Vector3 playerZ = Vector3(0.0f, 0.0f, playerPos.z);
 	m_pos = playerZ + m_standbyOffset;
 
-	//ダッシュした回数がleave_dash_num以上になったら戦線離脱する
-	if(m_dashNum > leave_dash_num)
+	//ダッシュした回数がleave_dash_numを越えたら戦線離脱する
+	if (m_dashNum > leave_dash_num)
 	{
 		//ステートを離脱に遷移
 		m_state = State::Leave;
 		m_stateTimer = 0.0f;
 	}
+
+	//shoot_intervalごとにmax_shoot_num回弾を撃つ
+	if (m_stateTimer >= first_shoot_frame + shoot_interval * m_shootNum &&
+		m_shootNum < max_shoot_num) Shoot(playerPos);
 
 	//停止時間が終了したら
 	if (m_stateTimer >= stop_frame)
@@ -253,7 +286,6 @@ void ButterflyEnemy::UpdateStop(const Vector3& playerPos)
 
 		//ダッシュの目標地点を計算
 		m_dashEndPos = m_dashStartPos + dashDir * dashDist;
-
 	}
 }
 
@@ -278,7 +310,66 @@ void ButterflyEnemy::UpdateDash(const Vector3& playerPos)
 		m_stateTimer = 0.0f;
 		//ダッシュした回数をカウント
 		m_dashNum++;
+		//弾を撃った数をリセット
+		m_shootNum = 0;
 	}
+}
+
+void ButterflyEnemy::UpdateLeave(const Vector3& playerPos)
+{
+	//画面外側への方向を計算する
+	Vector3 outwardVec = Vector3(m_standbyOffset.x, m_standbyOffset.y, 0.0f);
+	//もし長さが0なら上に行かせる
+	if (outwardVec.Length() == 0.0f) outwardVec = Vector3(0.0f, 1.0f, 0.0f);
+	//そうでなければ長さを1にする
+	else outwardVec.Normalize();
+
+	float timeScale = Application::GetInstance().GetTimeScale();
+
+	//プレイヤーから見た位置を動かす
+	m_standbyOffset += outwardVec * leave_speed * timeScale;
+
+	//位置を更新
+	//Zしかプレイヤーの位置を参照しない
+	Vector3 playerZ = Vector3(0.0f, 0.0f, playerPos.z);
+	m_pos = playerZ + m_standbyOffset;
+}
+
+bool ButterflyEnemy::IsOnScreen() const
+{
+	//当たり判定の半径ぶんの大きさの箱で調べる
+	//CheckCameraViewClip_Boxは、視界に入っていないときにTRUEを返す
+	Vector3 boxMin = m_pos - Vector3(m_colRadius, m_colRadius, m_colRadius);
+	Vector3 boxMax = m_pos + Vector3(m_colRadius, m_colRadius, m_colRadius);
+	return !CheckCameraViewClip_Box(boxMin.ToDxLib(), boxMax.ToDxLib());
+}
+
+void ButterflyEnemy::Shoot(const Vector3& playerPos)
+{
+	//プレイヤー
+	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
+	//プレイヤーへの向き
+	Vector3 playerDir = (playerPos - m_pos).Normalized();
+
+	//発射位置
+	Vector3 shootPos = m_pos;
+	//速度
+	Vector3 vel = playerDir * bullet_speed;
+	//プレイヤーの進んだZ分だけvelも進ませる
+	vel.z += pPlayer->GetVel().z;
+
+	//BulletManagerに弾を生成させる
+	m_pBulletManager.lock()->CreateSpiralBullet(
+		m_pos, vel, bullet_power, m_pCamera, DX_PI_F * m_shootNum,
+		std::static_pointer_cast<EnemyBase>(shared_from_this())
+	);
+
+	//音を鳴らす
+	m_pSoundManager.lock()->Play(
+		SoundManager::SoundType::EnemyShoot
+	);
+
+	m_shootNum++;
 }
 
 void ButterflyEnemy::LookAtDir(const Vector3& dir)

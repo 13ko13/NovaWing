@@ -5,6 +5,7 @@
 #include "Game/GameObjects/GameObject.h"
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
+#include "Game/GameObjects/Bullet/SpiralBullet.h"
 
 
 BulletManager::BulletManager(std::weak_ptr<EffectManager> pEffectManager) :
@@ -86,7 +87,6 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 		//それを配列に格納する
 		m_pChargeBullets.push_back(pBullet);
 		m_pAllBullets.push_back(pBullet);
-
 		break;
 	}
 	}
@@ -104,5 +104,20 @@ void BulletManager::CreateReflectedBullet(const ReflectedBullet::ReflectBulletDa
 
 	//反射弾用の配列に格納
 	m_pReflectedBullets.push_back(pBullet);
+	m_pAllBullets.push_back(pBullet);
+}
+
+void BulletManager::CreateSpiralBullet(const Vector3& pos, const Vector3& vel, const int attackPower, std::weak_ptr<CameraBase> pCamera, float startAngle, std::weak_ptr<EnemyBase> pTarget)
+{
+	//インスタンスを作成
+	std::shared_ptr<SpiralBullet> pBullet =
+		std::make_shared<SpiralBullet>(
+			pos, vel, attackPower, pCamera, pTarget.lock(), m_pEffectManager, startAngle);
+
+	//初期化
+	pBullet->Init();
+
+	//それを配列に格納する
+	m_pEnemyBullets.push_back(pBullet);
 	m_pAllBullets.push_back(pBullet);
 }
