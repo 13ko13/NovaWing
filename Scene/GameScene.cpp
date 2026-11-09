@@ -348,7 +348,13 @@ void GameScene::CreateStageObjects(float offsetZ)
 	}
 
 	//ビルの生成&初期化
-	m_pBuildings = BuildingDataSetter::CreateBuilding(m_pCamera, offsetZ, m_pStageConfig->GetCSVFolderName());
+	m_pBuildings = BuildingDataSetter::CreateBuilding(
+		m_pCamera, offsetZ,
+		m_pStageConfig->GetCSVFolderName(),
+		m_pStageConfig->GetBuildingLoopStartZ(),
+		m_pStageConfig->GetOneLapDistance()
+	);
+	
 	//それぞれのビルの初期化
 	for (std::shared_ptr<Building> pBuilding : m_pBuildings)
 	{

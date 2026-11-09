@@ -2285,7 +2285,28 @@
   - ユーザーが書いた: `hit_pairs`に`{ ButterflyEnemy, Building }`、[EnemyCollider::OnCollision](Game/Collision/EnemyCollider.cpp#L43)に`Building`なら`m_owner.OnHitBuilding()`。
 - **(11/09・ユーザー決定、ユーザー依頼でClaudeが実装)突進する敵も、体当たり・ビル衝突で爆発したときは撃破数に数えない。ビルに当たったら爆発する**: 2種類で使うので「数えない死に方」を`EnemyBase`へ移した。[EnemyBase::Crash](Game/GameObjects/Actors/Character/Enemy/EnemyBase.cpp)(死亡待機中なら何もしない → `m_isCrashed = true` → `TakeDamage(m_health)`)、[OnEnemyDead](Game/GameObjects/Actors/Character/Enemy/EnemyBase.cpp#L51)の最初で`m_isCrashed`なら`OnDead()`して`return`(撃破数を数える場所はここだけ)。蝶の`m_isCrashed`と`Update`の分岐は消して、`OnHitBuilding`は`Crash()`だけに。突進する敵は[OnHitPlayer](Game/GameObjects/Actors/Character/Enemy/RushEnemy/RushEnemy.cpp#L155)を`Crash()`に、`OnHitBuilding`を追加(`Crash()`)、`hit_pairs`に`{ RushEnemy, Building }`。Debug x64ビルドOK。**(11/09・ユーザー確認)蝶がビル・地面に当たると死ぬ、ぶつかった死は撃破数に数えない、突進する敵も同じ、弾で倒せば数える、すべてOK**。
 - **(11/09・ユーザー決定)蝶は今のままでOK**: 新しいビルの当たり判定、弾の速さ15([ButterflyEnemy.cpp:41](Game/GameObjects/Actors/Character/Enemy/ButterflyEnemy/ButterflyEnemy.cpp#L41))、回転弾の半径90([SpiralBullet.cpp:10](Game/GameObjects/Bullet/SpiralBullet.cpp#L10))の3つとも変えない。コスト表の蝶の行を完了にした(実コスト: かくかく移動3・回転弾2・死亡0.5・逃げる0.5、計6h/見積7h)。アルファの残りは61→54。
-- **エフェクトは別のAIに作らせる**(ユーザー)。こちらではエフェクトのファイルに触らない。ビルとの判定はモデルの形で調べるので、突進する敵が多い所で重くならないか見る。
+- **エフェクトは別のAIに作らせる**(ユーザー)。こちらではエフェクトのファイルに触らない。
+- **(11/09・Claude、ユーザー依頼「友達にプレイさせるので、レベルデザインを感じられる配置に」)敵の配置を見直した**。根拠は桜井さんの『単調な坂は山登りにならない』(困難と平地でデコボコ)、『パラメーターでキャラ立ちを』(敵は配置の組み合わせで印象的に)、『悪魔の釜』(新パルテナの反省「敵配置が満遍なさすぎ」)、『ハンデをつけてバランス調整』(開発者は慣れている)。元のCSV・Stage1.unityはscratchpadの`enemy_layout_backup_1109`。
+  - **2面**(区間は11/04の「開けた所」と「ビルを避ける所」の交互のまま、砲台12はそのまま): 新しい敵を**1種ずつ初登場**させ、その後に組み合わせ、最後に山場→静けさ→ボス。
+    - 0〜5500 突進の初登場(300右・1200左。1800→1200にして砲台の初登場と重ならないように)→標識の門の砲台
+    - 5500〜9500 ビルを避ける＋ふち・丘の砲台だけ
+    - 9500〜13000 **蝶の初登場**(7500、真ん中Y1000、ひとりで)。ここにいた突進2体(9600・10100)は消した
+    - 13000〜17500 門と正面のビルを避ける＋砲台
+    - 17200〜21000 **組み合わせ**: 突進の左右ペア16900→蝶17500(右上)→突進18400(左)
+    - 21000〜25200 3棟のビルを避ける＋砲台
+    - 25300〜29500 **山場**: 蝶2匹(23800右・24800左、ビルの区間を抜けた所で出そろう)＋突進5体(25400〜27600)。27600の後はボス(30000)まで何も出さない
+    - 蝶は9→4、突進は12→10。蝶はどれも出て止まる場所に物がないことを確認(その後のダッシュ先は見ていない)。
+  - **1面**: もとから導入(2体→リング)→ワーム単独→左右の塊→壁＋ワーム→縦列＋ワーム2→**山場(密集9＋ワーム3)**→余韻(3体)→ボス、の山の形だったので、**ボス直前のワーム(動き出し28300)だけ消した**(ボス前に静かな間を作り、ボスの登場を引き立てる)。Unityの`Stage1.unity`もImportAndSaveBatchで同期済み(81個)。
+  - **ゲームでの確認はまだ**。友達のプレイで、どこで死んだか・どこで退屈したかを見て直す。
+- **(11/09・ユーザー提起)2面のボス戦で地面とビルが途切れる → ボス区間をループさせる**: 2面の地面はCSVで42000まで(ボス出現30000)、ビルは[Building.cpp:34](Game/GameObjects/Actors/Building/Building.cpp#L34)の`Update`が空で動かない。1面は海と[Scenery](Game/GameObjects/Actors/Scenery/Scenery.cpp#L48-L55)(1周24000)がループするので困らない。
+  - **1周は12000以上必要**: 置き直したものはカメラ＋(1周−3000)に出るので、描画の奥の限界(far 9000)より遠くないと目の前に急に出てくる。同じ形の地面が続くのは34000〜42000だけだった(32000までは右の谷の坂)。
+  - **(済・Claude、ユーザー依頼)データ**: Unityの`Stage2.unity`で、40000の地面の列(11枚)を42000・44000に複製し、ビル10棟を足して**34000〜46000(12000)をつなぎ目の自然な1周**にして書き出した(`Building.csv`に32行追加、ほかは変化なし)。足したビルは、1周してつながった所も含めて同じ列の前後と2600〜3600おき、Unityの実寸の範囲で隣とのすき間600以上を確認。一時スクリプトは削除済み、元のシーン・CSVはscratchpadの`stage2_loop_backup_1109`。
+  - **コード(ユーザーが書く)**: ①[StageConfig.cpp](Constants/StageConfig.cpp#L22-L26)の表にループの始まり(2面34000)と1周(12000)を足す(1面は0=ループなし) ②[BuildingDataSetter.cpp](Game/GameObjects/Actors/Building/BuildingDataSetter.cpp)で、CSVのZがその区間にあるビルにだけループの情報を渡す(区間には`offsetZ`も足す) ③`Building::Update`でScenery.cppと同じ計算。ただし**1周目は動かさない**(Sceneryの式のままだと周回数が負になり、ステージの最初に前へ出てきてしまう)、**Zが変わったフレームだけ当たり判定モデルに`ApplyMatrix`→`MV1RefreshCollInfo`**(今は作るときの1回だけ、[Building.cpp:18-20](Game/GameObjects/Actors/Building/Building.cpp#L18-L20))。`Update`はGameObjectManagerが毎フレーム呼ぶのでGameScene側の変更はいらない。
+  - **(済・ユーザー実装)コード①〜③**: [StageConfig.cpp](Constants/StageConfig.cpp)に`buildingLoopStartZ`/`oneLapDistance`、[GameScene.cpp:351](Scene/GameScene.cpp#L351)から[BuildingDataSetter.cpp:106-107](Game/GameObjects/Actors/Building/BuildingDataSetter.cpp#L106-L107)へ渡して`isLoop`を決める(`offsetZ`を足す前のCSVのZで判定)。[Building.cpp:49-77](Game/GameObjects/Actors/Building/Building.cpp#L49-L77)の`Update`: 境目`minZ = カメラZ − 3000`、`m_baseZ > minZ`ならreturn(1周目は動かさない)、`周回数 = ceil((minZ − m_baseZ) / 1周)`、新しいZが今と違うときだけ`m_pos.z`を変えて当たり判定モデルに`ApplyMatrix`→`MV1RefreshCollInfo`(見た目は`Draw`で毎回`ApplyMatrix`しているので付いてくる。当たり判定の`MeshShape`はハンドルを持つだけなので作り直し不要)。
+  - 途中で直したまちがい(本人の理解のため): `a <= x < b`はC++では常に真(`&&`で2つに分ける)、`if (m_isLoop) return;`の条件が逆、`ceil(-1.52)`は-1(0ではない。だから1周目のreturnが必要)、**`ceil(static_cast<int>(x))`はintで先に切り捨てるので切り上げにならない → `static_cast<int>(ceil(x))`**([Building.cpp:63](Game/GameObjects/Actors/Building/Building.cpp#L63))。
+  - コメントの直し(動作に関係なし、まだ): [Building.cpp:33](Game/GameObjects/Actors/Building/Building.cpp#L33)「ボスの登場時からの」→「ループ区間の1周の長さ」、[Building.cpp:35](Game/GameObjects/Actors/Building/Building.cpp#L35)「CSVに書かれていたZ」→「CSVのZ＋チュートリアル終了位置」。
+  - **ゲームでの確認はまだ(次にやること)**: 2面のボス戦で地面とビルが途切れずに続くか、置き直した瞬間が見えないか、F1の赤いワイヤーフレームが動いたビルに付いてくるか、ステージの最初でループ区間のビルが前に出てこないか。
+- **(11/09・ユーザー変更)ライトの向き**[Game.h](Constants/Game.h#L30)のZを`-0.816`→`0.816`(光がカメラ側から奥へ進む向き)。理由: 夜空のスカイボックスではなくなったので月に合わせる必要がない、カメラから見てプレイヤーや敵の手前側に光が当たらず見にくかった。月の方向の説明コメントも削除。ビルとの判定はモデルの形で調べるので、突進する敵が多い所で重くならないか見る。
 - **(11/09・ユーザー依頼、Claude実装)ビルの当たり判定を「箱の山」から「外側の面だけの1つのメッシュ」に**: ユーザー「いっぱい四角を用意するんじゃなく、最初みたいに1つのメッシュで、形はちゃんとビルに寄せられないか(ProBuilderなら)」。手作業のProBuilderの代わりに、[BuildingCollisionTool.cs](StageEditor/Assets/Editor/BuildingCollisionTool.cs)に**「Auto Generate All (1つのメッシュで作る)」**を追加: 今までと同じボクセル(`Voxelize`に切り出して共通化、`AutoVoxelSize`=8)から、埋まったマスと空いたマスの境目にだけ面を張り、同じ平面に並んだ面は長方形にまとめる(閉じたメッシュなので`IsHitSphereAndMesh`の「真上に線を伸ばして中か調べる」もそのまま効く)。ゲームのコードは変更なし(`_Col.x`の差し替えだけ)。Unity 2022.3.62f1のバッチ(`-executeMethod BuildingCollisionTool.AutoGenerateAllSingleMeshBatch`)で6種類を書き出し済み。
   - 三角形の数(箱のとき→1つのメッシュ): AntennaTower 1176→702、BridgeWreck 252→186、Collapsed 972→684、Leaning 1236→912、OfficeGutted 288→268、TallBroken 2292→1464(合計約3割減)。
   - **ついでに見つけたずれ**: 箱を作る計算(`addBox`の`bmax`)が外側の空き1マス分を引き忘れていて、**+X・+Z側が1マス(ファイルの数値で8、ゲームで60〜100)大きかった**(11/04の「見た目より大きい」の残り)。新しいメッシュは正しい大きさ。箱の方の計算も直した(今は使っていない)。

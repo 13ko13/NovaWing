@@ -20,6 +20,10 @@ public:
 	int GetStageNo() const { return m_stageNo; }
 	//海ありのステージかを返す
 	bool HasSea() const { return m_hasSea; }
+	//ビルのループが始まるZ座標を取得
+	float GetBuildingLoopStartZ() const { return m_buildingLoopStartZ; }
+	//ボス登場時からのステージ1周の長さ
+	float GetOneLapDistance() const { return m_oneLapDistance; }
 
 private:
 	//ステージに使用するデータが入ったcsvのフォルダ名
@@ -32,4 +36,8 @@ private:
 	int m_stageNo = 0;
 	//海ありか
 	bool m_hasSea = false;
+	//ビルのループが開始するZ座標
+	float m_buildingLoopStartZ = 0.0f;
+	//ボス登場時からのステージ1周の長さ
+	float m_oneLapDistance = 0.0f;
 };

@@ -8,13 +8,14 @@ class CameraBase;
 class BuildingDataSetter
 {
 public:
-    BuildingDataSetter();
+	BuildingDataSetter();
 	virtual ~BuildingDataSetter();
 
 	//ビルを生成する
 	static std::vector<std::shared_ptr<Building>> CreateBuilding(
 		std::weak_ptr<CameraBase> pCamera,
 		float offsetZ,
-		const std::wstring& csvFolderName
+		const std::wstring& csvFolderName,
+		float loopStartZ, float oneLapDistance
 	);
 };

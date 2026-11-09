@@ -16,13 +16,17 @@ namespace
 		float bossAppearZ;
 		//海があるか
 		bool hasSea;
+		//ビルのループが開始するZ座標
+		float buildingLoopStartZ;
+		//1周の長さ
+		float oneLapDistance;
 	};
 
 	//ステージごとの設定(添字=ステージ番号(1面=0))
 	constexpr StageData stage_datas[] =
 	{
-		{ L"Stage1",true,31300.0f ,true},//1面
-		{ L"Stage2",false,30000.0f,false },//2面
+		{ L"Stage1",true,31300.0f ,true,0.0f,0.0f },//1面
+		{ L"Stage2",false,30000.0f,false, 34000.0f,12000.0f },//2面
 	};
 }
 
@@ -39,8 +43,10 @@ StageConfig::StageConfig(int stageNo) :
 	const StageData& data = stage_datas[stageNo];
 	m_csvFolderName = data.csvFolderName;
 	m_hasTutorial = data.hasTutorial;
-	m_bossAppearZ = data.bossAppearZ; 
+	m_bossAppearZ = data.bossAppearZ;
 	m_hasSea = data.hasSea;
+	m_buildingLoopStartZ = data.buildingLoopStartZ;
+	m_oneLapDistance = data.oneLapDistance;
 }
 
 StageConfig::~StageConfig()

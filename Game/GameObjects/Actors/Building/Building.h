@@ -16,6 +16,8 @@ public:
 		float rotYRadian;//ラジアン
 		Vector3 scale;
 		ResourceLoader::ModelID colModelID;
+		bool isLoop = false;//ループするか
+		float oneLapDistance = 0.0f;//1周の長さ
 	};
 
 	Building(std::weak_ptr<CameraBase> pCamera,const BuildingData& data);
@@ -33,4 +35,11 @@ private:
 	int m_colModelHandle = -1;
 	//ビルの当たり判定
 	std::unique_ptr<BuildingCollider> m_pCollider;
+
+	//このビルがループ対象か
+	bool m_isLoop = false;
+	//ボス登場時からのステージ1周分の長さ
+	float m_oneLapDistance = 0.0f;
+	//最初にビルを配置した位置
+	float m_baseZ = 0.0f;
 };
