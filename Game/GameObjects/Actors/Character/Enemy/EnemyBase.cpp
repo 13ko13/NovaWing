@@ -50,6 +50,13 @@ void EnemyBase::TakeDamage(int damage)
 
 void EnemyBase::OnEnemyDead()
 {
+	//プレイヤーが倒していないが死んだ場合は、撃破数に数えずに消える
+	if (m_isCrashed)
+	{
+		OnDead();
+		return;
+	}
+
 	//プレイヤーに敵が死んだことを伝える
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 	if (pPlayer != nullptr)
@@ -71,4 +78,15 @@ void EnemyBase::OnEnemyDead()
 	}
 
 	OnDead();
+}
+
+void EnemyBase::Crash()
+{
+	//既にプレイヤーに倒されて死亡待機中なら、撃破数に数えるためそのままにする
+	if (m_isDying) return;
+
+	//プレイヤーが倒したのではないことを覚えておく
+	m_isCrashed = true;
+	//爆発して死ぬ
+	TakeDamage(m_health);
 }

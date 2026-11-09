@@ -44,6 +44,10 @@ public:
 	//死んだときに呼ぶ関数
 	void OnEnemyDead();
 
+	//体当たりやビルへの衝突など、プレイヤーが倒したのではない形で爆発して死ぬ
+	//(プレイヤーの撃破数に数えない)
+	void Crash();
+
 	//当たり判定に使う球の配列を返す
 	//当たり判定を持つ敵がoverrideする
 	virtual std::vector<std::shared_ptr<SphereShape>> GetCollisionSpheres() const { return {}; }
@@ -52,6 +56,8 @@ public:
 	virtual std::vector<ICollider*> GetColliders() { return {}; }
 
 	virtual void OnHitPlayer() {};
+	//ビルに当たった時の処理(何もしない敵はそのまま)
+	virtual void OnHitBuilding() {};
 
 private:
 
@@ -74,5 +80,7 @@ protected:
 	int m_dyingFrame = 0;
 	//最後にダメージを与えた攻撃の種類
 	DamageSource m_lastDamageSource = DamageSource::None;
+	//Crashで死んだか(プレイヤーの撃破数に数えないため)
+	bool m_isCrashed = false;
 };
 

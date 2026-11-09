@@ -48,6 +48,9 @@ namespace
 	constexpr int max_shoot_num = 2;
 	//弾を撃つ間隔
 	constexpr int shoot_interval = 40;
+
+	//移動制限用の画面端からの余白
+	constexpr float margin = 100.0f;
 }
 
 ButterflyEnemy::ButterflyEnemy(const ButterflyEnemyData& data) :
@@ -180,6 +183,12 @@ std::vector<ICollider*> ButterflyEnemy::GetColliders()
 	return { m_pCollider.get() };
 }
 
+void ButterflyEnemy::OnHitBuilding()
+{
+	//ビルに突っ込んだら爆発して死ぬ(プレイヤーの撃破数には数えない)
+	Crash();
+}
+
 void ButterflyEnemy::DrawEnemy()
 {
 	//ResourceLoaderから蝶型の敵の法線マップを取得
@@ -276,16 +285,46 @@ void ButterflyEnemy::UpdateStop(const Vector3& playerPos)
 		//どれだけ移動するかを計算
 		float dashDist = dash_min_distance +
 			GetRand(static_cast<int>(dash_max_distance) - static_cast<int>(dash_min_distance));
+
 		//8方向のうち何番目の方向に移動するか
 		int dirIndex = GetRand(dash_dir_num - 1);
-		//1周を8分割すると45度
-		//それにランダムで決めた数をかけると8方向のうちどれを指すかが決まる
-		float angle = DX_TWO_PI_F / dash_dir_num * dirIndex;
-		//角度を方向にする
-		Vector3 dashDir = Vector3(std::cosf(angle), std::sinf(angle), 0.0f);
 
-		//ダッシュの目標地点を計算
-		m_dashEndPos = m_dashStartPos + dashDir * dashDist;
+		//ループがどれもうまくいかなかった時は移動しない
+		m_dashEndPos = m_dashStartPos;
+
+		//移動方向が画面外にならないようにすべての方向をループして
+		//画面内になるところだけに移動するようにする
+		for (int i = 0; i < dash_dir_num; i++)
+		{
+			//1周を8分割すると45度
+			//それにランダムで決めた数をかけると8方向のうちどれを指すかが決まる
+			float angle = DX_TWO_PI_F / dash_dir_num * ((dirIndex + i) % dash_dir_num);
+			//角度を方向にする
+			Vector3 dashDir = Vector3(std::cosf(angle), std::sinf(angle), 0.0f);
+
+			//ダッシュの目標地点を計算
+			Vector3 dashPos = m_dashStartPos + dashDir * dashDist;
+
+			//画面サイズ
+			const auto& wsize = Application::GetInstance().GetWindowSize();
+
+			//スクリーン内での位置を計算
+			Vector3 dashPosScreen;
+			dashPosScreen = ConvWorldPosToScreenPos((playerZ + dashPos).ToDxLib());
+
+			//この位置が画面内なのかを調べる
+			bool isScreen = dashPosScreen.x > margin &&
+				dashPosScreen.x < static_cast<float>(wsize.width) - margin &&
+				dashPosScreen.y > margin &&
+				dashPosScreen.y < static_cast<float>(wsize.height) - margin;
+
+			//画面内ならそこをダッシュ先の位置とする
+			if (isScreen)
+			{
+				m_dashEndPos = dashPos;
+				break;
+			}
+		}
 	}
 }
 

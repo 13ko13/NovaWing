@@ -89,15 +89,40 @@ public static class BuildingCollisionTool
     // バッチ用の入口
     public static void AutoGenerateAllBatch() => AutoGenerateAll();
 
-    // ビルの形(ファイルの数値)から、見た目に沿った箱を root の子に作る。箱の大きさは1/100。
+    // 全部のビルについて、形から「外側の面だけでできた1つのメッシュ」を自動で作って書き出す。
+    // 箱をたくさん積む Auto Generate All と同じボクセルを使うので形の近さは同じだが、
+    // 箱どうしが接している内側の面がなく、同じ平面の面はまとめるので、面の数がずっと少ない(判定が軽い)。
+    // メッシュは閉じている(穴がない)ので、ゲームの「真上に線を伸ばして中にいるか調べる」判定もそのまま使える。
+    [MenuItem("NovaWing/Building Collision/Auto Generate All (1つのメッシュで作る)")]
+    static void AutoGenerateAllSingleMesh()
+    {
+        foreach (var id in BuildingIDs)
+        {
+            var root = new GameObject(CollisionRootName);
+            int triCount = BuildAutoSurfaceMesh(id, root.transform);
+            if (triCount > 0)
+            {
+                ExportRoot(root, id);
+                Debug.Log($"[BuildingCollision] {id}: 三角形{triCount}個の1つのメッシュで書き出しました");
+            }
+            Object.DestroyImmediate(root);
+        }
+        AssetDatabase.Refresh();
+    }
+
+    // バッチ用の入口(1つのメッシュ)
+    public static void AutoGenerateAllSingleMeshBatch() => AutoGenerateAllSingleMesh();
+
+    // ビルの形(ファイルの数値)をボクセルにする(Auto Generate All の両方で使う)。
     // 1. 三角形の表面を細かく拾って、表面が通るボクセルに印を付ける
     // 2. 高さの段ごとに、外側から届かないボクセル(壁に囲まれた中身)も埋める
-    // 3. 段ごとに、埋まったボクセルを長方形にまとめ、上下の段で同じ長方形はつなげて1つの箱にする
-    // 以前は段ごとに全部を囲む箱1つにしていたため、L字・飛び出し・傾きの分だけ見た目より大きかった
-    static int BuildAutoBoxes(string buildingID, Transform root)
+    // solid[x,y,z] の x・z は外側に1マスずつ空きがある。マスの範囲は
+    // x: min.x + (ix-1)*v 〜 min.x + ix*v、y: min.y + iy*v 〜 min.y + (iy+1)*v、z: x と同じ
+    static bool Voxelize(string buildingID, out bool[,,] solid, out Vector3 min, out float v)
     {
+        solid = null; min = Vector3.zero; v = AutoVoxelSize;
         var model = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Models/" + buildingID + ".fbx");
-        if (model == null) { Debug.LogError($"[BuildingCollision] モデルがありません: {buildingID}"); return 0; }
+        if (model == null) { Debug.LogError($"[BuildingCollision] モデルがありません: {buildingID}"); return false; }
 
         // ファイルの数値のままの三角形(原点・大きさ1で置いたときのワールド座標)を集める
         var inst = (GameObject)Object.Instantiate(model);
@@ -108,17 +133,17 @@ public static class BuildingCollisionTool
             foreach (int t in mf.sharedMesh.triangles) tris.Add(mf.transform.TransformPoint(mv[t]));
         }
         Object.DestroyImmediate(inst);
-        if (tris.Count == 0) return 0;
+        if (tris.Count == 0) return false;
 
-        Vector3 min = tris[0], max = tris[0];
+        min = tris[0];
+        Vector3 max = tris[0];
         foreach (var p in tris) { min = Vector3.Min(min, p); max = Vector3.Max(max, p); }
-        float v = AutoVoxelSize;
         // 外側を1マスずつ空けておく(外から塗るときの出発点にする)
         int nx = Mathf.CeilToInt((max.x - min.x) / v) + 2;
         int ny = Mathf.CeilToInt((max.y - min.y) / v);
         int nz = Mathf.CeilToInt((max.z - min.z) / v) + 2;
         ny = Mathf.Max(ny, 1);
-        var solid = new bool[nx, ny, nz];
+        solid = new bool[nx, ny, nz];
 
         // 1. 表面を拾う(三角形の上を、ボクセルの半分より細かい間隔でなぞる)
         for (int i = 0; i + 2 < tris.Count; i += 3)
@@ -161,14 +186,25 @@ public static class BuildingCollisionTool
                 for (int z = 0; z < nz; z++)
                     if (!outside[x, z]) solid[x, y, z] = true;
         }
+        return true;
+    }
 
-        // 3. 段ごとに長方形にまとめ、上下で同じ長方形をつなげる(キー: x0,z0,x1,z1 → 始まりの段)
+    // ビルの形(ファイルの数値)から、見た目に沿った箱を root の子に作る。箱の大きさは1/100。
+    // ボクセルにしたあと、段ごとに埋まったボクセルを長方形にまとめ、上下の段で同じ長方形はつなげて1つの箱にする
+    // 以前は段ごとに全部を囲む箱1つにしていたため、L字・飛び出し・傾きの分だけ見た目より大きかった
+    static int BuildAutoBoxes(string buildingID, Transform root)
+    {
+        if (!Voxelize(buildingID, out var solid, out var min, out float v)) return 0;
+        int nx = solid.GetLength(0), ny = solid.GetLength(1), nz = solid.GetLength(2);
+
+        // 段ごとに長方形にまとめ、上下で同じ長方形をつなげる(キー: x0,z0,x1,z1 → 始まりの段)
         var open = new System.Collections.Generic.Dictionary<(int, int, int, int), int>();
         var boxes = new System.Collections.Generic.List<Bounds>();
         System.Action<(int x0, int z0, int x1, int z1), int, int> addBox = (r, y0, y1) =>
         {
             var bmin = new Vector3(min.x + (r.x0 - 1) * v, min.y + y0 * v, min.z + (r.z0 - 1) * v);
-            var bmax = new Vector3(min.x + r.x1 * v, min.y + y1 * v, min.z + r.z1 * v);
+            //x1・z1は「次のマス」の番号なので、外側の空き1マスの分を引いて境目にする(以前は引き忘れて+X・+Z側が1マス大きかった)
+            var bmax = new Vector3(min.x + (r.x1 - 1) * v, min.y + y1 * v, min.z + (r.z1 - 1) * v);
             var bb = new Bounds(); bb.SetMinMax(bmin, bmax);
             boxes.Add(bb);
         };
@@ -216,6 +252,104 @@ public static class BuildingCollisionTool
             box.transform.localScale = b.size / 100f;
         }
         return boxes.Count;
+    }
+
+    // ビルの形(ファイルの数値)から、外側の面だけでできた1つのメッシュを root の子に作る。大きさは1/100。
+    // 埋まったボクセルと空いたボクセルの境目にだけ面を張り、同じ向き・同じ平面に並んだ面は長方形にまとめる。
+    // 戻り値は三角形の数
+    static int BuildAutoSurfaceMesh(string buildingID, Transform root)
+    {
+        if (!Voxelize(buildingID, out var solid, out var min, out float v)) return 0;
+        int[] dims = { solid.GetLength(0), solid.GetLength(1), solid.GetLength(2) };
+
+        // マスの番号が範囲外なら空き
+        bool IsSolid(int[] c)
+        {
+            for (int i = 0; i < 3; i++) if (c[i] < 0 || c[i] >= dims[i]) return false;
+            return solid[c[0], c[1], c[2]];
+        }
+        // マスの境目の番号を、ファイルの数値の座標にする(x・zは外側の空き1マスの分を引く)
+        Vector3 ToPos(int gx, int gy, int gz) =>
+            new Vector3(min.x + (gx - 1) * v, min.y + gy * v, min.z + (gz - 1) * v);
+
+        var verts = new System.Collections.Generic.List<Vector3>();
+        var tris = new System.Collections.Generic.List<int>();
+
+        // 6方向(x・y・zのそれぞれプラス側・マイナス側)の面を作る
+        for (int axis = 0; axis < 3; axis++)
+        {
+            int u = (axis + 1) % 3, w = (axis + 2) % 3;
+            var normal = Vector3.zero;
+            for (int sign = -1; sign <= 1; sign += 2)
+            {
+                normal[axis] = sign;
+                var mask = new bool[dims[u], dims[w]];
+                var cell = new int[3];
+                var next = new int[3];
+                for (int i = 0; i < dims[axis]; i++)
+                {
+                    // この段で「自分は埋まっていて、面の向こう側は空いている」所に印を付ける
+                    for (int j = 0; j < dims[u]; j++)
+                    {
+                        for (int k = 0; k < dims[w]; k++)
+                        {
+                            cell[axis] = i; cell[u] = j; cell[w] = k;
+                            next[axis] = i + sign; next[u] = j; next[w] = k;
+                            mask[j, k] = IsSolid(cell) && !IsSolid(next);
+                        }
+                    }
+                    // 印の付いた所を長方形にまとめて、1枚の四角形(三角形2つ)にする
+                    int plane = sign > 0 ? i + 1 : i;
+                    for (int k = 0; k < dims[w]; k++)
+                    {
+                        for (int j = 0; j < dims[u]; j++)
+                        {
+                            if (!mask[j, k]) continue;
+                            int j1 = j;
+                            while (j1 + 1 < dims[u] && mask[j1 + 1, k]) j1++;
+                            int k1 = k;
+                            while (k1 + 1 < dims[w])
+                            {
+                                bool row = true;
+                                for (int m = j; m <= j1; m++) if (!mask[m, k1 + 1]) { row = false; break; }
+                                if (!row) break;
+                                k1++;
+                            }
+                            for (int m = j; m <= j1; m++) for (int n = k; n <= k1; n++) mask[m, n] = false;
+
+                            // 四角形の4つの角(マスの境目の番号)
+                            var corners = new Vector3[4];
+                            int[][] uw = { new[] { j, k }, new[] { j1 + 1, k }, new[] { j1 + 1, k1 + 1 }, new[] { j, k1 + 1 } };
+                            for (int c = 0; c < 4; c++)
+                            {
+                                var g = new int[3];
+                                g[axis] = plane; g[u] = uw[c][0]; g[w] = uw[c][1];
+                                corners[c] = ToPos(g[0], g[1], g[2]);
+                            }
+                            // 表(外側)を向くように三角形の順番を決める(Unityは左手系)
+                            bool flip = Vector3.Dot(Vector3.Cross(corners[1] - corners[0], corners[2] - corners[0]), normal) < 0f;
+                            int b = verts.Count;
+                            foreach (var p in corners) verts.Add(p / 100f);
+                            if (!flip) tris.AddRange(new[] { b, b + 1, b + 2, b, b + 2, b + 3 });
+                            else tris.AddRange(new[] { b, b + 2, b + 1, b, b + 3, b + 2 });
+                        }
+                    }
+                }
+            }
+        }
+
+        var mesh = new Mesh { name = buildingID + "_Col" };
+        if (verts.Count > 65000) mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        mesh.SetVertices(verts);
+        mesh.SetTriangles(tris, 0);
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+
+        var go = new GameObject("Surface");
+        go.transform.SetParent(root, false);
+        go.AddComponent<MeshFilter>().sharedMesh = mesh;
+        go.AddComponent<MeshRenderer>();
+        return tris.Count / 3;
     }
 
     // root を原点に戻して、ゲーム用の .x(Data/Model/Building)と、Unityで続きを直す用の FBX(Assets/Models)を書き出す。

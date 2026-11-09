@@ -7,9 +7,6 @@
 
 namespace
 {
-	//フォーカス可能な距離
-	constexpr float focus_range = 700.0f;
-
 	//手前のレティクルが見るZ値
 	constexpr float front_reticle_distance = 1400.0f;
 	//奥のレティクルが見るZ値

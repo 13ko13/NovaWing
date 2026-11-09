@@ -2,6 +2,7 @@
 #include "BulletCollider.h"
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
 #include "Game/Collision/ChargeExplosionCollider.h"
+#include "BuildingCollider.h"
 
 EnemyCollider::EnemyCollider(EnemyBase& owner, ColliderTag tag) :
 	m_owner(owner),
@@ -37,6 +38,11 @@ void EnemyCollider::OnCollision(const ICollider& other)
 	else if(other.GetTag() == ColliderTag::Player)
 	{
 		m_owner.OnHitPlayer();
+	}
+	//ビルにぶつかった時のそれぞれの処理
+	else if (other.GetTag() == ColliderTag::Building)
+	{
+		m_owner.OnHitBuilding();
 	}
 }
 

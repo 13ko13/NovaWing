@@ -7,9 +7,9 @@
 namespace
 {
 	//回転する弾を軸からどれぐらい離すか
-	constexpr float spiral_distance = 300.0f;
+	constexpr float spiral_distance = 90.0f;
 	//1フレームで何周するか
-	constexpr float rotation_per_frame = DX_TWO_PI_F / 60.0f;
+	constexpr float rotation_per_frame = DX_TWO_PI_F / 120.0f;
 }
 
 SpiralBullet::SpiralBullet(const Vector3& pos, const Vector3& vel,

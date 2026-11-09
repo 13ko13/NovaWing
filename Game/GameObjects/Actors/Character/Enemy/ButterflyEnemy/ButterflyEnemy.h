@@ -33,6 +33,9 @@ public:
 	//当たり判定インターフェースを返す
 	std::vector<ICollider*> GetColliders() override;
 
+	//ビルに当たった時の処理
+	void OnHitBuilding() override;
+
 private:
 	//敵を描画
 	void DrawEnemy();

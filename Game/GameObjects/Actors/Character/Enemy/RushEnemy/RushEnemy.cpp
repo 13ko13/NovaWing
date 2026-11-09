@@ -154,8 +154,14 @@ std::vector<ICollider*> RushEnemy::GetColliders()
 
 void RushEnemy::OnHitPlayer()
 {
-	//突進して爆発して死ぬ感じにする
-	TakeDamage(m_health);
+	//突進して爆発して死ぬ感じにする(プレイヤーの撃破数には数えない)
+	Crash();
+}
+
+void RushEnemy::OnHitBuilding()
+{
+	//ビルに突っ込んだら爆発して死ぬ(プレイヤーの撃破数には数えない)
+	Crash();
 }
 
 void RushEnemy::UpdateAppear(const Vector3& playerPos)

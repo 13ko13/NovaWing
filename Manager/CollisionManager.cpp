@@ -69,6 +69,8 @@ namespace
 		{ ColliderTag::Worm, ColliderTag::Player },
 		{ ColliderTag::Rock, ColliderTag::Player },
 		{ ColliderTag::Building,ColliderTag::Player },
+		{ ColliderTag::ButterflyEnemy,ColliderTag::Building },
+		{ ColliderTag::RushEnemy,ColliderTag::Building },
 	};
 
 	bool IsHitSphereAndMesh(const SphereShape& sphere, const MeshShape& mesh)

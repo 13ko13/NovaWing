@@ -37,6 +37,8 @@ public:
 
 	//プレイヤーに当たった時の処理
 	void OnHitPlayer() override;
+	//ビルに当たった時の処理
+	void OnHitBuilding() override;
 
 private:
 	//状態ごとの更新
