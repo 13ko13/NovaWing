@@ -428,3 +428,7 @@ StageEditor/*.sln
 
 # Dear ImGuiのウィンドウ位置などの保存ファイル
 DebugTools/ImGui/imgui.ini
+
+# Codexデスクトップアプリが「外部エージェントの取り込み同期」でCLAUDE.md/.claude/skillsから自動で作るコピー
+/AGENTS.md
+/.agents/

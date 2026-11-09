@@ -2270,3 +2270,10 @@
 - **バグ(コスト表に追加済み、ベータ・A・1h)**: ボスを倒してリザルトからタイトルへ戻ると、タイトルのプレイヤーが見えない時間がある(未調査)。
 - 注意(今日のコミットに入れるかどうか): `.pso`(ビルドで再生成)、`Log.txt`(実行ログ、コミットしない方針)。
 - **(11/08)`AGENTS.md`と`.agents/skills/sakurai-game-design/`**: 11/07に別のセッションで作られたもの(`CLAUDE.md`とまったく同じ内容、スキルも`.claude/skills/`の同名のものと同じ)。Claude Code以外のAIツールが読む用。ノートには11/06の`CLAUDE.md`・`sakurai-knowledge/`の記述だけがあり、これは記録されていなかったので、ここに残す。`Log.txt`は実行ログなのでコミットせず、変更は破棄した。
+  - **→ 11/09訂正: これはわざと作ったものではなく、Codexの自動コピーだった(下の11/09)。リポジトリから外した。**
+
+### 2026-11-09 `AGENTS.md`・`.agents/`はCodexの自動コピー → 同期を切ってリポジトリから外した(Claude、ユーザー依頼)
+- ユーザー: 「pullしてくると`SKILL.md`と`AGENTS.md`が絶対いる」「家でも学校でも起きていた」「起きないようになればそれでいい」。
+- 原因: **Codexデスクトップアプリの「外部エージェントの取り込み同期」**(`~/.codex/config.toml`の`[desktop]`に`external-agent-import-sync-enabled = true`、`external-agent-import-sync-item-types = "all"`)。Codexの起動時に`CLAUDE.md`→`AGENTS.md`、`.claude/skills/`→`.agents/skills/`へ同じ中身でコピーする。11/08に家のセッションがそれを「ほかのAIツール用」と思ってコミットしていた(af26665)。
+- 対処: **学校のPC**で`external-agent-import-sync-enabled = false`(Codexの再起動後も`false`のままを確認)。`git rm`で`AGENTS.md`と`.agents/`をリポジトリから外し、[.gitignore](.gitignore)に`/AGENTS.md`と`/.agents/`を追加。
+- **家のPCはまだ**: 家で最初にClaudeが`~/.codex/config.toml`を同じように`false`にし、残っている`AGENTS.md`/`.agents/`を消す(環境まわりなのでユーザーに確認させない)。`.gitignore`があるので、それまで作られても変更一覧には出ない。
