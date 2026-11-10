@@ -8,7 +8,7 @@
 namespace
 {
 	//カメラがこの距離より先に進んだ景色は、1周分前方へ移して使い回す
-	const float recycle_behind_distance = 3000.0f;
+	const float recycle_behind_distance = 1000.0f;
 }
 
 Building::Building(std::weak_ptr<CameraBase> pCamera, const BuildingData& data) :
