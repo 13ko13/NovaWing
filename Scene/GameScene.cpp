@@ -57,6 +57,7 @@
 #include "Manager/EnemySpawner.h"
 #include "Game/GameObjects/Actors/Character/Enemy/TurretEnemy/TurretEnemyDataSetter.h"
 #include "ShaderEffect/BoostingEffect.h"
+#include "ShaderEffect/WaterDropEffect.h"
 #ifdef _DEBUG
 #include "DebugTools/DebugUI/DebugUI.h"
 #endif
@@ -235,6 +236,8 @@ void GameScene::Init()
 
 	//ブーストエフェクトの初期化
 	m_pBoostingEffect = std::make_unique<BoostingEffect>();
+	//水滴エフェクトの初期化
+	m_pWaterDropEffect = std::make_unique<WaterDropEffect>();
 
 	//景色の生成&初期化(位置はステージのオフセットに関係なく固定)
 	m_pSceneries = SceneryDataSetter::CreateScenery(m_pCamera, m_pStageConfig->GetCSVFolderName());
@@ -729,14 +732,19 @@ void GameScene::Draw()
 	//エフェクトの描画
 	m_pEffectManager->Draw();
 
-	//UIだけバックバッファに描画する
-	m_pBoostingEffect->ChangeNormalRT();
-
-	//視野角とNearFarを再設定
-	m_pCamera->SetUpCamera();
+	//水滴用のオフスクリーンにブーストエフェクト込みの世界を描画する
+	m_pWaterDropEffect->ChangeWaterDropEffectRT();
 
 	//ブースト中であればブーストエフェクトを描画
 	m_pBoostingEffect->Draw(m_pPlayer->IsBoosting());
+
+	//バックバッファに戻す
+	m_pWaterDropEffect->ChangeNormalRT();
+
+	//水滴シェーダーを通した世界とブーストエフェクトを描画
+	m_pWaterDropEffect->Draw();
+	//カメラを再設定
+	m_pCamera->SetUpCamera();
 
 	//全てのUIを描画する
 	m_pUIManager->Draw();

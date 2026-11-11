@@ -1,5 +1,8 @@
 modelID,posX,posY,posZ,rotX,rotY,rotZ,scaleX,scaleY,scaleZ,frontOffset
-ButterflyEnemy,0,1000,7500,0,0,0,1,1,1,2500
-ButterflyEnemy,700,1100,17500,0,0,0,1,1,1,2500
-ButterflyEnemy,700,900,23800,0,0,0,1,1,1,2500
-ButterflyEnemy,-700,1000,24800,0,0,0,1,1,1,2500
+ButterflyEnemy,0,700,8500,0,0,0,1,1,1,1500
+ButterflyEnemy,700,800,18500,0,0,0,1,1,1,1500
+ButterflyEnemy,700,600,24800,0,0,0,1,1,1,1500
+ButterflyEnemy,-700,700,25800,0,0,0,1,1,1,1500
+ButterflyEnemy,0,700,37000,0,0,0,1,1,1,1500
+ButterflyEnemy,-700,700,45000,0,0,0,1,1,1,1500
+ButterflyEnemy,700,600,46200,0,0,0,1,1,1,1500

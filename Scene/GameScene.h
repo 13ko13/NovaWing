@@ -26,6 +26,7 @@ class TutorialController;
 class StageConfig;
 class EnemySpawner;
 class BoostingEffect;
+class WaterDropEffect;
 class GameScene :public Scene
 {
 public:
@@ -144,4 +145,6 @@ private:
 	std::unique_ptr<EnemySpawner> m_pEnemySpawner;
 	//ブーストエフェクトクラスへのポインタ
 	std::unique_ptr<BoostingEffect> m_pBoostingEffect;
+	//水滴エフェクトクラスへのポインタ
+	std::unique_ptr<WaterDropEffect> m_pWaterDropEffect;
 };

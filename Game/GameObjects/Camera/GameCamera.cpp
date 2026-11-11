@@ -22,7 +22,7 @@ namespace
 	constexpr float zoom_dist_thresould = 100.0f;
 
 	// カメラのLerpに使うtの値
-	constexpr float lerp_t = 0.03f;
+	constexpr float lerp_t = 0.06f;
 
 	// カメラからターゲットまでの距離
 	constexpr float camera_to_target = 38000.0f;
@@ -178,9 +178,12 @@ void GameCamera::UpdateTargetPos()
 		// プレイヤーから見たかなり前のほうをターゲットとする
 		if (!pPlayer->IsSomersault())
 		{
-			Vector3 lookDir = -pPlayer->GetForward();
-			lookDir.x *= camera_yaw_rate;
-			m_targetPos = pPlayer->GetPos() + lookDir * camera_to_target;
+			// Vector3 lookDir = -pPlayer->GetForward();
+			// lookDir.x *= camera_yaw_rate;
+			// m_targetPos = pPlayer->GetPos() + lookDir * camera_to_target;
+
+			//カメラの回転が気持ち悪いので一旦注視点を見るのではなくずっと前を見るようにする
+			m_targetPos = m_pos + Vector3(0.0f, 0.0f, camera_to_target);
 		}
 	}
 }

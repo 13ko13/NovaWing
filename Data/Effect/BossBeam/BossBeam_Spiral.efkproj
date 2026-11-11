@@ -5,64 +5,6 @@
     <Children>
       <Node>
         <CommonValues>
-          <MaxGeneration>
-            <Infinite>True</Infinite>
-          </MaxGeneration>
-          <LocationEffectType>1</LocationEffectType>
-          <RotationEffectType>1</RotationEffectType>
-          <ScaleEffectType>1</ScaleEffectType>
-          <Life>
-            <Center>440</Center>
-            <Max>450</Max>
-            <Min>430</Min>
-          </Life>
-          <Generation>
-            <GenerationTime>
-              <Center>10</Center>
-              <Max>10</Max>
-              <Min>10</Min>
-            </GenerationTime>
-          </Generation>
-        </CommonValues>
-        <ScalingValues>
-          <Fixed>
-            <Scale>
-              <X>1.6</X>
-              <Y>1.6</Y>
-              <Z>1.6</Z>
-            </Scale>
-          </Fixed>
-        </ScalingValues>
-        <RendererCommonValues>
-          <ColorTexture>Texture/BB_RimDisc2.png</ColorTexture>
-          <FadeInType>1</FadeInType>
-          <FadeIn>
-            <Frame>3</Frame>
-          </FadeIn>
-          <FadeOutType>1</FadeOutType>
-          <FadeOut>
-            <Frame>10</Frame>
-          </FadeOut>
-        </RendererCommonValues>
-        <DrawingValues>
-          <ColorAll>
-            <Fixed>
-              <R>60</R>
-              <G>15</G>
-              <B>95</B>
-              <A>230</A>
-            </Fixed>
-          </ColorAll>
-          <Sprite>
-            <Billboard>2</Billboard>
-          </Sprite>
-        </DrawingValues>
-        <Name>RimDisc</Name>
-        <Children>
-        </Children>
-      </Node>
-      <Node>
-        <CommonValues>
           <Life>
             <Center>100000</Center>
             <Max>100000</Max>
@@ -331,35 +273,75 @@
       </Node>
       <Node>
         <CommonValues>
+          <MaxGeneration>
+            <Infinite>True</Infinite>
+          </MaxGeneration>
+          <LocationEffectType>1</LocationEffectType>
+          <RotationEffectType>1</RotationEffectType>
+          <ScaleEffectType>1</ScaleEffectType>
           <Life>
-            <Center>100000</Center>
-            <Max>100000</Max>
-            <Min>100000</Min>
+            <Center>440</Center>
+            <Max>450</Max>
+            <Min>430</Min>
           </Life>
+          <Generation>
+            <GenerationTime>
+              <Center>10</Center>
+              <Max>10</Max>
+              <Min>10</Min>
+            </GenerationTime>
+          </Generation>
         </CommonValues>
         <ScalingValues>
-          <Fixed>
-            <Scale>
-              <X>2.2</X>
-              <Y>2.2</Y>
-              <Z>2.2</Z>
-            </Scale>
-          </Fixed>
+          <Type>5</Type>
+          <FCurve>
+            <FCurve>
+              <Keys>
+                <Timeline>0</Timeline>
+                <X>
+                  <Key0><Frame>0</Frame><Value>1.25</Value><LeftX>0</LeftX><LeftY>1.25</LeftY><RightX>8</RightX><RightY>1.25</RightY><InterpolationType>0</InterpolationType></Key0>
+                  <Key1><Frame>24</Frame><Value>1</Value><LeftX>16</LeftX><LeftY>1</LeftY><RightX>24</RightX><RightY>1</RightY><InterpolationType>0</InterpolationType></Key1>
+                </X>
+                <Y>
+                  <Key0><Frame>0</Frame><Value>1.25</Value><LeftX>0</LeftX><LeftY>1.25</LeftY><RightX>8</RightX><RightY>1.25</RightY><InterpolationType>0</InterpolationType></Key0>
+                  <Key1><Frame>24</Frame><Value>1</Value><LeftX>16</LeftX><LeftY>1</LeftY><RightX>24</RightX><RightY>1</RightY><InterpolationType>0</InterpolationType></Key1>
+                </Y>
+                <Z>
+                  <Key0><Frame>0</Frame><Value>1</Value><LeftX>0</LeftX><LeftY>1</LeftY><RightX>0</RightX><RightY>1</RightY><InterpolationType>1</InterpolationType></Key0>
+                </Z>
+              </Keys>
+            </FCurve>
+          </FCurve>
         </ScalingValues>
         <RendererCommonValues>
-          <ColorTexture>Texture/BB_RimDisc2.png</ColorTexture>
+          <ColorTexture>Texture/BB_TubeSpiral.png</ColorTexture>
+          <FadeInType>1</FadeInType>
+          <FadeIn>
+            <Frame>4</Frame>
+          </FadeIn>
+          <FadeOutType>1</FadeOutType>
+          <FadeOut>
+            <Frame>10</Frame>
+          </FadeOut>
+          <UV>3</UV>
+          <UVScroll>
+            <Size>
+              <X><Center>256</Center><Max>256</Max><Min>256</Min></X>
+              <Y><Center>256</Center><Max>256</Max><Min>256</Min></Y>
+            </Size>
+            <Speed>
+              <X><Center>8.5333</Center><Max>8.5333</Max><Min>8.5333</Min></X>
+            </Speed>
+          </UVScroll>
         </RendererCommonValues>
         <DrawingValues>
-          <ColorAll>
-            <Fixed>
-              <R>60</R>
-              <G>15</G>
-              <B>95</B>
-              <A>220</A>
-            </Fixed>
-          </ColorAll>
+          <Type>5</Type>
+          <Model>
+            <Model>Model/BB_Tube.efkmodel</Model>
+            <Culling>2</Culling>
+          </Model>
         </DrawingValues>
-        <Name>TipBack</Name>
+        <Name>DarkTube</Name>
         <Children>
         </Children>
       </Node>
@@ -416,6 +398,42 @@
           </ColorAll>
         </DrawingValues>
         <Name>TipGlow</Name>
+        <Children>
+        </Children>
+      </Node>
+      <Node>
+        <CommonValues>
+          <Life>
+            <Center>100000</Center>
+            <Max>100000</Max>
+            <Min>100000</Min>
+          </Life>
+        </CommonValues>
+        <RotationValues>
+          <Type>1</Type>
+          <PVA>
+            <Velocity>
+              <Z>
+                <Center>-9</Center>
+                <Max>-9</Max>
+                <Min>-9</Min>
+              </Z>
+            </Velocity>
+          </PVA>
+        </RotationValues>
+        <ScalingValues>
+          <Fixed>
+            <Scale>
+              <X>2.3</X>
+              <Y>2.3</Y>
+              <Z>2.3</Z>
+            </Scale>
+          </Fixed>
+        </ScalingValues>
+        <RendererCommonValues>
+          <ColorTexture>Texture/BB_Vortex.png</ColorTexture>
+        </RendererCommonValues>
+        <Name>TipVortex</Name>
         <Children>
         </Children>
       </Node>

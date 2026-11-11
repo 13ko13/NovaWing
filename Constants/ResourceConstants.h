@@ -246,7 +246,7 @@ namespace
 	constexpr float summon_worm_eff_scale = 1.0f;
 	constexpr float boss_beam_eff_scale = 2.0f;
 	constexpr float boss_shield_eff_scale = 4.0f;
-	constexpr float hit_effect_scale = 2.0f;
+	constexpr float hit_effect_scale = 4.0f;
 	constexpr float boss_death_eff_scale = 1.0f;
 	constexpr float boost_effect_scale = 1.0f;
 	constexpr float left_wing_splash_effect_scale = 1.0f;

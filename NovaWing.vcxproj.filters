@@ -420,6 +420,7 @@
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\ButterflyEnemy\ButterflyEnemy.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderEffect\WaterDropEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants\Game.h">
@@ -836,6 +837,7 @@
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\ButterflyEnemy\ButterflyEnemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="ShaderEffect\WaterDropEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="LightingPS.hlsl" />
@@ -848,6 +850,7 @@
     <FxCompile Include="DamagePS.hlsl" />
     <FxCompile Include="SkinnedLightingVS.hlsl" />
     <FxCompile Include="BoostingEffectPS.hlsl" />
+    <FxCompile Include="WaterDropEffectPS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\CSV\RockData.csv" />

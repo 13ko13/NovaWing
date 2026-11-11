@@ -306,6 +306,7 @@
     <ClCompile Include="ShaderEffect\BoostingEffect.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\TurretEnemy\TurretEnemyDataSetter.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\ButterflyEnemy\ButterflyEnemy.cpp" />
+    <ClCompile Include="ShaderEffect\WaterDropEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
@@ -446,6 +447,7 @@
     <ClInclude Include="ShaderEffect\BoostingEffect.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\TurretEnemy\TurretEnemyDataSetter.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\ButterflyEnemy\ButterflyEnemy.h" />
+    <ClInclude Include="ShaderEffect\WaterDropEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="BoostingEffectPS.hlsl">
@@ -573,6 +575,20 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)%(Filename).vso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).vso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="WaterDropEffectPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)%(Filename).pso</ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)%(Filename).pso</ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)%(Filename).pso</ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).pso</ObjectFileOutput>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

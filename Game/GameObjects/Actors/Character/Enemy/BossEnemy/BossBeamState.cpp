@@ -30,7 +30,7 @@ namespace
 	constexpr float target_offset = 100.0f;
 
 	//何フレームビームを続けるか
-	constexpr int beam_end_frame = 60 * 7;
+	constexpr int beam_end_frame = 60 * 10;
 
 	//ビームがターゲットまで進むときの速度
 	constexpr float beam_speed = 20.0f;

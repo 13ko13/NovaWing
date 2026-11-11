@@ -7,7 +7,7 @@
 
 namespace
 {
-	constexpr float move_speed_z = 8.0f;//移動速度
+	constexpr float move_speed_z = 15.0f;//移動速度
 
 	constexpr float move_speed_x = 19.0f;//横方向の移動速度
 	constexpr float move_speed_y = 19.0f;//縦方向の移動速度

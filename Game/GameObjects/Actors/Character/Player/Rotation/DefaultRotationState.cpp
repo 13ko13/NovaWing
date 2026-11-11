@@ -13,7 +13,9 @@ namespace
 	//アナログスティックの入力値を-1～1に正規化するための割る数
 	constexpr float stick_input_max = 1000.0f;
 	//スティック入力から求める機体の最大傾き角度
-	constexpr float max_tilt_angle = DX_PI_F / 5.0f;
+	constexpr float max_normal_tilt_angle = 45.0f * DX_PI_F / 180.0f;
+	//傾けボタンを押している間の機体の最大傾き角度
+	constexpr float max_roll_tilt_angle = 90.0f * DX_PI_F / 180.0f;
 
 	//ローリングボタン連続入力を二回押しと判定するまでの許容フレーム
 	constexpr int double_press_frame = 30;
@@ -82,18 +84,29 @@ void DefaultRotationState::Update()
 
 	//上下入力
 	//X軸回転
-	targetAngle = stick.y * max_tilt_angle;
+	targetAngle = stick.y * max_normal_tilt_angle;
 	pPlayer->LerpToAngleX(targetAngle, rot_lerp_t);
 
-	//左右入力
-	//Y軸回転
-	//モデルの前後が逆なので180度回した状態を基準として
-	//回転を行う
-	targetAngle = DX_PI_F + (stick.x * max_tilt_angle);
-	pPlayer->LerpToAngleY(targetAngle, rot_lerp_t);
-	//Z軸回転
-	targetAngle =(stick.x * max_tilt_angle);
-	pPlayer->LerpToAngleZ(targetAngle, rot_lerp_t);
+	//傾けボタンが押されているときだけ最大回転角を大きくする
+	if (input.IsPressed(InputEvent::right_rolling) ||
+		input.IsPressed(InputEvent::left_rolling))
+	{
+		//左右入力
+		//Y軸回転
+		//モデルの前後が逆なので180度回した状態を基準として回転を行う
+		targetAngle = DX_PI_F + (stick.x * max_roll_tilt_angle);
+		pPlayer->LerpToAngleY(targetAngle, rot_lerp_t);
+	}
+	//押していない間は大きく回転はしない
+	else
+	{
+		//左右入力
+		//Y軸回転
+		//モデルの前後が逆なので180度回した状態を基準として回転を行う
+		targetAngle = DX_PI_F + (stick.x * max_normal_tilt_angle);
+		pPlayer->LerpToAngleY(targetAngle, rot_lerp_t);
+	}
+
 
 	//ローリングボタンが一回押されていたらフレーム更新
 	if (m_pushRightRollFrame > 0)
@@ -184,7 +197,7 @@ void DefaultRotationState::Update()
 	{
 		//Z軸回転
 		//回転を行う
-		targetAngle = DX_PI_F / 2;
+		targetAngle = max_roll_tilt_angle;
 		if (pPlayer->IsNearSea()) targetAngle = 0.0f;
 		pPlayer->LerpToAngleZ(targetAngle, rot_lerp_t);
 	}
@@ -192,13 +205,13 @@ void DefaultRotationState::Update()
 	{
 		//Z軸回転
 		//回転を行う
-		targetAngle = -DX_PI_F / 2;
+		targetAngle = -max_roll_tilt_angle;
 		if (pPlayer->IsNearSea()) targetAngle = 0.0f;
 		pPlayer->LerpToAngleZ(targetAngle, rot_lerp_t);
 	}
 	else
 	{
-		targetAngle = 0.0f;
+		targetAngle = stick.x * max_normal_tilt_angle;
 		pPlayer->LerpToAngleZ(targetAngle, rot_lerp_t);
 	}
 

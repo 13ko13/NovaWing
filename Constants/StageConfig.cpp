@@ -25,8 +25,8 @@ namespace
 	//ステージごとの設定(添字=ステージ番号(1面=0))
 	constexpr StageData stage_datas[] =
 	{
-		{ L"Stage1",true,31300.0f ,true,0.0f,0.0f },//1面
-		{ L"Stage2",false,30000.0f,false, 34000.0f,12000.0f },//2面
+		{ L"Stage1",true,58700.0f ,true,0.0f,0.0f },//1面
+		{ L"Stage2",false,56300.0f,false, 34000.0f,16000.0f },//2面
 	};
 }
 

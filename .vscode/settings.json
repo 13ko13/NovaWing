@@ -7,7 +7,15 @@
         "*.hlsli": "hlsl"
     },
     "[hlsl]": {
-        "editor.defaultFormatter": "mahirocreative.dxlib-devenv"
+        "editor.defaultFormatter": "mahirocreative.dxlib-devenv",
+        "editor.quickSuggestions": {
+            "other": "off",
+            "comments": "off",
+            "strings": "off"
+        },
+        "editor.suggestOnTriggerCharacters": false,
+        "editor.wordBasedSuggestions": "off",
+        "editor.inlineSuggest.enabled": false
     },
 
     "editor.insertSpaces": false,

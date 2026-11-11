@@ -14,7 +14,7 @@ namespace
 	// チャージ弾を打てる許容時間
 	constexpr int can_shoot_frame = 60; // 2秒
 	// 弾の速度
-	constexpr float move_speed = 25.0f;
+	constexpr float move_speed = 50.0f;
 	// 攻撃力
 	constexpr int attack_power = 100;
 	// チャージ完了エフェクトを出す前後位置のオフセット
