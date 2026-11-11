@@ -14,12 +14,14 @@ static const float2 water_drop_center = float2(0.7f, 0.4f);
 // 水滴がどのくらいの大きさか
 static const float water_drop_radius = 0.03f;
 // 水滴の中の景色をどのぐらい縮めるか
-static const float shrink_ratio = 0.3f;
+static const float shrink_ratio = 2.0f;
 // 仮で画面の横幅と縦幅
 static const float window_width = 1280.0f;
 static const float window_height = 720.0f;
 // 比率を合わせる必要があるので画面のアスペクト比を計算
 static const float screen_aspect_ratio = window_width / window_height;
+//水滴を指定の方向にどれだけ大きくするか
+static const float water_drop_stretch = 0.7f;
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
@@ -32,7 +34,7 @@ float4 main(PS_INPUT input) : SV_TARGET
 	// ずらした後のuv.yを倍率で割ることで1にする
 	float2 correctedWaterDropToUV = float2(
 		uv.x - water_drop_center.x,
-		(uv.y - water_drop_center.y) / screen_aspect_ratio);
+		(uv.y - water_drop_center.y) / screen_aspect_ratio * water_drop_stretch);
 
 	// 水滴の中心からの距離を出す
 	float waterDropToUVLength = length(correctedWaterDropToUV);
