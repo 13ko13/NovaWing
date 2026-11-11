@@ -507,7 +507,7 @@ void GameScene::Update()
 		if (!m_isAppearBoss)
 		{
 			//プレイヤーが何も行わないようにする
-			m_pPlayer->ChangeAllStateToDisabled();
+			// m_pPlayer->ChangeAllStateToDisabled();
 
 			switch (m_bossApearState)
 			{
@@ -544,6 +544,9 @@ void GameScene::Update()
 
 			case BossApearState::Movie:
 			{
+				//プレイヤーの動きを止める
+				m_pPlayer->ChangeAllStateToDisabled();
+
 				//ムービーの再生が終わったら
 				int movieH = ResourceLoader::GetInstance().GetGraphic(
 					ResourceLoader::GraphicID::BossAppearMovie);
