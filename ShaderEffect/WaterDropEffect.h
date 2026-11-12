@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Utility/Vector2.h"
 
 class WaterDropEffect
 {
@@ -22,12 +23,21 @@ private:
 	//水滴エフェクトをかける用のレンダーターゲットハンドル
 	int m_screenH = 0;
 
-	// struct WaterDropBuffer
-	// {
-	// 	float padding[4];//16バイトアライメント
-	// };
-	// //水滴用の定数バッファハンドル
-	// int m_cbuffWaterDropH = -1;
-	// //水滴用の定数バッファ
-	// WaterDropBuffer* m_pCBuffWaterDrop = nullptr;
+	struct WaterDropData
+	{
+		float radius;//半径
+		Vector2 pos;//位置
+		float padding;//16バイトアライメント
+	};
+
+	static const int max_water_drop_count = 15;
+
+	struct WaterDropBuffer
+	{
+		WaterDropData waterData[max_water_drop_count];
+	};
+	//水滴用の定数バッファハンドル
+	int m_cbuffWaterDropH = -1;
+	//水滴用の定数バッファ
+	WaterDropBuffer* m_pCBuffWaterDrop = nullptr;
 };

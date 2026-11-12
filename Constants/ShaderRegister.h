@@ -64,4 +64,8 @@ namespace ShaderRegister
 	//----------ブーストエフェクト専用------
 	//ブースト量を渡す定数バッファ(ピクセルシェーダ)
 	constexpr int cbuffer_boosting = 8;
+
+	//----------水滴エフェクト専用------
+	//水滴の位置と半径の配列を渡す定数バッファ(ピクセルシェーダ)
+	constexpr int cbuffer_water_drop = 9;
 }

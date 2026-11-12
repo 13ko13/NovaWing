@@ -9,10 +9,21 @@ struct PS_INPUT
 	float2 uv : TEXCOORD0;
 };
 
-// 仮で水滴の中心を用意しておく
-static const float2 water_drop_pos = float2(0.7f, 0.4f);
-// 水滴がどのくらいの大きさか
-static const float water_drop_radius = 0.03f;
+struct WaterDropData
+{
+	float radius;
+	float2 waterDropPos;
+	float padding;
+};
+
+// 用意する水滴の数
+static const int max_water_drop_count = 15;
+
+cbuffer WaterDropBuffer : register(b9)
+{
+	WaterDropData waterDrops[max_water_drop_count];
+}
+
 // 水滴の中の景色をどのぐらい縮めるか
 static const float shrink_ratio = 2.0f;
 // 仮で画面の横幅と縦幅
@@ -26,8 +37,8 @@ static const float water_drop_stretch = 0.7f;
 static const float water_drop_rim_width = 0.1f;
 // 縁をどれだけ暗くするか
 static const float water_drop_rim_darkness = 0.4;
-// 水滴の光の半径
-static const float water_drop_light_radius = water_drop_radius * 0.5f;
+// 水滴の半径から見て光の半径をどのぐらいにするかの割合
+static const float water_drop_light_radius_ratio = 0.5f;
 // 水滴上の光の位置をどれだけずらすか(半径を超えたらだめなので半径を1とする)
 static const float water_drop_highlight_offset = 0.4f;
 
@@ -98,57 +109,64 @@ float4 main(PS_INPUT input) : SV_TARGET
 	// 元のuv
 	float2 uv = input.uv;
 
-	// 水滴の位置から今回のピクセルまでのベクトル
-	float2 waterDropToUV = uv - water_drop_pos;
-
-	// 画面の横幅と高さのピクセル数は横の方が長いので
-	// yのずらす量をアスペクト比で割ることでxと同じ量ずらすことができる
-	float2 correctedWaterDropToUV = float2(
-		uv.x - water_drop_pos.x,
-		(uv.y - water_drop_pos.y) / screen_aspect_ratio);
-	float correctedWaterDropToUVLength = length(correctedWaterDropToUV);
-
-	// 水滴からピクセルまでの距離が半径を超えていたら普通の背景
-	// 超えていなければ水滴内としたいので水滴の中心を1、水滴の半径を超えるにつれて0になるようにする
-	float waterDropToFrameRatio = saturate(1.0f - correctedWaterDropToUVLength / water_drop_radius);
-
-	// 水滴から見た上下左右が反転している景色を作る
-	// 水滴の中心からピクセルまでのベクトルを反転させて水滴の中心に足す
-	// 反転させるだけでは水滴っぽくないので映った景色を縮める
-	float2 distortionUV = water_drop_pos - waterDropToUV * shrink_ratio;
-
-	// 水滴の縁に行くほど暗くする
-	// 縁に行くほど0、中心に行くほど1にする必要がある
-	// 範囲が0~1だと縁が暗すぎるので0.5~1.0に変換
-	float waterDropDarknessRatio = saturate(1.0f - correctedWaterDropToUVLength / water_drop_rim_width * water_drop_rim_darkness);
-	// 縁を超えたら水滴部分以外の色を見せる
-	// つまり0の部分は普通の景色を見せたいので
-	// 水滴の中心から縁までの割合が0以下であれば暗くするための値を1にする
-	if (waterDropToFrameRatio <= 0.0f)
+	for (int i = 0; i < max_water_drop_count; i++)
 	{
-		waterDropDarknessRatio = 1.0f;
+		WaterDropData drop = waterDrops[i];
+		// 水滴の位置から今回のピクセルまでのベクトル
+		float2 waterDropToUV = uv - drop.waterDropPos;
+
+		// 画面の横幅と高さのピクセル数は横の方が長いので
+		// yのずらす量をアスペクト比で割ることでxと同じ量ずらすことができる
+		float2 correctedWaterDropToUV = float2(
+			uv.x - drop.waterDropPos.x,
+			(uv.y - drop.waterDropPos.y) / screen_aspect_ratio);
+		float correctedWaterDropToUVLength = length(correctedWaterDropToUV);
+
+		// 水滴からピクセルまでの距離が半径を超えていたら普通の背景
+		// 超えていなければ水滴内としたいので水滴の中心を1、水滴の半径を超えるにつれて0になるようにする
+		float waterDropToFrameRatio = saturate(1.0f - correctedWaterDropToUVLength / drop.radius);
+
+		// 水滴から見た上下左右が反転している景色を作る
+		// 水滴の中心からピクセルまでのベクトルを反転させて水滴の中心に足す
+		// 反転させるだけでは水滴っぽくないので映った景色を縮める
+		float2 distortionUV = drop.waterDropPos - waterDropToUV * shrink_ratio;
+
+		// 水滴の縁に行くほど暗くする
+		// 縁に行くほど0、中心に行くほど1にする必要がある
+		// 範囲が0~1だと縁が暗すぎるので0.5~1.0に変換
+		float waterDropDarknessRatio = saturate(1.0f - correctedWaterDropToUVLength / water_drop_rim_width * water_drop_rim_darkness);
+		// 縁を超えたら水滴部分以外の色を見せる
+		// つまり0の部分は普通の景色を見せたいので
+		// 水滴の中心から縁までの割合が0以下であれば暗くするための値を1にする
+		if (waterDropToFrameRatio <= 0.0f)
+		{
+			waterDropDarknessRatio = 1.0f;
+		}
+
+		// 水滴から見てちょっと右上の当たりに光を当てる
+		float2 waterLightPos = float2(
+			drop.radius * water_drop_highlight_offset,
+			-drop.radius * water_drop_highlight_offset);
+
+		// 光から今回のピクセルまでの距離を計算
+		float lightToFrameLength = length(waterLightPos - correctedWaterDropToUV);
+
+		//光の半径
+		float water_drop_light_radius = drop.radius * water_drop_light_radius_ratio;
+
+		// 光の中心が1、光の縁が0になるような数値を作る
+		float lightRatio = saturate(1.0f - lightToFrameLength / water_drop_light_radius);
+
+		// 水滴部分以外の色
+		float4 colOutWaterDrop = tex.Sample(smp, uv);
+		// 水滴部分の色
+		float4 colInWaterDrop = tex.Sample(smp, distortionUV);
+		// 二つの間の縁周りだけ混ぜる
+		float4 waterDropCol = lerp(colOutWaterDrop, colInWaterDrop, waterDropToFrameRatio);
+		// 縁だけ暗くする
+		waterDropCol.rgb *= waterDropDarknessRatio;
 	}
 
-	// 水滴から見てちょっと右上の当たりに光を当てる
-	float2 waterLightPos = float2(
-		water_drop_radius * water_drop_highlight_offset,
-		-water_drop_radius * water_drop_highlight_offset);
-
-	// 光から今回のピクセルまでの距離を計算
-	float lightToFrameLength = length(waterLightPos - correctedWaterDropToUV);
-
-	//光の中心が1、光の縁が0になるような数値を作る
-	float lightRatio = saturate(1.0f - lightToFrameLength / water_drop_light_radius);
-
-	// 水滴部分以外の色
-	float4 colOutWaterDrop = tex.Sample(smp, uv);
-	// 水滴部分の色
-	float4 colInWaterDrop = tex.Sample(smp, distortionUV);
-	// 二つの間の縁周りだけ混ぜる
-	float4 waterDropCol = lerp(colOutWaterDrop, colInWaterDrop, waterDropToFrameRatio);
-	// 縁だけ暗くする
-	waterDropCol.rgb *= waterDropDarknessRatio;
-	
-	//最終的に光から水滴の縁に行くにつれて水滴の色に滑らかに変わっていくようにする
-	return lerp(waterDropCol,float4(1.0f,1.0f,1.0f,1.0f),lightRatio);
+	// 最終的に光から水滴の縁に行くにつれて水滴の色に滑らかに変わっていくようにする
+	return lerp(waterDropCol, float4(1.0f, 1.0f, 1.0f, 1.0f), lightRatio);
 }

@@ -2410,3 +2410,21 @@
 - HLSL Toolsをアンインストールし、**Shader validator(`antaalt.shader-validator` 1.6.0)**を入れた。補完・ホバー・定義へジャンプはこちらが担当。[.vscode/settings.json](.vscode/settings.json)で`shader-validator.validate: false`(DXC/SM6で判定するのでfxc向けのコードに間違ったエラーが出うる。エラーは今まで通りhlsl-check)、`symbols: true`。
 - `[hlsl]`の`quickSuggestions`オフなどは前からの設定のまま(補完は`Ctrl+Space`で出す)。
 - **学校PCはまだ**: 同じようにHLSL Toolsを外してShader validatorを入れる(設定はリポジトリの`.vscode/settings.json`で付いてくる)。
+
+### 2026-11-12 水滴の形は丸のまま(ユーザー決定)
+- 昨夜(11/11)試した「縮小(`shrink_ratio`=2.0)」「縦長(0.7)」は入れず、**書き直した今の版のまま(丸・上下左右反転のみ)で行く**(ユーザー「丸で行きます。そのまま」)。ノートの11/11の縮小・縦長の記録は、この版には入っていない。
+- **次**: 水滴の数を増やす。個数がまだ決まっていない(数十個まで→C++から配列で渡して全部調べる、何百個→マス目＋ハッシュ)。
+
+### 2026-11-12 水滴を数十個に(設計、ユーザー実装中)
+- **方針(ユーザー)**: 個数は数十個、プレイの邪魔にならない程度(画面の中央は薄く端に寄せる)。C++から**定数バッファ(`b9`、`ShaderRegister::cbuffer_water_drop`)で`WaterDropData`の配列**を渡し、ピクセルシェーダーで全部をループして評価する。
+- **HLSL**([WaterDropEffectPS.hlsl:12-22](WaterDropEffectPS.hlsl#L12-L22)): `struct WaterDropData { float radius; float2 waterDropPos; float padding; }` と `cbuffer WaterDropBuffer : register(b9) { WaterDropData data[15]; }`(16バイト、配列の要素は16バイト境界)。個数15は定数にして、C++の`max_water_drop_count`と合わせる。変数名`data`は一般的すぎるので`waterDrops`など。
+- **C++**([WaterDropEffect.h](ShaderEffect/WaterDropEffect.h))に構造体を同じ並びで定義(ユーザー)。`WaterDropEffect.cpp`で定数バッファの作成・ポインタ取得・解放(コンストラクタ/デストラクタ、`BoostingEffect`と同じ形)をClaudeが書いた(ユーザー依頼)。`Vector2`は`float x,y`だけの8バイト。
+- **cbufferのパッキング**(ClaudeのHLSL説明の訂正): 変数は16バイトの「行」に前から詰める。**16バイト境界をまたぐ場合だけ**次の行へ。`float2`が8バイトに揃う規則はない(最初「隙間が自動で入る」と説明したが誤り)。配列の要素は16バイト境界から始まる(ストライド16)。
+- **残り**: ①C++で配列に値を書く(最初は確認用に2〜3個を決め打ち) ②`Draw`で`UpdateShaderConstantBuffer`と`SetShaderConstantBuffer(…, cbuffer_water_drop)` ③HLSLの`main`を配列のループに ④重なり: 配置で被らないようにする(ユーザー案)。シェーダーは「あとから評価した水滴が上書き」の単純な形で。
+- **案(後で)**: 水滴どうしがつながって見えるようにする(メタボール)。各水滴の`waterToFrameRatio`を足し合わせ、合計が一定以上を内側とみなす。近い水滴の境目がくびれてつながる。
+
+### 2026-11-12 水滴を数十個に: C++側ができ、HLSLのループは途中(ユーザー実装、続きは次回)
+- **C++**([WaterDropEffect.cpp](ShaderEffect/WaterDropEffect.cpp)): コンストラクタで`waterData[0〜2]`に確認用の3個(位置はUV、半径0.03/0.05/0.07)を決め打ちし、残りは`radius=0`・位置0に初期化(`GetBufferShaderConstantBuffer`が返すメモリは0とは限らない)。`Draw`で`UpdateShaderConstantBuffer`→`SetShaderConstantBuffer(…, cbuffer_water_drop)`→描画→`-1`で外す(`BoostingEffect`と同じ形)。個数は`max_water_drop_count`(15)。
+- **HLSL**([WaterDropEffectPS.hlsl](WaterDropEffectPS.hlsl)): `struct WaterDropData { float radius; float2 waterDropPos; float padding; }`、`cbuffer WaterDropBuffer : register(b9) { WaterDropData waterDrops[max_water_drop_count]; }`。`main`は**途中**: `for`ループが`waterDropToUV`を出すだけで、ループの外の計算(定数`water_drop_pos`/`water_drop_radius`を使ったまま)とつながっていない。**ビルドが通らない状態**(`waterDrops[i].pos`は構造体のメンバ名が`waterDropPos`なので存在しない。C++側は`pos`、HLSL側は`waterDropPos`と名前が違う。どちらかに揃える)。
+- **次(ユーザー)**: ①メンバ名を揃える ②`WaterDropData drop = waterDrops[i];`のようにローカルに取って(補完が`.`で出ないため。`Ctrl+Space`で出る)、ループの中に今の計算(定数をdropの値に置き換えて)を移す ③色は、ループに入る前に元の色を持ち、水滴ごとに更新(重なったら後が上書き) ④半径が0の水滴は飛ばす(0割り防止) ⑤`static const`は実行時の半径で計算できないので、半径に比例するもの(`water_drop_light_radius`=半径×0.5、光の位置のずらし)は、割合だけ定数にして、ループの中で`drop.radius`に掛ける(`water_drop_highlight_offset`は元から「半径の何割」なのでそのまま)。
+- 環境メモ: Shader validatorの補完は`waterDrops[i].`の添え字のあとだと一覧が出ない。ローカル変数に取ってから`.`+`Ctrl+Space`なら出る。
