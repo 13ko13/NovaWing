@@ -17,6 +17,8 @@
         "editor.wordBasedSuggestions": "off",
         "editor.inlineSuggest.enabled": false
     },
+    "shader-validator.validate": false,
+    "shader-validator.symbols": true,
 
     "editor.insertSpaces": false,
     "editor.tabSize": 4,
