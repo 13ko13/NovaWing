@@ -2442,3 +2442,16 @@
 - つまずいた所: 半径の式(`min + rand / max`→`min + max*rand`→`+min`忘れ)、向きを`1.0f - 中央`で作ろうとした(全部同じ向きになる、ピクセルとUVの混在)。
 - 残り: [WaterDropEffect.cpp:19](ShaderEffect/WaterDropEffect.cpp#L19)の`max_water_drop_count = 10`は.hの15と二重(クラス内は15が使われる)、消す。
 - **次**: 端で水滴がパッと消える/パッと出る対策(判定に半径を入れる、出現時にじわっと出す) → 中央を避けた出現(角度+下限つき距離) → 横長画面の補正。
+- 追記: 流れを見たら「2Dの水滴ではなく3Dの水泡に見える」。原因候補は①中央から放射状・一定速度の動き(カメラが空間の物を通り過ぎる見え方)②5倍縮小+反転+強いハイライトの球っぽさ。切り分け(速度0で見る)と「レンズに付くかキャノピーに付くか」の決定は未。
+- 光が真っ白すぎたので[WaterDropEffectPS.hlsl:103](WaterDropEffectPS.hlsl#L103)で`lightRatio`に光の強さを掛けて上限を下げた → 「めちゃいい感じ」。ユーザーの依頼でClaudeが定数`water_drop_light_strength`(0.3、[45行目](WaterDropEffectPS.hlsl#L45))に出した。
+- **(ユーザー判断)3D感はなくなったので、水滴はこれで完了。** 残りの小さい直し(.cppの`max_water_drop_count`の二重、端でパッと消える等)も触らなくてよい。
+
+### 2026-11-13 2面の曇り空スカイボックスを作った(画像だけ。コードはユーザーが書く)
+- ユーザー決定: 暗さは「中間の青灰色」。雨の再生コードとスカイボックスの切り替えコードは**ユーザーが書く**(Claudeは手順と名前の候補)。
+- 画像: `Data/Image/SkyBoxCloudy/`に6枚(1024×1024、ファイル名は昼と同じ`skybox_front.png`など)。生成は[make_cloudy_sky.ps1](Data/Image/SkyBoxCloudy/tools/make_cloudy_sky.ps1)(C#埋め込み、**UTF-8 BOM付きで保存**、1秒程度)。雲は方向から計算する(高い平面へ投影したノイズ)ので面のつなぎ目で切れない。面の向きは[SkyBox.cpp](Game/BackGround/SkyBox.cpp#L60-L107)の頂点の並びから逆算。
+- 色: 地平線のかすみ(168,174,183)、真上(120,128,140)、雲の厚い所(100,107,120)〜薄い所(168,174,183)、地平線より下(112,118,127)。**フォグを入れるならフォグの色を地平線の色(168,174,183)に合わせると、遠くのビルが空に溶ける。**
+- 確認(ゲームのカメラ相当、縦90°・1280×720、6枚をSkyBox.cppと同じ貼り方で読む): [正面](Data/Image/SkyBoxCloudy/tools/review/gamecam_front.png)、[面のつなぎ目をまたぐ向き](Data/Image/SkyBoxCloudy/tools/review/gamecam_seam_yaw45_pitch35.png)。貼り方の逆算は、ゲームで正しく出ている昼の空を同じ読み方で見て、つなぎ目が切れていないことで検算([昼](Data/Image/SkyBoxCloudy/tools/review/check_day_seam_yaw45_pitch35.png))。1回目は雲が大理石のようにうねりすぎたので、ゆがみを弱めて大きくぼんやりした固まりにした。
+- コード側の手順(ユーザーが書く): ①ResourceConstantsに曇りの6枚のパス ②ResourceLoaderにGraphicIDと表、`game.graphics`に追加 ③StageConfigに「雨のステージか」 ④GameSceneでSkyBoxを作るときに切り替え。雨: ①EffectIDとパス・倍率1.0、`game.effects`に追加 ②雨のステージだけ開始時に`Play`してハンドルを持つ ③毎フレーム[GameScene.cpp:676](Scene/GameScene.cpp#L676)の`m_pEffectManager->Update()`の前で`SetPos(ハンドル, カメラの位置)`(カメラはGameObjectなので`UpdateAll`の後なら最新)。
+- 未確認(ゲーム内): ビル・雨と重ねたときの明るさ、敵や弾が空に埋もれないか。
+- **(ユーザー依頼でClaudeが実装)パスとIDの追加**: 曇りの6枚のパス`skybox_cloudy_*_path`([ResourceConstants.h:96-101](Constants/ResourceConstants.h#L96-L101))、`rain_effect_path`([199行目](Constants/ResourceConstants.h#L199))・`rain_effect_scale`(1.0、[266行目](Constants/ResourceConstants.h#L266))。GraphicID`SkyBoxCloudyFront`〜`SkyBoxCloudyBottom`([ResourceLoader.h:105-110](Manager/ResourceLoader.h#L105-L110))、EffectID`Rain`([181行目](Manager/ResourceLoader.h#L181)))。表は[ResourceLoader.cpp:58-63](Manager/ResourceLoader.cpp#L58-L63)と[244行目](Manager/ResourceLoader.cpp#L244)、`game.graphics`([531-532行目](Manager/ResourceLoader.cpp#L531-L532))と`game.effects`([559行目](Manager/ResourceLoader.cpp#L559))に追加。Debug x64のビルドOK。`KeepEffect()`(古い一括読み込み)はどこからも呼ばれていないので足していない。
+- **残り(ユーザーが書く)**: StageConfigに「雨のステージか」→GameSceneでSkyBoxに曇りのIDを渡す、雨の`Play`とハンドル保持、毎フレーム`SetPos(カメラの位置)`。

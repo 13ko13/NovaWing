@@ -225,14 +225,29 @@ void GameScene::Init()
 	}
 
 	//スカイボックスの初期化
-	m_pSkyBox = std::make_shared<SkyBox>(
-		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxFront),
-		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxBack),
-		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxLeft),
-		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxRight),
-		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxUp),
-		resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxBottom)
-	);
+	//雨が降るステージであれば曇りのスカイボックスにする
+	if (m_pStageConfig->IsRainStage())
+	{
+		m_pSkyBox = std::make_shared<SkyBox>(
+			resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxCloudyFront),
+			resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxCloudyBack),
+			resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxCloudyLeft),
+			resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxCloudyRight),
+			resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxCloudyUp),
+			resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxCloudyBottom)
+		);
+	}
+	else
+	{
+		m_pSkyBox = std::make_shared<SkyBox>(
+			resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxFront),
+			resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxBack),
+			resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxLeft),
+			resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxRight),
+			resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxUp),
+			resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxBottom)
+		);
+	}
 
 	//ブーストエフェクトの初期化
 	m_pBoostingEffect = std::make_unique<BoostingEffect>();
@@ -357,7 +372,7 @@ void GameScene::CreateStageObjects(float offsetZ)
 		m_pStageConfig->GetBuildingLoopStartZ(),
 		m_pStageConfig->GetOneLapDistance()
 	);
-	
+
 	//それぞれのビルの初期化
 	for (std::shared_ptr<Building> pBuilding : m_pBuildings)
 	{

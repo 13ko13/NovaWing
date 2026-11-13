@@ -54,6 +54,14 @@ namespace
 		{ ResourceLoader::GraphicID::SkyBoxUp, skybox_up_path },//上
 		{ ResourceLoader::GraphicID::SkyBoxBottom, skybox_bottom_path },//下
 
+		//曇り空のスカイボックス(雨のステージ用)
+		{ ResourceLoader::GraphicID::SkyBoxCloudyFront, skybox_cloudy_front_path },//前
+		{ ResourceLoader::GraphicID::SkyBoxCloudyBack, skybox_cloudy_back_path },//後
+		{ ResourceLoader::GraphicID::SkyBoxCloudyRight, skybox_cloudy_right_path },//右
+		{ ResourceLoader::GraphicID::SkyBoxCloudyLeft, skybox_cloudy_left_path },//左
+		{ ResourceLoader::GraphicID::SkyBoxCloudyUp, skybox_cloudy_up_path },//上
+		{ ResourceLoader::GraphicID::SkyBoxCloudyBottom, skybox_cloudy_bottom_path },//下
+
 		//岩
 		{ ResourceLoader::GraphicID::RockNorm, rock_normal_map_path },//法線マップ
 
@@ -231,6 +239,9 @@ namespace
 		{ ResourceLoader::EffectID::RightWingSplash,{ right_wing_splash_effect_path, right_wing_splash_effect_scale } },//右羽の水しぶき
 		{ ResourceLoader::EffectID::LeftBarrelRoll,{ left_barrel_roll_effect_path, left_barrel_roll_effect_scale } },//左バレルロール
 		{ ResourceLoader::EffectID::RightBarrelRoll,{ right_barrel_roll_effect_path, right_barrel_roll_effect_scale } },//右バレルロール
+
+		//ステージ
+		{ ResourceLoader::EffectID::Rain,{ rain_effect_path, rain_effect_scale } },//雨
 
 		//敵
 		{ ResourceLoader::EffectID::EnemyBullet,{ enemy_bullet_effect_path, enemy_bullet_effect_scale } },//敵の弾
@@ -517,6 +528,8 @@ void ResourceLoader::InitSceneResources()
 	game.graphics = {
 		GraphicID::SkyBoxFront, GraphicID::SkyBoxBack, GraphicID::SkyBoxLeft,
 		GraphicID::SkyBoxRight, GraphicID::SkyBoxUp, GraphicID::SkyBoxBottom,
+		GraphicID::SkyBoxCloudyFront, GraphicID::SkyBoxCloudyBack, GraphicID::SkyBoxCloudyLeft,
+		GraphicID::SkyBoxCloudyRight, GraphicID::SkyBoxCloudyUp, GraphicID::SkyBoxCloudyBottom,
 		GraphicID::Caustics, GraphicID::RockNorm, GraphicID::DissolveNoise,
 		GraphicID::PlayerNormalMap, GraphicID::PlayerMetalicMap, GraphicID::PlayerEmissionMap,
 		GraphicID::FloatingNormalMap, GraphicID::FloatingEmissionMap,
@@ -542,7 +555,8 @@ void ResourceLoader::InitSceneResources()
 		EffectID::LeftBarrelRoll, EffectID::RightBarrelRoll,
 		EffectID::FloatingDeath, EffectID::WormDeath,
 		EffectID::SummonFloating, EffectID::SummonWorm,
-		EffectID::BossBeam, EffectID::BossShield, EffectID::BossDeath, EffectID::Splash
+		EffectID::BossBeam, EffectID::BossShield, EffectID::BossDeath, EffectID::Splash,
+		EffectID::Rain
 	};
 	game.sounds = {
 		SoundID::GameBGM, SoundID::BossQuake, SoundID::BossBGM, SoundID::Decision,

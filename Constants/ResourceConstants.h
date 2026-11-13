@@ -92,6 +92,13 @@ namespace
 	constexpr const wchar_t* skybox_left_path = L"Data/Image/SkyBox/skybox_left.png";
 	constexpr const wchar_t* skybox_up_path = L"Data/Image/SkyBox/skybox_up.png";
 	constexpr const wchar_t* skybox_bottom_path = L"Data/Image/SkyBox/skybox_bottom.png";
+	//曇り空のスカイボックス(雨のステージ用)
+	constexpr const wchar_t* skybox_cloudy_front_path = L"Data/Image/SkyBoxCloudy/skybox_front.png";
+	constexpr const wchar_t* skybox_cloudy_back_path = L"Data/Image/SkyBoxCloudy/skybox_back.png";
+	constexpr const wchar_t* skybox_cloudy_right_path = L"Data/Image/SkyBoxCloudy/skybox_right.png";
+	constexpr const wchar_t* skybox_cloudy_left_path = L"Data/Image/SkyBoxCloudy/skybox_left.png";
+	constexpr const wchar_t* skybox_cloudy_up_path = L"Data/Image/SkyBoxCloudy/skybox_up.png";
+	constexpr const wchar_t* skybox_cloudy_bottom_path = L"Data/Image/SkyBoxCloudy/skybox_bottom.png";
 	//岩
 	constexpr const wchar_t* rock_normal_map_path = L"Data/Model/Rock.fbm/rocks_nm_new.png";
 	//タイトル
@@ -188,6 +195,8 @@ namespace
 	//バレルロールのエフェクト
 	constexpr const wchar_t* left_barrel_roll_effect_path = L"Data/Effect/BarrelRoll/BarrelRoll_v2_R.efk";//左ロール用
 	constexpr const wchar_t* right_barrel_roll_effect_path = L"Data/Effect/BarrelRoll/BarrelRoll_v2_L.efk";//右ロール用
+	//雨のエフェクト(カメラ追従)
+	constexpr const wchar_t* rain_effect_path = L"Data/Effect/Rain/Rain.efk";
 
 	//---------- CSV上でのモデル識別文字列 ----------
 	constexpr const wchar_t* rock1_csv_name = L"Rock1";
@@ -253,6 +262,8 @@ namespace
 	constexpr float right_wing_splash_effect_scale = 1.0f;
 	constexpr float left_barrel_roll_effect_scale = 1.0f;
 	constexpr float right_barrel_roll_effect_scale = 1.0f;
+	//雨はエフェクト側でゲームの大きさに合わせてあるので1.0のまま
+	constexpr float rain_effect_scale = 1.0f;
 
 	//----------フォント系-----------------
 	//ファイル場所

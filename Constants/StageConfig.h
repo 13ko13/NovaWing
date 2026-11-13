@@ -24,6 +24,8 @@ public:
 	float GetBuildingLoopStartZ() const { return m_buildingLoopStartZ; }
 	//ボス登場時からのステージ1周の長さ
 	float GetOneLapDistance() const { return m_oneLapDistance; }
+	//雨のステージなのか
+	bool IsRainStage() const { return m_isRainStage; }
 
 private:
 	//ステージに使用するデータが入ったcsvのフォルダ名
@@ -40,4 +42,6 @@ private:
 	float m_buildingLoopStartZ = 0.0f;
 	//ボス登場時からのステージ1周の長さ
 	float m_oneLapDistance = 0.0f;
+	//雨のステージか
+	bool m_isRainStage = false;
 };

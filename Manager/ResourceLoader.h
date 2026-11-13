@@ -102,6 +102,13 @@ public:
 		SkyBoxUp,//スカイボックス(上)
 		SkyBoxBottom,//スカイボックス(下)
 
+		SkyBoxCloudyFront,//曇り空のスカイボックス(前)
+		SkyBoxCloudyBack,//曇り空のスカイボックス(後)
+		SkyBoxCloudyLeft,//曇り空のスカイボックス(左)
+		SkyBoxCloudyRight,//曇り空のスカイボックス(右)
+		SkyBoxCloudyUp,//曇り空のスカイボックス(上)
+		SkyBoxCloudyBottom,//曇り空のスカイボックス(下)
+
 		RockNorm,//岩の法線マップ
 
 		TitleLogo,//タイトルロゴ
@@ -171,6 +178,7 @@ public:
 		RightWingSplash,//右羽の水しぶきエフェクト
 		LeftBarrelRoll,//左バレルロールのエフェクト
 		RightBarrelRoll,//右バレルロールのエフェクト
+		Rain,//雨のエフェクト(カメラ追従)
 	};
 
 	//音の種類

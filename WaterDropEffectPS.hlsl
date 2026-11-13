@@ -38,9 +38,11 @@ static const float water_drop_rim_width = 0.005f;
 // 縁をどれだけ暗くするか
 static const float water_drop_rim_darkness = 0.1;
 // 水滴の半径から見て光の半径をどのぐらいにするかの割合
-static const float water_drop_light_radius_ratio = 0.7f;
+static const float water_drop_light_radius_ratio = 0.8f;
 // 水滴上の光の位置をどれだけずらすか(半径を超えたらだめなので半径を1とする)
 static const float water_drop_highlight_offset = 0.05f;
+// 光の強さ(1で光の中心が真っ白、0で光なし)
+static const float water_drop_light_strength = 0.3f;
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
@@ -98,7 +100,7 @@ float4 main(PS_INPUT input) : SV_TARGET
 		float waterDropLightRadius = drop.radius * water_drop_light_radius_ratio;
 
 		// 光の中心が1、光の縁が0になるような数値を作る
-		float lightRatio = saturate(1.0f - lightToFrameLength / waterDropLightRadius) * 0.3f;
+		float lightRatio = saturate(1.0f - lightToFrameLength / waterDropLightRadius) * water_drop_light_strength;
 
 		// 水滴部分の色
 		float4 colInWaterDrop = tex.Sample(smp, distortionUV);
