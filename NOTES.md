@@ -2428,3 +2428,17 @@
 - **HLSL**([WaterDropEffectPS.hlsl](WaterDropEffectPS.hlsl)): `struct WaterDropData { float radius; float2 waterDropPos; float padding; }`、`cbuffer WaterDropBuffer : register(b9) { WaterDropData waterDrops[max_water_drop_count]; }`。`main`は**途中**: `for`ループが`waterDropToUV`を出すだけで、ループの外の計算(定数`water_drop_pos`/`water_drop_radius`を使ったまま)とつながっていない。**ビルドが通らない状態**(`waterDrops[i].pos`は構造体のメンバ名が`waterDropPos`なので存在しない。C++側は`pos`、HLSL側は`waterDropPos`と名前が違う。どちらかに揃える)。
 - **次(ユーザー)**: ①メンバ名を揃える ②`WaterDropData drop = waterDrops[i];`のようにローカルに取って(補完が`.`で出ないため。`Ctrl+Space`で出る)、ループの中に今の計算(定数をdropの値に置き換えて)を移す ③色は、ループに入る前に元の色を持ち、水滴ごとに更新(重なったら後が上書き) ④半径が0の水滴は飛ばす(0割り防止) ⑤`static const`は実行時の半径で計算できないので、半径に比例するもの(`water_drop_light_radius`=半径×0.5、光の位置のずらし)は、割合だけ定数にして、ループの中で`drop.radius`に掛ける(`water_drop_highlight_offset`は元から「半径の何割」なのでそのまま)。
 - 環境メモ: Shader validatorの補完は`waterDrops[i].`の添え字のあとだと一覧が出ない。ローカル変数に取ってから`.`+`Ctrl+Space`なら出る。
+
+### 2026-11-13 水滴のループが完成(ユーザー実装、ゲームでの確認はこれから)
+- [WaterDropEffectPS.hlsl:112](WaterDropEffectPS.hlsl#L112)でループの前に`col = tex.Sample(smp, uv)`(元の景色)、ループの中は`col = lerp(col, 水滴の中の色, 割合)` → `col.rgb *= 暗さ` → `col = lerp(col, 白, lightRatio)`で水滴ごとに重ねる(前の水滴の結果を残す)。最後に`return col`。
+- [118-119行目](WaterDropEffectPS.hlsl#L118-L119)で半径0は`continue`(使っていない12個、0割り防止)。暗さ([140行目](WaterDropEffectPS.hlsl#L140)付近)は`/ drop.radius`に。`colOutWaterDrop`はループの中で15回むだにSampleするので削除。
+- つまずいた所: ループの中で宣言した変数はループの外から見えない／毎回`colOutWaterDrop`から作ると最後の水滴しか残らない／`return`は`main`ごと終わる(飛ばすのは`continue`)。
+- `shrink_ratio`(2.0)はユーザーが入れ直した(11/12の「丸・反転のみ」から、縮小ありに)。
+- **次**: ゲームで3個(半径0.03/0.05/0.07)が出るか確認 → 配置(画面の中央は薄く端に寄せる、被らない) → 外側へなびく動き。
+
+### 2026-11-13 水滴15個のランダム出現と外側への流れ(ユーザー実装、ゲームで確認OK)
+- [WaterDropEffect.cpp:111](ShaderEffect/WaterDropEffect.cpp#L111)の`RespawnWaterDrop(i)`: 半径=`(max_radius - min_radius) * GetRandRatio() + min_radius`(「幅×ランダム+下の端」)、位置=UVで0〜1のランダム。`GetRandRatio()`は`GetRand(rand_resolution)`(int 1000)をfloatにして割る。
+- [WaterDropEffect.cpp:56-80](ShaderEffect/WaterDropEffect.cpp#L56-L80)の`Update()`: 中央(`screen_center_uv`)→水滴のベクトル(B−A)を`Normalized()`して`screen_out_speed`(0.001)を掛けて足す。x/yのどれかが0〜1の外に出たら`RespawnWaterDrop(i)`。[GameScene.cpp:502](Scene/GameScene.cpp#L502)で毎フレーム呼ぶ。
+- つまずいた所: 半径の式(`min + rand / max`→`min + max*rand`→`+min`忘れ)、向きを`1.0f - 中央`で作ろうとした(全部同じ向きになる、ピクセルとUVの混在)。
+- 残り: [WaterDropEffect.cpp:19](ShaderEffect/WaterDropEffect.cpp#L19)の`max_water_drop_count = 10`は.hの15と二重(クラス内は15が使われる)、消す。
+- **次**: 端で水滴がパッと消える/パッと出る対策(判定に半径を入れる、出現時にじわっと出す) → 中央を避けた出現(角度+下限つき距離) → 横長画面の補正。

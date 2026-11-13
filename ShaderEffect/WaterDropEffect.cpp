@@ -5,6 +5,25 @@
 #include "Utility/GraphShaderDraw.h"
 #include "Constants/ShaderRegister.h"
 
+namespace
+{
+	//ランダムな小数を返すときの値ごとの細かさ
+	constexpr int rand_resolution = 1000;
+
+	//水滴の最低半径
+	constexpr float min_radius = 0.005f;
+	//水滴の最大半径
+	constexpr float max_radius = 0.015f;
+
+	//画面に現れる最大水滴数
+	constexpr int max_water_drop_count = 10;
+
+	//画面中央のuv
+	const Vector2 screen_center_uv = Vector2(0.5f, 0.5f);
+	//水滴が画面外へ出ていくときの速度
+	constexpr float screen_out_speed = 0.001f;
+}
+
 WaterDropEffect::WaterDropEffect()
 {
 	//水滴用のシェーダーをロード
@@ -22,16 +41,10 @@ WaterDropEffect::WaterDropEffect()
 	//定数バッファの内容を取得
 	m_pCBuffWaterDrop = static_cast<WaterDropBuffer*>(GetBufferShaderConstantBuffer(m_cbuffWaterDropH));
 
-	m_pCBuffWaterDrop->waterData[0].radius = 0.03f;
-	m_pCBuffWaterDrop->waterData[0].pos = Vector2(0.8f, 0.2f);
-	m_pCBuffWaterDrop->waterData[1].radius = 0.05f;
-	m_pCBuffWaterDrop->waterData[1].pos = Vector2(0.2f, 0.8f);
-	m_pCBuffWaterDrop->waterData[2].radius =0.07f;
-	m_pCBuffWaterDrop->waterData[2].pos = Vector2(0.5f, 0.8f);
-	for(int i = 3; i < max_water_drop_count; i++)
+	//最大水滴個数分の水滴を生む
+	for (int i = 0; i < max_water_drop_count; i++)
 	{
-		m_pCBuffWaterDrop->waterData[i].radius = 0.0f;
-		m_pCBuffWaterDrop->waterData[i].pos = Vector2(0.0f, 0.0f);
+		RespawnWaterDrop(i);
 	}
 }
 
@@ -42,6 +55,29 @@ WaterDropEffect::~WaterDropEffect()
 
 void WaterDropEffect::Update()
 {
+	for (int i = 0; i < max_water_drop_count; i++)
+	{
+		//画面の中央から水滴へのベクトルを作る
+		Vector2 centerToWaterDrop = Vector2(
+			m_pCBuffWaterDrop->waterData[i].pos.x - screen_center_uv.x,
+			m_pCBuffWaterDrop->waterData[i].pos.y - screen_center_uv.y
+		);
+		//正規化
+		Vector2 centerToWaterDropDir = centerToWaterDrop.Normalized();
+		//水滴の位置を外側へずらしていく
+		m_pCBuffWaterDrop->waterData[i].pos += centerToWaterDropDir * screen_out_speed;
+
+		Vector2 pos = m_pCBuffWaterDrop->waterData[i].pos;
+
+		//外に出たらまた新しい水滴を出現させる
+		if (pos.x < 0.0f ||
+			pos.x > 1.0f ||
+			pos.y < 0.0f ||
+			pos.y > 1.0f)
+		{
+			RespawnWaterDrop(i);
+		}
+	}
 }
 
 void WaterDropEffect::Draw()
@@ -80,4 +116,23 @@ void WaterDropEffect::ChangeNormalRT()
 {
 	//もとに戻す
 	SetDrawScreen(DX_SCREEN_BACK);
+}
+
+float WaterDropEffect::GetRandRatio()
+{
+	//乱数の範囲を0.0f~1.0fとして返す
+	//GetRandに渡す値を大きくするほど、返す値が細かくなる
+	return static_cast<float>(GetRand(rand_resolution)) / rand_resolution;
+}
+
+void WaterDropEffect::RespawnWaterDrop(int index)
+{
+	//index番目の水滴を生み出す
+	//半径を最低半径~最大半径の間でランダムにする
+	//先に最低から最大までの幅を求めてそこにランダムな割合をかけて最低を足す
+	m_pCBuffWaterDrop->waterData[index].radius = (max_radius - min_radius) * GetRandRatio() + min_radius;
+	//位置も設定する
+	//シェーダーに位置を渡すときはuvが0~1なので
+	//0~1の間でランダムにする
+	m_pCBuffWaterDrop->waterData[index].pos = Vector2(GetRandRatio(),GetRandRatio());
 }

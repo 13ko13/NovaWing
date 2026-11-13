@@ -498,6 +498,9 @@ void GameScene::Update()
 	//サウンドマネージャーの更新
 	m_pSoundManager->Update();
 
+	//水滴エフェクトを更新
+	m_pWaterDropEffect->Update();
+
 	//プレイヤーが特定のz座標まで到達したら
 	//カメラを揺らしてボスを登場させる
 	if (m_pPlayer->GetPos().z > m_pStageConfig->GetBossAppearZ() + m_stageOffsetZ &&

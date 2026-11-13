@@ -18,6 +18,13 @@ public:
 	void ChangeNormalRT();
 
 private:
+	//0.0f~1.0fの乱数を返す
+	float GetRandRatio();
+	//水滴を生み出す
+	//index番目の水滴に位置と半径を入れます。
+	void RespawnWaterDrop(int index);
+
+private:
 	//水滴用のピクセルシェーダーハンドル
 	int m_waterDropEffectPSH = -1;
 	//水滴エフェクトをかける用のレンダーターゲットハンドル
