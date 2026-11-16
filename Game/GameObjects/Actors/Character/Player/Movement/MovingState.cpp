@@ -1,4 +1,5 @@
 ﻿#include <cmath>
+#include <algorithm>
 
 #include "MovingState.h"
 #include "Manager/InputManager.h"
@@ -7,10 +8,9 @@
 
 namespace
 {
-	constexpr float move_speed_z = 15.0f;//移動速度
+	constexpr float move_speed_z = 18.0f;//移動速度
 
-	constexpr float move_speed_x = 19.0f;//横方向の移動速度
-	constexpr float move_speed_y = 19.0f;//縦方向の移動速度
+	constexpr float move_speed_xy = 18.0f;//左右上下の最高移動速度
 	constexpr float tilt_move_speed_x = 25.0f;//機体が傾いているときの横移動速度
 
 	constexpr float stick_dead_zone = 0.1f;//スティックのデッドゾーン
@@ -26,6 +26,9 @@ namespace
 
 	//プレイヤーが傾いていると判断する閾値
 	constexpr float tilt_threshold = DX_PI_F / 4.0f;
+
+	//最高速度に行くまでのフレーム
+	constexpr float accel_frame = 20.0f;
 }
 
 MovingState::MovingState(const std::weak_ptr<Player> pPlayer) :
@@ -73,31 +76,41 @@ void MovingState::Update()
 	//weak_ptrからshared_ptrに変換
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
 
-	Vector3 vel;
+	Vector3 targetVel;
 
 	//上下入力
-	vel.y = -stick.y * move_speed_y;
+	targetVel.y = -stick.y * move_speed_xy;
 	//左右入力
 	//ローリングされてたら、そのローリングの符号に応じた方向への移動速度を増やす
-	if (pPlayer->GetRotationZ() > tilt_threshold&&
+	if (pPlayer->GetRotationZ() > tilt_threshold &&
 		stick.x > 0.0f)
 	{
-		vel.x = std::abs(stick.x) * tilt_move_speed_x;
+		targetVel.x = std::abs(stick.x) * tilt_move_speed_x;
 	}
-	else if (pPlayer->GetRotationZ() < -tilt_threshold&&
+	else if (pPlayer->GetRotationZ() < -tilt_threshold &&
 		stick.x < 0.0f)
 	{
-		vel.x = std::abs(stick.x) * -tilt_move_speed_x;
+		targetVel.x = std::abs(stick.x) * -tilt_move_speed_x;
 	}
 	else
 	{
-		vel.x = stick.x * move_speed_x;
+		targetVel.x = stick.x * move_speed_xy;
 	}
 
-	//進むときのスピードを設定する
-	vel.z = move_speed_z;
-	pPlayer->SetVel(vel);
+	//Zは普通に移動させる
+	targetVel.z = move_speed_z;
+	Vector3 vel;
+	vel.z = targetVel.z;
 
+	//今の速度をとって、xとyだけ目標速度へと1フレームの上限を付けて近づける
+	Vector3 currentVel = pPlayer->GetVel();
+	//1フレームに進むことができる上限値
+	float step = move_speed_xy / accel_frame;
+	vel.x = currentVel.x + std::clamp(targetVel.x - currentVel.x, -step, step);
+	vel.y = currentVel.y + std::clamp(targetVel.y - currentVel.y, -step, step);
+
+	pPlayer->SetVel(vel);
+		
 	//lengthがしきい値未満ならIdleMovementStateに戻る
 	if (length < idle_return_threshold)
 	{
@@ -106,4 +119,5 @@ void MovingState::Update()
 }
 
 void MovingState::Exit()
-{}
+{
+}

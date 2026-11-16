@@ -22,7 +22,7 @@ namespace
 	constexpr float zoom_dist_thresould = 100.0f;
 
 	// カメラのLerpに使うtの値
-	constexpr float lerp_t = 0.06f;
+	constexpr float lerp_t = 0.09f;
 
 	// カメラからターゲットまでの距離
 	constexpr float camera_to_target = 38000.0f;

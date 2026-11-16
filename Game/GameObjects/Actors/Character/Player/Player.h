@@ -186,6 +186,8 @@ private:
 	//羽のボーンのy座標以外を使用して海面に
 	//水しぶきエフェクトをループ再生させる
 	void UpdateWingSplash(int& splashHandle, const Vector3& wingPos, ResourceLoader::EffectID effectID);
+	//機体の後ろに光を出す
+	void UpdateLightEffect(ResourceLoader::EffectID effectID);
 
 	//ステートの更新
 	//テンプレート関数なのでヘッダに実装をかく
@@ -283,6 +285,9 @@ private:
 	//左右の羽の水しぶきエフェクト再生ハンドル
 	int m_leftWingEffectH = -1;
 	int m_rightWingEffectH = -1;
+
+	//機体の後ろの光のエフェクト再生ハンドル
+	int m_lightEffectHandle = -1;
 
 	//無敵時間
 	int m_invincibleFrame = 0;

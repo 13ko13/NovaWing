@@ -235,6 +235,7 @@ namespace
 		{ ResourceLoader::EffectID::ChargeExplosion,{ charge_explosion_effect_path, charge_explosion_effect_scale } },//チャージ弾の着弾爆発
 		{ ResourceLoader::EffectID::Charging,{ charging_effect_path, charging_effect_scale } },//チャージ中
 		{ ResourceLoader::EffectID::Boost,{ boost_effect_path, boost_effect_scale } },//ブースト
+		{ ResourceLoader::EffectID::StarFlare,{ star_flare_effect_path, star_flare_effect_scale } },//十字の光芒
 		{ ResourceLoader::EffectID::LeftWingSplash,{ left_wing_splash_effect_path, left_wing_splash_effect_scale } },//左羽の水しぶき
 		{ ResourceLoader::EffectID::RightWingSplash,{ right_wing_splash_effect_path, right_wing_splash_effect_scale } },//右羽の水しぶき
 		{ ResourceLoader::EffectID::LeftBarrelRoll,{ left_barrel_roll_effect_path, left_barrel_roll_effect_scale } },//左バレルロール
@@ -550,7 +551,7 @@ void ResourceLoader::InitSceneResources()
 	};
 	game.effects = {
 		EffectID::PlayerBullet, EffectID::PlayerChargeBullet, EffectID::ChargeExplosion, EffectID::Charging,
-		EffectID::EnemyBullet, EffectID::HitEffect, EffectID::Boost,
+		EffectID::EnemyBullet, EffectID::HitEffect, EffectID::Boost, EffectID::StarFlare,
 		EffectID::LeftWingSplash, EffectID::RightWingSplash,
 		EffectID::LeftBarrelRoll, EffectID::RightBarrelRoll,
 		EffectID::FloatingDeath, EffectID::WormDeath,

@@ -2455,3 +2455,23 @@
 - 未確認(ゲーム内): ビル・雨と重ねたときの明るさ、敵や弾が空に埋もれないか。
 - **(ユーザー依頼でClaudeが実装)パスとIDの追加**: 曇りの6枚のパス`skybox_cloudy_*_path`([ResourceConstants.h:96-101](Constants/ResourceConstants.h#L96-L101))、`rain_effect_path`([199行目](Constants/ResourceConstants.h#L199))・`rain_effect_scale`(1.0、[266行目](Constants/ResourceConstants.h#L266))。GraphicID`SkyBoxCloudyFront`〜`SkyBoxCloudyBottom`([ResourceLoader.h:105-110](Manager/ResourceLoader.h#L105-L110))、EffectID`Rain`([181行目](Manager/ResourceLoader.h#L181)))。表は[ResourceLoader.cpp:58-63](Manager/ResourceLoader.cpp#L58-L63)と[244行目](Manager/ResourceLoader.cpp#L244)、`game.graphics`([531-532行目](Manager/ResourceLoader.cpp#L531-L532))と`game.effects`([559行目](Manager/ResourceLoader.cpp#L559))に追加。Debug x64のビルドOK。`KeepEffect()`(古い一括読み込み)はどこからも呼ばれていないので足していない。
 - **残り(ユーザーが書く)**: StageConfigに「雨のステージか」→GameSceneでSkyBoxに曇りのIDを渡す、雨の`Play`とハンドル保持、毎フレーム`SetPos(カメラの位置)`。
+
+### 2026-11-16 機体後部の十字の光芒(スターフレア)エフェクトを作った(エフェクトのみ。コードはユーザーが書く)
+- 依頼: 噴射口に付く十字の光芒。芯(白)+縦横の光条(青白→水色、先端は透明)+ごく薄いグロー。加算。ビルボードにせず機体に固定、直交する板で全方向から見える。90F周期の明滅(±12%)と光条の伸縮(±8%)、乱数なし。ブースト版は光条1.5倍・明るさ約1.25倍。一気に作る。
+- ファイル: [StarFlare.efkefc](Data/Effect/StarFlare/StarFlare.efkefc) / `StarFlare.efk`、[StarFlareBoost.efkefc](Data/Effect/StarFlare/StarFlareBoost.efkefc) / `StarFlareBoost.efk`(どちらも拡大率50で書き出し)、`Texture/SF_Ray.png`・`SF_Core.png`・`SF_Glow.png`(自作、生成は[gen_starflare_textures.ps1](Data/Effect/StarFlare/tools/gen_starflare_textures.ps1))。確認画像は[compare_angles.png](Data/Effect/StarFlare/tools/review/compare_angles.png)(通常/ブースト×5方向)と[compare_bg_roll.png](Data/Effect/StarFlare/tools/review/compare_bg_roll.png)(暗い背景・ロール40°)。
+- 座標の前提: **原点=噴射口**。エディタの+Zが機体の後ろ(ブーストと同じ、回転は`(rotX, rotY+π, …)`想定)。仮の機体`tools/DummyJet.efkmodel`(`Ship`ノード、z=-1.25)は書き出し前に外してある。寸法はブースト制作時の推定の機体幅3.2(翼端±1.6=ゲームで±80)が基準: 横の光条5.6(1.75倍)、縦3.64(横の65%)、芯の直径約0.55(横の約1/10。仮の機体の胴が細く、1/8だと胴を覆ったため小さくした)。
+- 構成: `Flare`(None)の下に`Glow_XY/XZ/YZ`、`Rays`(None、伸縮のFCurve)の下に`RayH_XY`・`RayH_XZ`(横の光条)・`RayV_XY`・`RayV_YZ`(縦の光条)、`Core_XY/XZ/YZ`。すべて`Billboard=Fixed`、`MaxGeneration=1`・`Life=100000`。後ろ向きの板(XY)が主、ほかの面はalphaを約6割にして、斜めで重なっても明るくなりすぎないようにした。ブースト版だけ`BoostGrow`(None)があり、開始8Fで光条が0.67倍→1倍に伸びる(差し替えたときのパッと感を減らす)。
+- 確認済み(エディタ): 背面・斜め・真横・正面・真上・ロール40°で十字が消えない(真横は縦の線+芯、真上は横の線+芯が残る)。明るい灰色(曇り空相当)と暗い紺の背景の両方で見える。0Fと90Fが同じ見た目でループする。
+- 気づいた点: カメラは機体の後ろなので、光は機体より手前にあり、**深度テストでは機体を守れない**(芯の大きさと明るさで抑えている)。ブースト版の横の全長は8.4(機体幅の約2.6倍)で、通常版の上限(2倍)を超える(依頼の1.5倍を優先)。
+- 未確認(ゲーム内): 実機の大きさと噴射口の位置、明るさ、ロールの向き(`SetRotation`にZを渡したとき逆回りなら符号を反転)。
+- **(2026-11-16 続き)ユーザー指摘「板感がある」「主張が強すぎる、もう少し薄めでいい」→ 直した。** 板感の原因は、①芯の画像の縁がくっきりしていて、斜めから見るとコインのような円盤に見えた ②光条の幅が広く、縁の形(紡錘形)がはっきりしていて、斜めから見ると平たい刃に見えた、の2つ。芯を縁のないなだらかな山(ガウス)に、光条の断面をなだらかなベル形にして、にじみを0.12→0.04、太さを0.4→0.32にした([gen_starflare_textures.ps1](Data/Effect/StarFlare/tools/gen_starflare_textures.ps1))。明るさは全体を約0.75倍に、背面以外の面(XZ/YZ)は主の面の約5割(光条)・約4割(芯)に下げた。長さは変えていない。ブースト版も同じ割合で直した(通常版の約1.25倍の明るさのまま)。両方とも拡大率50で上書きして書き出した。
+- 比較: [compare_before_after.png](Data/Effect/StarFlare/tools/review/compare_before_after.png)(前/今回、同じカメラ・45F)。古い確認画像(compare_angles/compare_bg_roll と撮った画像)は消した。
+- まだ強いと感じたら、次は芯のalphaを下げる(光条はすでに細い)。ゲーム内での見え方は未確認。
+- **(2026-11-16 続き2) ユーザー指摘「原作だと画面にかかっているエフェクトに見える。シェーダーを書く暇はないので、それっぽく作ってほしい」→ 画面に貼り付いて見える作りに変えた。** 上の「ビルボードにしない・直交する板」の方針は、ここで取りやめた。
+  - 全スプライトを`Billboard=Billboard`(常にカメラ正面)、`ZTest=false`(深度テストなし、機体や地形に隠されない)にした。XZ/YZの副の板は消して、`Glow`・`Rays/RayH`・`Rays/RayV`・`Core`の1枚ずつにした。どの角度から見ても同じ形になり、板の傾きがなくなったので板感も出ない。
+  - **十字は画面に固定(ロールしても傾かない)。** `Billboard`はノードの回転を無視するため。縦の光条をZ回転90°で作ると回転を無視して横になってしまう(`RotatedBillboard`にすると親の回転についてくるので、ロールで横と縦がずれる)。そこで縦向きの画像`Texture/SF_RayV.png`(SF_Rayを90°回したもの、生成スクリプトで一緒に作る)を足し、縦の光条は回転0・スケール(0.32, 3.64)にした。
+  - レンズっぽさとして、細く長い横の線`Rays/Streak`(SF_Ray、スケール7.0×0.12、alpha 55→70)を足した。ブースト版は10.5×0.12、alpha 69→88。
+  - ブースト版も同じ作り(`BoostGrow`の伸びはビルボードでも効く)。どちらも拡大率50で上書きした。
+  - 確認画像: [screen_overlay_angles.png](Data/Effect/StarFlare/tools/review/screen_overlay_angles.png)(後ろ/斜め/真横/真上/ロール40°/明るい背景)、[screen_overlay_boost.png](Data/Effect/StarFlare/tools/review/screen_overlay_boost.png)。[compare_before_after.png](Data/Effect/StarFlare/tools/review/compare_before_after.png)は板の版どうしの比較として残している。
+  - **コード側への影響**: エフェクトの向きは見た目に効かないので、`SetRotation`は不要(位置だけ`SetPos`で噴射口に合わせる。噴射口の位置は機体の回転を使って計算する)。
+  - 未確認(ゲーム内): 深度テストを切ったので、エフェクトを描く順番より前に描いたものにはすべて上から重なる。UIより後に描かれていたらUIにもかかる。画面に出したときの大きさ。

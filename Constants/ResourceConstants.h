@@ -197,6 +197,8 @@ namespace
 	constexpr const wchar_t* right_barrel_roll_effect_path = L"Data/Effect/BarrelRoll/BarrelRoll_v2_L.efk";//右ロール用
 	//雨のエフェクト(カメラ追従)
 	constexpr const wchar_t* rain_effect_path = L"Data/Effect/Rain/Rain.efk";
+	//機体後部の十字の光芒のエフェクト
+	constexpr const wchar_t* star_flare_effect_path = L"Data/Effect/StarFlare/StarFlare.efk";
 
 	//---------- CSV上でのモデル識別文字列 ----------
 	constexpr const wchar_t* rock1_csv_name = L"Rock1";
@@ -264,6 +266,8 @@ namespace
 	constexpr float right_barrel_roll_effect_scale = 1.0f;
 	//雨はエフェクト側でゲームの大きさに合わせてあるので1.0のまま
 	constexpr float rain_effect_scale = 1.0f;
+	//十字の光芒もエフェクト側(拡大率50で書き出し)で大きさを合わせてあるので1.0のまま
+	constexpr float star_flare_effect_scale = 1.0f;
 
 	//----------フォント系-----------------
 	//ファイル場所

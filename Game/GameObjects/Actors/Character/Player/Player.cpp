@@ -34,7 +34,7 @@
 namespace
 {
 	// モデルのサイズ
-	const Vector3 model_scale = {0.25f, 0.25f, 0.25f};
+	const Vector3 model_scale = { 0.25f, 0.25f, 0.25f };
 
 	// ゲージの毎フレームの回復量
 	constexpr float gauge_recovery_amount = 0.5f;
@@ -49,10 +49,10 @@ namespace
 	// 当たり判定の球の半径
 	constexpr float hit_coll_sphere_radius = 50.0f;
 	// 当たり判定位置のオフセット
-	const Vector3 coll_sphere_offset = {0.0f, 0.0f, -90.0f};
+	const Vector3 coll_sphere_offset = { 0.0f, 0.0f, -90.0f };
 
 	// 初期座標
-	const Vector3 first_pos = {0.0f, 500.0f, 1200.0f};
+	const Vector3 first_pos = { 0.0f, 500.0f, 1200.0f };
 
 	// HPの最大値
 	constexpr int max_health = 100;
@@ -86,7 +86,7 @@ namespace
 	constexpr float sea_splash_offset_x = 50.0f;
 	//水しぶきのエフェクトのオフセットZ
 	constexpr float sea_splash_offset_z = -50.0f;
-	
+
 	//カウンター用の球の半径
 	constexpr float counter_col_radius = 100.0f;
 
@@ -95,6 +95,9 @@ namespace
 
 	//海からこの距離以内であれば回転を不可能にする
 	constexpr float sea_roll_limit_height = 150.0f;
+
+	//十字の光をどれぐらいずらすか
+	constexpr float light_offset = 165.0f;
 } // namespace
 
 Player::Player(
@@ -176,7 +179,7 @@ void Player::Update()
 		m_damageTime++;
 		//sinfの結果が-1までいかないように180
 		float angle = 180.0f * (static_cast<float>(m_damageTime) / damage_eff_frame);
-		m_pCBufferDamageData->redAmount = sinf(angle * DX_PI_F / 180.0f); 
+		m_pCBufferDamageData->redAmount = sinf(angle * DX_PI_F / 180.0f);
 		//ダメージエフェクトを出さないようにする
 		if (m_damageTime > damage_eff_frame)
 		{
@@ -249,14 +252,17 @@ void Player::Update()
 
 	//ステージに海がある場合のみ
 	//この二つの位置に水しぶきのエフェクトを出す
-	if(m_isSeaStage)
+	if (m_isSeaStage)
 	{
 		UpdateWingSplash(m_leftWingEffectH, leftWingPos, ResourceLoader::EffectID::LeftWingSplash);
 		UpdateWingSplash(m_rightWingEffectH, rightWingPos, ResourceLoader::EffectID::RightWingSplash);
 	}
 
+	//機体の後ろに光のエフェクトを付ける
+	UpdateLightEffect(ResourceLoader::EffectID::StarFlare);
+
 	//無敵時間の更新
-	if(m_invincibleFrame > 0)
+	if (m_invincibleFrame > 0)
 	{
 		m_invincibleFrame--;
 	}
@@ -306,7 +312,7 @@ void Player::Somersault(InputManager& input)
 
 	// 宙返りボタンが押されていたらステートをそれぞれ切り替える
 	if (input.IsTriggered(InputEvent::somersault) &&
-		m_gauge > somersoult_use_gauge && 
+		m_gauge > somersoult_use_gauge &&
 		!isSomersoult)
 	{
 		// 射撃のみできるようにする
@@ -413,7 +419,7 @@ void Player::UpdateWingSplash(int& splashHandle, const Vector3& wingPos, Resourc
 	//羽と海面の距離を計算
 	float distWingToSea = wingPos.y - sea_height;
 	//海面付近にいるかをチェック
-	if(distWingToSea < sea_splash_height_threshold)
+	if (distWingToSea < sea_splash_height_threshold)
 	{
 		//既に再生されていれば処理を飛ばす
 		if (splashHandle == -1 ||
@@ -446,6 +452,24 @@ void Player::UpdateWingSplash(int& splashHandle, const Vector3& wingPos, Resourc
 			splashHandle = -1;
 		}
 	}
+}
+
+void Player::UpdateLightEffect(ResourceLoader::EffectID effectID)
+{
+	std::shared_ptr<EffectManager> pEffectManager = m_pEffectManager.lock();
+
+	//エフェクトの位置
+	Vector3 effectPos = m_pos + GetVisualBack() * light_offset;
+
+	//既に再生されていれば処理を飛ばす
+	if (m_lightEffectHandle == -1 ||
+		!pEffectManager->IsPlaying(m_lightEffectHandle))
+	{
+		//海面付近にいるので水しぶきのエフェクトを出す
+		m_lightEffectHandle = pEffectManager->Play(effectID, effectPos);
+	}
+	//位置更新
+	pEffectManager->SetPos(m_lightEffectHandle, Vector3(effectPos.x, effectPos.y - 5.0f, effectPos.z));
 }
 
 bool Player::IsNearSea() const
@@ -513,7 +537,7 @@ void Player::DrawPlayer()
 	// エミッションマップを渡す
 	SetUseTextureToShader(ShaderRegister::tex_emission, emissionGraphH);
 
-	LightingManager::GetInstance().ApplyShader(false,0.0f);
+	LightingManager::GetInstance().ApplyShader(false, 0.0f);
 	BindShaderBuffers();
 
 	if (m_isDamageEffect)
@@ -563,7 +587,7 @@ void Player::TakeDamage(int damage)
 	if (m_health <= 0)
 	{
 		//死亡音を鳴らす
-		pSoundManager->Play(SoundManager::SoundType::PlayerDeath,false,true);
+		pSoundManager->Play(SoundManager::SoundType::PlayerDeath, false, true);
 		//各ステートのExitを呼んで、チャージやブーストのエフェクトを止める
 		ChangeAllStateToDisabled();
 		OnDead();
@@ -691,7 +715,7 @@ void Player::ChangeAllStateToDisabled()
 	//何もしないステート
 	std::shared_ptr<IShootState> newShootState =
 		std::make_shared<DisabledShootState>(
-			std::static_pointer_cast<Player>(shared_from_this()), m_pBulletManager, m_pSoundManager,m_pTargetManager);
+			std::static_pointer_cast<Player>(shared_from_this()), m_pBulletManager, m_pSoundManager, m_pTargetManager);
 	ChangeShootState(newShootState);
 }
 
@@ -709,14 +733,14 @@ void Player::ChangeAllStateToNormal()
 
 	// 通常ステート
 	std::shared_ptr<IRotationState> newRotState =
-		std::make_shared < DefaultRotationState > (
+		std::make_shared < DefaultRotationState >(
 			std::static_pointer_cast<Player>(shared_from_this()));
 	ChangeRotationState(newRotState);
 
 	// 通常ステート
 	std::shared_ptr<IShootState> newShootState =
 		std::make_shared<NormalShootState>(
-			std::static_pointer_cast<Player>(shared_from_this()), m_pBulletManager, m_pSoundManager,m_pTargetManager);
+			std::static_pointer_cast<Player>(shared_from_this()), m_pBulletManager, m_pSoundManager, m_pTargetManager);
 	ChangeShootState(newShootState);
 }
 

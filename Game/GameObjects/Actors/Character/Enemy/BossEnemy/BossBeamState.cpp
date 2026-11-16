@@ -33,7 +33,7 @@ namespace
 	constexpr int beam_end_frame = 60 * 10;
 
 	//ビームがターゲットまで進むときの速度
-	constexpr float beam_speed = 20.0f;
+	constexpr float beam_speed = 30.0f;
 
 	//何フレームに一回当たり判定を出すか
 	constexpr int beam_col_interval = 10;
