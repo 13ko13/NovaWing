@@ -2475,3 +2475,12 @@
   - 確認画像: [screen_overlay_angles.png](Data/Effect/StarFlare/tools/review/screen_overlay_angles.png)(後ろ/斜め/真横/真上/ロール40°/明るい背景)、[screen_overlay_boost.png](Data/Effect/StarFlare/tools/review/screen_overlay_boost.png)。[compare_before_after.png](Data/Effect/StarFlare/tools/review/compare_before_after.png)は板の版どうしの比較として残している。
   - **コード側への影響**: エフェクトの向きは見た目に効かないので、`SetRotation`は不要(位置だけ`SetPos`で噴射口に合わせる。噴射口の位置は機体の回転を使って計算する)。
   - 未確認(ゲーム内): 深度テストを切ったので、エフェクトを描く順番より前に描いたものにはすべて上から重なる。UIより後に描かれていたらUIにもかかる。画面に出したときの大きさ。
+
+### 2026-11-16 移動の加速・減速を入れた(ユーザー実装、ゲームで確認OK「良い感じだった」)
+- 考え方: 1フレームに変えられる速度に上限(step)を付けて、目標速度へ近づける。`cur = cur + clamp(target - cur, -step, +step)`。増える・減る・負の向き、どれでも同じ式で、行き過ぎない。`step = 最高速度 / 最高速度までのフレーム数`。最高速度は**定数**の`move_speed_xy`を使う(`targetVel`はスティックの傾きで変わるので使わない)。
+- 加速: [MovingState.cpp:31](Game/GameObjects/Actors/Character/Player/Movement/MovingState.cpp#L31)の`accel_frame`(20F)、式は[MovingState.cpp:105-112](Game/GameObjects/Actors/Character/Player/Movement/MovingState.cpp#L105-L112)。`targetVel`(目標)と`vel`(近づけた結果)を分けて、`SetVel(vel)`に渡す。最初は`SetVel(targetVel)`のままで効いていなかった。
+- 減速: [IdleMovementState.cpp:22](Game/GameObjects/Actors/Character/Player/Movement/IdleMovementState.cpp#L22)の`stop_frame`(24F)。目標を0にして同じ式。**`Enter`は切り替えの瞬間に1回しか呼ばれないので、毎フレームの減速は`Update`に置く**(`Enter`は空。離した瞬間の速度を引き継ぐ)。`ChangeState`は次のステートを保存するだけで自分を破棄しないので、その後も計算を続けて問題ない。
+- `move_speed_xy`(18)はIdle側にも同じ値を置いた(Moving側と二重。直すときは両方)。zは`move_speed`を18にそろえて、Idleに入るたびに落ちる問題をなくした。
+- 未実装(依頼にあった「傾いているときだけ加速度を大きくする」): 傾き中は`tilt_move_speed_x`(25)が最高速度なので、`step`の基準も25にそろえる必要がある。仮の値は6フレーム。**今回は見送り**。
+- ほかの状態(ブースト・ブレーキ・宙返りなど)は速度を直接入れているので、加速の対象外。画面端のクランプで速度を0にするかも未確認。
+- 追加したタスク: 「HPゲージの表示ズレ修正(画像の余白を計算に含めている疑い)」1.5h、優先度A、アルファ。敵とプレイヤーのHPが、最初と最後で減っていないように見える。
