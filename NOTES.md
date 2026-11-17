@@ -2531,3 +2531,15 @@
 - ボスの点滅の条件式を`frame % (blinking_interval * 2) < blinking_interval`に直し、間隔を10→5にした(ユーザー)。点滅は問題なし。
 - コスト表: 「ボスの頭を攻撃したら赤く点滅」「スターフレアの組み込み」を完了(実コスト=見積の1h)。「ステージ1ボス」の下に「死亡中はUIを消す・水滴を止める」(1h・S・アルファ・完了)を追加。コスト表の「ボス(仕様未定)」は2面のボスの行なので、1面の作業は紐づけない。
 - **次**: 「ボス死亡時のまわりのエフェクトを消す」(1.5h・S)。ビームは死亡待機中に止まらない([BossBeamStateのデストラクタ](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossBeamState.cpp#L67-L83)でしか止まらない)。ゆっくりフェードして消す(前例: `FadeOutHitBeam`)。ビームの当たり判定が死亡中も生きている問題は別。
+
+### 2026-11-17 ボス死亡時のまわりのエフェクト(ビーム)を消す: 設計の途中(コードはまだ。ユーザーは集中が切れたので今日はここまで)
+- 目的: 死亡待機に入ったらビームを**ゆっくりフェードして消す**(コスト表「バグ修正＞ボス死亡時のまわりのエフェクトを消す」1.5h・S・アルファ。未着手)。
+- 原因: [BossEnemy.cpp:161](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.cpp#L161)の`if (!m_isDying)`の中に`m_pState->Update()`があるので、死亡待機中はステートの`Update`が呼ばれず、ビームのエフェクトは[BossBeamStateのデストラクタ](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossBeamState.cpp#L67-L83)でしか止まらない(ボスが消えるまで残る)。
+- 前例: [FadeOutHitBeam](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossBeamState.cpp#L433-L453)(`playH`と`fadeFrame`を参照で受け、アルファを下げ、`hit_boss_fade_frame`=30Fで`Stop`して`playH=-1`)。ボスに当たったビームだけ、`Update`内で呼んでいる。
+- **決まったこと(ユーザー)**: ステートに知らせる形(前者)。`BossEnemy`が死んだ瞬間に`m_pState`へ伝え、`BossBeamState`だけが自分のビームを消す。ボス側へビームのハンドルを移す案は、変更が大きいので採らない。
+- **ユーザーの提案**: 「`BossBeamState`の中でボスが死んだかどうかを確かめればいいのでは」。→ 概念は正しいが、**死亡待機中は`Update`が呼ばれない**ので、そのままでは動かない。
+- **分かれ道(未決定。Claudeは A を勧めた)**:
+  - **A**: `m_pState->Update()`を死亡待機中も呼ぶ。`BossBeamState::Update`の先頭で、死亡中ならフェードだけして`return`。代償: `IdleState`と`SummonState`の`Update`も死亡中に走るので、**特にSummonは死亡中に敵を呼ぶおそれ** → その2つにも「死亡中なら何もしない」が要る。
+  - **B**: `IBossEnemyState`に中身が空の仮想関数`OnBossDying()`を足し(名前候補: `OnBossDying`/`OnDeath`/`NotifyDying`)、死んだ瞬間に1回だけ呼ぶ。ただし毎フレームのフェードを進めるには`Update`相当の呼び出しが要るので、結局どこかで回す必要がある。
+- ビームの当たり判定が死亡中も生きている問題(未確認)は別。[BossBeamCollider.cpp:29-33](Game/Collision/BossBeamCollider.cpp#L29-L33)・[BossBeamTipCollider.cpp:96](Game/Collision/BossBeamTipCollider.cpp#L96)が`IsDead`だけ見て`IsDying`を見ない。
+- **次**: AかBを決める → 選んだ形で実装 → フェードの長さを決める(`hit_boss_fade_frame`の30Fより長くする?仕様は「ゆっくり」) → ゲームで確認(死亡中にビームが残らないか、倒した後にビームでプレイヤーが死なないか)。
