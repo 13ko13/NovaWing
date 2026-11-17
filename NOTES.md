@@ -2523,3 +2523,11 @@
 - 削除したソース: 全エフェクトの`tools/`(生成スクリプトとreview画像、約12.9MB)。ただし`Boost/tools/DummyJet.efkmodel`と`StarFlare/tools/DummyJet.efkmodel`は`.efkefc`がプレビュー用に参照しているので残した。`.efkefc`/`.efkproj`はすべて残した(`StarFlareBoost.efkefc`も)。
 - 戻し方: git管理下の分は`git checkout -- Data/Effect`で戻せる。**gitに入っていなかったCharging v6のtools(`gen_charge_tex_v6.ps1`・`make_charging_v6.ps1`・`compose_v6.ps1`とv6のreview画像)と、Rainのreview画像3枚は戻せない。** 削除の時点でCharging v6が別のセッションで作業中だったことに後から気づいた(そのセッションには連絡済み)。`Charging/Texture/CS6_*`は残している。
 - 確認: Debug x64でビルドが通った。起動してタイトル画面で15秒止まらないことを確認した。エフェクトはシーンごとに読み込まれるので、ゲームシーンのエフェクトはゲーム内では未確認(参照先がすべて存在することはファイルで確認済み)。
+
+### 2026-11-17 ボス死亡中はUIを消す・水滴を止める(ユーザー実装、ゲームで確認OK)
+- UI: [GameScene.cpp](Scene/GameScene.cpp)の`Draw`で、`m_pBoss->IsDying()`のときは`m_pUIManager->Draw()`を呼ばない。
+- 水滴: 死亡エフェクト(画面が真っ白になる)の上に水滴が乗るのが嫌 → **死亡中は水滴の工程を飛ばす**(方法A)。原因は描画順で、死亡エフェクトも`m_pEffectManager->Draw()`でブースト用の画面に描かれ、その絵ごと水滴のシェーダーを通っていた。飛ばすときは`m_pBoostingEffect->ChangeNormalRT()`で描画先をバックバッファに戻してから`m_pBoostingEffect->Draw`(ブーストしていなくてもDrawGraphで描く)。水滴は死亡待機に入る瞬間に消えるが、問題なし。方法B(死亡エフェクトだけ水滴の後に描く)は、EffectManagerにエフェクトごとの描き分けが要るので見送り。
+- **つまずき: `m_pCamera->SetUpCamera()`をUIの描画より後ろに置いたら、レティクルが機体の回転についてこなくなった。** レティクルは`ConvWorldPosToScreenPos`(そのとき設定されているカメラを使う)で位置を出す。水滴・ブーストで画面を切り替えるとカメラの設定が崩れるので、**UIを描く前に`SetUpCamera()`が必要**。UIの前に戻して直った。
+- ボスの点滅の条件式を`frame % (blinking_interval * 2) < blinking_interval`に直し、間隔を10→5にした(ユーザー)。点滅は問題なし。
+- コスト表: 「ボスの頭を攻撃したら赤く点滅」「スターフレアの組み込み」を完了(実コスト=見積の1h)。「ステージ1ボス」の下に「死亡中はUIを消す・水滴を止める」(1h・S・アルファ・完了)を追加。コスト表の「ボス(仕様未定)」は2面のボスの行なので、1面の作業は紐づけない。
+- **次**: 「ボス死亡時のまわりのエフェクトを消す」(1.5h・S)。ビームは死亡待機中に止まらない([BossBeamStateのデストラクタ](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossBeamState.cpp#L67-L83)でしか止まらない)。ゆっくりフェードして消す(前例: `FadeOutHitBeam`)。ビームの当たり判定が死亡中も生きている問題は別。

@@ -768,22 +768,35 @@ void GameScene::Draw()
 	//エフェクトの描画
 	m_pEffectManager->Draw();
 
-	//水滴用のオフスクリーンにブーストエフェクト込みの世界を描画する
-	m_pWaterDropEffect->ChangeWaterDropEffectRT();
+	if (!m_pBoss->IsDying())
+	{
+		//水滴用のオフスクリーンにブーストエフェクト込みの世界を描画する
+		m_pWaterDropEffect->ChangeWaterDropEffectRT();
+	}
+	else
+	{
+		//死んでいる場合はバックバッファに戻してから画面描画
+		m_pBoostingEffect->ChangeNormalRT();
+
+	}
 
 	//ブースト中であればブーストエフェクトを描画
 	m_pBoostingEffect->Draw(m_pPlayer->IsBoosting());
 
-	//バックバッファに戻す
-	m_pWaterDropEffect->ChangeNormalRT();
-
-	//水滴シェーダーを通した世界とブーストエフェクトを描画
-	m_pWaterDropEffect->Draw();
-	//カメラを再設定
-	m_pCamera->SetUpCamera();
-
-	//全てのUIを描画する
-	m_pUIManager->Draw();
+	//ボスが死んでいるときは描画しない
+	if (!m_pBoss->IsDying())
+	{
+		//バックバッファに戻す
+		m_pWaterDropEffect->ChangeNormalRT();
+		
+		//水滴シェーダーを通した世界とブーストエフェクトを描画
+		m_pWaterDropEffect->Draw();
+		//カメラを再設定
+		m_pCamera->SetUpCamera();
+		//全てのUIを描画する
+		m_pUIManager->Draw();
+	}
+	
 
 	//ボス登場ムービーの再生中は、画面全体にムービーを描画する
 	if (m_isDrawBossMovie)

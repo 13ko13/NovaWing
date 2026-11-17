@@ -61,7 +61,7 @@ namespace
 	constexpr int blinking_frame = 30;
 
 	//点滅させる間隔
-	constexpr int blinking_interval = 10;
+	constexpr int blinking_interval = 5;
 }
 
 BossEnemy::BossEnemy(BossEnemyData& data) :
@@ -376,10 +376,11 @@ void BossEnemy::DrawEnemy()
 	std::vector<std::pair<int, int>> textures;
 	textures.push_back({ ShaderRegister::tex_normal,normGraphH });//法線マップ
 	textures.push_back({ ShaderRegister::tex_metalic,-1 });//メタリックマップはないので-1
-	if (m_damageBlinkingFrame % blinking_interval * 2 < blinking_interval)
+	if (m_damageBlinkingFrame % (blinking_interval * 2) < blinking_interval)
 	{
 		//通常時エミッション画像
 		textures.push_back({ ShaderRegister::tex_emission,normalEmissionGraphH });
+		
 	}
 	else
 	{
