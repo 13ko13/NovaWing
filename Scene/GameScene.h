@@ -97,9 +97,12 @@ private:
 		CameraZoom,//カメラをズームアップ
 	};
 	BossApearState m_bossApearState = BossApearState::None;
-
+	
 	//プレイヤーがチュートリアルを終了した位置を保存しておく(敵が出てくる位置のオフセット)
 	float m_stageOffsetZ = 0.0f;
+	
+	//雨のエフェクトの再生ハンドル
+	int m_rainEffectHandle = -1;
 
 	//プレイヤーへのポインタ
 	std::shared_ptr<Player> m_pPlayer;

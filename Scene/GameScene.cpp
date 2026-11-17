@@ -5,6 +5,7 @@
 #include <string>
 #include <cmath>
 #include <algorithm>
+#include <EffekseerForDXLib.h>
 
 #include "../Game/GameObjects/Actors/Actor.h"
 #include "../Game/GameObjects/Actors/Character/Character.h"
@@ -247,6 +248,13 @@ void GameScene::Init()
 			resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxUp),
 			resourceL.GetGraphic(ResourceLoader::GraphicID::SkyBoxBottom)
 		);
+	}
+
+	//雨のステージの時だけ雨を降らせる
+	if (m_pStageConfig->IsRainStage())
+	{
+		//エフェクトの再生を依頼する
+		m_rainEffectHandle = m_pEffectManager->Play(ResourceLoader::EffectID::Rain, m_pCamera->GetPos());
 	}
 
 	//ブーストエフェクトの初期化
@@ -686,6 +694,13 @@ void GameScene::UpdateGameWorld()
 
 	//プレイヤーが出現位置まで来たら敵を出す
 	m_pEnemySpawner->Update();
+
+	//雨のエフェクトの更新
+	if (m_rainEffectHandle >= 0)
+	{
+		//エフェクトの位置の調整する
+		m_pEffectManager->SetPos(m_rainEffectHandle, m_pCamera->GetPos());
+	}
 
 	//エフェクトマネージャーの更新
 	m_pEffectManager->Update();

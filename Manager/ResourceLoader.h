@@ -125,6 +125,7 @@ public:
 		PlayerHPGauge,//プレイヤーのHPゲージ
 
 		BossEmission,//ボスのエミッション
+		BossEmissionDamage,//ボスのエミッション(顔を攻撃されたときの赤い版)
 		BossNormal,//ボスの法線マップ
 
 		BossHPFrame,//ボスのHPの枠

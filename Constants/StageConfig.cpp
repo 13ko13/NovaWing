@@ -20,13 +20,15 @@ namespace
 		float buildingLoopStartZ;
 		//1周の長さ
 		float oneLapDistance;
+		//雨が降っているか
+		bool isRainStage;
 	};
 
 	//ステージごとの設定(添字=ステージ番号(1面=0))
 	constexpr StageData stage_datas[] =
 	{
-		{ L"Stage1",true,58700.0f ,true,0.0f,0.0f },//1面
-		{ L"Stage2",false,56300.0f,false, 34000.0f,16000.0f },//2面
+		{ L"Stage1",true,58700.0f ,true,0.0f,0.0f,false },//1面
+		{ L"Stage2",false,56300.0f,false, 34000.0f,16000.0f,true },//2面
 	};
 }
 
@@ -47,6 +49,7 @@ StageConfig::StageConfig(int stageNo) :
 	m_hasSea = data.hasSea;
 	m_buildingLoopStartZ = data.buildingLoopStartZ;
 	m_oneLapDistance = data.oneLapDistance;
+	m_isRainStage = data.isRainStage;
 }
 
 StageConfig::~StageConfig()

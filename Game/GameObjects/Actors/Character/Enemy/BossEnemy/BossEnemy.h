@@ -136,4 +136,7 @@ private:
 	BossBeamCollider m_beamCollider;//ビーム
 	BossBeamTipCollider m_beamRightTipCollider;//右のビームの先端判定
 	BossBeamTipCollider m_beamLeftTipCollider;//左のビームの先端判定
+
+	//ダメージを食らった時の顔面点滅用のフレーム
+	int m_damageBlinkingFrame = 0;
 };

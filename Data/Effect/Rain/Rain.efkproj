@@ -45,8 +45,8 @@
         <ScalingValues>
           <Fixed>
             <Scale>
-              <X>0.05</X>
-              <Y>2</Y>
+              <X>0.08</X>
+              <Y>2.6</Y>
               <Z>1</Z>
             </Scale>
           </Fixed>
@@ -65,10 +65,10 @@
         <DrawingValues>
           <ColorAll>
             <Fixed>
-              <R>195</R>
-              <G>205</G>
-              <B>218</B>
-              <A>110</A>
+              <R>230</R>
+              <G>235</G>
+              <B>240</B>
+              <A>170</A>
             </Fixed>
           </ColorAll>
           <Sprite>
@@ -121,8 +121,8 @@
         <ScalingValues>
           <Fixed>
             <Scale>
-              <X>0.05</X>
-              <Y>2</Y>
+              <X>0.08</X>
+              <Y>2.6</Y>
               <Z>1</Z>
             </Scale>
           </Fixed>
@@ -141,10 +141,10 @@
         <DrawingValues>
           <ColorAll>
             <Fixed>
-              <R>195</R>
-              <G>205</G>
-              <B>218</B>
-              <A>110</A>
+              <R>230</R>
+              <G>235</G>
+              <B>240</B>
+              <A>170</A>
             </Fixed>
           </ColorAll>
           <Sprite>
@@ -217,10 +217,10 @@
         <DrawingValues>
           <ColorAll>
             <Fixed>
-              <R>190</R>
-              <G>200</G>
-              <B>214</B>
-              <A>80</A>
+              <R>225</R>
+              <G>230</G>
+              <B>236</B>
+              <A>110</A>
             </Fixed>
           </ColorAll>
           <Sprite>

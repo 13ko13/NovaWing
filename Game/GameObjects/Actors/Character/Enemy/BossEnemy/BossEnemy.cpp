@@ -56,6 +56,12 @@ namespace
 
 	//足音を鳴らす間隔
 	constexpr int footstep_interval = 49;
+
+	//点滅が持続する時間
+	constexpr int blinking_frame = 30;
+
+	//点滅させる間隔
+	constexpr int blinking_interval = 10;
 }
 
 BossEnemy::BossEnemy(BossEnemyData& data) :
@@ -129,9 +135,8 @@ void BossEnemy::OnInit()
 
 void BossEnemy::Update()
 {
-	
 	//着地が終了していない間に着地したら
-	if(m_velocity.y < 0.0f)
+	if (m_velocity.y < 0.0f)
 	{
 		if (m_pos.y < water_y)
 		{
@@ -187,8 +192,17 @@ void BossEnemy::Update()
 				//切り替え後の入った時の処理
 				m_pState->Enter();
 			}
+
+			//ダメージを食らっていたら顔面を点滅させる
+			if (m_damageBlinkingFrame > 0)
+			{
+				m_damageBlinkingFrame++;
+				if (m_damageBlinkingFrame > blinking_frame)
+				{
+					m_damageBlinkingFrame = 0;
+				}
+			}
 		}
-	
 
 		//キャラクタークラス共通の処理
 		Character::Update();
@@ -298,8 +312,11 @@ void BossEnemy::TakeDamage(int damage)
 	//被弾音を鳴らす
 	m_pSoundManager.lock()->Play(SoundManager::SoundType::BossDamage);
 
+	//点滅開始
+	m_damageBlinkingFrame = 1;
+
 	// HP0以下になったら死亡処理を行う
-	if (m_health <= 0 && 
+	if (m_health <= 0 &&
 		!m_isDying)
 	{
 		//死亡待機状態をtrueにする
@@ -326,7 +343,7 @@ std::vector<std::shared_ptr<SphereShape>> BossEnemy::GetBeamSphereR() const
 	return std::dynamic_pointer_cast<BossBeamState>(m_pState)->GetRightBeamSpheres();
 }
 
-void BossEnemy::OnHitInvincibleCol(const Position3& effectPos,const int attackPower)
+void BossEnemy::OnHitInvincibleCol(const Position3& effectPos, const int attackPower)
 {
 	//シールドのエフェクト生成
 	m_pEffectManager.lock()->PlayOneShot(
@@ -348,15 +365,28 @@ void BossEnemy::DrawEnemy()
 	//法線マップ取得
 	const int normGraphH = resourceLoader.GetGraphic(
 		ResourceLoader::GraphicID::BossNormal);
-	//エミッションマップを取得
-	const int emissionGraphH = resourceLoader.GetGraphic(
+	//通常時エミッションマップを取得
+	const int normalEmissionGraphH = resourceLoader.GetGraphic(
 		ResourceLoader::GraphicID::BossEmission);
+	//ダメージ時エミッションマップを取得
+	const int damageEmissionGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::BossEmissionDamage);
 
 	//ハンドルとレジスタ番号をセットで保持しておく
 	std::vector<std::pair<int, int>> textures;
 	textures.push_back({ ShaderRegister::tex_normal,normGraphH });//法線マップ
 	textures.push_back({ ShaderRegister::tex_metalic,-1 });//メタリックマップはないので-1
-	textures.push_back({ ShaderRegister::tex_emission,emissionGraphH });//エミッション
+	if (m_damageBlinkingFrame % blinking_interval * 2 < blinking_interval)
+	{
+		//通常時エミッション画像
+		textures.push_back({ ShaderRegister::tex_emission,normalEmissionGraphH });
+	}
+	else
+	{
+		//ダメージ時エミッション画像
+		textures.push_back({ ShaderRegister::tex_emission,damageEmissionGraphH });
+	}
+
 	textures.push_back({ ShaderRegister::tex_noise,-1 });//ノイズテクスチャも途切れることがないのでなし
 
 	//DrawWithLightingにペアの配列を渡してモデルを描画

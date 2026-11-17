@@ -118,6 +118,8 @@ namespace
 	//ボス
 	constexpr const wchar_t* boss_normal_path = L"Data/Model/Boss.fbm/T_Mech_LOD2_N.png";
 	constexpr const wchar_t* boss_emission_path = L"Data/Model/Boss.fbm/T_Mech_LOD2_E.png";
+	//頭(顔)を攻撃されたときの、顔だけ赤いエミッションマップ
+	constexpr const wchar_t* boss_emission_damage_path = L"Data/Model/Boss.fbm/T_Mech_LOD2_E_Damage.png";
 	//ボスHPゲージ
 	constexpr const wchar_t* boss_hp_frame_path = L"Data/Image/HPGauge/BossHPGauge/Boss_HP_Frame.png";
 	constexpr const wchar_t* boss_hp_gauge_path = L"Data/Image/HPGauge/BossHPGauge/Boss_HP_Ber.png";

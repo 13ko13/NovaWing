@@ -83,6 +83,7 @@ namespace
 
 		//ボス
 		{ ResourceLoader::GraphicID::BossEmission, boss_emission_path },//エミッションマップ
+		{ ResourceLoader::GraphicID::BossEmissionDamage, boss_emission_damage_path },//エミッションマップ(顔が赤い版)
 		{ ResourceLoader::GraphicID::BossNormal, boss_normal_path },//法線マップ
 		{ ResourceLoader::GraphicID::BossHPFrame, boss_hp_frame_path },//HPの枠
 		{ ResourceLoader::GraphicID::BossHPGauge, boss_hp_gauge_path },//HPゲージ
@@ -535,7 +536,7 @@ void ResourceLoader::InitSceneResources()
 		GraphicID::PlayerNormalMap, GraphicID::PlayerMetalicMap, GraphicID::PlayerEmissionMap,
 		GraphicID::FloatingNormalMap, GraphicID::FloatingEmissionMap,
 		GraphicID::WormHeadNormalMap, GraphicID::WormHeadMetalicMap, GraphicID::WormHeadEmissionMap,
-		GraphicID::WormBodyDiffuseMap, GraphicID::BossNormal, GraphicID::BossEmission,
+		GraphicID::WormBodyDiffuseMap, GraphicID::BossNormal, GraphicID::BossEmission, GraphicID::BossEmissionDamage,
 		GraphicID::RushEnemyNormalMap, GraphicID::RushEnemyMetalicMap, GraphicID::RushEnemyEmissionMap,
 		GraphicID::TurretEnemyNormalMap, GraphicID::TurretEnemyMetalicMap, GraphicID::TurretEnemyEmissionMap,
 		GraphicID::ButterflyEnemyNormalMap, GraphicID::ButterflyEnemyMetalicMap, GraphicID::ButterflyEnemyEmissionMap,
