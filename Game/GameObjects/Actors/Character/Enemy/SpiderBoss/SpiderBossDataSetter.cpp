@@ -47,7 +47,7 @@ std::shared_ptr<SpiderBoss> SpiderBossDataSetter::CreateEnemy(
             dataString[1], dataString[2], dataString[3]);
 
         SpiderBoss::SpiderBossData bossData;
-        bossData.Id = modelID;
+        bossData.modelID = modelID;
         bossData.pBulletManager = pBulletManager;
         bossData.pCamera = pCamera;
         bossData.pos = pos;

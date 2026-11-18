@@ -2604,3 +2604,13 @@
   - 2つのボスの上位クラスとして`Boss`を作る(ユーザー案)。`EnemyBase`/`Character`にあるもの(HP・`IsDying`・`GetColliders`など)は足さない。**`Boss`に持たせるのは`IsBossAppear`/`SetIsBossAppear`(と`SpiderBoss`の`m_isAppear`を移す)**。`SetEnemyFactory`は1面の召喚用なので`SpiderBoss`に残す。
   - **2面も1面と同じくムービーで登場する(ユーザー決定「そっちの方が楽そう」)**。WARNING→ムービー→カメラのズームの流れを2つのボスで共通にする。ボスごとに違うのは「どのムービーか」「ムービー後にボスを置く位置(1面は海面`boss_stand_y`)」「ムービーの最後のカメラの位置(1面は`boss_appear_camera_dist`2700・`height`1020)」。2面のムービーはClaudeがBlenderで作る(1面のムービーの作り方は10/02の記録: ゲームのシェーダーと同じ見た目、最後のコマをゲームのカメラ位置に合わせる)。
 - **次(ゲーム側、ユーザーが書く)**: モデルと画像の登録(ResourceLoaderの`ModelID`/`GraphicID`、パス、`game.models`/`game.graphics`) → 2面のボスのクラス(`GameScene`・HPゲージ・当たり判定がボス全般を扱える形) → 動き → 網と放熱 → ロケット → 形態の切り替え → 扉。扉とロケットのモデルはまだ作っていない。
+
+### 2026-11-18 2面のボスの準備: コスト表・素材の登録・上位クラス`BossBase`(途中。**ビルドは通らない状態**)
+- **コスト表**: 「ボス(仕様未定)」の下に10行を足した(S・アルファ・未完了、見積は仮の目安): ボスの共通化3、飛ぶ動き2、網のレーザー5、放熱の隙・弱点・ロックオン位置2、形態変化3、扉4、ロケット2、第二形態のリズムと速さ1、2面の登場演出2、モデルの確認と変換2(計約26h)。「ボス(仕様未定)」は**2面のボスの行**なので、1面のボスの作業は紐づけない(「ステージ1ボス」の下に別の行)。
+- **素材の登録(Claudeが実施、Debug x64ビルドOK)**: `ModelID::Boss2`、`GraphicID::Boss2Normal`/`Boss2Emission`/`Boss2EmissionVent`(放熱中の赤い版)。パスは[ResourceConstants.h](Constants/ResourceConstants.h)の`boss2_*_path`。ゲームシーンの読み込み一覧に入れたので、**1面でも2面のボスのモデルを読み込む**(重さが気になったら2面だけに分ける)。
+- **上位クラス`BossBase`(ユーザーが作成)**: `GameScene`が`m_pBoss`で呼ぶもの(Init/GetPos/SetPos/IsDying/IsDead/GetHealth/GetMaxHealth/TakeDamage/DebugSetHealth)はすでに`EnemyBase`/`Character`にあるので、`BossBase : public EnemyBase`に足すのは`m_isAppear`と`IsBossAppear`/`SetIsBossAppear`だけ(`SetEnemyFactory`は1面の召喚用なので`SpiderBoss`に残す)。`BossBase`のコンストラクタは構造体`BossBaseData`(modelID・カメラ・プレイヤー・弾・音・エフェクトの6つ)を受けて`EnemyBase`へ渡す。名前は`Boss`だとわかりづらいのでユーザーが`BossBase`に決め、フォルダは`Enemy/Boss/`。`m_isAppear`と2つの関数は`SpiderBoss`から`BossBase`へ移動済み。
+- **データ構造体の共通化(方針B、ユーザー決定)**: `SpiderBossData`は`BossBase::BossBaseData`を継承して`pos`だけ持つ。名前は`modelID`にそろえた(`SpiderBossData::Id`→`modelID`、Claudeが3か所直した)。
+- **残り(ユーザーが自分で直す。これでビルドが通る)**: ①[SpiderBoss.h:21](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h#L21)の`SpiderBossData`を`BossBase::BossBaseData`の継承にして`pos`だけにする ②[SpiderBoss.cpp:68](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.cpp#L68)の初期化リストを`EnemyBase(...)`から`BossBase(data)`にする(継承していれば`SpiderBossData`をそのまま渡せる)。現在のエラーは`EnemyBase が基底クラスでもメンバーでもない`と`BossBase に既定のコンストラクターがない`の2つ。
+- 任意: `BossBase`の`SetIsBossAppear`/`IsBossAppear`の`virtual`は上書きの予定がないので不要。
+- 次: `GameScene`の`m_pBoss`、`BossHPGaugeUI`、`CollisionManager`、AutoPlay系の`SpiderBoss`直接指定を`BossBase`に変える必要があるか確認 → 2面のボスのクラス → 動き → 網 → …(仕様は[BOSS2_SPEC.md](BOSS2_SPEC.md))。
+- 別: 1面のボス死亡時のビームを消す作業(コスト表1.5h、S)は、AかB(`NOTES`の11/17の項)が未決定のまま。

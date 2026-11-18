@@ -85,6 +85,10 @@ namespace
 		{ ResourceLoader::GraphicID::BossEmission, boss_emission_path },//エミッションマップ
 		{ ResourceLoader::GraphicID::BossEmissionDamage, boss_emission_damage_path },//エミッションマップ(顔が赤い版)
 		{ ResourceLoader::GraphicID::BossNormal, boss_normal_path },//法線マップ
+		//2面のボス
+		{ ResourceLoader::GraphicID::Boss2Emission, boss2_emission_path },//エミッションマップ
+		{ ResourceLoader::GraphicID::Boss2EmissionVent, boss2_emission_vent_path },//エミッションマップ(放熱中の赤い版)
+		{ ResourceLoader::GraphicID::Boss2Normal, boss2_normal_path },//法線マップ
 		{ ResourceLoader::GraphicID::BossHPFrame, boss_hp_frame_path },//HPの枠
 		{ ResourceLoader::GraphicID::BossHPGauge, boss_hp_gauge_path },//HPゲージ
 
@@ -130,6 +134,7 @@ namespace
 		{ ResourceLoader::ModelID::Rock3, rock3_model_path },//岩3
 		{ ResourceLoader::ModelID::Stage, stage_model_path },//ステージ
 		{ ResourceLoader::ModelID::Boss, boss_model_path },//ボス
+		{ ResourceLoader::ModelID::Boss2, boss2_model_path },//2面のボス
 		{ ResourceLoader::ModelID::RushEnemy, rush_enemy_model_path },//突進する敵
 		{ ResourceLoader::ModelID::TurretEnemy, turret_enemy_model_path },//固定砲台の敵
 		{ ResourceLoader::ModelID::ButterflyEnemy, butterfly_enemy_model_path },//蝶型の敵
@@ -508,7 +513,7 @@ void ResourceLoader::InitSceneResources()
 	SceneResources game;
 	game.models = {
 		ModelID::Player, ModelID::Stage, ModelID::Rock1, ModelID::Rock2,
-		ModelID::Rock3, ModelID::FloatingEnemy, ModelID::WormHead, ModelID::Boss,
+		ModelID::Rock3, ModelID::FloatingEnemy, ModelID::WormHead, ModelID::Boss, ModelID::Boss2,
 		ModelID::SceneryIslandA, ModelID::SceneryIslandB, ModelID::SceneryIslandC,
 		//2ステージ目のビル(見た目と当たり判定用)
 		ModelID::BuildingTallBroken, ModelID::BuildingOfficeGutted, ModelID::BuildingLeaning,
@@ -537,6 +542,7 @@ void ResourceLoader::InitSceneResources()
 		GraphicID::FloatingNormalMap, GraphicID::FloatingEmissionMap,
 		GraphicID::WormHeadNormalMap, GraphicID::WormHeadMetalicMap, GraphicID::WormHeadEmissionMap,
 		GraphicID::WormBodyDiffuseMap, GraphicID::BossNormal, GraphicID::BossEmission, GraphicID::BossEmissionDamage,
+		GraphicID::Boss2Normal, GraphicID::Boss2Emission, GraphicID::Boss2EmissionVent,
 		GraphicID::RushEnemyNormalMap, GraphicID::RushEnemyMetalicMap, GraphicID::RushEnemyEmissionMap,
 		GraphicID::TurretEnemyNormalMap, GraphicID::TurretEnemyMetalicMap, GraphicID::TurretEnemyEmissionMap,
 		GraphicID::ButterflyEnemyNormalMap, GraphicID::ButterflyEnemyMetalicMap, GraphicID::ButterflyEnemyEmissionMap,

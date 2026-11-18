@@ -12,6 +12,8 @@ namespace
 	constexpr const wchar_t* rock3_model_path = L"Data/Model/Rock3.mv1";
 	constexpr const wchar_t* stage_model_path = L"Data/Model/Stage.mv1";
 	constexpr const wchar_t* boss_model_path = L"Data/Model/Boss.mv1";
+	//2面のボス(ベース色はモデルのマテリアルに入っている)
+	constexpr const wchar_t* boss2_model_path = L"Data/Model/Boss2.mv1";
 	//景色用の島(地形は生成、テクスチャはPoly Haven・CC0)
 	constexpr const wchar_t* scenery_islanda_model_path = L"Data/Model/Scenery/SceneryIslandA.x";
 	constexpr const wchar_t* scenery_islandb_model_path = L"Data/Model/Scenery/SceneryIslandB.x";
@@ -120,6 +122,11 @@ namespace
 	constexpr const wchar_t* boss_emission_path = L"Data/Model/Boss.fbm/T_Mech_LOD2_E.png";
 	//頭(顔)を攻撃されたときの、顔だけ赤いエミッションマップ
 	constexpr const wchar_t* boss_emission_damage_path = L"Data/Model/Boss.fbm/T_Mech_LOD2_E_Damage.png";
+	//2面のボス
+	constexpr const wchar_t* boss2_normal_path = L"Data/Model/Boss2.fbm/Boss2_Normal.png";
+	constexpr const wchar_t* boss2_emission_path = L"Data/Model/Boss2.fbm/Boss2_Emission.png";
+	//放熱中(放熱口が赤く光る)のエミッションマップ
+	constexpr const wchar_t* boss2_emission_vent_path = L"Data/Model/Boss2.fbm/Boss2_Emission_Vent.png";
 	//ボスHPゲージ
 	constexpr const wchar_t* boss_hp_frame_path = L"Data/Image/HPGauge/BossHPGauge/Boss_HP_Frame.png";
 	constexpr const wchar_t* boss_hp_gauge_path = L"Data/Image/HPGauge/BossHPGauge/Boss_HP_Ber.png";

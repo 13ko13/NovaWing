@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/BossBase.h"
 #include "Manager/ResourceLoader.h"
 #include "Game/Collision/SphereShape.h"
 #include "Game/Collision/SpiderBossDamageCollider.h"
@@ -14,14 +14,14 @@ class ISpiderBossState;
 class EnemyFactory;
 class SoundManager;
 class EffectManager;
-class SpiderBoss : public EnemyBase
+class SpiderBoss : public BossBase
 {
 public:
 	//ボス生成に必要な情報
 	struct SpiderBossData
 	{
 		std::weak_ptr<Player> pPlayer;
-		ResourceLoader::ModelID Id = ResourceLoader::ModelID::None;
+		ResourceLoader::ModelID modelID = ResourceLoader::ModelID::None;
 		std::weak_ptr<BulletManager> pBulletManager;
 		std::weak_ptr<CameraBase> pCamera;
 		std::weak_ptr<SoundManager> pSoundManager;
@@ -75,10 +75,6 @@ public:
 	//現在のステートを返す
 	std::shared_ptr<ISpiderBossState> GetCurrentState() const { return m_pState; }
 
-	//ボス出現が終了しているかをセットする
-	void SetIsBossAppear(bool isAppear) { m_isAppear = isAppear; }
-	//ボス出現が終了しているかを返す
-	bool IsBossAppear() const { return m_isAppear; }
 	//最初の着地が完了しているか
 	bool IsFirstLanding() const { return m_isFirstLanding; }
 
@@ -135,9 +131,6 @@ private:
 	//プレイヤーの弾が当たった時のダメージ判定する部分
 	std::shared_ptr<SphereShape> m_damageCol = std::make_shared<SphereShape>();
 
-	//ボスが出現完了しているか
-	//ゲームシーン側からセットさせる
-	bool m_isAppear = false;
 	//一番最初の着地時のみに使用するフラグ
 	bool m_isFirstLanding = false;
 

@@ -22,6 +22,7 @@ public:
 		Rock3,//岩3
 		Stage,//ステージ
 		Boss,//ボス
+		Boss2,//2面のボス
 		SceneryIslandA,//景色用の島(IslandA)
 		SceneryIslandB,//景色用の島(IslandB)
 		SceneryIslandC,//景色用の島(IslandC)
@@ -127,6 +128,9 @@ public:
 		BossEmission,//ボスのエミッション
 		BossEmissionDamage,//ボスのエミッション(顔を攻撃されたときの赤い版)
 		BossNormal,//ボスの法線マップ
+		Boss2Emission,//2面のボスのエミッション
+		Boss2EmissionVent,//2面のボスのエミッション(放熱中の赤い版)
+		Boss2Normal,//2面のボスの法線マップ
 
 		BossHPFrame,//ボスのHPの枠
 		BossHPGauge,//ボスのHPゲージ

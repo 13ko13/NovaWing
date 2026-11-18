@@ -307,6 +307,7 @@
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\TurretEnemy\TurretEnemyDataSetter.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\ButterflyEnemy\ButterflyEnemy.cpp" />
     <ClCompile Include="ShaderEffect\WaterDropEffect.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\BossBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
@@ -448,6 +449,7 @@
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\TurretEnemy\TurretEnemyDataSetter.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\ButterflyEnemy\ButterflyEnemy.h" />
     <ClInclude Include="ShaderEffect\WaterDropEffect.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\BossBase.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="BoostingEffectPS.hlsl">

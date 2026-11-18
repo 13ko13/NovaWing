@@ -65,7 +65,7 @@ namespace
 }
 
 SpiderBoss::SpiderBoss(SpiderBossData& data) :
-	EnemyBase(data.Id, data.pCamera, data.pPlayer,
+	EnemyBase(data.modelID, data.pCamera, data.pPlayer,
 	data.pBulletManager, data.pSoundManager, data.pEffectManager),
 	m_animator(m_modelHandle),
 	m_damageCollider(*this),
