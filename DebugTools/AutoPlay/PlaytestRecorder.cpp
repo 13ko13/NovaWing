@@ -12,7 +12,7 @@
 #include "AutoPlayWorld.h"
 #include "Constants/StageConfig.h"
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
-#include "Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.h"
+#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h"
 
 namespace
 {
@@ -270,7 +270,7 @@ void PlaytestRecorder::UpdateRun(const AutoPlayWorld& world)
 	m_wasDisabled = isDisabled;
 
 	//ボス撃破
-	const std::shared_ptr<BossEnemy>& pBoss = world.GetBoss();
+	const std::shared_ptr<SpiderBoss>& pBoss = world.GetBoss();
 	bool isBossDying = pBoss && pBoss->IsDying();
 	if (isBossDying && !m_wasBossDying)
 	{

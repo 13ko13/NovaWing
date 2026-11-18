@@ -1,8 +1,8 @@
-﻿#include "BossEnemy.h"
+﻿#include "SpiderBoss.h"
 #include "Constants/ShaderRegister.h"
-#include "BossIdleState.h"
+#include "SpiderBossIdleState.h"
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
-#include "BossBeamState.h"
+#include "SpiderBossBeamState.h"
 #include "Manager/DebugManager.h"
 #include "Manager/SoundManager.h"
 #include "Manager/EffectManager.h"
@@ -35,7 +35,7 @@ namespace
 	//無敵判定用球の半径
 	constexpr float invincible_col_radius = 1500.0f;
 	//無敵判定球のY座標オフセット
-	constexpr float invincible_col_offset_y = 350.0f;
+	const Vector3 invincible_col_offset = Vector3(0.0f,350.0f,0.0f);
 
 	//ダメージ判定球のオフセット位置
 	const Vector3 damage_col_offset = Vector3(0.0f, 950.0f, -1300.0f);
@@ -64,7 +64,7 @@ namespace
 	constexpr int blinking_interval = 5;
 }
 
-BossEnemy::BossEnemy(BossEnemyData& data) :
+SpiderBoss::SpiderBoss(SpiderBossData& data) :
 	EnemyBase(data.Id, data.pCamera, data.pPlayer,
 	data.pBulletManager, data.pSoundManager, data.pEffectManager),
 	m_animator(m_modelHandle),
@@ -78,15 +78,36 @@ BossEnemy::BossEnemy(BossEnemyData& data) :
 	SetPos(data.pos);
 }
 
-BossEnemy::~BossEnemy()
+SpiderBoss::~SpiderBoss()
 {
 }
 
-void BossEnemy::OnInit()
+void SpiderBoss::OnInit()
 {
 	//シェーダーに渡す定数バッファを作成
 	CreateShaderBuffers();
+	//すべての足の位置を取得
+	GetAllLegPos();
 
+	//後ろ移動アニメーションを再生
+	m_animator.Play(MV1GetAnimIndex(m_modelHandle, idle_anim_name.c_str()), true, idle_anim_speed);
+
+	//ステートを初期化
+	m_pState = std::make_shared<SpiderBossIdleState>(
+		std::static_pointer_cast<SpiderBoss>(shared_from_this()),
+		m_pPlayer
+	);
+	m_pState->Enter();
+
+	//無敵判定球初期化
+	InitCol(m_invincibleHitCol, m_pos, invincible_col_radius, invincible_col_offset);
+
+	//ダメージ判定球初期化
+	InitCol(m_damageCol, m_pos, damage_col_radius, damage_col_offset);
+}
+
+void SpiderBoss::GetAllLegPos()
+{
 	//最初の右足の位置(3本)を取得
 	for (int i = 1; i < static_cast<int>(LegIndex::BackLeft); i++)
 	{
@@ -111,29 +132,20 @@ void BossEnemy::OnInit()
 		//配列に格納
 		m_currentLegPositions.push_back(leftLegPos);
 	}
-
-	//後ろ移動アニメーションを再生
-	m_animator.Play(MV1GetAnimIndex(m_modelHandle, idle_anim_name.c_str()), true, idle_anim_speed);
-
-	//ステートを初期化
-	m_pState = std::make_shared<BossIdleState>(
-		std::static_pointer_cast<BossEnemy>(shared_from_this()),
-		m_pPlayer
-	);
-	m_pState->Enter();
-
-	//無敵判定球初期化
-	Vector3 invincibleColPos = m_pos;
-	invincibleColPos.y += invincible_col_offset_y;//Y座標のみ補正する
-	m_invincibleHitCol = std::make_shared<SphereShape>(invincibleColPos, invincible_col_radius);
-
-
-	//ダメージ判定球初期化
-	Vector3 damageColPos = m_pos + damage_col_offset;
-	m_damageCol = std::make_shared<SphereShape>(damageColPos, damage_col_radius);
 }
 
-void BossEnemy::Update()
+void SpiderBoss::InitCol(
+	std::shared_ptr<SphereShape> sphere,
+	const Vector3& pos,
+	const float radius,
+	const Vector3& offset)
+{
+	Vector3 colPos = m_pos;
+	colPos += offset;
+	sphere = std::make_shared<SphereShape>(pos, invincible_col_radius);
+}
+
+void SpiderBoss::Update()
 {
 	//着地が終了していない間に着地したら
 	if (m_velocity.y < 0.0f)
@@ -181,7 +193,7 @@ void BossEnemy::Update()
 			//ステートの更新
 			m_pState->Update();
 			//次のステートを取得
-			std::shared_ptr<IBossEnemyState> pState = m_pState->GetNextState();
+			std::shared_ptr<ISpiderBossState> pState = m_pState->GetNextState();
 			//次のステートがあればステートを変更する
 			if (pState != nullptr)
 			{
@@ -209,7 +221,7 @@ void BossEnemy::Update()
 
 		//当たり判定の更新
 		Vector3 hitColPos = m_pos;
-		hitColPos.y += invincible_col_offset_y;//Y座標のみ補正する
+		hitColPos += invincible_col_offset;
 		m_invincibleHitCol->Update(hitColPos, invincible_col_radius);
 
 		//ダメージ判定更新
@@ -279,7 +291,7 @@ void BossEnemy::Update()
 	}
 }
 
-void BossEnemy::Draw()
+void SpiderBoss::Draw()
 {
 	//モデルに行列を適用
 	ApplyMatrix(model_scale, m_pos, m_rotation, m_modelHandle);
@@ -304,7 +316,7 @@ void BossEnemy::Draw()
 #endif
 }
 
-void BossEnemy::TakeDamage(int damage)
+void SpiderBoss::TakeDamage(int damage)
 {
 	// HPを減らす
 	m_health -= damage;
@@ -331,19 +343,19 @@ void BossEnemy::TakeDamage(int damage)
 	}
 }
 
-std::vector<std::shared_ptr<SphereShape>> BossEnemy::GetBeamSphereL() const
+std::vector<std::shared_ptr<SphereShape>> SpiderBoss::GetBeamSphereL() const
 {
 	//左のビームの球を返す
-	return std::dynamic_pointer_cast<BossBeamState>(m_pState)->GetLeftBeamSpheres();
+	return std::dynamic_pointer_cast<SpiderBossBeamState>(m_pState)->GetLeftBeamSpheres();
 }
 
-std::vector<std::shared_ptr<SphereShape>> BossEnemy::GetBeamSphereR() const
+std::vector<std::shared_ptr<SphereShape>> SpiderBoss::GetBeamSphereR() const
 {
 	//右のビームの球を返す
-	return std::dynamic_pointer_cast<BossBeamState>(m_pState)->GetRightBeamSpheres();
+	return std::dynamic_pointer_cast<SpiderBossBeamState>(m_pState)->GetRightBeamSpheres();
 }
 
-void BossEnemy::OnHitInvincibleCol(const Position3& effectPos, const int attackPower)
+void SpiderBoss::OnHitInvincibleCol(const Position3& effectPos, const int attackPower)
 {
 	//シールドのエフェクト生成
 	m_pEffectManager.lock()->PlayOneShot(
@@ -357,7 +369,7 @@ void BossEnemy::OnHitInvincibleCol(const Position3& effectPos, const int attackP
 	m_pSoundManager.lock()->Play(SoundManager::SoundType::BossRecovery);
 }
 
-void BossEnemy::DrawEnemy()
+void SpiderBoss::DrawEnemy()
 {
 	//ResourceLoaderからボスの法線マップを取得
 	//ResourceLoaderのインスタンスを取得

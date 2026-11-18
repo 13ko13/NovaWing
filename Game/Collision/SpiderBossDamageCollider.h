@@ -1,19 +1,19 @@
 ﻿#pragma once
 #include "ICollider.h"
 
-class BossEnemy;
+class SpiderBoss;
 /// <summary>
-/// ボスの無敵判定(弾を弾いてシールドエフェクトを出す部分)
+/// ボスのダメージ判定(弾が当たるとダメージを受ける部分)
 /// </summary>
-class BossShieldCollider : public ICollider
+class SpiderBossDamageCollider : public ICollider
 {
 public:
-	BossShieldCollider(BossEnemy& owner);
+	SpiderBossDamageCollider(SpiderBoss& owner);
 
 	//当たり判定の形状データを取得
 	std::vector<std::shared_ptr<ColliderShape>> GetCollision() const override;
 	//自分のタグを取得
-	ColliderTag GetTag() const override { return ColliderTag::BossShield; }
+	ColliderTag GetTag() const override { return ColliderTag::BossDamage; }
 	//衝突時処理
 	void OnCollision(const ICollider& other) override;
 	//判定が有効かどうか
@@ -21,5 +21,5 @@ public:
 
 private:
 	//ボスを参照したい
-	BossEnemy& m_owner;
+	SpiderBoss& m_owner;
 };

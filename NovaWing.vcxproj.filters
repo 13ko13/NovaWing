@@ -237,16 +237,16 @@
     <ClCompile Include="Utility\GraphShaderDraw.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossEnemy.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBoss.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossEnemyDataSetter.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossDataSetter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\IBossEnemyState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\ISpiderBossState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\SummonState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossSummonState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\EnemyFactory.cpp">
@@ -255,10 +255,10 @@
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\EnemyBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossIdleState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossIdleState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossBeamState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossBeamState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Actors\Character\Player\Shoot\DisabledShootState.cpp">
@@ -309,13 +309,13 @@
     <ClCompile Include="Game\Collision\EnemyCollider.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Collision\BossDamageCollider.cpp">
+    <ClCompile Include="Game\Collision\SpiderBossDamageCollider.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Collision\BossShieldCollider.cpp">
+    <ClCompile Include="Game\Collision\SpiderBossShieldCollider.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Collision\BossBeamCollider.cpp">
+    <ClCompile Include="Game\Collision\SpiderBossBeamCollider.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\Collision\CounterCollider.cpp">
@@ -324,7 +324,7 @@
     <ClCompile Include="Game\GameObjects\Bullet\ReflectedBullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Collision\BossBeamTipCollider.cpp">
+    <ClCompile Include="Game\Collision\SpiderBossBeamTipCollider.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Scene\LoadingScene.cpp">
@@ -657,16 +657,16 @@
     <ClInclude Include="Utility\GraphShaderDraw.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossEnemy.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBoss.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossEnemyDataSetter.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossDataSetter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\IBossEnemyState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\ISpiderBossState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\SummonState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossSummonState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\EnemyFactory.h">
@@ -675,10 +675,10 @@
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\EnemyBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossIdleState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossIdleState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\BossEnemy\BossBeamState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossBeamState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Actors\Character\Player\Shoot\DisabledShootState.h">
@@ -741,13 +741,13 @@
     <ClInclude Include="Game\Collision\EnemyCollider.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Collision\BossDamageCollider.h">
+    <ClInclude Include="Game\Collision\SpiderBossDamageCollider.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Collision\BossShieldCollider.h">
+    <ClInclude Include="Game\Collision\SpiderBossShieldCollider.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Collision\BossBeamCollider.h">
+    <ClInclude Include="Game\Collision\SpiderBossBeamCollider.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\Collision\CounterCollider.h">
@@ -756,7 +756,7 @@
     <ClInclude Include="Game\GameObjects\Bullet\ReflectedBullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Collision\BossBeamTipCollider.h">
+    <ClInclude Include="Game\Collision\SpiderBossBeamTipCollider.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Scene\SceneID.h">

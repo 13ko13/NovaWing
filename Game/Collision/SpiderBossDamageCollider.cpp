@@ -1,6 +1,6 @@
-﻿#include "BossDamageCollider.h"
+﻿#include "SpiderBossDamageCollider.h"
 #include "BulletCollider.h"
-#include "Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.h"
+#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h"
 
 namespace
 {
@@ -8,18 +8,18 @@ namespace
 	constexpr int reflect_beam_damage = 200;
 }
 
-BossDamageCollider::BossDamageCollider(BossEnemy& owner) :
+SpiderBossDamageCollider::SpiderBossDamageCollider(SpiderBoss& owner) :
 	m_owner(owner)
 {
 }
 
-std::vector<std::shared_ptr<ColliderShape>> BossDamageCollider::GetCollision() const
+std::vector<std::shared_ptr<ColliderShape>> SpiderBossDamageCollider::GetCollision() const
 {
 	//球はボスのOnInitで作り直されるので、毎回ボスから取得する
 	return { m_owner.GetDamageSphere() };
 }
 
-void BossDamageCollider::OnCollision(const ICollider& other)
+void SpiderBossDamageCollider::OnCollision(const ICollider& other)
 {
 	if (other.GetTag() == ColliderTag::PlayerBullet)
 	{
@@ -38,7 +38,7 @@ void BossDamageCollider::OnCollision(const ICollider& other)
 	}
 }
 
-bool BossDamageCollider::IsCollisionActive() const
+bool SpiderBossDamageCollider::IsCollisionActive() const
 {
 	return !m_owner.IsDead();
 }

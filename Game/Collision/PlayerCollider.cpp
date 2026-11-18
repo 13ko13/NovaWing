@@ -1,6 +1,6 @@
 ﻿#include "PlayerCollider.h"
 #include "BulletCollider.h"
-#include "BossBeamCollider.h"
+#include "SpiderBossBeamCollider.h"
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
 
 namespace
@@ -35,7 +35,7 @@ void PlayerCollider::OnCollision(const ICollider& other)
 		m_owner.TakeDamage(static_cast<const BulletCollider&>(other).GetAttackPower());
 		break;
 	case ColliderTag::BossBeam:
-		m_owner.TakeDamage(static_cast<const BossBeamCollider&>(other).GetDamage());
+		m_owner.TakeDamage(static_cast<const SpiderBossBeamCollider&>(other).GetDamage());
 		break;
 	case ColliderTag::RushEnemy:
 		m_owner.TakeDamage(hit_rush_enemy_damage);

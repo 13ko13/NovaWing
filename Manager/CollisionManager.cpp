@@ -10,12 +10,12 @@
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
 #include "Game/GameObjects/Actors/Rock/Rock.h"
 #include "Game/GameObjects/Camera/GameCamera.h"
-#include "Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.h"
+#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h"
 #include "Game/Collision/ICollider.h"
 #include "Game/Collision/SphereShape.h"
 #include "Game/Collision/EnemyCollider.h"
 #include "Game/Collision/RockCollider.h"
-#include "Game/Collision/BossBeamCollider.h"
+#include "Game/Collision/SpiderBossBeamCollider.h"
 #include "Game/GameObjects/Bullet/ReflectedBullet.h"
 #include "Game/Collision/BulletCollider.h"
 #include "Main/Application.h"
@@ -150,7 +150,7 @@ namespace
 			outSource = { DamageSourceType::Worm, static_cast<const EnemyCollider&>(collider).GetOwnerID() };
 			return true;
 		case ColliderTag::BossBeam:
-			outSource = { DamageSourceType::Beam, static_cast<const BossBeamCollider&>(collider).GetOwnerID() };
+			outSource = { DamageSourceType::Beam, static_cast<const SpiderBossBeamCollider&>(collider).GetOwnerID() };
 			return true;
 		case ColliderTag::Building:
 			outSource = { DamageSourceType::Building,static_cast<const BuildingCollider&>(collider).GetOwnerID() };
@@ -180,7 +180,7 @@ CollisionManager::CollisionManager(
 	const std::weak_ptr<Player> pPlayer,
 	const std::weak_ptr<BulletManager> pBulletManager,
 	const std::weak_ptr<GameCamera> pCamera,
-	const std::weak_ptr<BossEnemy> pBoss) :
+	const std::weak_ptr<SpiderBoss> pBoss) :
 	m_pPlayer(pPlayer),
 	m_pBulletManager(pBulletManager),
 	m_pCamera(pCamera),
@@ -216,7 +216,7 @@ void CollisionManager::Update()
 	//shared_ptrに変換
 	std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock();
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
-	std::shared_ptr<BossEnemy> pBoss = m_pBoss.lock();
+	std::shared_ptr<SpiderBoss> pBoss = m_pBoss.lock();
 
 	//判定中にオブジェクトが解放されないよう、このフレームの間shared_ptrで保持しておく
 	std::vector<std::shared_ptr<GameObject>> keepAlive;

@@ -432,3 +432,7 @@ DebugTools/ImGui/imgui.ini
 # Codexデスクトップアプリが「外部エージェントの取り込み同期」でCLAUDE.md/.claude/skillsから自動で作るコピー
 /AGENTS.md
 /.agents/
+# 2面ボスのモデルの途中ファイル(Tools/Boss2Model のスクリプトで作り直せる)
+Tools/Boss2Model/export/
+Tools/Boss2Model/*.blend
+Tools/Boss2Model/*.blend1

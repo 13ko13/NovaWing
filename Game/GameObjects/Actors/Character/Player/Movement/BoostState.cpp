@@ -5,7 +5,7 @@
 
 namespace
 {
-	constexpr float boost_speed = 17.0f;
+	constexpr float boost_speed = 30.0f;
 	//ブースト音がフェードアウトする時間
 	constexpr float boost_fade_out_time = 60.0f;
 

@@ -1,11 +1,11 @@
 ﻿#include <DxLib.h>
 #include <cassert>
 
-#include "BossIdleState.h"
-#include "SummonState.h"
-#include "BossEnemy.h"
+#include "SpiderBossIdleState.h"
+#include "SpiderBossSummonState.h"
+#include "SpiderBoss.h"
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
-#include "BossBeamState.h"
+#include "SpiderBossBeamState.h"
 
 namespace
 {
@@ -15,25 +15,25 @@ namespace
 	const Vector3 summon_pos_offset = Vector3(0.0f, 600.0f, -1550.0f);
 }
 
-BossIdleState::BossIdleState(
-	std::weak_ptr<BossEnemy> pBoss,
+SpiderBossIdleState::SpiderBossIdleState(
+	std::weak_ptr<SpiderBoss> pBoss,
 	std::weak_ptr<Player> pPlayer) :
-	IBossEnemyState(pBoss),
+	ISpiderBossState(pBoss),
 	m_pPlayer(pPlayer)
 {
 }
 
-BossIdleState::~BossIdleState()
+SpiderBossIdleState::~SpiderBossIdleState()
 {
 }
 
-void BossIdleState::Enter()
+void SpiderBossIdleState::Enter()
 {
 	//念のため攻撃フレームをリセット
 	m_attackFrame = 0;
 }
 
-void BossIdleState::Update()
+void SpiderBossIdleState::Update()
 {
 	//攻撃フレーム更新
 	m_attackFrame++;
@@ -60,7 +60,7 @@ void BossIdleState::Update()
 			summonPos = m_pBoss.lock()->GetPos();
 			summonPos += summon_pos_offset;
 			
-			ChangeState(std::make_shared<SummonState>(
+			ChangeState(std::make_shared<SpiderBossSummonState>(
 				m_pBoss,
 				summonPos,
 				m_pBoss.lock()->GetEnemyFactory()
@@ -72,7 +72,7 @@ void BossIdleState::Update()
 
 			//ビームステートに変更
 			ChangeState(
-				std::make_shared<BossBeamState>(
+				std::make_shared<SpiderBossBeamState>(
 					m_pBoss, m_pPlayer)
 				);
 
@@ -85,6 +85,6 @@ void BossIdleState::Update()
 	}
 }
 
-void BossIdleState::Exit()
+void SpiderBossIdleState::Exit()
 {
 }

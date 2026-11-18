@@ -3,18 +3,18 @@
 #include <memory>
 #include <string>
 
-class BossEnemy;
+class SpiderBoss;
 class Player;
 class CameraBase;
 class BulletManager;
 class EnemyFactory;
 class SoundManager;
 class EffectManager;
-class BossEnemyDataSetter
+class SpiderBossDataSetter
 {
 public:
     //敵を生成
-    static std::shared_ptr<BossEnemy> CreateEnemy(
+    static std::shared_ptr<SpiderBoss> CreateEnemy(
         std::weak_ptr<Player> pPlayer,
         std::weak_ptr<CameraBase> pCamera,
         std::weak_ptr<BulletManager> pBulletManager,

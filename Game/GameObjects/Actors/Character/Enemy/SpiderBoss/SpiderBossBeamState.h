@@ -1,19 +1,19 @@
 ﻿#pragma once
 #include <memory>
 #include <vector>
-#include "IBossEnemyState.h"
+#include "ISpiderBossState.h"
 #include "Utility/Vector3.h"
 #include "Game/Collision/SphereShape.h"
 
 class Player;
-class BossEnemy;
+class SpiderBoss;
 class EffectManager;
-class BossBeamState : public IBossEnemyState
+class SpiderBossBeamState : public ISpiderBossState
 {
 public:
-	BossBeamState(std::weak_ptr<BossEnemy> pBoss,
+	SpiderBossBeamState(std::weak_ptr<SpiderBoss> pBoss,
 	 std::weak_ptr<Player> pPlayer);
-	~BossBeamState();
+	~SpiderBossBeamState();
 
 	void Enter() override;
 	void Update() override;

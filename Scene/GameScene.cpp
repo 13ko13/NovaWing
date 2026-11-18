@@ -42,8 +42,8 @@
 #include "Game/GameObjects/Actors/Character/Enemy/WormEnemy/WormEnemyDataSetter.h"
 #include "Scene/ClearScene.h"
 #include "Game/UI/PlayerHPGaugeUI.h"
-#include "Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.h"
-#include "Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemyDataSetter.h"
+#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h"
+#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBossDataSetter.h"
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyFactory.h"
 #include "Game/UI/BossHPGaugeUI.h"
 #include "Manager/LightingManager.h"
@@ -172,7 +172,7 @@ void GameScene::Init()
 	m_pPlayer->SetCamera(m_pCamera);
 
 	//ボスエネミーの初期化
-	m_pBoss = BossEnemyDataSetter::CreateEnemy(
+	m_pBoss = SpiderBossDataSetter::CreateEnemy(
 		m_pPlayer,
 		m_pCamera,
 		m_pBulletManager,

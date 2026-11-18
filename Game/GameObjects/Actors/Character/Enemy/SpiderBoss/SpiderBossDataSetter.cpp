@@ -1,9 +1,9 @@
-﻿#include "BossEnemyDataSetter.h"
+﻿#include "SpiderBossDataSetter.h"
 #include "Manager/ResourceLoader.h"
 #include "Manager/CSVDataLoader.h"
 #include "CSVData/CSVData.h"
 #include "Utility/Vector3.h"
-#include "BossEnemy.h"
+#include "SpiderBoss.h"
 
 namespace
 {
@@ -11,7 +11,7 @@ namespace
     const wchar_t* const boss_csv_name = L"Boss";
 }
 
-std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
+std::shared_ptr<SpiderBoss> SpiderBossDataSetter::CreateEnemy(
         std::weak_ptr<Player> pPlayer,
         std::weak_ptr<CameraBase> pCamera,
         std::weak_ptr<BulletManager> pBulletManager,
@@ -20,7 +20,7 @@ std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
         const std::wstring& csvFolderName
 )
 {
-    std::shared_ptr<BossEnemy> pEnemy;
+    std::shared_ptr<SpiderBoss> pEnemy;
 
     //CSVLoaderにCSVをロードさせる
     CSVDataLoader& loader = CSVDataLoader::GetInstance();
@@ -46,7 +46,7 @@ std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
         Vector3 pos = Vector3::FromWString(
             dataString[1], dataString[2], dataString[3]);
 
-        BossEnemy::BossEnemyData bossData;
+        SpiderBoss::SpiderBossData bossData;
         bossData.Id = modelID;
         bossData.pBulletManager = pBulletManager;
         bossData.pCamera = pCamera;
@@ -56,7 +56,7 @@ std::shared_ptr<BossEnemy> BossEnemyDataSetter::CreateEnemy(
         bossData.pEffectManager = pEffectManager;
 
         //その位置と、pCameraで敵を一つ作成する
-        pEnemy = std::make_shared<BossEnemy>(bossData);
+        pEnemy = std::make_shared<SpiderBoss>(bossData);
     }
     //出来上がったボスのポインタを返す
     return pEnemy;

@@ -7,7 +7,7 @@
 #include "Utility/Vector3.h"
 
 class Player;
-class BossEnemy;
+class SpiderBoss;
 
 /// <summary>
 /// AIテストプレイ用:GameObjectManagerに登録されているオブジェクトを毎フレーム読み取り、
@@ -56,7 +56,7 @@ public:
 	//プレイヤー(ゲームシーン以外ではnullptr)
 	const std::shared_ptr<Player>& GetPlayer() const { return m_pPlayer; }
 	//ボス(いなければnullptr)
-	const std::shared_ptr<BossEnemy>& GetBoss() const { return m_pBoss; }
+	const std::shared_ptr<SpiderBoss>& GetBoss() const { return m_pBoss; }
 	//危険物
 	const std::vector<Threat>& GetThreats() const { return m_threats; }
 	//倒せる敵(ボス以外)
@@ -72,7 +72,7 @@ private:
 
 private:
 	std::shared_ptr<Player> m_pPlayer;
-	std::shared_ptr<BossEnemy> m_pBoss;
+	std::shared_ptr<SpiderBoss> m_pBoss;
 	std::vector<Threat> m_threats;
 	std::vector<Enemy> m_enemies;
 	std::vector<Enemy> m_allEnemyPositions;

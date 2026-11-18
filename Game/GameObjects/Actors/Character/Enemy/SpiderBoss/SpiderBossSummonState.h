@@ -1,18 +1,18 @@
 ﻿#pragma once
-#include "IBossEnemyState.h"
+#include "ISpiderBossState.h"
 #include "Utility/Vector3.h"
 
-class BossEnemy;
+class SpiderBoss;
 class EnemyFactory;
-class SummonState : public IBossEnemyState
+class SpiderBossSummonState : public ISpiderBossState
 {
 public:
-	SummonState(
-		std::weak_ptr<BossEnemy> pBoss,
+	SpiderBossSummonState(
+		std::weak_ptr<SpiderBoss> pBoss,
 		const Position3& summonPos,
 		std::weak_ptr<EnemyFactory> enemyFactory
 	);
-	~SummonState();
+	~SpiderBossSummonState();
 
 	void Enter() override;
 	void Update() override;

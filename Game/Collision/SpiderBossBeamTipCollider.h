@@ -1,11 +1,11 @@
 ﻿#pragma once
 #include "ICollider.h"
 
-class BossEnemy;
-class BossBeamTipCollider : public ICollider {
+class SpiderBoss;
+class SpiderBossBeamTipCollider : public ICollider {
 public:
-    BossBeamTipCollider(BossEnemy& owner,bool isRight);
-	virtual ~BossBeamTipCollider();
+    SpiderBossBeamTipCollider(SpiderBoss& owner,bool isRight);
+	virtual ~SpiderBossBeamTipCollider();
 	
 	std::vector<std::shared_ptr<ColliderShape>> GetCollision() const override;
     ColliderTag GetTag() const override;
@@ -14,7 +14,7 @@ public:
 
 private:
 	//当たり判定の持ち主
-	BossEnemy& m_owner;
+	SpiderBoss& m_owner;
 	//ビームの先端が右側かどうか
 	bool m_isRight = false;
 };

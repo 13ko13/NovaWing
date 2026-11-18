@@ -1,19 +1,19 @@
-﻿#include "BossShieldCollider.h"
+﻿#include "SpiderBossShieldCollider.h"
 #include "BulletCollider.h"
-#include "Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.h"
+#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h"
 
-BossShieldCollider::BossShieldCollider(BossEnemy& owner) :
+SpiderBossShieldCollider::SpiderBossShieldCollider(SpiderBoss& owner) :
 	m_owner(owner)
 {
 }
 
-std::vector<std::shared_ptr<ColliderShape>> BossShieldCollider::GetCollision() const
+std::vector<std::shared_ptr<ColliderShape>> SpiderBossShieldCollider::GetCollision() const
 {
 	//球はボスのOnInitで作り直されるので、毎回ボスから取得する
 	return { m_owner.GetInvinsibleSphere() };
 }
 
-void BossShieldCollider::OnCollision(const ICollider& other)
+void SpiderBossShieldCollider::OnCollision(const ICollider& other)
 {
 	if (other.GetTag() == ColliderTag::PlayerBullet)
 	{
@@ -27,7 +27,7 @@ void BossShieldCollider::OnCollision(const ICollider& other)
 	}
 }
 
-bool BossShieldCollider::IsCollisionActive() const
+bool SpiderBossShieldCollider::IsCollisionActive() const
 {
 	return !m_owner.IsDead();
 }

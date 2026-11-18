@@ -1,10 +1,10 @@
-﻿#include "SummonState.h"
+﻿#include "SpiderBossSummonState.h"
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyFactory.h"
-#include "BossIdleState.h"
+#include "SpiderBossIdleState.h"
 #include "Manager/ResourceLoader.h"
 #include "Manager/SoundManager.h"
 #include "Manager/EffectManager.h"
-#include "BossEnemy.h"
+#include "SpiderBoss.h"
 
 namespace
 {
@@ -12,22 +12,22 @@ namespace
 	const Vector3 summon_effect_offset = Vector3(300.0f, 0.0f, 0.0f);
 }
 
-SummonState::SummonState(
-	std::weak_ptr<BossEnemy> pBoss,
+SpiderBossSummonState::SpiderBossSummonState(
+	std::weak_ptr<SpiderBoss> pBoss,
 	const Position3& summonPos,
 	std::weak_ptr<EnemyFactory> pEnemyFactory) :
-	IBossEnemyState(pBoss),
+	ISpiderBossState(pBoss),
 	m_summonPos(summonPos),
 	m_pEnemyFactory(pEnemyFactory)
 {
 }
 
-SummonState::~SummonState()
+SpiderBossSummonState::~SpiderBossSummonState()
 {
 	
 }
 
-void SummonState::Enter()
+void SpiderBossSummonState::Enter()
 {
 	//召喚音を鳴らす
 	m_pBoss.lock()->GetSoundManager().lock()->Play(SoundManager::SoundType::BossSummon);
@@ -74,16 +74,16 @@ void SummonState::Enter()
 	}
 }
 
-void SummonState::Update()
+void SpiderBossSummonState::Update()
 {
 	//ボスが死んでいるなら処理を行わない
 	if (m_pBoss.lock() == nullptr) return;
 	//召喚は終了しているのでidleに戻る
 	ChangeState(
-		std::make_shared<BossIdleState>(m_pBoss, m_pBoss.lock()->GetPlayer())
+		std::make_shared<SpiderBossIdleState>(m_pBoss, m_pBoss.lock()->GetPlayer())
 	);
 }
 
-void SummonState::Exit()
+void SpiderBossSummonState::Exit()
 {
 }

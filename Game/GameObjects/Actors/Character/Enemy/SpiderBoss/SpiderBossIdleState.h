@@ -1,13 +1,13 @@
 ﻿#pragma once
-#include "IBossEnemyState.h"
+#include "ISpiderBossState.h"
 
 class Player;
-class BossIdleState : public IBossEnemyState
+class SpiderBossIdleState : public ISpiderBossState
 {
 public:
-	BossIdleState(std::weak_ptr<BossEnemy> pBoss,
+	SpiderBossIdleState(std::weak_ptr<SpiderBoss> pBoss,
 		std::weak_ptr<Player> pPlayer);
-	~BossIdleState();
+	~SpiderBossIdleState();
 
 	void Enter() override;
 	void Update() override;

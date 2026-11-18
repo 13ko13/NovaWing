@@ -1,23 +1,23 @@
 ﻿#include "DxLib.h"
-#include "BossBeamTipCollider.h"
-#include "Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.h"
-#include "Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossBeamState.h"
+#include "SpiderBossBeamTipCollider.h"
+#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h"
+#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBossBeamState.h"
 #include "Game/Collision/CounterCollider.h"
 
-BossBeamTipCollider::BossBeamTipCollider(BossEnemy& owner, bool isRight) :
+SpiderBossBeamTipCollider::SpiderBossBeamTipCollider(SpiderBoss& owner, bool isRight) :
 	m_owner(owner),
 	m_isRight(isRight)
 {
 }
 
-BossBeamTipCollider::~BossBeamTipCollider()
+SpiderBossBeamTipCollider::~SpiderBossBeamTipCollider()
 {
 }
 
-std::vector<std::shared_ptr<ColliderShape>> BossBeamTipCollider::GetCollision() const
+std::vector<std::shared_ptr<ColliderShape>> SpiderBossBeamTipCollider::GetCollision() const
 {
 	//現在のステートがボスビームステートか
-	std::shared_ptr<BossBeamState> pBeamState = std::dynamic_pointer_cast<BossBeamState>(m_owner.GetCurrentState());
+	std::shared_ptr<SpiderBossBeamState> pBeamState = std::dynamic_pointer_cast<SpiderBossBeamState>(m_owner.GetCurrentState());
 	if(!pBeamState)
 	{
 		return {};
@@ -34,12 +34,12 @@ std::vector<std::shared_ptr<ColliderShape>> BossBeamTipCollider::GetCollision() 
 	}
 }
 
-ColliderTag BossBeamTipCollider::GetTag() const
+ColliderTag SpiderBossBeamTipCollider::GetTag() const
 {
 	if(m_isRight)
 	{
 		//BossBeamStateにキャストして、右のビームが反射されているかを取得する
-		std::shared_ptr<BossBeamState> pBeamState = std::dynamic_pointer_cast<BossBeamState>(m_owner.GetCurrentState());
+		std::shared_ptr<SpiderBossBeamState> pBeamState = std::dynamic_pointer_cast<SpiderBossBeamState>(m_owner.GetCurrentState());
 		if (!pBeamState) return ColliderTag::BossBeamTip;
 		
 		if(pBeamState->IsReflectedR())
@@ -51,7 +51,7 @@ ColliderTag BossBeamTipCollider::GetTag() const
 	else
 	{
 		//BossBeamStateにキャストして、左のビームが反射されているかを取得する
-		std::shared_ptr<BossBeamState> pBeamState = std::dynamic_pointer_cast<BossBeamState>(m_owner.GetCurrentState());
+		std::shared_ptr<SpiderBossBeamState> pBeamState = std::dynamic_pointer_cast<SpiderBossBeamState>(m_owner.GetCurrentState());
 		if (!pBeamState) return ColliderTag::BossBeamTip;
 
 		if (pBeamState->IsReflectedL())
@@ -62,10 +62,10 @@ ColliderTag BossBeamTipCollider::GetTag() const
 	}
 }
 
-void BossBeamTipCollider::OnCollision(const ICollider& other)
+void SpiderBossBeamTipCollider::OnCollision(const ICollider& other)
 {
 	//現在のステートがボスビームステートか
-	std::shared_ptr<BossBeamState> pBeamState = std::dynamic_pointer_cast<BossBeamState>(m_owner.GetCurrentState());
+	std::shared_ptr<SpiderBossBeamState> pBeamState = std::dynamic_pointer_cast<SpiderBossBeamState>(m_owner.GetCurrentState());
 	if (!pBeamState) return;
 
 	//相手のタグがカウンターの時だけ処理
@@ -93,12 +93,12 @@ void BossBeamTipCollider::OnCollision(const ICollider& other)
 	
 }
 
-bool BossBeamTipCollider::IsCollisionActive() const
+bool SpiderBossBeamTipCollider::IsCollisionActive() const
 {
 	//ボスが生きているか
 	bool isAlive = !m_owner.IsDead();
 	//今のステートがBossBeamStateか
-	std::shared_ptr<BossBeamState> pBeamState = std::dynamic_pointer_cast<BossBeamState>(m_owner.GetCurrentState());
+	std::shared_ptr<SpiderBossBeamState> pBeamState = std::dynamic_pointer_cast<SpiderBossBeamState>(m_owner.GetCurrentState());
 	//dynamic_castで、キャストできれば現在はBossBeamStateであることがわかる
 	bool isBeamState = pBeamState != nullptr;
 	//ビームステートではない時点で処理を飛ばす

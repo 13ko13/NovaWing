@@ -1725,7 +1725,7 @@
 - **CSVをExcelで編集できるように**: `CSVDataLoader::GetWStringList`でUTF-16に変換した直後、先頭が`L'\uFEFF'`(BOM)なら1文字消す([CSVDataLoader.cpp:100-105](Manager/CSVDataLoader.cpp#L100-L105)、ユーザー実装)。Excelの「CSV UTF-8 (コンマ区切り)」で保存するとBOMが付き、ヘッダー名で列を探す(`GetColumnIndex`)ときに1列目が一致しなくなるため。先輩のProjectNeaRはヘッダー行を捨てて列番号で読むので、BOMがあっても困らない(NovaWingはヘッダー名で探すので必要)。
   - **Excelでの編集ルール**: 保存形式は必ず「CSV UTF-8 (コンマ区切り)」(ただの「CSV」はShift-JISで文字化け)。メッセージに半角`,`は使えない。`\n`は日本語フォントでは`¥n`に見えるが同じ文字。`Tutorial.csv`はBOM付きにした(ダブルクリックで開ける)。`TutorialEnemy.csv`はまだBOMなし(初回は「データ→テキストまたはCSVから」でUTF-8指定して開き、CSV UTF-8で保存)。
 - **文字列→enum**: `TutorialController.cpp`の匿名名前空間に`ToTaskType`/`ToEnemyType`(`static const unordered_map`→`find`→無ければ`assert`して`None`)。ヘッダーではなく匿名名前空間にした理由: この.cppでしか使わず、メンバ変数も使わないため(ヘッダーに書くとincludeしている全員が再コンパイル)。
-- **`EnemyFactory::EnemyType`に`None`を先頭に追加**(Claude、ユーザー依頼)。ボスの召喚([SummonState.cpp:35-40](Game/GameObjects/Actors/Character/Enemy/BossEnemy/SummonState.cpp#L35-L40))の乱数を`None`の次〜`Max`の手前にした(マジックナンバーなしで`None`/`Max`から計算)。
+- **`EnemyFactory::EnemyType`に`None`を先頭に追加**(Claude、ユーザー依頼)。ボスの召喚([SummonState.cpp:35-40](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBossSummonState.cpp#L35-L40))の乱数を`None`の次〜`Max`の手前にした(マジックナンバーなしで`None`/`Max`から計算)。
 - **読み込み**(ユーザー実装): `Stage1/Tutorial`を1行ずつ`TutorialStepData`→`StepData`→`m_steps`。`Stage1/TutorialEnemy`を1行ずつ`TutorialEnemyData`→種類が`None`なら飛ばす→`m_steps[stepID].spawnData`に追加。
   - **ルール(ユーザー決定: ステップはあまり増減しないので表を作らない)**: **stepIDは0から順番に振り、行の順番と一致させる**(敵のCSVがstepIDをそのまま添字に使う)。ずれたら起動時に`assert`で止まる。ステップを消す・並べ替えるときは両方のCSVのstepIDを振り直す。
   - 直したバグ: 範囲チェックが`size() < stepID`で`stepID == size()`を素通りしていた→`<=`。
@@ -1880,7 +1880,7 @@
 - **(10/22ユーザー決定)新しい敵(蝶・固定砲台・突進)など、コスト表にある新しい要素は全部2面用。** 1面には出さない。
 - **(10/22タスク追加・コスト表 敵全体＞「個体ごとに動きと攻撃のタイミングをずらす」1h/A/アルファ)**: 敵が同じ瞬間に撃つ・同時に動き出す・全員同じ動きなのが変。案: 生成時に個体ごとの乱数(撃つ間隔の開始のずれ、揺れの周期のずれ等)を持たせる。
 - (10/22)投射物の基底クラス(`ProjectileBase`仮)を`BulletBase`の上に作る案が出たが、**ユーザー判断で取りやめ**。参考: 今のビームは`BossBeamState`が位置を持ちコライダーはボスのもの(オブジェクトではない)、動きも「伸びる」。次のボスで投射物を作るときに改めて検討。
-- **(10/22完了・ユーザー確認「いい感じ」)カウンター成功時のスロー・カメラの揺れ**: `GameScene`の間引き更新をやめて毎フレーム更新に戻し、移動にタイムスケールを掛ける方式に変更。掛けている場所: `Character::Update`(プレイヤーは`IsAffectedByTimeScale()`=falseで除外)、`BulletBase::Update`、ワームの前進、ボスのビームの先端([BossBeamState.cpp:140-141・245-252](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossBeamState.cpp#L245-L252))。カメラは毎フレーム更新なので揺れ・追従は通常速度。`Application::ResetTimeScale()`を`GameScene::Init`で呼ぶ。スロー0.3倍・30F、揺れ5・12F。コスト表: 見積2h/実3hで完了、親「横回転反射」も完了に(プロト残14h)。**掛かっていないもの**(必要なら): フレームカウンター(撃つ間隔・状態の時間)、弾の寿命、アニメーション、エフェクトの再生、ワームの螺旋の回転、海の時間。
+- **(10/22完了・ユーザー確認「いい感じ」)カウンター成功時のスロー・カメラの揺れ**: `GameScene`の間引き更新をやめて毎フレーム更新に戻し、移動にタイムスケールを掛ける方式に変更。掛けている場所: `Character::Update`(プレイヤーは`IsAffectedByTimeScale()`=falseで除外)、`BulletBase::Update`、ワームの前進、ボスのビームの先端([BossBeamState.cpp:140-141・245-252](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBossBeamState.cpp#L245-L252))。カメラは毎フレーム更新なので揺れ・追従は通常速度。`Application::ResetTimeScale()`を`GameScene::Init`で呼ぶ。スロー0.3倍・30F、揺れ5・12F。コスト表: 見積2h/実3hで完了、親「横回転反射」も完了に(プロト残14h)。**掛かっていないもの**(必要なら): フレームカウンター(撃つ間隔・状態の時間)、弾の寿命、アニメーション、エフェクトの再生、ワームの螺旋の回転、海の時間。
 - **(10/22)2面の制作に着手(ユーザー決定)。** 当たり判定と岩(ノーマル/チャージ)はいったん放置→優先度Bに変更済み。コスト表に追加: ゲームループ＞「ステージの切り替え(1面クリア→2面)」5h/S/プロト、ステージ＞「2面の建物をUnityで配置して読み込む」3h/S/プロト(建物はUnityで置いてCSV経由で読み込む、ユーザー方針)。進め方: ①ステージ切り替えの土台(`StageConfig`、`GameScene`が設定でCSVフォルダ・海の有無・チュートリアルの有無等を切り替え、クリア後に次のステージで作り直す) ②仮の2面(Unityで建物を配置) ③新しい敵3種(突進→固定砲台→蝶) ④2面の配置 ⑤見た目(アルファ) ⑥音(ベータ)。
   - **次回(返事待ち)**: 1面のボスを倒したあと2面へどう進むか。A案(Claude推奨): クリア画面(リザルト)を見せてから選択肢に「次のステージへ」を足す([ClearScene.cpp:332-350](Scene/ClearScene.cpp#L332-L350)の`ClearSelect`に1つ追加)。B案: クリア画面を出さずにそのまま2面へ。決まったら`StageConfig`の設計(CSVフォルダ名・海の有無・チュートリアルの有無・次のステージ、`GameScene`のコンストラクタで受け取り、リトライ4か所は同じステージを渡す)に進む。
   - 今のコードで「Stage1」固定の場所: 各DataSetterのCSV名(`FloatingEnemy`/`WormEnemy`/`Rock`/`Boss`/`Scenery`)、`TutorialController`の`Tutorial`/`TutorialEnemy`。`GameScene`を作っている所: `TitleScene.cpp:287`・`PauseScene.cpp:183`・`GameoverScene.cpp:139`・`ClearScene.cpp:338`(リトライ)。`ClearScene`の選択肢は`ReTry`/`BackTitle`の2つ。
@@ -2375,7 +2375,7 @@
 
 ### 2026-11-11 ボス登場: WARNING中はプレイヤーを止めず、ムービーから止める(コミット`940a91d`)
 - **(ユーザー実装)** [GameScene.cpp:510](Scene/GameScene.cpp#L510)の`ChangeAllStateToDisabled()`(ボス登場Zに着いた瞬間に止めていた)をコメントアウトし、[GameScene.cpp:548](Scene/GameScene.cpp#L548)の`case BossApearState::Movie:`で止める。毎フレーム呼んでも[Player.cpp:673](Game/GameObjects/Actors/Character/Player/Player.cpp#L673)で2回目以降は何もしない。
-- **(ユーザー依頼「CSVのボスの位置をその分ずらせばいい」、Claude)** ボスは出現前は動かない([BossEnemy.cpp:158](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.cpp#L158)の`m_isAppear`まで)ので、WARNING中に進む分だけボスを奥へ: [Stage1/Boss.csv](Data/CSV/Stage1/Boss.csv#L2) 62200→**64960**、[Stage2/Boss.csv](Data/CSV/Stage2/Boss.csv#L2) 61100→**63860**(+2760)。
+- **(ユーザー依頼「CSVのボスの位置をその分ずらせばいい」、Claude)** ボスは出現前は動かない([BossEnemy.cpp:158](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.cpp#L158)の`m_isAppear`まで)ので、WARNING中に進む分だけボスを奥へ: [Stage1/Boss.csv](Data/CSV/Stage1/Boss.csv#L2) 62200→**64960**、[Stage2/Boss.csv](Data/CSV/Stage2/Boss.csv#L2) 61100→**63860**(+2760)。
   - 2760＝15×184フレーム: 着いたフレーム(None→Start)の次から、Start 1F・揺れ(`m_shakeFrame`180から減らして`<0`で終わる)が終わるまで・Movieに切り替わった次のフレーム(そこで速度0)まで。
   - **ずれる場合**: WARNING中にブースト・ブレーキを使うと進む量が変わり、そのぶん距離がずれる(ユーザーはCSVで固定にする方を選んだ。きっちり合わせるなら、Startで「プレイヤーから見たボスのZ」を覚えて、ムービー開始時に置き直す方法がある)。
   - WARNING中は`m_isDisabled`が立たないので、被弾・岩との衝突は起きる。WARNING中に死んだときの流れは未確認。
@@ -2504,16 +2504,16 @@
 - 未確認(ゲーム内): 手前の機体との重なり、チャージ中に始まるロックオンのレティクルと閉じてくる輪が紛らわしくないか、離したときの縮小(`SetScale`)での消え方。前の版の「気になった点」(離すと玉がすぐ消える、など)はそのまま。
 
 ### 2026-11-17 ボスの残り作業の仕様(ユーザー決定。コードはユーザーが書く)
-- **頭の赤い点滅 = 顔(黄色く光る部分)だけを赤くする。方法はテクスチャの切り替え。** 発光マップ`Data/Model/Boss.fbm/T_Mech_LOD2_E.png`(4096×4096)の左下寄り(UVで横0.24〜0.38・縦0.68〜0.79)の大きな形が顔(ベース色`T_Mech_LOD2_B.png`の顔のプレートと同じ位置)。[BossEnemy::DrawEnemy](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.cpp#L352-L359)で渡す`emissionGraphH`を、点滅中だけ赤い版にする。開始は[TakeDamage](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.cpp#L293)(頭のダメージ判定のときだけ呼ばれる。シールドは`OnHitInvincibleCol`)。ベース色の顔は黄〜オレンジなので、発光だけ赤くするとオレンジに見える可能性あり→そのときはベース色も`MV1SetTextureGraphHandle`で替える。赤い版の画像はClaudeが作れる(顔だけか、ほかの黄色も含むかは未決定)。
+- **頭の赤い点滅 = 顔(黄色く光る部分)だけを赤くする。方法はテクスチャの切り替え。** 発光マップ`Data/Model/Boss.fbm/T_Mech_LOD2_E.png`(4096×4096)の左下寄り(UVで横0.24〜0.38・縦0.68〜0.79)の大きな形が顔(ベース色`T_Mech_LOD2_B.png`の顔のプレートと同じ位置)。[BossEnemy::DrawEnemy](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.cpp#L352-L359)で渡す`emissionGraphH`を、点滅中だけ赤い版にする。開始は[TakeDamage](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.cpp#L293)(頭のダメージ判定のときだけ呼ばれる。シールドは`OnHitInvincibleCol`)。ベース色の顔は黄〜オレンジなので、発光だけ赤くするとオレンジに見える可能性あり→そのときはベース色も`MV1SetTextureGraphHandle`で替える。赤い版の画像はClaudeが作れる(顔だけか、ほかの黄色も含むかは未決定)。
   - **(ユーザー依頼でClaudeが実装)赤い版の画像とパス・登録**: 画像は`Data/Model/Boss.fbm/T_Mech_LOD2_E_Damage.png`(2048×2048。顔の範囲=元の4096でx950〜1620・y2740〜3260だけ、明るさを保って赤(255,25,20)に置き換え。右隣の黄色い丸などはそのまま)。生成は[make_damage_emission.ps1](Data/Model/Boss.fbm/tools/make_damage_emission.ps1)(`-Size 4096`で元と同じ大きさにもできる)。パス`boss_emission_damage_path`([ResourceConstants.h:122](Constants/ResourceConstants.h#L122))、GraphicID`BossEmissionDamage`([ResourceLoader.h:128](Manager/ResourceLoader.h#L128))、表([ResourceLoader.cpp:86](Manager/ResourceLoader.cpp#L86))、`game.graphics`([ResourceLoader.cpp:539](Manager/ResourceLoader.cpp#L539))。Debug x64のビルドOK。
   - 見え方の予想([damage_preview.png](Data/Model/Boss.fbm/tools/review/damage_preview.png)、ベース色×明るさ0.3/0.7＋発光、左から 元/赤 ×2、下段は発光だけ): 光が弱い所では赤寄りのオレンジ、強い所ではオレンジ。ベース色の顔が黄色いので、発光だけでは真っ赤にはならない。黄色との違いははっきりわかる。
   - **ベース色も赤くする案はやめた(ユーザー決定)。** 試しにベース色の顔も赤くした版を作ると、光の強さに関係なくはっきり赤になった。ただしベース色はモデル自身のテクスチャなので、`MV1SetTextureGraphHandle`で差し替えるコードが要る(元に戻すときは画像に`-1`)。画像とスクリプトは削除し、発光だけの版に戻した。
-  - **(ユーザー実装)点滅ができた(ビルドOK、ゲーム内は未確認)**: `m_damageBlinkingFrame`([BossEnemy.h](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.h))を`TakeDamage`で1にして開始、`Update`で`blinking_frame`(30F)を超えたら0に戻す。`DrawEnemy`で、通常の発光と`BossEmissionDamage`を交互に渡す。
+  - **(ユーザー実装)点滅ができた(ビルドOK、ゲーム内は未確認)**: `m_damageBlinkingFrame`([BossEnemy.h](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h))を`TakeDamage`で1にして開始、`Update`で`blinking_frame`(30F)を超えたら0に戻す。`DrawEnemy`で、通常の発光と`BossEmissionDamage`を交互に渡す。
   - 気づいた点(未変更): 切り替えの条件`m_damageBlinkingFrame % blinking_interval * 2 < blinking_interval`は、`%`と`*`が同じ優先順位で左から計算されるので`(frame % 10) * 2 < 10`、つまり5Fごとの切り替えになる。10Fごとのつもりなら`frame % (blinking_interval * 2) < blinking_interval`。点滅のカウントは`m_isAppear`の中で進むので、死亡中は進まない(最後の一撃で1になる→通常の発光のまま止まる)。
   - **生成スクリプトと比較画像(`Data/Model/Boss.fbm/tools/`)はコミットしていない。** 「Data/にはゲームで使うものだけを置く」方針(下の「Data/Effect の未使用素材と tools/ を削除した」)に合わせた。ローカルにだけある。
-- **死亡時のまわりのエフェクトは、ゆっくりフェードして消す。** 原因: 死亡待機中([BossEnemy.cpp:205-221](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.cpp#L205-L221))はステートの`Update`/`Exit`が呼ばれず、ビームは[BossBeamStateのデストラクタ](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossBeamState.cpp#L67-L83)でしか止まらない→ボスが消えるまでビームが残る。前例: ボスに当たったビームを消す[FadeOutHitBeam](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossBeamState.cpp#L433-L452)(長さは`hit_boss_fade_frame`=30F固定)。
+- **死亡時のまわりのエフェクトは、ゆっくりフェードして消す。** 原因: 死亡待機中([BossEnemy.cpp:205-221](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.cpp#L205-L221))はステートの`Update`/`Exit`が呼ばれず、ビームは[BossBeamStateのデストラクタ](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBossBeamState.cpp#L67-L83)でしか止まらない→ボスが消えるまでビームが残る。前例: ボスに当たったビームを消す[FadeOutHitBeam](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBossBeamState.cpp#L433-L452)(長さは`hit_boss_fade_frame`=30F固定)。
 - **死亡中はUIを消す。** UIは全部[GameScene.cpp:786](Scene/GameScene.cpp#L786)の`m_pUIManager->Draw()`で描いている(照準・HP・ボスHP・特殊ゲージ・WARNING)。
-- **見つけた問題: ボスの死亡待機中もビームの当たり判定が生きている。** [BossBeamCollider.cpp:29-33](Game/Collision/BossBeamCollider.cpp#L29-L33)と[BossBeamTipCollider.cpp:96](Game/Collision/BossBeamTipCollider.cpp#L96)は`IsDead`だけを見ていて`IsDying`を見ない。ほかの敵は`GetColliders`で死亡中なら空を返している(例: [RushEnemy.cpp:145](Game/GameObjects/Actors/Character/Enemy/RushEnemy/RushEnemy.cpp#L145))。ボスを倒した後にビームでプレイヤーが死ぬと、ゲームオーバーになるおそれ(未確認)。
+- **見つけた問題: ボスの死亡待機中もビームの当たり判定が生きている。** [BossBeamCollider.cpp:29-33](Game/Collision/SpiderBossBeamCollider.cpp#L29-L33)と[BossBeamTipCollider.cpp:96](Game/Collision/SpiderBossBeamTipCollider.cpp#L96)は`IsDead`だけを見ていて`IsDying`を見ない。ほかの敵は`GetColliders`で死亡中なら空を返している(例: [RushEnemy.cpp:145](Game/GameObjects/Actors/Character/Enemy/RushEnemy/RushEnemy.cpp#L145))。ボスを倒した後にビームでプレイヤーが死ぬと、ゲームオーバーになるおそれ(未確認)。
 - **2026-11-17続き: 輪を全部外した。** ユーザー「わっか見たいなやついらない。ダサい」。`GaugeRing`・`HoldRim`・`HoldPulse`・`ChargedRing`・`ChargedRingGlow`を削除し、使わなくなった`CS6T_Ring.png`も消した(ごみ箱)。残りは、深い緑の玉(`Backing`)が0〜20Fで大きくなる＋プラズマ・吸い込まれる火花・芯、20Fの一拍は`ChargedBurst`(八芒星)・`ChargedFlash`・`ChargedSparks`。4つの背景で玉と20Fの星は見える。**輪が受け持っていた「溜めの進み具合」と「溜まった後」の表示がなくなったので、15F(溜め中)と25F以降(保持)の見た目が近い。** →次の項目で、輪以外の方法を足した。
 - **2026-11-17続き2: 保持中に玉が脈打つようにした(輪の代わり)。** 大きさの変化は明るい背景でも暗い背景でも見えるので、通常合成の玉`Backing`と加算の芯`Core`の大きさを、FCurve(フレーム指定、最後をLoop)で18Fごとに膨らませて戻す。玉は2.5→3.0→2.5倍、芯は1.5→2.0→1.5倍(9Fで最大)。どちらも20Fに出るので同じ位相で動く。溜め中は玉が大きくなり続け、保持中はその場で脈打つ、という動きの違いで見分ける。
 
@@ -2530,16 +2530,77 @@
 - **つまずき: `m_pCamera->SetUpCamera()`をUIの描画より後ろに置いたら、レティクルが機体の回転についてこなくなった。** レティクルは`ConvWorldPosToScreenPos`(そのとき設定されているカメラを使う)で位置を出す。水滴・ブーストで画面を切り替えるとカメラの設定が崩れるので、**UIを描く前に`SetUpCamera()`が必要**。UIの前に戻して直った。
 - ボスの点滅の条件式を`frame % (blinking_interval * 2) < blinking_interval`に直し、間隔を10→5にした(ユーザー)。点滅は問題なし。
 - コスト表: 「ボスの頭を攻撃したら赤く点滅」「スターフレアの組み込み」を完了(実コスト=見積の1h)。「ステージ1ボス」の下に「死亡中はUIを消す・水滴を止める」(1h・S・アルファ・完了)を追加。コスト表の「ボス(仕様未定)」は2面のボスの行なので、1面の作業は紐づけない。
-- **次**: 「ボス死亡時のまわりのエフェクトを消す」(1.5h・S)。ビームは死亡待機中に止まらない([BossBeamStateのデストラクタ](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossBeamState.cpp#L67-L83)でしか止まらない)。ゆっくりフェードして消す(前例: `FadeOutHitBeam`)。ビームの当たり判定が死亡中も生きている問題は別。
+- **次**: 「ボス死亡時のまわりのエフェクトを消す」(1.5h・S)。ビームは死亡待機中に止まらない([BossBeamStateのデストラクタ](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBossBeamState.cpp#L67-L83)でしか止まらない)。ゆっくりフェードして消す(前例: `FadeOutHitBeam`)。ビームの当たり判定が死亡中も生きている問題は別。
 
 ### 2026-11-17 ボス死亡時のまわりのエフェクト(ビーム)を消す: 設計の途中(コードはまだ。ユーザーは集中が切れたので今日はここまで)
 - 目的: 死亡待機に入ったらビームを**ゆっくりフェードして消す**(コスト表「バグ修正＞ボス死亡時のまわりのエフェクトを消す」1.5h・S・アルファ。未着手)。
-- 原因: [BossEnemy.cpp:161](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossEnemy.cpp#L161)の`if (!m_isDying)`の中に`m_pState->Update()`があるので、死亡待機中はステートの`Update`が呼ばれず、ビームのエフェクトは[BossBeamStateのデストラクタ](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossBeamState.cpp#L67-L83)でしか止まらない(ボスが消えるまで残る)。
-- 前例: [FadeOutHitBeam](Game/GameObjects/Actors/Character/Enemy/BossEnemy/BossBeamState.cpp#L433-L453)(`playH`と`fadeFrame`を参照で受け、アルファを下げ、`hit_boss_fade_frame`=30Fで`Stop`して`playH=-1`)。ボスに当たったビームだけ、`Update`内で呼んでいる。
+- 原因: [BossEnemy.cpp:161](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.cpp#L161)の`if (!m_isDying)`の中に`m_pState->Update()`があるので、死亡待機中はステートの`Update`が呼ばれず、ビームのエフェクトは[BossBeamStateのデストラクタ](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBossBeamState.cpp#L67-L83)でしか止まらない(ボスが消えるまで残る)。
+- 前例: [FadeOutHitBeam](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBossBeamState.cpp#L433-L453)(`playH`と`fadeFrame`を参照で受け、アルファを下げ、`hit_boss_fade_frame`=30Fで`Stop`して`playH=-1`)。ボスに当たったビームだけ、`Update`内で呼んでいる。
 - **決まったこと(ユーザー)**: ステートに知らせる形(前者)。`BossEnemy`が死んだ瞬間に`m_pState`へ伝え、`BossBeamState`だけが自分のビームを消す。ボス側へビームのハンドルを移す案は、変更が大きいので採らない。
 - **ユーザーの提案**: 「`BossBeamState`の中でボスが死んだかどうかを確かめればいいのでは」。→ 概念は正しいが、**死亡待機中は`Update`が呼ばれない**ので、そのままでは動かない。
 - **分かれ道(未決定。Claudeは A を勧めた)**:
   - **A**: `m_pState->Update()`を死亡待機中も呼ぶ。`BossBeamState::Update`の先頭で、死亡中ならフェードだけして`return`。代償: `IdleState`と`SummonState`の`Update`も死亡中に走るので、**特にSummonは死亡中に敵を呼ぶおそれ** → その2つにも「死亡中なら何もしない」が要る。
   - **B**: `IBossEnemyState`に中身が空の仮想関数`OnBossDying()`を足し(名前候補: `OnBossDying`/`OnDeath`/`NotifyDying`)、死んだ瞬間に1回だけ呼ぶ。ただし毎フレームのフェードを進めるには`Update`相当の呼び出しが要るので、結局どこかで回す必要がある。
-- ビームの当たり判定が死亡中も生きている問題(未確認)は別。[BossBeamCollider.cpp:29-33](Game/Collision/BossBeamCollider.cpp#L29-L33)・[BossBeamTipCollider.cpp:96](Game/Collision/BossBeamTipCollider.cpp#L96)が`IsDead`だけ見て`IsDying`を見ない。
+- ビームの当たり判定が死亡中も生きている問題(未確認)は別。[BossBeamCollider.cpp:29-33](Game/Collision/SpiderBossBeamCollider.cpp#L29-L33)・[BossBeamTipCollider.cpp:96](Game/Collision/SpiderBossBeamTipCollider.cpp#L96)が`IsDead`だけ見て`IsDying`を見ない。
 - **次**: AかBを決める → 選んだ形で実装 → フェードの長さを決める(`hit_boss_fade_frame`の30Fより長くする?仕様は「ゆっくり」) → ゲームで確認(死亡中にビームが残らないか、倒した後にビームでプレイヤーが死なないか)。
+- (11/18)↑はA/B未決定のまま。ユーザーは先に2面のボスの仕様決めに移った。
+
+### 2026-11-18 2面のボスの仕様決め(途中。コードはまだ)
+- **狙い(ユーザー)**: ちゃんと動き回る。第二形態がある。少し苦戦する。「避けて弾を当てる」をくり返す、しっかりした戦闘のループ。
+  - 1面ボスとの違い: 1面はプレイヤーの前進の速さだけを写してついてくる(x・yは0、[BossEnemy.cpp:166-170](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.cpp#L166-L170))。攻撃は3秒ごとに召喚かビームをランダムで選ぶ([BossIdleState.cpp:41-55](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBossIdleState.cpp#L41-L55))。
+  - 根拠: ループは「予兆→攻撃→隙」(『攻撃モーションの内訳』『かまえは瞬時に極端に』)。第二形態はHPを増やすのではなくリズムか動き方を変える(『単調な坂は山登りにならない』『ギュッとしてパッと解消』)。苦戦させるならやり直しは速く(『リトライは迅速に』)→今はゲームオーバーからのリトライでステージの最初に戻る。ボスの前からやり直せる仕組みは別の作業として検討。
+- **第一形態の主役の攻撃(ユーザー決定)**: ボスの前の空間に、右上→左下と左上→右下の斜めのレーザーを何本も並べて**バツ型の網目**を作る。**網はその場に置いたまま**(プレイヤーは前進し続けるので、網が壁のように近づいてくる→網目のすき間をくぐり抜ける。※Claudeがこう受け取った、ユーザーの否定はなし)。
+  - 案: 「細い線で予告→太くなって当たり判定あり」の2段階(【予告の長さ】【判定がある長さ】【消えるまでの長さ】)。曇り空・雨で埋もれないよう、芯は明るく外側に暗い層。網が自分の所に来るタイミングの手がかり(地面に光の線など)。
+  - 公平さ: プレイヤーの当たり判定は半径50([Player.cpp:50](Game/GameObjects/Actors/Character/Player/Player.cpp#L50))。網目のひし形に内接する円の半径=(平行な線の間隔−レーザーの太さ)÷2 を50より十分大きく。飛べる範囲(左右±1600・高さ100〜900)のどこを通っても網目が1つ以上あるように。
+  - 当たり判定: 今の形は球とメッシュだけ([ColliderShape.h:6-9](Game/Collision/ColliderShape.h#L6-L9))→カプセル(線分×球、DxLibの`HitCheck_Sphere_Capsule`)を足すのが自然。1本ずつのオブジェクトか網1枚で1つかは実装時に決める。
+- **隙の形(ユーザー決定)= A「撃った後に放熱する」**: 網を撃ち終わると発射口が開いて熱を逃がし(数秒)、開いている間だけそこが弱点。案: 隙の長さはチャージショットを1発撃てる長さ以上。(候補だったB=網を出す子機を撃つと網が消える、C=くぐった後にボスが背中・コアを見せる、は採らなかった)
+- **モデルの方針(ユーザー)**: 仕様をある程度決めてから、それに合わせたモデルをClaudeが作る。**人型にはしない**(AIは人型のアニメーションが下手なため)。アニメーションは1面ボスと同じくモデルに入れ、コードは名前で探して`ModelAnimator`で再生するだけ([BossEnemy.cpp:116](Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.cpp#L116))。描画は1面と同じスキンありの描き方(`DrawWithLighting(textures, true)`)。Blender 4.2・5.2がこのPC(家)にある→Pythonで形・ボーン・キーフレームまで作ってFBXに書き出せる。
+  - アニメーションごとに、待機ポーズ・攻撃ポーズ・攻撃が出るフレーム・全体のフレーム数を決めておく(『攻撃モーションの内訳』)。
+- 規模の注意: アルファ残り46.5h、締め切り12/3。コスト表の「ボス(仕様未定)」は今「死亡」1hだけなので、仕様が決まったら見積を足す。攻撃は形態ごとに1〜2種類、第二形態は第一形態の攻撃を作り変えて使い回す程度が現実的。
+- **動き方(ユーザー決定)= 飛ぶ**(1面のボスは海面に立っていたので、違いを出す)。曇り空に溶けないよう、暗めの本体と光る発射口などで明度差を付ける(『シルエットが命』『判定のあるものを強調する』)。
+- **発射口(ユーザー決定)= 2つ。場所はClaudeに任せる** → Claudeの案(ユーザーの反対なし、モデルを作るときの前提):
+  - 横に長い飛行体。中央に暗い色の装甲の胴体、左右の上に張り出した腕の先に発射口のポッドが1つずつ。
+  - 右上のポッド=右上→左下の線、左上のポッド=左上→右下の線(線がポッドの方向から伸びる)。2つの光の色を少し変えると対応がはっきりする(例: 青寄りと紫寄り)。
+  - 隙: 閉じている間は暗い装甲、開くと中が赤く光る(発光マップの切り替え=1面ボスの赤い点滅と同じ方法)。閉じた装甲に当たったら火花と硬い音(ダメージなし、1面ボスのシールドの`OnHitInvincibleCol`と同じ考え方)。
+  - ロックオンは敵1体につき`GetPos()`の1か所だけ([TargetManager.cpp:58](Manager/TargetManager.cpp#L58))→ボスだけ「ロックオンで狙う位置」を返す関数が要る(名前の候補: `GetLockOnPos`/`GetAimPos`)。開いている間は照準に近いほうのポッド、など(実装時に決める)。
+  - 第二形態へのつながり(案): 片方のポッドが壊れて左右非対称のシルエットになる。
+- **第二形態(ユーザー決定)**: 攻撃の種類を3種類ほどにする・網のリズムを変える・動きを少し速く・形も変える(全部)。※Claudeは「攻撃は網＋新しい2種類で計3種類」と受け取った(未確認)。
+- **規模(Claudeの目安、ユーザー未確認)**: ボスの共通化3h・飛ぶ動き2h・網のレーザー5h・放熱の隙/弱点/ロックオン位置2h・形態変化3h・新しい攻撃2種6h・リズムと速さ1h・2面の登場演出2h・モデルの確認と変換2h=約26h。アルファ残りはボス抜きで46.5h(12/3まで16日、2.9h/日が必要、今の平均2.15h/日)→足すと約72h(4.5h/日)。
+  - Claudeの案: アルファの優先度B・C(計18.5h)と海のリアル化(6h)をベータへ回す → **ユーザー判断で回さない**。優先度の低いものは時間があれば後で作る扱いでよく、ベータに移すとベータのコストが増えたように見えるので、コスト表のバージョンはそのままにする。
+- **2つ目の攻撃(ユーザー案)= 扉**: プレイヤーの前方に扉のようなものを出し、ブーストかブレーキを強いる。Claudeの受け取り: 扉が開閉をくり返し、普通の速さだとちょうど閉じている時に着く→ブーストで開いているうちに抜けるか、ブレーキで次に開くのを待つ(未確認)。網=位置、扉=タイミングで役割が分かれる(『対戦は複雑になるもの?』)。
+  - **見つけた点(未変更)**: ブースト中の前進は17([BoostState.cpp:8](Game/GameObjects/Actors/Character/Player/Movement/BoostState.cpp#L8))で、普通の前進18([MovingState.cpp:11](Game/GameObjects/Actors/Character/Player/Movement/MovingState.cpp#L11)・[IdleMovementState.cpp:12](Game/GameObjects/Actors/Character/Player/Movement/IdleMovementState.cpp#L12))より遅い。11/16に普通の前進を18にそろえたためと思われる。ブレーキは2([BrakeState.cpp:7](Game/GameObjects/Actors/Character/Player/Movement/BrakeState.cpp#L7))。扉の攻撃にはブーストの見直しが要る(値はユーザーが決める)。
+  - 公平さ: ゲージは押している間0.5/F([GaugeActionStateBase.cpp:15](Game/GameObjects/Actors/Character/Player/Movement/GaugeActionStateBase.cpp#L15))、満タン100で約3.3秒。扉を抜けるのに要る長さを満タンの一部(半分以下など)に収める。開閉のリズムを着く前に読めるように(扉の縁のランプの点滅など)。
+  - リスクとリターン(案): ブースト=反応時間が短い代わりに早く抜けられる、ブレーキ=安全だが遅い。ブーストで抜けた人に得(ボスの隙に早く着くなど)があると選ぶ意味が出る。
+  - **(11/18・ユーザー依頼でClaudeが変更)ブースト17→30、ブレーキ2→5**([BoostState.cpp:8](Game/GameObjects/Actors/Character/Player/Movement/BoostState.cpp#L8)、[BrakeState.cpp:7](Game/GameObjects/Actors/Character/Player/Movement/BrakeState.cpp#L7))。経緯: 最初(10/01)は普通8・ブースト17・ブレーキ2で、普通だけ8→15(11/11)→18(11/17)と上がっていた。カメラは毎フレーム残りの9%ずつ追う(`lerp_t`=0.09、[GameCamera.cpp:25](Game/GameObjects/Camera/GameCamera.cpp#L25))ので、一定の速さvではカメラが約v×10だけ余分に遅れる(機体との距離≒166＋v×10)。普通18で約350、ブレーキ2で約190(=近すぎ)、5で約220、ブースト30で約470。Debug x64のビルドOK、ゲームでは未確認。速さを使っているのは「ブースト中か」の判定だけ(チュートリアル・AIテストプレイ・ブーストの画面効果)で、距離には依存していない。
+- **3つ目の攻撃(ユーザー決定)= ロケットを飛ばしてくる(単純な攻撃)**。
+  - `EnemyBullet`の仲間として作れば、バレルロールのカウンターでの跳ね返しがそのまま使える([CollisionManager.cpp:425-452](Manager/CollisionManager.cpp#L425-L452)の`ReflectEnemyBullet`)。ただし跳ね返った弾は撃った敵の`GetPos()`(中心)を狙う([438行目](Manager/CollisionManager.cpp#L438))→放熱口に当てるなら「ロックオンで狙う位置」の関数をここでも使う。
+  - 3つの役割: 網=位置(移動)、扉=タイミング(ブースト/ブレーキ)、ロケット=追ってくるものをかわす/跳ね返す(移動/バレルロール)。
+  - モデル: ロケットの発射口はポッドとは別に胴体の下側(Claudeの案、見分けやすさのため)。
+- **攻撃の割り振り(ユーザー決定)**: 第一形態=網・ロケット。第二形態=数が増えたロケット＋扉を追加。網は第二形態でも残りリズムが変わる(前の「網のリズムも変えたい」から。Claudeの受け取り)。動きも少し速くなる。
+- **第二形態の形(ユーザー決定、「一旦」)= ポッドが片方壊れる**。壊れたポッドの線は消え、網は片方向の斜めの線だけになる(すき間が増える分リズムを速くする)。放熱して弱点になるのは残ったポッド1つ。
+- **細かい所(Claudeの仮の値、ユーザー了承「いったんやってみましょう」)**: 第二形態はHP50%から、壊れるのは右上のポッドで固定(→第二形態の網は左上のポッドの線=左上→右下だけ、弱点も左上だけ)、壊れ方は部品の非表示＋壊れた部品＋爆発エフェクト、2面の登場は遠くの空から飛んできて前に回り込む(コードで動かす)、死亡は1面と同じくエフェクト。
+- **仕様書を作った: [BOSS2_SPEC.md](BOSS2_SPEC.md)**(流れ・動き方・攻撃4つ・モデルの形/大きさ/部品の名前/テクスチャ/アニメーション9本・作る順番・書き出しの注意)。攻撃の順番はランダムにせず決まった順(第一=網→ロケット、第二=網→扉→ロケット)、放熱は網の後だけ、とした。
+- **次**: ユーザーが仕様書を確認 → Claudeがボスのモデル(形・部品・ボーン・Idle)をBlenderで作り、DxLibで読めるか確かめる。
+  - (11/18)ユーザー「一旦やってみて違ければまた作り直しましょう」→仕様書はこのまま。
+
+### 2026-11-18 Claude Code(FIC-ADMIN、ユーザーSakamotoKou)にBlender MCPを登録した(Claude、ユーザー依頼)
+- **注意: このPCのSteamは別のWindowsユーザー「admin」で動いている**ので、Steamから開いたBlenderは`C:\Users\Admin\AppData\Roaming\Blender Foundation\Blender\`の設定を読む(SakamotoKouからは権限がなく見えない)。SakamotoKou側の5.3には5.2の設定(MCP拡張・Blender Labのリポジトリ込み)をコピー済みで、`blender.exe`を直接SakamotoKouとして起動すればMCPが有効(画面なしの起動で`bl_ext.lab_blender_org.mcp`が有効と確認)。
+- もともとClaude Desktopの拡張(Blender Labの`blender-mcp`、`%LOCALAPPDATA%\Claude-Data\claude_pzs8sxrjxfjjc\Claude Extensions\ant.dir.gh.blender.blender-mcp`)で連携していた。Blender側は5.1・5.2に拡張`mcp`(Blender Lab、ポート9876で待ち受け)。
+- **Desktopの拡張の環境は壊れていた**: `.venv`の土台のPython(`%APPDATA%\uv\python\cpython-3.14.0...`)が消えていて起動できない(Desktopでも今は動かない可能性)。Desktopのフォルダは触っていない。
+- Claude Code用に別の環境を作った: `%LOCALAPPDATA%\BlenderMcpClaudeCode`(拡張のソースをコピー、Desktop同梱のuv 0.9.7で`uv sync --frozen`、**土台はBlender 5.2同梱のPython 3.13**なので消えにくい)。`claude mcp add --scope user blender -- %LOCALAPPDATA%\BlenderMcpClaudeCode\.venv\Scripts\blender-mcp.exe`で登録(`~/.claude.json`)、`claude mcp list`で Connected。
+- 使うとき: Blender 5.2を開き、MCPの拡張のサーバーを起動しておく。Claude Codeは登録後の再起動で道具が使えるようになる。DesktopとCodeで同時に同じBlenderにつながない。
+- ほかのPCには入っていない(同じ手順で作れる)。
+- 別件: Effekseer MCPはこのセッションで「Failed to connect」(未調査)。
+- (11/18)Blender MCPの確認のたびに作業が止まるので、`.cpp/.h/.hlsl`以外は確認なしにした(`.claude/settings.local.json`のallowにRead/Edit/Write/Glob/Grep/mcp__blender/mcp__effekseerなど、スクラッチパッド等をadditionalDirectoriesに)。
+
+### 2026-11-18 2面のボスのモデル第1版を作った(Claude、Blender MCP。コードはまだ)
+- 詳細は [BOSS2_SPEC.md](BOSS2_SPEC.md) の「8. 作ったモデル」。ゲームが読むのは`Data/Model/Boss2.mv1`と`Data/Model/Boss2.fbm/`(ベース色・発光・放熱中の発光・平らな法線)。
+- 形: 横に長い飛行体。暗い金属の胴体、斜め上に伸びる2本の腕の先にポッド(左上=紫、右上=水色のレンズ)、胴体の下にロケットのハッチと4本の筒、前面に斜めの2本の目。ポッドの胴は装甲の下がへこんでいて、閉じていると放熱口(赤)は見えず、装甲が上下に開くと見える。パネルの継ぎ目と汚れのむらはベース色に焼き付けた。
+- DxLibで確認済み: 大きさ(幅約2920)・向き(正面-Z、左-X)・フレームの名前・アニメーション9本の名前と長さ・各ポーズ(放熱/ハッチ/のけぞり)の向き。**ゲームの中ではまだ表示していない**(ゲームのシェーダーでの見え方は未確認)。
+- 作り方: `Tools/Boss2Model/`のスクリプト(Blenderで build→bake→export、`make_all.ps1`でモデルビューアを使って`.mv1`に変換)。BlenderのFBXは`MV1LoadModel`で直接読めない(handle=-1)が、モデルビューアに渡すと`LoadAndSave=1`の設定で自動で`.mv1`になる。変換のときだけ`NormalRemake`を0にして、終わったら1に戻す。
+- つまずき: マテリアルに発光をつないだまま書き出すとDxLibで真っ白、拡散色0.8・自己発光0だとDxLibの標準の描き方で真っ黒に近い→1面のボスの値(拡散色1.0・自己発光0.5)にそろえた。テクスチャのパスは`Boss2.fbm\Boss2_Base.png`で入るので、1面と同じ「`.mv1`の隣に`.fbm`フォルダ」に置く。Blenderの画面のスクリーンショットは古いままで更新されなかったので、確認はカメラを置いたレンダリングで行った。
+- **(11/18・ユーザー依頼でClaudeが実施)1面のボスを`SpiderBoss`に名前を変えた**(2面のボスと区別するため。上位に`Boss`クラスを作る予定=ユーザー案)。フォルダ`Enemy/BossEnemy/`→`Enemy/SpiderBoss/`。`BossEnemy`→`SpiderBoss`(構造体`SpiderBossData`)、`BossEnemyDataSetter`→`SpiderBossDataSetter`、`IBossEnemyState`→`ISpiderBossState`、`BossIdleState`/`BossBeamState`/`SummonState`→`SpiderBossIdleState`/`SpiderBossBeamState`/`SpiderBossSummonState`、`Game/Collision/`の`BossDamageCollider`/`BossShieldCollider`/`BossBeamCollider`/`BossBeamTipCollider`→頭に`Spider`。`git mv`で移動(履歴は残る)、中身は単語単位で置き換え(32ファイル、`.vcxproj`/`.filters`も)、Debug x64ビルドOK。ボス全般のもの(`BossHPGaugeUI`、`ModelID::Boss`などの素材ID、`ColliderTag`、CSV名`Boss`)は変えていない。このノートの中の古いファイルへのリンク(20か所)も新しいパスに直した(本文の名前は当時のまま)。
+- **(11/18)コードの設計(ユーザーと相談中)**:
+  - 2つのボスの上位クラスとして`Boss`を作る(ユーザー案)。`EnemyBase`/`Character`にあるもの(HP・`IsDying`・`GetColliders`など)は足さない。**`Boss`に持たせるのは`IsBossAppear`/`SetIsBossAppear`(と`SpiderBoss`の`m_isAppear`を移す)**。`SetEnemyFactory`は1面の召喚用なので`SpiderBoss`に残す。
+  - **2面も1面と同じくムービーで登場する(ユーザー決定「そっちの方が楽そう」)**。WARNING→ムービー→カメラのズームの流れを2つのボスで共通にする。ボスごとに違うのは「どのムービーか」「ムービー後にボスを置く位置(1面は海面`boss_stand_y`)」「ムービーの最後のカメラの位置(1面は`boss_appear_camera_dist`2700・`height`1020)」。2面のムービーはClaudeがBlenderで作る(1面のムービーの作り方は10/02の記録: ゲームのシェーダーと同じ見た目、最後のコマをゲームのカメラ位置に合わせる)。
+- **次(ゲーム側、ユーザーが書く)**: モデルと画像の登録(ResourceLoaderの`ModelID`/`GraphicID`、パス、`game.models`/`game.graphics`) → 2面のボスのクラス(`GameScene`・HPゲージ・当たり判定がボス全般を扱える形) → 動き → 網と放熱 → ロケット → 形態の切り替え → 扉。扉とロケットのモデルはまだ作っていない。

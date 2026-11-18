@@ -1,14 +1,14 @@
 ﻿#pragma once
 #include "ICollider.h"
 
-class BossEnemy;
+class SpiderBoss;
 /// <summary>
 /// ボスのビーム(左右まとめて1つのダメージ源として扱う)
 /// </summary>
-class BossBeamCollider : public ICollider
+class SpiderBossBeamCollider : public ICollider
 {
 public:
-	BossBeamCollider(BossEnemy& owner);
+	SpiderBossBeamCollider(SpiderBoss& owner);
 
 	//当たり判定の形状データを取得
 	std::vector<std::shared_ptr<ColliderShape>> GetCollision() const override;
@@ -26,5 +26,5 @@ public:
 
 private:
 	//ボスを参照したい
-	BossEnemy& m_owner;
+	SpiderBoss& m_owner;
 };

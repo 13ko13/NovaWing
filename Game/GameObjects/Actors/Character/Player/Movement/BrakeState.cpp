@@ -4,7 +4,7 @@
 
 namespace
 {
-	constexpr float brake_speed = 2.0f;
+	constexpr float brake_speed = 5.0f;
 }
 
 BrakeState::BrakeState(const std::weak_ptr<Player> pPlayer,

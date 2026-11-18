@@ -2,13 +2,13 @@
 #include <algorithm>
 #include <cmath>
 
-#include "BossBeamState.h"
+#include "SpiderBossBeamState.h"
 #include "Manager/ResourceLoader.h"
 #include "Manager/SoundManager.h"
 #include "Manager/EffectManager.h"
-#include "BossEnemy.h"
+#include "SpiderBoss.h"
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
-#include "BossIdleState.h"
+#include "SpiderBossIdleState.h"
 #include "Manager/DebugManager.h"
 #include "Main/Application.h"
 
@@ -57,14 +57,14 @@ namespace
 	constexpr int color_max = 255;
 }
 
-BossBeamState::BossBeamState(std::weak_ptr<BossEnemy> pBoss,
+SpiderBossBeamState::SpiderBossBeamState(std::weak_ptr<SpiderBoss> pBoss,
 	 std::weak_ptr<Player> pPlayer) :
-	IBossEnemyState(pBoss),
+	ISpiderBossState(pBoss),
 	m_pPlayer(pPlayer)
 {
 }
 
-BossBeamState::~BossBeamState()
+SpiderBossBeamState::~SpiderBossBeamState()
 {
 	//エフェクトを止める
 	//(ボスに当たって薄くなったビームは既に止めてあり、ハンドルが-1になっている)
@@ -82,7 +82,7 @@ BossBeamState::~BossBeamState()
 	}
 }
 
-void BossBeamState::Enter()
+void SpiderBossBeamState::Enter()
 {
 	//エフェクトのマネージャーを保持しておく
 	m_pEffectManager = m_pBoss.lock()->GetEffectManager();
@@ -158,7 +158,7 @@ void BossBeamState::Enter()
 	m_hitBossFrameR = 0;
 }
 
-void BossBeamState::Update()
+void SpiderBossBeamState::Update()
 {
 	//前フレームのビームの先端位置を保存
 	m_prevBeamPosL = m_beamPosL;
@@ -348,16 +348,16 @@ void BossBeamState::Update()
 	if (m_beamFrame > beam_end_frame)
 	{
 		//ステートをアイドルに戻す
-		ChangeState(std::make_shared<BossIdleState>(m_pBoss,m_pPlayer));
+		ChangeState(std::make_shared<SpiderBossIdleState>(m_pBoss,m_pPlayer));
 	}
 }
 
-void BossBeamState::Exit()
+void SpiderBossBeamState::Exit()
 {
 	
 }
 
-void BossBeamState::Draw()
+void SpiderBossBeamState::Draw()
 {
 #ifdef _DEBUG
 	if (DebugManager::GetInstance().IsDebugDrawEnabled())
@@ -379,12 +379,12 @@ void BossBeamState::Draw()
 #endif
 }
 
-int BossBeamState::GetBeamDamage() const
+int SpiderBossBeamState::GetBeamDamage() const
 {
 	return beam_damage;
 }
 
-void BossBeamState::OnReflectLeft(const Vector3& hitPos)
+void SpiderBossBeamState::OnReflectLeft(const Vector3& hitPos)
 {
 	//ビームの先端位置
 	Vector3 beamTipPos = m_beamTipSphereL->GetPos();
@@ -398,7 +398,7 @@ void BossBeamState::OnReflectLeft(const Vector3& hitPos)
 	m_isReflectedL = true;
 }
 
-void BossBeamState::OnReflectRight(const Vector3& hitPos)
+void SpiderBossBeamState::OnReflectRight(const Vector3& hitPos)
 {
 	Vector3 beamTipPos = m_beamTipSphereR->GetPos();
 	//カウンター球の法線(当たった位置からビームの先端へのベクトル)
@@ -410,27 +410,27 @@ void BossBeamState::OnReflectRight(const Vector3& hitPos)
 	m_isReflectedR = true;
 }
 
-std::shared_ptr<SphereShape> BossBeamState::GetTipSphereL() const
+std::shared_ptr<SphereShape> SpiderBossBeamState::GetTipSphereL() const
 {
 	return  m_beamTipSphereL;
 }
 
-std::shared_ptr<SphereShape> BossBeamState::GetTipSphereR() const
+std::shared_ptr<SphereShape> SpiderBossBeamState::GetTipSphereR() const
 {
 	return m_beamTipSphereR;
 }
 
-bool BossBeamState::IsReflectedL() const
+bool SpiderBossBeamState::IsReflectedL() const
 {
 	return m_isReflectedL;
 }
 
-bool BossBeamState::IsReflectedR() const
+bool SpiderBossBeamState::IsReflectedR() const
 {
 	return m_isReflectedR;
 }
 
-void BossBeamState::FadeOutHitBeam(int& playH, int& fadeFrame)
+void SpiderBossBeamState::FadeOutHitBeam(int& playH, int& fadeFrame)
 {
 	//既に止めている場合は何もしない
 	if (playH == -1) return;
@@ -451,7 +451,7 @@ void BossBeamState::FadeOutHitBeam(int& playH, int& fadeFrame)
 	}
 }
 
-void BossBeamState::SetBeamEffectDir(int playH, const Vector3& dir)
+void SpiderBossBeamState::SetBeamEffectDir(int playH, const Vector3& dir)
 {
 	//らせんは軸の向きの正負が関係ないのでZ成分を正にそろえる
 		//(180度回転の特異点も避けられる)
