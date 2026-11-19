@@ -495,6 +495,13 @@ void GameScene::RegisterDebugItems()
 			return L"HP: " + std::to_wstring(m_pBoss->GetHealth()) +
 				L" / " + std::to_wstring(m_pBoss->GetMaxHealth());
 		});
+	debugUI.AddText(this, L"Boss", [this]()
+		{
+			const Vector3 pos = m_pBoss->GetPos();
+			return L"座標: (" + std::to_wstring(static_cast<int>(pos.x)) +
+				L", " + std::to_wstring(static_cast<int>(pos.y)) +
+				L", " + std::to_wstring(static_cast<int>(pos.z)) + L")";
+		});
 	debugUI.AddButton(this, L"Boss", L"ボスのHPを1にする", [this]()
 		{
 			m_pBoss->DebugSetHealth(1);

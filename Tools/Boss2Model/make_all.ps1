@@ -6,7 +6,9 @@
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path (Split-Path $PSScriptRoot)
-$vdir = "C:\Users\SakamotoKou\Desktop\DxLib_VC3_24f\DxLib_VC\Tool\DxLibModelViewer"
+# モデルビューアの場所(学校のPCと家のPCで違うので、ある方を使う)
+$vdir = @("C:\Users\SakamotoKou\Desktop\DxLib_VC3_24f\DxLib_VC\Tool\DxLibModelViewer",
+          "C:\DxLib_VC\Tool\DxLibModelViewer") | Where-Object { Test-Path $_ } | Select-Object -First 1
 $ini = Join-Path $vdir "Setting.ini"
 $fbx = Join-Path $PSScriptRoot "export\Boss2.fbx"
 $mv1 = [IO.Path]::ChangeExtension($fbx, ".mv1")

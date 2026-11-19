@@ -89,6 +89,7 @@ namespace
 		{ ResourceLoader::GraphicID::Boss2Emission, boss2_emission_path },//エミッションマップ
 		{ ResourceLoader::GraphicID::Boss2EmissionVent, boss2_emission_vent_path },//エミッションマップ(放熱中の赤い版)
 		{ ResourceLoader::GraphicID::Boss2Normal, boss2_normal_path },//法線マップ
+		{ ResourceLoader::GraphicID::Boss2Metallic, boss2_metallic_path },//メタリックマップ
 		{ ResourceLoader::GraphicID::BossHPFrame, boss_hp_frame_path },//HPの枠
 		{ ResourceLoader::GraphicID::BossHPGauge, boss_hp_gauge_path },//HPゲージ
 
@@ -542,7 +543,7 @@ void ResourceLoader::InitSceneResources()
 		GraphicID::FloatingNormalMap, GraphicID::FloatingEmissionMap,
 		GraphicID::WormHeadNormalMap, GraphicID::WormHeadMetalicMap, GraphicID::WormHeadEmissionMap,
 		GraphicID::WormBodyDiffuseMap, GraphicID::BossNormal, GraphicID::BossEmission, GraphicID::BossEmissionDamage,
-		GraphicID::Boss2Normal, GraphicID::Boss2Emission, GraphicID::Boss2EmissionVent,
+		GraphicID::Boss2Normal, GraphicID::Boss2Metallic, GraphicID::Boss2Emission, GraphicID::Boss2EmissionVent,
 		GraphicID::RushEnemyNormalMap, GraphicID::RushEnemyMetalicMap, GraphicID::RushEnemyEmissionMap,
 		GraphicID::TurretEnemyNormalMap, GraphicID::TurretEnemyMetalicMap, GraphicID::TurretEnemyEmissionMap,
 		GraphicID::ButterflyEnemyNormalMap, GraphicID::ButterflyEnemyMetalicMap, GraphicID::ButterflyEnemyEmissionMap,

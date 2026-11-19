@@ -5,11 +5,17 @@
 #include "Manager/ResourceLoader.h"
 #include "Constants/ShaderRegister.h"
 #include "Utility/ModelAnimator.h"
+#include "Game/GameObjects/Actors/Character/Player/Player.h"
 
 namespace
 {
 	//第二形態になるときに表示する壊れたポッドのフレーム名
 	constexpr const wchar_t* broken_pod_frame_name = L"Boss2_PodR_Broken";
+	//待機アニメーション名
+	constexpr const wchar_t* idle_anim_name = L"Boss2_Armature|Idle";
+
+	//アニメーションのブレンドの速さ
+	constexpr float anim_blend_frame = 16.0f;
 }
 
 GunshipBoss::GunshipBoss(GunshipBossData& data) :
@@ -34,6 +40,26 @@ void GunshipBoss::OnInit()
 	m_brokenPodFrameIdx = MV1SearchFrame(m_modelHandle, broken_pod_frame_name);
 	assert(m_brokenPodFrameIdx >= 0 && "ポッドのフレーム名を間違えている");
 	MV1SetFrameVisible(m_modelHandle, m_brokenPodFrameIdx, FALSE);
+
+	//待機アニメーションを再生
+	m_pAnimator->Play(idle_anim_name, true);
+}
+
+void GunshipBoss::Update()
+{
+	if (m_isAppear)
+	{
+		//プレイヤーと同じ速度で移動する
+		Vector3 myVel = m_pPlayer.lock()->GetVel();
+		//zのみコピー
+		myVel.y = 0.0f;
+		myVel.x = 0.0f;
+		SetVel(myVel);
+	}
+	//BossBase(Character)の更新処理を呼ぶ
+	BossBase::Update();
+	//アニメーターを更新させる
+	m_pAnimator->Update(anim_blend_frame);
 }
 
 void GunshipBoss::Draw()
@@ -49,6 +75,9 @@ void GunshipBoss::Draw()
 	//法線マップ
 	const int normGraphH = resourceLoader.GetGraphic(
 		ResourceLoader::GraphicID::Boss2Normal);
+	//メタリックマップ(滑らかさ。-1で渡すとツヤが広く強く出て、正面が白く飛ぶ)
+	const int metalicGraphH = resourceLoader.GetGraphic(
+		ResourceLoader::GraphicID::Boss2Metallic);
 	//エミッションマップ(通常。放熱中の赤い版Boss2EmissionVentは、放熱を作るときに切り替える)
 	const int emissionGraphH = resourceLoader.GetGraphic(
 		ResourceLoader::GraphicID::Boss2Emission);
@@ -56,7 +85,7 @@ void GunshipBoss::Draw()
 	//ハンドルとレジスタ番号をセットで保持しておく
 	std::vector<std::pair<int, int>> textures;
 	textures.push_back({ ShaderRegister::tex_normal,normGraphH });//法線マップ
-	textures.push_back({ ShaderRegister::tex_metalic,-1 });//メタリックマップはないので-1
+	textures.push_back({ ShaderRegister::tex_metalic,metalicGraphH });//メタリックマップ
 	textures.push_back({ ShaderRegister::tex_emission,emissionGraphH });//エミッションマップ
 	textures.push_back({ ShaderRegister::tex_noise,-1 });//ノイズテクスチャもなし
 

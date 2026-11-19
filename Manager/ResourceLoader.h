@@ -131,6 +131,7 @@ public:
 		Boss2Emission,//2面のボスのエミッション
 		Boss2EmissionVent,//2面のボスのエミッション(放熱中の赤い版)
 		Boss2Normal,//2面のボスの法線マップ
+		Boss2Metallic,//2面のボスのメタリックマップ(滑らかさ)
 
 		BossHPFrame,//ボスのHPの枠
 		BossHPGauge,//ボスのHPゲージ

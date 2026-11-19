@@ -124,6 +124,7 @@ namespace
 	constexpr const wchar_t* boss_emission_damage_path = L"Data/Model/Boss.fbm/T_Mech_LOD2_E_Damage.png";
 	//2面のボス
 	constexpr const wchar_t* boss2_normal_path = L"Data/Model/Boss2.fbm/Boss2_Normal.png";
+	constexpr const wchar_t* boss2_metallic_path = L"Data/Model/Boss2.fbm/Boss2_Metallic.png";
 	constexpr const wchar_t* boss2_emission_path = L"Data/Model/Boss2.fbm/Boss2_Emission.png";
 	//放熱中(放熱口が赤く光る)のエミッションマップ
 	constexpr const wchar_t* boss2_emission_vent_path = L"Data/Model/Boss2.fbm/Boss2_Emission_Vent.png";

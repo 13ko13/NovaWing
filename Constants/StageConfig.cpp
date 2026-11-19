@@ -45,7 +45,7 @@ namespace
 		//2面
 		{ L"Stage2",false,56300.0f,false, 34000.0f,16000.0f,true,
 			ResourceLoader::GraphicID::BossAppearMovie,
-			0.0f,2700.0f,1020.0f,StageConfig::BossType::GunShip
+			1000.0f,2700.0f,1020.0f,StageConfig::BossType::GunShip
 		},
 	};
 }

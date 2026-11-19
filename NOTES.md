@@ -2660,3 +2660,16 @@
   5. その後: 動き → 網と放熱 → ロケット → 形態の切り替え → 扉(仕様は[BOSS2_SPEC.md](BOSS2_SPEC.md))。2面の登場ムービー、ロケットと扉のモデルはまだ。
 - 注意: 今の2面は`GunshipBoss`が出るが、当たり判定も動きもないのでボス戦が進まない。Unityから2面を書き出すと`Boss.csv`のモデル名が`Boss`に戻る。
 - つまずき(環境): Claudeが途中で止めたビルドの`cl.exe`が残ってファイルを開いたままにし、VS Codeで「保存できませんでした」になった→残った`cl.exe`を終了して解決。
+
+### 2026-11-19 2面のボスが表示できた(待機アニメーション・追従・位置。ビルドOK)
+- **ユーザー実装**: `GunshipBoss`の`Update()`(`BossBase::Update()`→アニメーター`Update(anim_blend_frame)`)、`OnInit`の待機`Play(idle_anim_name, true)`。**プレイヤーに追従**(出現済みなら、プレイヤーの速度のzだけを自分の速度にする。[GunshipBoss.cpp:54-62](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBoss.cpp#L54-L62)、`SpiderBoss`と同じ処理。**共通化はまだしない(ユーザー決定)**。名前の候補は`MoveWithPlayer`/`FollowPlayerZ`/`CopyPlayerVelZ`で`BossBase`に置く案。追従のブロックが`BossBase::Update()`の後ろにあるので、1フレーム遅れる(前に移せば直る。見た目には出にくい))。
+- **「存在しないモデルID」のassert**: [EnemyStatus.csv](Data/CSV/Params/EnemyStatus.csv)に`Boss2`の行がなかった(`EnemyBase`が`FindByModelID`でHPなどを探す)。`Boss2,2000,0,330,0`を足した(1面と同じ仮の値。HPは仕様書に具体値がないので後で調整)。
+- **2面のボスが見えない原因(最初のディゾルブ説は外れ)**: **`Boss2.mv1`の頂点形式が接線なし(`4FRAME`、vtype 1)だった**。ゲームの頂点シェーダー[SkinnedLightingVS.hlsl](SkinnedLightingVS.hlsl)は`tangent`/`bin`を入力に持つので、頂点データの並びとずれて何も描かれなかった。1面のボスは接線つき(`NMAP_4FRAME`、vtype 5)。DxLibは**FBXのマテリアルに法線マップが入っているモデルだけ**接線つきの`.mv1`を作る([NOTES.md:1810](NOTES.md#L1810)の「法線マップがモデルごとに必要」と同じ制約)。
+  - 調べ方: 小さなDxLibプログラム(`MV1LoadModel`→`MV1GetTriangleListVertexType`)で、1面と2面のモデルの頂点タイプを比べた。大きさ(ポッドがx≈±1270)、Idleの動き、マテリアル(半透明でない)は正常だった。
+  - 直し方: [bake_boss2.py](Tools/Boss2Model/bake_boss2.py)の最後のマテリアルに、`Boss2_Normal.png`をNormal Mapノード経由でPrincipled BSDFのNormalにつないだ。FBXに法線マップが入り、`.mv1`が接線つき(vtype 5)になった。Blenderは**バックグラウンドで実行できる**(`C:\bl\blender.exe -b --python`、build→bake→exportを続けて約3分)。`make_all.ps1`はモデルビューアの場所を学校(`C:\Users\SakamotoKou\...`)と家(`C:\DxLib_VC\Tool\DxLibModelViewer`)の両方から探すようにした。**テクスチャ5枚も焼き直したので少し変わっている**(形・ボーン・アニメーションは同じ)。
+  - **教訓**: 「描画のコードは1面と同じ形なのに見えない」ときは、**モデルの頂点形式**(`MV1GetTriangleListVertexType`)を疑う。最初に疑った「ディゾルブ」(カメラからの距離で消える)は、ボスの位置(出現Zから7560先で、1面は5160先)を1面にそろえても見えなかったので外れ。ただし**ズーム中は「カメラ〜プレイヤー」の距離が長くなり、ディゾルブの範囲が広がる**のは本当なので、ボスの位置を変えるときは注意(ボスの描画をディゾルブ対象から外す根本対応は未)。[Stage2/Boss.csv](Data/CSV/Stage2/Boss.csv)のzを61460(出現Z+5160)にしたが、原因とは無関係。
+- **メタリックの画像の登録(Claude、ユーザー依頼、Debug x64ビルドOK)**: [ResourceConstants.h:127](Constants/ResourceConstants.h#L127)の`boss2_metallic_path`、`GraphicID::Boss2Metallic`([ResourceLoader.h:134](Manager/ResourceLoader.h#L134)、`.cpp`の表と`game.graphics`)、[GunshipBoss.cpp](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBoss.cpp)の`tex_metalic`に`-1`の代わりに渡した。
+- **ボスの高さ**: 2面の`bossStandY`を0→**1000**([StageConfig.cpp:48](Constants/StageConfig.cpp#L48))。画面のスクリーンショットで、ボスが道路に近く下寄りだったので(中心が原点で高さ約1200、足元が道路に近かった)。**1000の見え方は未確認**(ユーザー「確認しなくていい」)。気になったらこの数値だけ変える。
+- **デバッグ**: [GameScene.cpp:498](Scene/GameScene.cpp#L498)のデバッグの「Boss」タブにボスの座標(x,y,z)を足した(Claude、ユーザー依頼)。
+- **ゲーム内で確認できたこと**: 2面のボスが見える(ポッドの紫と水色の発光、胴の水色の目と下の噴射口、パネル割りの質感)。**まだ確認していない**: 法線マップの凹凸の向き(逆に見えたら`bake_boss2.py`の`normal_g="NEG_Y"`を`POS_Y`)、ツヤ、アニメーションの動き。
+- **次**: ボスの動き(仕様書の「3. 動き方」。プレイヤーの前の【プレイヤーとの距離】の所に浮かび、左右±・高さの範囲で決まった地点の間を移動、攻撃の構えで止まる)。設計はユーザーが決める(地点を固定の配列にするか乱数か、追従のzと合成する速度)。その後: 網と放熱 → ロケット → 形態の切り替え → 扉。HPの値、ディゾルブ対象から外す根本対応、`SpiderBoss`との共通化(追従)は後で。

@@ -218,6 +218,15 @@ def main():
     tex = nt.nodes.new("ShaderNodeTexImage")
     tex.image = bpy.data.images.load(os.path.join(TEX_DIR, "Boss2_Base.png"), check_existing=False)
     nt.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+    # 法線マップもマテリアルにつなぐ。FBXに法線マップが入っていないと、DxLibは接線(タンジェント)なしの
+    # 頂点形式(4FRAME)の.mv1を作る。ゲームの頂点シェーダー(SkinnedLightingVS)は接線を読むので、
+    # 形式が合わずにモデルが描かれない。つなぐと接線つき(NMAP_4FRAME)になる。
+    ntex = nt.nodes.new("ShaderNodeTexImage")
+    ntex.image = bpy.data.images.load(os.path.join(TEX_DIR, "Boss2_Normal.png"), check_existing=False)
+    ntex.image.colorspace_settings.name = "Non-Color"
+    nmap = nt.nodes.new("ShaderNodeNormalMap")
+    nt.links.new(ntex.outputs["Color"], nmap.inputs["Color"])
+    nt.links.new(nmap.outputs["Normal"], bsdf.inputs["Normal"])
     # DxLibのマテリアルの値は1面のボス(Boss.mv1)にそろえる: 拡散色1.0・自己発光0.5
     # (FBXでは拡散色=Base Colorの値、自己発光=Emission Color×Strength になる)
     # 発光の画像はゲーム側で別に渡すので、ここにはつながない(つなぐと真っ白に描かれる)
