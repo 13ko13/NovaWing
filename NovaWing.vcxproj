@@ -165,15 +165,15 @@
     <ClCompile Include="Game\GameObjects\Camera\GameCamera.cpp" />
     <ClCompile Include="Game\UI\BossHPGaugeUI.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Player\Shoot\DisabledShootState.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossBeamState.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossIdleState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossBeamState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossIdleState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\EnemyBase.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\EnemyFactory.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossDataSetter.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBoss.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossDataSetter.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBoss.cpp" />
     <ClCompile Include="Game\UI\PlayerHPGaugeUI.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\ISpiderBossState.cpp" />
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossSummonState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\ISpiderBossState.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossSummonState.cpp" />
     <ClCompile Include="Game\UI\GaugeUIBase.cpp" />
     <ClCompile Include="Game\GameObjects\Camera\TitleCamera.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Player\TitlePlayer.cpp" />
@@ -308,6 +308,8 @@
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\ButterflyEnemy\ButterflyEnemy.cpp" />
     <ClCompile Include="ShaderEffect\WaterDropEffect.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\BossBase.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBoss.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossDataSetter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
@@ -319,15 +321,15 @@
     <ClInclude Include="Game\UI\BossHPGaugeUI.h" />
     <ClInclude Include="Constants\ResourceConstants.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Player\Shoot\DisabledShootState.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossBeamState.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossIdleState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossBeamState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossIdleState.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\EnemyBase.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\EnemyFactory.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossDataSetter.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBoss.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossDataSetter.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBoss.h" />
     <ClInclude Include="Game\UI\PlayerHPGaugeUI.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\ISpiderBossState.h" />
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossSummonState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\ISpiderBossState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossSummonState.h" />
     <ClInclude Include="Game\UI\GaugeUIBase.h" />
     <ClInclude Include="Game\GameObjects\Camera\TitleCamera.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Player\TitlePlayer.h" />
@@ -450,6 +452,8 @@
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\ButterflyEnemy\ButterflyEnemy.h" />
     <ClInclude Include="ShaderEffect\WaterDropEffect.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\BossBase.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBoss.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossDataSetter.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="BoostingEffectPS.hlsl">

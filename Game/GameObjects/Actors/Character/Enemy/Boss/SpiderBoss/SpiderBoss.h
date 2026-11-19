@@ -5,9 +5,9 @@
 #include "Game/Collision/SpiderBossDamageCollider.h"
 #include "Game/Collision/SpiderBossShieldCollider.h"
 #include "Game/Collision/SpiderBossBeamCollider.h"
-#include "Utility/ModelAnimator.h"
 #include "Game/Collision/SpiderBossBeamTipCollider.h"
 
+class ModelAnimator;
 class Player;
 class BulletManager;
 class ISpiderBossState;
@@ -18,14 +18,8 @@ class SpiderBoss : public BossBase
 {
 public:
 	//ボス生成に必要な情報
-	struct SpiderBossData
+	struct SpiderBossData : public BossBaseData
 	{
-		std::weak_ptr<Player> pPlayer;
-		ResourceLoader::ModelID modelID = ResourceLoader::ModelID::None;
-		std::weak_ptr<BulletManager> pBulletManager;
-		std::weak_ptr<CameraBase> pCamera;
-		std::weak_ptr<SoundManager> pSoundManager;
-		std::weak_ptr<EffectManager> pEffectManager;
 		Vector3 pos;
 	};
 
@@ -119,7 +113,7 @@ private:
 	};
 
 	//モデル用のアニメーター
-	ModelAnimator m_animator;
+	std::unique_ptr<ModelAnimator> m_pAnimator;
 
 	//ステート
 	std::shared_ptr<ISpiderBossState> m_pState;

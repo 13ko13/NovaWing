@@ -7,6 +7,7 @@
 #include "Manager/SoundManager.h"
 #include "Manager/EffectManager.h"
 #include "Main/Application.h"
+#include "Utility/ModelAnimator.h"
 
 namespace
 {
@@ -65,9 +66,7 @@ namespace
 }
 
 SpiderBoss::SpiderBoss(SpiderBossData& data) :
-	EnemyBase(data.modelID, data.pCamera, data.pPlayer,
-	data.pBulletManager, data.pSoundManager, data.pEffectManager),
-	m_animator(m_modelHandle),
+	BossBase(data),
 	m_damageCollider(*this),
 	m_shieldCollider(*this),
 	m_beamCollider(*this),
@@ -76,6 +75,8 @@ SpiderBoss::SpiderBoss(SpiderBossData& data) :
 {
 	//位置を反映
 	SetPos(data.pos);
+	//アニメーターを作成(モデルのハンドルは基底クラスのコンストラクタで読み込み済み)
+	m_pAnimator = std::make_unique<ModelAnimator>(m_modelHandle);
 }
 
 SpiderBoss::~SpiderBoss()
@@ -90,7 +91,7 @@ void SpiderBoss::OnInit()
 	GetAllLegPos();
 
 	//後ろ移動アニメーションを再生
-	m_animator.Play(MV1GetAnimIndex(m_modelHandle, idle_anim_name.c_str()), true, idle_anim_speed);
+	m_pAnimator->Play(MV1GetAnimIndex(m_modelHandle, idle_anim_name.c_str()), true, idle_anim_speed);
 
 	//ステートを初期化
 	m_pState = std::make_shared<SpiderBossIdleState>(
@@ -252,7 +253,7 @@ void SpiderBoss::Update()
 	//脚の位置を取得するが、インデックスの途中で不要なものが入っているので
 	//二回に分けて取得する
 	//アニメーターの更新
-	m_animator.Update(anim_blend_time);
+	m_pAnimator->Update(anim_blend_time);
 
 	//最初の右足の位置(3本)を取得
 	for (int i = 1; i < static_cast<int>(LegIndex::BackLeft); i++)
@@ -335,7 +336,7 @@ void SpiderBoss::TakeDamage(int damage)
 		m_isDying = true;
 
 		//死亡アニメーション再生
-		m_animator.Play(death_anim_name.c_str(), false, death_anim_speed);
+		m_pAnimator->Play(death_anim_name.c_str(), false, death_anim_speed);
 
 		//死亡エフェクトを出現させる
 		m_pEffectManager.lock()->PlayOneShot(

@@ -1,6 +1,6 @@
 ﻿#include "SpiderBossBeamCollider.h"
-#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h"
-#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBossBeamState.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/SpiderBoss/SpiderBoss.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/SpiderBoss/SpiderBossBeamState.h"
 
 SpiderBossBeamCollider::SpiderBossBeamCollider(SpiderBoss& owner) :
 	m_owner(owner)

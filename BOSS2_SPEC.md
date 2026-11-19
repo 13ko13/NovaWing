@@ -153,19 +153,26 @@
 3. ゲーム側: 2面のボスのクラスと、`GameScene`・HPゲージ・当たり判定がボス全般を扱える形(ユーザー)。
 4. 動き → 網と放熱 → ロケット → 形態の切り替え → 扉。
 
-## 8. 作ったモデル(第1版 2026-11-18)
+## 8. 作ったモデル(第2版 2026-11-19。第1版 2026-11-18 を作り直した)
+
+作り直した考え方と根拠は [NOTES.md](NOTES.md) の「2026-11-19 2面のボスのモデル第2版」。
 
 ### ゲームが読むファイル(1面のボスの `Boss.mv1` + `Boss.fbm/` と同じ置き方)
-- `Data/Model/Boss2.mv1`(三角形7360枚、`model_scale` 1.0 でそのままの大きさ)
-- `Data/Model/Boss2.fbm/Boss2_Base.png`(ベース色、2048。モデルのマテリアルに入っている)
-- `Data/Model/Boss2.fbm/Boss2_Emission.png`(発光・通常。ゲーム側で渡す)
-- `Data/Model/Boss2.fbm/Boss2_Emission_Vent.png`(発光・放熱中。放熱口が赤く光る。点滅のときと同じように差し替える)
-- `Data/Model/Boss2.fbm/Boss2_Normal.png`(法線。まだ平ら、64×64)
-- メタリックの画像はない(1面と同じく -1)。マテリアルの値は1面にそろえた(拡散色1.0・自己発光0.5)。
+- `Data/Model/Boss2.mv1`(三角形13064枚、`model_scale` 1.0 でそのままの大きさ)
+- `Data/Model/Boss2.fbm/Boss2_Base.png`(ベース色、2048、RGB。アルファなし。モデルのマテリアルに入っている)
+- `Data/Model/Boss2.fbm/Boss2_Metallic.png`(滑らかさ、2048。**ゲーム側で`tex_metalic`に渡す**。1面のボスのように-1で渡すと、ツヤが広く強く出て正面が白く飛ぶ)
+  - ゲームのシェーダーでは、ツヤの鋭さ = R×34+1。装甲は0.35〜0.55、光る所は1.0(ツヤが色にかぶらないように)。
+  - ツヤをベース色のアルファに入れる方式は、モデルビューアで透けて見えるのでやめた(11/19・ユーザー決定)。
+- `Data/Model/Boss2.fbm/Boss2_Emission.png`(発光・通常。2048。ゲーム側で渡す)
+- `Data/Model/Boss2.fbm/Boss2_Emission_Vent.png`(発光・放熱中。放熱口が赤く光る。点滅のときと同じように差し替える。壊れた右ポッドは赤く光らない)
+- `Data/Model/Boss2.fbm/Boss2_Normal.png`(法線。2048。角の丸め・継ぎ目の溝・ボルトの凹凸入り。**DirectX式**(緑=テクスチャの下向き)。ゲームの中での向きの確認はまだ)
+- マテリアルの値は1面にそろえた(拡散色1.0・自己発光0.5)。
 
 ### DxLibで確かめた数値
-- 大きさ: x -1455〜1466、y -316〜619、z -740〜847(幅約2920・高さ約935・奥行き約1590)。原点は胴体の中心。
-- 向き: 正面は -Z(網の発射口 z=-415)、左のポッドは -X、上は +Y。
+- 大きさ: x -1461〜1488、y -369〜736、z -799〜842(幅約2950・高さ約1105・奥行き約1640)。原点は胴体の中心。
+- 向き: 正面は -Z(網の発射口 z=-430)、左のポッドは -X、上は +Y。
+- 目印の位置(読み込んだときのポーズ。待機の0フレーム目なので少し傾いている): `Muzzle_Net_L` (-1271, 440, -430) / `Muzzle_Net_R` (1280, 415, -430)、`Weak_L` (-1263, 426, 25) / `Weak_R` (1271, 401, 25)、`Muzzle_Rocket_0`〜`3` x=-111/-39/33/105・y 約-282・z -546。
+- `RocketHatch` のボーンはハッチの付け根(y -330・z -190付近)に移した(第1版から変更。名前と親は同じ)。
 - フレーム(名前で探せる): `Body`、`Arm_L`/`Arm_R`、`Pod_L`/`Pod_R`、`PodArmor_L_Top`/`_Bottom`(Rも)、`Pod_R_Broken`、`RocketHatch`、`Muzzle_Net_L`/`_R`、`Muzzle_Rocket_0`〜`3`、`Weak_L`/`_R`。
 - **壊れたポッドの表示**: メッシュのフレーム `Boss2_PodR_Broken` を `MV1SetFrameVisible` で切り替える(最初は非表示にする)。壊れる前のポッドは `Boss2_PodR`。
 - アニメーション(名前は `Boss2_Armature|` が付く。長さは再生の速さ1.0でゲームのフレーム数と同じ):
@@ -184,9 +191,11 @@
 
 ### 作り直し方(Claude)
 `Tools/Boss2Model/` のスクリプトで、形から `.mv1` まで作り直せる。
-1. Blender(MCPのサーバーを起動)で `build_boss2.py` → `bake_boss2.py`(TEX_DIR=`Data/Model/Boss2.fbm`)→ `export_boss2.py`(`Tools/Boss2Model/export/Boss2.fbx`)を実行。
+1. Blender(MCPのサーバーを起動)で `build_boss2.py` → `bake_boss2.py`(TEX_DIR=`Data/Model/Boss2.fbm`。Cycles、GPUがあれば使う)→ `export_boss2.py`(`Tools/Boss2Model/export/Boss2.fbx`)を実行。
+   - 色を調整しながら焼き直すときは `bake_boss2.py` に `APPLY_ATLAS=False` を渡す(最後のマテリアルの差し替えをしない)。色の値は `build_boss2.py` の `build_materials` に「PNGに入る値」で書いてある。
 2. `make_all.ps1` を実行: DxLibのモデルビューアでFBXを `.mv1` に変換し、`Data/Model/Boss2.mv1` に置く(変換のときだけビューアの「法線を作り直す」を切る)。
-- 確認用の画像は `render_preview.py`(Blender)で撮る。`export/` と `.blend` はgitに入れない(作り直せるため)。
+3. `mv1check/build.ps1` でビルドした `mv1check.exe` で、フレーム・大きさ・アニメーションを確かめ、DxLibで描いた画像を撮る。
+- 確認用の画像は `render_preview.py`(Blender)で撮る。**ゲームのシェーダーと同じ式**(拡散+環境光0.5+ツヤ(滑らかさ込み)+発光、ゲームの光の向き)で描く。`USE_METALLIC=False` で、メタリックを-1で渡したときの見え方になる。ゲームのカメラ・黒塗りのシルエット・放熱・ハッチ・壊れたポッドなど17枚。`export/` と `.blend` はgitに入れない(作り直せるため)。
 
 ## 7. 書き出しの注意
 - 前に、BlenderのFBXを`MV1LoadModel`で直接読めなかったことがある(ビルの当たり判定のとき)。モデルビューアで`.mv1`に変換して読む前提にする。最初の1体で必ず確かめる。

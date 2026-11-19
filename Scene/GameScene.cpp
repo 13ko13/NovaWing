@@ -42,8 +42,9 @@
 #include "Game/GameObjects/Actors/Character/Enemy/WormEnemy/WormEnemyDataSetter.h"
 #include "Scene/ClearScene.h"
 #include "Game/UI/PlayerHPGaugeUI.h"
-#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h"
-#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBossDataSetter.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/BossBase.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/SpiderBoss/SpiderBoss.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/SpiderBoss/SpiderBossDataSetter.h"
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyFactory.h"
 #include "Game/UI/BossHPGaugeUI.h"
 #include "Manager/LightingManager.h"
@@ -58,6 +59,8 @@
 #include "Manager/EnemySpawner.h"
 #include "Game/GameObjects/Actors/Character/Enemy/TurretEnemy/TurretEnemyDataSetter.h"
 #include "ShaderEffect/BoostingEffect.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossDataSetter.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBoss.h"
 #include "ShaderEffect/WaterDropEffect.h"
 #ifdef _DEBUG
 #include "DebugTools/DebugUI/DebugUI.h"
@@ -77,18 +80,11 @@ namespace
 	//ボス登場時のカメラを揺らす時間(この間WARNINGを出す)
 	constexpr int boss_appear_shake_frame = 60 * 3;
 
-	//ムービー終了後にボスを立たせる高さ(海面)
-	constexpr float boss_stand_y = 0.0f;
-
 	//ボスへのズームの速度
 	constexpr float boss_zoom_speed = 0.04f;
 	//ボスへのターゲットオフセットY
 	constexpr float boss_target_offset_y = 1500.0f;
 
-	//ボス登場ムービーの最後のカメラ位置(ボスの正面からの距離と高さ)
-	//ムービー明けはこの位置から始めて、そこからプレイヤーの位置へ引いて戻る
-	constexpr float boss_appear_camera_dist = 2700.0f;
-	constexpr float boss_appear_camera_height = 1020.0f;
 	//ムービーの最後の位置へ1フレームで移すためのズーム速度
 	constexpr float boss_appear_zoom_speed = 1.0f;
 	//ボス死亡のズーム時に保たせる最低限の距離
@@ -172,13 +168,26 @@ void GameScene::Init()
 	m_pPlayer->SetCamera(m_pCamera);
 
 	//ボスエネミーの初期化
-	m_pBoss = SpiderBossDataSetter::CreateEnemy(
+	if (m_pStageConfig->GetBossType() == StageConfig::BossType::Spider)
+	{
+		m_pBoss = SpiderBossDataSetter::CreateEnemy(
 		m_pPlayer,
 		m_pCamera,
 		m_pBulletManager,
 		m_pSoundManager,
 		m_pEffectManager,
 		m_pStageConfig->GetCSVFolderName());
+	}
+	else
+	{
+		m_pBoss = GunshipBossDataSetter::CreateEnemy(
+		m_pPlayer,
+		m_pCamera,
+		m_pBulletManager,
+		m_pSoundManager,
+		m_pEffectManager,
+		m_pStageConfig->GetCSVFolderName());
+	}
 	m_pBoss->Init();
 
 	//衝突判定マネージャーの初期化
@@ -198,8 +207,9 @@ void GameScene::Init()
 		m_pSoundManager,
 		m_pEffectManager
 	);
-	//ボスに工場をセットする
-	m_pBoss->SetEnemyFactory(m_pEnemyFactory);
+	//SpiderBossであればボスに工場をセットする
+	std::shared_ptr<SpiderBoss> pSpider = std::dynamic_pointer_cast<SpiderBoss>(m_pBoss);
+	if (pSpider) pSpider->SetEnemyFactory(m_pEnemyFactory);
 	//敵出現管理の初期化
 	m_pEnemySpawner = std::make_unique<EnemySpawner>(m_pPlayer, m_pEnemyFactory);
 
@@ -558,7 +568,7 @@ void GameScene::Update()
 				if (!m_pCamera->IsShake() && !m_pWarningUI->IsPlaying())
 				{
 					int movieH = ResourceLoader::GetInstance().GetGraphic(
-						ResourceLoader::GraphicID::BossAppearMovie);
+						m_pStageConfig->GetBossAppearMovieID());
 					//リトライで2回目以降に再生することもあるので、頭に戻してから再生する
 					SeekMovieToGraph(movieH, 0);
 					PlayMovieToGraph(movieH);
@@ -575,12 +585,12 @@ void GameScene::Update()
 
 				//ムービーの再生が終わったら
 				int movieH = ResourceLoader::GetInstance().GetGraphic(
-					ResourceLoader::GraphicID::BossAppearMovie);
+					m_pStageConfig->GetBossAppearMovieID());
 				if (GetMovieStateToGraph(movieH) == 0)
 				{
 					//ムービーの最後と同じく、ボスを海面に立たせる
 					Position3 bossPos = m_pBoss->GetPos();
-					bossPos.y = boss_stand_y;
+					bossPos.y = m_pStageConfig->GetBossStandY();
 					m_pBoss->SetPos(bossPos);
 					//地震音が鳴っていればフェードアウトする
 					m_pSoundManager->FadeOut(SoundManager::SoundType::BossQuake, boss_quake_fade_out_time);
@@ -599,8 +609,8 @@ void GameScene::Update()
 					m_pCamera->OnZoomUp(
 						boss_appear_zoom_speed,
 						m_pBoss,
-						boss_appear_camera_dist,
-						boss_appear_camera_height);
+						m_pStageConfig->GetBossAppearCameraDist(),
+						m_pStageConfig->GetBossAppearCameraHeight());
 					//ボス出現フラグを立てる
 					m_isAppearBoss = true;
 					//ボスの行動を許可する
@@ -788,7 +798,7 @@ void GameScene::Draw()
 	{
 		//バックバッファに戻す
 		m_pWaterDropEffect->ChangeNormalRT();
-		
+
 		//水滴シェーダーを通した世界とブーストエフェクトを描画
 		m_pWaterDropEffect->Draw();
 		//カメラを再設定
@@ -796,14 +806,14 @@ void GameScene::Draw()
 		//全てのUIを描画する
 		m_pUIManager->Draw();
 	}
-	
+
 
 	//ボス登場ムービーの再生中は、画面全体にムービーを描画する
 	if (m_isDrawBossMovie)
 	{
 		const Size& wsize = Application::GetInstance().GetWindowSize();
 		DrawExtendGraph(0, 0, wsize.width, wsize.height,
-			ResourceLoader::GetInstance().GetGraphic(ResourceLoader::GraphicID::BossAppearMovie),
+			ResourceLoader::GetInstance().GetGraphic(m_pStageConfig->GetBossAppearMovieID()),
 			FALSE);
 	}
 }

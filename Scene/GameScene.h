@@ -17,7 +17,7 @@ class Rock;
 class Building;
 class Scenery;
 class Stage;
-class SpiderBoss;
+class BossBase;
 class EnemyFactory;
 class SoundManager;
 class EffectManager;
@@ -131,7 +131,7 @@ private:
 	//ステージへのポインタ
 	std::shared_ptr<Stage> m_pStage;
 	//ボスへのポインタ
-	std::shared_ptr<SpiderBoss> m_pBoss;
+	std::shared_ptr<BossBase> m_pBoss;
 	//敵生産工場へのポインタ
 	std::shared_ptr<EnemyFactory> m_pEnemyFactory;
 	//サウンドマネージャーへのポインタ

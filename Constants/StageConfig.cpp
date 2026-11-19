@@ -22,13 +22,31 @@ namespace
 		float oneLapDistance;
 		//雨が降っているか
 		bool isRainStage;
+		//登場ムービーのID
+		ResourceLoader::GraphicID bossAppearMovieID;
+		//ムービー後のボスの高さ
+		float bossStandY;
+		//ムービーの最後のカメラの距離
+		float bossAppearDist;
+		//ムービーの最後のカメラの高さ
+		float bossAppearCameraHeight;
+		//ボスの種類
+		StageConfig::BossType bossType;
 	};
 
 	//ステージごとの設定(添字=ステージ番号(1面=0))
 	constexpr StageData stage_datas[] =
 	{
-		{ L"Stage1",true,58700.0f ,true,0.0f,0.0f,false },//1面
-		{ L"Stage2",false,56300.0f,false, 34000.0f,16000.0f,true },//2面
+		//1面
+		{ L"Stage1",true,58700.0f ,true,0.0f,0.0f,false,
+			ResourceLoader::GraphicID::BossAppearMovie,
+			0.0f,2700.0f,1020.0f,StageConfig::BossType::Spider
+		},
+		//2面
+		{ L"Stage2",false,56300.0f,false, 34000.0f,16000.0f,true,
+			ResourceLoader::GraphicID::BossAppearMovie,
+			0.0f,2700.0f,1020.0f,StageConfig::BossType::GunShip
+		},
 	};
 }
 
@@ -50,6 +68,11 @@ StageConfig::StageConfig(int stageNo) :
 	m_buildingLoopStartZ = data.buildingLoopStartZ;
 	m_oneLapDistance = data.oneLapDistance;
 	m_isRainStage = data.isRainStage;
+	m_bossAppearMovieID = data.bossAppearMovieID;
+	m_bossStandY = data.bossStandY;
+	m_bossAppearDist = data.bossAppearDist;
+	m_bossAppearCameraHeight = data.bossAppearCameraHeight;
+	m_bossType = data.bossType;
 }
 
 StageConfig::~StageConfig()

@@ -28,6 +28,8 @@ public:
 	//ボス出現が終了しているかを返す
 	bool IsBossAppear() const { return m_isAppear; }
 
+private:
+
 protected:
 	//ボスが出現完了しているか
 	//ゲームシーン側からセットさせる

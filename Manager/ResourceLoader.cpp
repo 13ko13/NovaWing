@@ -740,6 +740,7 @@ ResourceLoader::ModelID ResourceLoader::WStringToModelID(const std::wstring id)
 		{ turret_enemy_csv_name,ModelID::TurretEnemy },
 		{ butterfly_enemy_csv_name,ModelID::ButterflyEnemy },
 		{ boss_csv_name,ModelID::Boss },
+		{ boss2_csv_name,ModelID::Boss2 },
 		{ scenery_islanda_csv_name,ModelID::SceneryIslandA },
 		{ scenery_islandb_csv_name,ModelID::SceneryIslandB },
 		{ scenery_islandc_csv_name,ModelID::SceneryIslandC },

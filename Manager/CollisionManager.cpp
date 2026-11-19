@@ -10,7 +10,7 @@
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
 #include "Game/GameObjects/Actors/Rock/Rock.h"
 #include "Game/GameObjects/Camera/GameCamera.h"
-#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/BossBase.h"
 #include "Game/Collision/ICollider.h"
 #include "Game/Collision/SphereShape.h"
 #include "Game/Collision/EnemyCollider.h"
@@ -180,7 +180,7 @@ CollisionManager::CollisionManager(
 	const std::weak_ptr<Player> pPlayer,
 	const std::weak_ptr<BulletManager> pBulletManager,
 	const std::weak_ptr<GameCamera> pCamera,
-	const std::weak_ptr<SpiderBoss> pBoss) :
+	const std::weak_ptr<BossBase> pBoss) :
 	m_pPlayer(pPlayer),
 	m_pBulletManager(pBulletManager),
 	m_pCamera(pCamera),
@@ -216,7 +216,7 @@ void CollisionManager::Update()
 	//shared_ptrに変換
 	std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock();
 	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
-	std::shared_ptr<SpiderBoss> pBoss = m_pBoss.lock();
+	std::shared_ptr<BossBase> pBoss = m_pBoss.lock();
 
 	//判定中にオブジェクトが解放されないよう、このフレームの間shared_ptrで保持しておく
 	std::vector<std::shared_ptr<GameObject>> keepAlive;

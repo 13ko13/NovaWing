@@ -1,0 +1,63 @@
+﻿#include "GunshipBossDataSetter.h"
+#include "Manager/ResourceLoader.h"
+#include "Manager/CSVDataLoader.h"
+#include "CSVData/CSVData.h"
+#include "Utility/Vector3.h"
+#include "GunshipBoss.h"
+
+namespace
+{
+    //CSVファイル名
+    const wchar_t* const boss_csv_name = L"Boss";
+}
+
+std::shared_ptr<GunshipBoss> GunshipBossDataSetter::CreateEnemy(
+        std::weak_ptr<Player> pPlayer,
+        std::weak_ptr<CameraBase> pCamera,
+        std::weak_ptr<BulletManager> pBulletManager,
+        std::weak_ptr<SoundManager> pSoundManager,
+        std::weak_ptr<EffectManager> pEffectManager,
+        const std::wstring& csvFolderName
+)
+{
+    std::shared_ptr<GunshipBoss> pEnemy;
+
+    //CSVLoaderにCSVをロードさせる
+    CSVDataLoader& loader = CSVDataLoader::GetInstance();
+
+    //CSVデータのリストを受け取る
+    std::wstring csvPath = csvFolderName + L"/" + boss_csv_name;//csvフォルダの名前/csvファイル名
+    std::vector<std::shared_ptr<CSVData>> pData = loader.LoadCSV(csvPath.c_str());
+
+    //受け取ったCSVの文字列を入れる変数
+    std::vector<std::wstring> dataString;
+
+    //リストをループしてそれぞれのデータを受け取る
+    for (std::shared_ptr<CSVData> data : pData)
+    {
+        //CSVから読み取った値を受け取る
+        dataString = data->GetData();
+
+        //モデルID(文字列)をModelIDに変換
+        ResourceLoader::ModelID modelID =
+            ResourceLoader::WStringToModelID(dataString[0]);
+
+        //位置(文字列)をVector3に変換
+        Vector3 pos = Vector3::FromWString(
+            dataString[1], dataString[2], dataString[3]);
+
+        GunshipBoss::GunshipBossData bossData;
+        bossData.modelID = modelID;
+        bossData.pBulletManager = pBulletManager;
+        bossData.pCamera = pCamera;
+        bossData.pos = pos;
+        bossData.pPlayer = pPlayer;
+        bossData.pSoundManager = pSoundManager;
+        bossData.pEffectManager = pEffectManager;
+
+        //その位置で敵を一つ作成する
+        pEnemy = std::make_shared<GunshipBoss>(bossData);
+    }
+    //出来上がったボスのポインタを返す
+    return pEnemy;
+}

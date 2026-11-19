@@ -1,6 +1,6 @@
 ﻿#include "SpiderBossShieldCollider.h"
 #include "BulletCollider.h"
-#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/SpiderBoss/SpiderBoss.h"
 
 SpiderBossShieldCollider::SpiderBossShieldCollider(SpiderBoss& owner) :
 	m_owner(owner)

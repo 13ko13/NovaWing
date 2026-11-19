@@ -436,3 +436,5 @@ DebugTools/ImGui/imgui.ini
 Tools/Boss2Model/export/
 Tools/Boss2Model/*.blend
 Tools/Boss2Model/*.blend1
+Tools/Boss2Model/mv1check/*.exe
+Tools/Boss2Model/mv1check/*.obj

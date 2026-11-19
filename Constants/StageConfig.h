@@ -1,9 +1,18 @@
 ﻿#pragma once
 #include <string>
 
+#include "Manager/ResourceLoader.h"
+
 class StageConfig
 {
 public:
+	//ボスの種類
+	enum class BossType
+	{
+		Spider,
+		GunShip
+	};
+
 	//ステージ番号を受け取る
 	StageConfig(int stageNo);
 	~StageConfig();
@@ -26,6 +35,16 @@ public:
 	float GetOneLapDistance() const { return m_oneLapDistance; }
 	//雨のステージなのか
 	bool IsRainStage() const { return m_isRainStage; }
+	//ボスの登場ムービーのIDを取得
+	ResourceLoader::GraphicID GetBossAppearMovieID() const { return m_bossAppearMovieID; }
+	//ムービー後のボスの高さを取得
+	float GetBossStandY() const { return m_bossStandY; }
+	//ムービーの最後のカメラの距離を取得
+	float GetBossAppearCameraDist() const { return m_bossAppearDist; }
+	//ムービーの最後のカメラの高さを取得
+	float GetBossAppearCameraHeight() const { return m_bossAppearCameraHeight; }
+	//ボスの種類を取得
+	BossType GetBossType() const { return m_bossType; }
 
 private:
 	//ステージに使用するデータが入ったcsvのフォルダ名
@@ -44,4 +63,14 @@ private:
 	float m_oneLapDistance = 0.0f;
 	//雨のステージか
 	bool m_isRainStage = false;
+	//ボスの登場ムービーのID
+	ResourceLoader::GraphicID m_bossAppearMovieID = ResourceLoader::GraphicID::BossAppearMovie;
+	//ムービー後のボスの高さ
+	float m_bossStandY = 0.0f;
+	//ムービーの最後のカメラの距離
+	float m_bossAppearDist = 0.0f;
+	//ムービーの最後のカメラの高さ
+	float m_bossAppearCameraHeight = 0.0f;
+	//ボスの種類
+	BossType m_bossType = BossType::Spider;
 };

@@ -216,6 +216,7 @@ namespace
 	constexpr const wchar_t* floating_enemy_csv_name = L"FloatingEnemy";
 	constexpr const wchar_t* worm_head_csv_name = L"WormHead";
 	constexpr const wchar_t* boss_csv_name = L"Boss";
+	constexpr const wchar_t* boss2_csv_name = L"Boss2";//2ステージ目のボス
 	constexpr const wchar_t* rush_enemy_csv_name = L"RushEnemy";
 	constexpr const wchar_t* turret_enemy_csv_name = L"TurretEnemy";
 	constexpr const wchar_t* butterfly_enemy_csv_name = L"ButterflyEnemy";

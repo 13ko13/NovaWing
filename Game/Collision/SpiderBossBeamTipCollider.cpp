@@ -1,7 +1,7 @@
 ﻿#include "DxLib.h"
 #include "SpiderBossBeamTipCollider.h"
-#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h"
-#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBossBeamState.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/SpiderBoss/SpiderBoss.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/SpiderBoss/SpiderBossBeamState.h"
 #include "Game/Collision/CounterCollider.h"
 
 SpiderBossBeamTipCollider::SpiderBossBeamTipCollider(SpiderBoss& owner, bool isRight) :

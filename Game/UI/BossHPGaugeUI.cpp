@@ -1,5 +1,5 @@
 ﻿#include "BossHPGaugeUI.h"
-#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/BossBase.h"
 #include "Manager/ResourceLoader.h"
 #include "Utility/SizeF.h"
 #include "Constants/ShaderRegister.h"
@@ -16,7 +16,7 @@ namespace
     constexpr float scanline_frequency = 655.0f;
 }
 
-BossHPGaugeUI::BossHPGaugeUI(std::weak_ptr<SpiderBoss> pBoss) :
+BossHPGaugeUI::BossHPGaugeUI(std::weak_ptr<BossBase> pBoss) :
     m_pBoss(pBoss)
 {
     //スキャンラインを入れる周期をシェーダに渡す

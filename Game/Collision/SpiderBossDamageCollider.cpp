@@ -1,6 +1,6 @@
 ﻿#include "SpiderBossDamageCollider.h"
 #include "BulletCollider.h"
-#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/SpiderBoss/SpiderBoss.h"
 
 namespace
 {

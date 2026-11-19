@@ -4,7 +4,7 @@
 #include "Game/GameObjects/GameObject.h"
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
-#include "Game/GameObjects/Actors/Character/Enemy/SpiderBoss/SpiderBoss.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/BossBase.h"
 #include "Game/GameObjects/Bullet/EnemyBullet.h"
 #include "Game/GameObjects/Actors/Rock/Rock.h"
 #include "Game/Collision/ICollider.h"
@@ -124,7 +124,7 @@ void AutoPlayWorld::Refresh()
 			std::shared_ptr<EnemyBase> pEnemy = std::dynamic_pointer_cast<EnemyBase>(pObject);
 			if (!pEnemy || pEnemy->IsDead()) return;
 
-			std::shared_ptr<SpiderBoss> pBoss = std::dynamic_pointer_cast<SpiderBoss>(pEnemy);
+			std::shared_ptr<BossBase> pBoss = std::dynamic_pointer_cast<BossBase>(pEnemy);
 			if (pBoss)
 			{
 				m_pBoss = pBoss;

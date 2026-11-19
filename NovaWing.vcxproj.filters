@@ -237,16 +237,16 @@
     <ClCompile Include="Utility\GraphShaderDraw.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBoss.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBoss.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossDataSetter.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossDataSetter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\ISpiderBossState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\ISpiderBossState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossSummonState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossSummonState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\EnemyFactory.cpp">
@@ -255,10 +255,10 @@
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\EnemyBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossIdleState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossIdleState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossBeamState.cpp">
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossBeamState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Game\GameObjects\Actors\Character\Player\Shoot\DisabledShootState.cpp">
@@ -422,6 +422,12 @@
     </ClCompile>
     <ClCompile Include="ShaderEffect\WaterDropEffect.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\BossBase.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBoss.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossDataSetter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -660,16 +666,16 @@
     <ClInclude Include="Utility\GraphShaderDraw.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBoss.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBoss.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossDataSetter.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossDataSetter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\ISpiderBossState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\ISpiderBossState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossSummonState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossSummonState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\EnemyFactory.h">
@@ -678,10 +684,10 @@
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\EnemyBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossIdleState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossIdleState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\SpiderBoss\SpiderBossBeamState.h">
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\SpiderBoss\SpiderBossBeamState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Game\GameObjects\Actors\Character\Player\Shoot\DisabledShootState.h">
@@ -842,6 +848,12 @@
     </ClInclude>
     <ClInclude Include="ShaderEffect\WaterDropEffect.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\BossBase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBoss.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossDataSetter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

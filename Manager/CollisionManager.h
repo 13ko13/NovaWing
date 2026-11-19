@@ -10,7 +10,7 @@ class BulletManager;
 class EnemyBase;
 class Rock;
 class GameCamera;
-class SpiderBoss;
+class BossBase;
 class ICollider;
 class BulletCollider;
 class Building;
@@ -20,7 +20,7 @@ public:
 	CollisionManager(const std::weak_ptr<Player> pPlayer,
 		const std::weak_ptr<BulletManager> pBulletManager,
 		const std::weak_ptr<GameCamera> pCamera,
-		const std::weak_ptr<SpiderBoss> pBoss
+		const std::weak_ptr<BossBase> pBoss
 	);
 	~CollisionManager();
 
@@ -54,7 +54,7 @@ private:
 	//ビルの配列
 	std::vector<std::weak_ptr<Building>> m_pBuildings;
 	//ボス
-	std::weak_ptr<SpiderBoss> m_pBoss;
+	std::weak_ptr<BossBase> m_pBoss;
 
 	//多段ヒット防止用、今フレーム当たっていたダメージ源
 	std::set<DamageSource> m_hitSourcesThisFrame;

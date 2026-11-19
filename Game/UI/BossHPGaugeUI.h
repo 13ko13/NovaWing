@@ -1,12 +1,12 @@
 ﻿#pragma once
 #include "GaugeUIBase.h"
 
-class SpiderBoss;
+class BossBase;
 class BossHPGaugeUI : public GaugeUIBase
 {
 public:
     //ボスからHPを貰うためボスの弱参照を受け取る
-    BossHPGaugeUI(std::weak_ptr<SpiderBoss> pBoss);
+    BossHPGaugeUI(std::weak_ptr<BossBase> pBoss);
     ~BossHPGaugeUI();
 
     //描画
@@ -15,6 +15,6 @@ public:
     void Update() override;
 
 private:
-    std::weak_ptr<SpiderBoss> m_pBoss;
+    std::weak_ptr<BossBase> m_pBoss;
 };
 
