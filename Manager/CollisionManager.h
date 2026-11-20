@@ -19,8 +19,7 @@ class CollisionManager
 public:
 	CollisionManager(const std::weak_ptr<Player> pPlayer,
 		const std::weak_ptr<BulletManager> pBulletManager,
-		const std::weak_ptr<GameCamera> pCamera,
-		const std::weak_ptr<BossBase> pBoss
+		const std::weak_ptr<GameCamera> pCamera
 	);
 	~CollisionManager();
 
@@ -31,6 +30,8 @@ public:
 	//ビルを配列に格納
 	void RegisterBuilding(std::shared_ptr<Building> pBuilding);
 	void Update();//更新処理
+	//ボスを格納
+	void RegisterBoss(std::shared_ptr<BossBase> pBoss);
 
 private:
 	//2つのコライダーが当たった時の処理

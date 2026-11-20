@@ -167,35 +167,9 @@ void GameScene::Init()
 	//カメラを生成したのでプレイヤーにカメラをセットする
 	m_pPlayer->SetCamera(m_pCamera);
 
-	//ボスエネミーの初期化
-	if (m_pStageConfig->GetBossType() == StageConfig::BossType::Spider)
-	{
-		m_pBoss = SpiderBossDataSetter::CreateEnemy(
-		m_pPlayer,
-		m_pCamera,
-		m_pBulletManager,
-		m_pSoundManager,
-		m_pEffectManager,
-		m_pStageConfig->GetCSVFolderName());
-	}
-	else
-	{
-		m_pBoss = GunshipBossDataSetter::CreateEnemy(
-		m_pPlayer,
-		m_pCamera,
-		m_pBulletManager,
-		m_pSoundManager,
-		m_pEffectManager,
-		m_pStageConfig->GetCSVFolderName());
-	}
-	m_pBoss->Init();
-
-	//衝突判定マネージャーの初期化
+	//当たり判定マネージャーの初期化
 	m_pCollisionManager = std::make_shared<CollisionManager>(
-		m_pPlayer,
-		m_pBulletManager,
-		m_pCamera,
-		m_pBoss);
+		m_pPlayer, m_pBulletManager, m_pCamera);
 
 	//敵生産工場の初期化
 	m_pEnemyFactory = std::make_shared<EnemyFactory>(
@@ -207,9 +181,7 @@ void GameScene::Init()
 		m_pSoundManager,
 		m_pEffectManager
 	);
-	//SpiderBossであればボスに工場をセットする
-	std::shared_ptr<SpiderBoss> pSpider = std::dynamic_pointer_cast<SpiderBoss>(m_pBoss);
-	if (pSpider) pSpider->SetEnemyFactory(m_pEnemyFactory);
+
 	//敵出現管理の初期化
 	m_pEnemySpawner = std::make_unique<EnemySpawner>(m_pPlayer, m_pEnemyFactory);
 
@@ -217,7 +189,6 @@ void GameScene::Init()
 	m_pUIManager = std::make_shared<UIManager>();
 	m_pUIManager->Register(std::make_shared<ReticleUI>(m_pTargetManager, m_pPlayer));
 	m_pUIManager->Register(std::make_shared<PlayerHPGaugeUI>(m_pPlayer));
-	m_pUIManager->Register(std::make_shared<BossHPGaugeUI>(m_pBoss));
 	m_pUIManager->Register(std::make_shared<SpecialGaugeUI>(m_pPlayer));
 	//ボス登場前のWARNINGは、GameSceneから表示を開始するのでポインタを持っておく
 	m_pWarningUI = std::make_shared<WarningUI>();
@@ -398,11 +369,6 @@ void GameScene::CreateStageObjects(float offsetZ)
 		//当たり判定のマネージャーに登録する
 		m_pCollisionManager->RegisterBuilding(pBuilding);
 	}
-
-	//ボスの位置も改めてセットする
-	Vector3 bossPos = m_pBoss->GetPos();
-	bossPos.z += m_stageOffsetZ;
-	m_pBoss->SetPos(bossPos);
 }
 
 void GameScene::StartStage()
@@ -491,26 +457,36 @@ void GameScene::RegisterDebugItems()
 
 	//ボス
 	debugUI.AddText(this, L"Boss", [this]()
+	{
+		if (m_pBoss)
 		{
 			return L"HP: " + std::to_wstring(m_pBoss->GetHealth()) +
 				L" / " + std::to_wstring(m_pBoss->GetMaxHealth());
-		});
+		}
+		return std::wstring(L"ボスなし");
+	});
 	debugUI.AddText(this, L"Boss", [this]()
+	{
+		if (m_pBoss)
 		{
 			const Vector3 pos = m_pBoss->GetPos();
 			return L"座標: (" + std::to_wstring(static_cast<int>(pos.x)) +
 				L", " + std::to_wstring(static_cast<int>(pos.y)) +
 				L", " + std::to_wstring(static_cast<int>(pos.z)) + L")";
-		});
+		}
+		return std::wstring(L"ボスなし");
+	});
 	debugUI.AddButton(this, L"Boss", L"ボスのHPを1にする", [this]()
-		{
-			m_pBoss->DebugSetHealth(1);
-		});
+	{
+		if (!m_pBoss) return;
+		m_pBoss->DebugSetHealth(1);
+	});
 	debugUI.AddButton(this, L"Boss", L"ボスを倒す", [this]()
-		{
-			//通常のダメージ処理を通すので、死亡演出なども本番と同じ流れになる
-			m_pBoss->TakeDamage(m_pBoss->GetMaxHealth());
-		});
+	{
+		if (!m_pBoss) return;
+		//通常のダメージ処理を通すので、死亡演出なども本番と同じ流れになる
+		m_pBoss->TakeDamage(m_pBoss->GetMaxHealth());
+	});
 }
 #endif
 
@@ -595,10 +571,8 @@ void GameScene::Update()
 					m_pStageConfig->GetBossAppearMovieID());
 				if (GetMovieStateToGraph(movieH) == 0)
 				{
-					//ムービーの最後と同じく、ボスを海面に立たせる
-					Position3 bossPos = m_pBoss->GetPos();
-					bossPos.y = m_pStageConfig->GetBossStandY();
-					m_pBoss->SetPos(bossPos);
+					//ボスを作成
+					CreateBoss();
 					//地震音が鳴っていればフェードアウトする
 					m_pSoundManager->FadeOut(SoundManager::SoundType::BossQuake, boss_quake_fade_out_time);
 					//ステートをカメラズームに遷移
@@ -644,7 +618,7 @@ void GameScene::Update()
 		}
 
 		//ボスが死亡待機状態になった瞬間、一度だけBGMをフェードアウトする
-		if (m_pBoss->IsDying() && !m_isBossDeathBGMFadeOut)
+		if (IsBossDying() && !m_isBossDeathBGMFadeOut)
 		{
 			m_pSoundManager->FadeOut(SoundManager::SoundType::BossBGM, boss_death_bgm_fade_out_time);
 			m_isBossDeathBGMFadeOut = true;
@@ -652,7 +626,7 @@ void GameScene::Update()
 	}
 
 	//ボスを倒したらクリアにする
-	if (m_pBoss->IsDead())
+	if (m_pBoss != nullptr && m_pBoss->IsDead())
 	{
 		//リザルトに渡す情報を組み立てる
 		ClearScene::ClearResultData resultData;
@@ -668,7 +642,7 @@ void GameScene::Update()
 	}
 
 	//ボスが死亡待機状態になったら
-	if (m_pBoss->IsDying())
+	if (IsBossDying())
 	{
 		//プレイヤーの進行を止める
 		m_pPlayer->ChangeAllStateToDisabled();
@@ -738,6 +712,53 @@ void GameScene::UpdateGameWorld()
 	}
 }
 
+void GameScene::CreateBoss()
+{
+	//ボスエネミーの初期化
+	if (m_pStageConfig->GetBossType() == StageConfig::BossType::Spider)
+	{
+		m_pBoss = SpiderBossDataSetter::CreateEnemy(
+		m_pPlayer,
+		m_pCamera,
+		m_pBulletManager,
+		m_pSoundManager,
+		m_pEffectManager,
+		m_pStageConfig->GetCSVFolderName());
+	}
+	else
+	{
+		m_pBoss = GunshipBossDataSetter::CreateEnemy(
+		m_pPlayer,
+		m_pCamera,
+		m_pBulletManager,
+		m_pSoundManager,
+		m_pEffectManager,
+		m_pStageConfig->GetCSVFolderName());
+	}
+	m_pBoss->Init();
+
+	//SpiderBossであればボスに工場をセットする
+	std::shared_ptr<SpiderBoss> pSpider = std::dynamic_pointer_cast<SpiderBoss>(m_pBoss);
+	if (pSpider) pSpider->SetEnemyFactory(m_pEnemyFactory);
+
+	//ボスの位置を改めてセットする
+	Vector3 bossPos = m_pBoss->GetPos();
+	bossPos.z += m_stageOffsetZ;
+	m_pBoss->SetPos(bossPos);
+
+	//HPゲージのUIをUIマネージャーに登録
+	m_pUIManager->Register(std::make_shared<BossHPGaugeUI>(m_pBoss));
+
+	//当たり判定マネージャーにボスを登録
+	m_pCollisionManager->RegisterBoss(m_pBoss);
+}
+
+bool GameScene::IsBossDying()
+{
+	//存在していて死んでいる場合はtrueを返す
+	return m_pBoss != nullptr && m_pBoss->IsDying();
+}
+
 void GameScene::Draw()
 {
 	//WaterRevealManagerのインスタンスを取得
@@ -785,7 +806,7 @@ void GameScene::Draw()
 	//エフェクトの描画
 	m_pEffectManager->Draw();
 
-	if (!m_pBoss->IsDying())
+	if (!IsBossDying())
 	{
 		//水滴用のオフスクリーンにブーストエフェクト込みの世界を描画する
 		m_pWaterDropEffect->ChangeWaterDropEffectRT();
@@ -801,7 +822,7 @@ void GameScene::Draw()
 	m_pBoostingEffect->Draw(m_pPlayer->IsBoosting());
 
 	//ボスが死んでいるときは描画しない
-	if (!m_pBoss->IsDying())
+	if (!IsBossDying())
 	{
 		//バックバッファに戻す
 		m_pWaterDropEffect->ChangeNormalRT();
@@ -813,7 +834,6 @@ void GameScene::Draw()
 		//全てのUIを描画する
 		m_pUIManager->Draw();
 	}
-
 
 	//ボス登場ムービーの再生中は、画面全体にムービーを描画する
 	if (m_isDrawBossMovie)

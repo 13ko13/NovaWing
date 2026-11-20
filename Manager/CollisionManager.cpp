@@ -179,12 +179,10 @@ namespace
 CollisionManager::CollisionManager(
 	const std::weak_ptr<Player> pPlayer,
 	const std::weak_ptr<BulletManager> pBulletManager,
-	const std::weak_ptr<GameCamera> pCamera,
-	const std::weak_ptr<BossBase> pBoss) :
+	const std::weak_ptr<GameCamera> pCamera) :
 	m_pPlayer(pPlayer),
 	m_pBulletManager(pBulletManager),
-	m_pCamera(pCamera),
-	m_pBoss(pBoss)
+	m_pCamera(pCamera)
 {
 
 }
@@ -275,9 +273,13 @@ void CollisionManager::Update()
 			addCollider(*pCollider);
 		}
 	}
-	for (ICollider* pCollider : pBoss->GetColliders())
+	//ボスがいたらボスのコライダーを追加
+	if (pBoss)
 	{
-		addCollider(*pCollider);
+		for (ICollider* pCollider : pBoss->GetColliders())
+		{
+			addCollider(*pCollider);
+		}
 	}
 
 	//岩
@@ -333,6 +335,11 @@ void CollisionManager::Update()
 		}),
 	m_pEnemies.end()
 	);
+}
+
+void CollisionManager::RegisterBoss(std::shared_ptr<BossBase> pBoss)
+{
+	m_pBoss = pBoss;
 }
 
 void CollisionManager::OnHit(ICollider& a, ICollider& b)

@@ -70,6 +70,13 @@ private:
 
 	//ゲーム中の更新
 	void UpdateGameWorld();
+
+	//ボスを作成
+	void CreateBoss();
+
+	//ボスが存在していて死にかけているか
+	bool IsBossDying();
+
 private:
 	//フレームカウンター
 	int m_frame;

@@ -10,6 +10,13 @@ namespace
 {
 	//召喚時のエフェクトの再生位置のオフセット
 	const Vector3 summon_effect_offset = Vector3(300.0f, 0.0f, 0.0f);
+
+	//召喚してよい敵の種類を並べる
+	constexpr EnemyFactory::EnemyType summon_enemy_types[] =
+	{
+		EnemyFactory::EnemyType::FloatingEnemy,
+		EnemyFactory::EnemyType::WormEnemy
+	};
 }
 
 SpiderBossSummonState::SpiderBossSummonState(
@@ -33,11 +40,10 @@ void SpiderBossSummonState::Enter()
 	m_pBoss.lock()->GetSoundManager().lock()->Play(SoundManager::SoundType::BossSummon);
 
 	//浮遊敵とワームエネミーをランダムで召喚
-	//Noneは召喚できないので、Noneの次からMaxの手前までの中から選ぶ
-	const int firstEnemyType = static_cast<int>(EnemyFactory::EnemyType::None) + 1;
-	const int enemyTypeCount = static_cast<int>(EnemyFactory::EnemyType::Max) - firstEnemyType;
+	const int enemyTypeCount = std::size(summon_enemy_types);
 	//GetRandは0〜引数(引数も含む)を返すので、種類の数-1を渡す
-	int rand = firstEnemyType + GetRand(enemyTypeCount - 1);
+	int rand = GetRand(enemyTypeCount - 1);
+	EnemyFactory::EnemyType enemyType = summon_enemy_types[rand];
 
 	//左右対称にして2か所から召喚
 	Vector3 leftSummonPos = m_summonPos - summon_effect_offset;
@@ -45,7 +51,7 @@ void SpiderBossSummonState::Enter()
 
 	//生成した敵に応じて再生するエフェクトを変える
 	std::shared_ptr<EffectManager> pEffectManager = m_pBoss.lock()->GetEffectManager().lock();
-	switch (static_cast<EnemyFactory::EnemyType>(rand))
+	switch (static_cast<EnemyFactory::EnemyType>(enemyType))
 	{
 	case EnemyFactory::EnemyType::FloatingEnemy:
 		//左右2か所にエフェクトを再生
@@ -65,11 +71,11 @@ void SpiderBossSummonState::Enter()
 		//召喚
 		m_pEnemyFactory.lock()->Create(
 			leftSummonPos,
-			static_cast<EnemyFactory::EnemyType>(rand)
+			enemyType
 		);
 		m_pEnemyFactory.lock()->Create(
 			rightSummonPos,
-			static_cast<EnemyFactory::EnemyType>(rand)
+			enemyType
 		);
 	}
 }

@@ -6,6 +6,8 @@
 #include "Constants/ShaderRegister.h"
 #include "Utility/ModelAnimator.h"
 #include "Game/GameObjects/Actors/Character/Player/Player.h"
+#include "IGunshipBossState.h"
+#include "GunshipBossMoveState.h"
 
 namespace
 {
@@ -43,6 +45,13 @@ void GunshipBoss::OnInit()
 
 	//待機アニメーションを再生
 	m_pAnimator->Play(idle_anim_name, true);
+
+	//移動ステートのポインタを作成
+	//コンストラクタ内で作ろうとするとまだGunshipBossのポインタが作られていないのでOnInitで呼ぶ
+	m_pState = std::make_shared<GunshipBossMoveState>(
+		std::static_pointer_cast<GunshipBoss>(shared_from_this()));
+	//ステートの開始処理を呼ぶ
+	m_pState->Enter();
 }
 
 void GunshipBoss::Update()
@@ -55,6 +64,8 @@ void GunshipBoss::Update()
 		myVel.y = 0.0f;
 		myVel.x = 0.0f;
 		SetVel(myVel);
+		//ステートの更新を呼ぶ
+		m_pState->Update();
 	}
 	//BossBase(Character)の更新処理を呼ぶ
 	BossBase::Update();

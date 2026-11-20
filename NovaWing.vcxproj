@@ -310,6 +310,9 @@
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\BossBase.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBoss.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossDataSetter.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossMoveState.cpp" />
+    <ClCompile Include="Utility\Easing.cpp" />
+    <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\IGunshipBossState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
@@ -454,6 +457,9 @@
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\BossBase.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBoss.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossDataSetter.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\IGunshipBossState.h" />
+    <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossMoveState.h" />
+    <ClInclude Include="Utility\Easing.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="BoostingEffectPS.hlsl">

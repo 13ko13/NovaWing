@@ -4,6 +4,7 @@
 #include "Game/GameObjects/Actors/Character/Enemy/Boss/BossBase.h"
 
 class ModelAnimator;
+class IGunshipBossState;
 class GunshipBoss : public BossBase
 {
 public:
@@ -27,4 +28,6 @@ private:
 	int m_brokenPodFrameIdx = -1;
 	//アニメーター
 	std::unique_ptr<ModelAnimator> m_pAnimator;
+	//現在のステート
+	std::shared_ptr<IGunshipBossState> m_pState;
 };
