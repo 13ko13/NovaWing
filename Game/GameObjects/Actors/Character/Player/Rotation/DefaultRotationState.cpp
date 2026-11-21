@@ -1,9 +1,11 @@
 ﻿#include <cmath>
+#include <algorithm>
 
 #include "DefaultRotationState.h"
 #include "Manager/EffectManager.h"
 #include "Manager/InputManager.h"
 #include "Character/Player/Player.h"
+#include "Constants/Game.h"
 
 namespace
 {
@@ -22,6 +24,12 @@ namespace
 
 	//ローリング1回転(360)にかけるフレーム数
 	constexpr float roll_frame = 20;
+
+	//プレイヤーが下にいるときは少し上を向くように補正する
+	//プレイヤーがどのくらいの高さにいたら上に向かせるか
+	constexpr float low_tilt_start_y = 500.0f;
+	//どのぐらい上に傾けるか
+	constexpr float low_tilt_max_angle = 17.0f * DX_PI_F / 180.0f;
 }
 
 DefaultRotationState::DefaultRotationState(const std::weak_ptr<Player> pPlayer) :
@@ -84,7 +92,11 @@ void DefaultRotationState::Update()
 
 	//上下入力
 	//X軸回転
+	//スティックの上下の傾きに合わせて回転する値を決める
 	targetAngle = stick.y * max_normal_tilt_angle;
+	//下に行くほど回転を上に補正する
+	AddLowTilt(pPlayer, targetAngle);
+	
 	pPlayer->LerpToAngleX(targetAngle, rot_lerp_t);
 
 	//傾けボタンが押されているときだけ最大回転角を大きくする
@@ -234,6 +246,20 @@ void DefaultRotationState::Update()
 				Vector3(0.0f, pPlayer->GetRotationY() + DX_PI_F, 0.0f));
 		}
 	}
+}
+
+void DefaultRotationState::AddLowTilt(std::shared_ptr<Player>& pPlayer, float& targetAngle)
+{
+	//今のプレイヤーの高さをとって、画面下方にいたら
+		//レティクルの位置を少し補正してあげるために上を向かせる
+	Vector3 playerPos = pPlayer->GetPos();
+	//傾け始める高さから画面の下限までを割合として計算
+	float lowRatio = (low_tilt_start_y - playerPos.y) /
+		(low_tilt_start_y - Game::sea_player_margin);
+	//0~1に制限する
+	lowRatio = std::clamp(lowRatio, 0.0f, 1.0f);
+	//下にいればいるほど上に向きを補正させる
+	targetAngle -= lowRatio * low_tilt_max_angle;
 }
 
 void DefaultRotationState::PlayRollEffect()

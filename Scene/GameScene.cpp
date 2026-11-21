@@ -439,6 +439,20 @@ void GameScene::RegisterDebugItems()
 		});
 	debugUI.AddText(this, L"Player", [this]()
 		{
+			//画面の縦の中心(540)からの差で、上下の偏りを確認する(上が+、下が-)
+			const Vector3 playerPos = m_pPlayer->GetPos();
+			const Vector3 reticlePos = m_pTargetManager->GetReticlePos();
+			const VECTOR playerScreen = ConvWorldPosToScreenPos(
+				VGet(playerPos.x, playerPos.y, playerPos.z));
+			const VECTOR reticleScreen = ConvWorldPosToScreenPos(
+				VGet(reticlePos.x, reticlePos.y, reticlePos.z));
+			return L"画面Y(中心からの差 上が+) 機体: " +
+				std::to_wstring(static_cast<int>(540.0f - playerScreen.y)) +
+				L" / レティクル: " +
+				std::to_wstring(static_cast<int>(540.0f - reticleScreen.y));
+		});
+	debugUI.AddText(this, L"Player", [this]()
+		{
 			return L"HP: " + std::to_wstring(m_pPlayer->GetHealth()) +
 				L" / " + std::to_wstring(m_pPlayer->GetMaxHealth());
 		});

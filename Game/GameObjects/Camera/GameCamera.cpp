@@ -16,7 +16,7 @@ namespace
 	constexpr float camera_offset_y = 250.0f;
 
 	// プレイヤーからどれぐらい離したZ位置にカメラを置くか
-	constexpr float camera_offset_z = 166.0f;
+	constexpr float camera_offset_z = 230.0f;
 
 	//ズーム時の距離判定閾値
 	constexpr float zoom_dist_thresould = 100.0f;

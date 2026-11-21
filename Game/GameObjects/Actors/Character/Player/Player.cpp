@@ -85,7 +85,7 @@ namespace
 	//水しぶきのエフェクトのオフセットX
 	constexpr float sea_splash_offset_x = 50.0f;
 	//水しぶきのエフェクトのオフセットZ
-	constexpr float sea_splash_offset_z = -50.0f;
+	constexpr float sea_splash_offset_z = -200.0f;
 
 	//カウンター用の球の半径
 	constexpr float counter_col_radius = 100.0f;

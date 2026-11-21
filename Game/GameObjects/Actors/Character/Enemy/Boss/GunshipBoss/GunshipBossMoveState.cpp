@@ -1,4 +1,6 @@
-﻿#define NOMINMAX
+﻿#include <iterator>
+
+#define NOMINMAX
 #include "GunshipBossMoveState.h"
 #include "GunshipBoss.h"
 #include "Utility/Easing.h"
@@ -8,7 +10,18 @@ namespace
 	//移動にかける時間
 	constexpr int move_frame = 60;
 	//止まっている間の時間
-	constexpr int stop_frame = 60;
+	constexpr int stop_frame = 120;
+
+	//ボスが動く地点
+	//時計回りに順番に回る
+	const Vector3 move_point[] =
+	{
+		Vector3(-1400.0f,1000.0f,0.0f),//左上
+		Vector3(0.0f,1100.0f,0.0f),//中央の上
+		Vector3(1400.0f,1000.0f,0.0f),//右上
+		Vector3(1400.0f,650.0f,0.0f),//右下
+		Vector3(0.0f,600.0f,0.0f)//中央の下
+	};
 }
 
 GunshipBossMoveState::GunshipBossMoveState(std::weak_ptr<GunshipBoss> pBoss) :
@@ -42,6 +55,8 @@ void GunshipBossMoveState::Update()
 		{
 			m_isMoving = false;
 			m_frame = 0;
+			//移動した回数を増やす
+			m_moveCount++;
 		}
 	}
 	//止まっている間
@@ -80,8 +95,7 @@ void GunshipBossMoveState::StartMove()
 	m_startPos = m_pBoss.lock()->GetPos();
 
 	//目標地点を入れる
-	//仮で開始地点から右に1000
-	m_endPos = m_startPos + Vector3(1000.0f, 0.0f, 0.0f);
+	m_endPos = move_point[m_moveCount % static_cast<int>(std::size(move_point))];
 	//移動する準備を行う
 	m_isMoving = true;
 	m_frame = 0;
