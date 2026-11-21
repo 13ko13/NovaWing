@@ -7,6 +7,8 @@ namespace
 {
 	//移動にかける時間
 	constexpr int move_frame = 60;
+	//止まっている間の時間
+	constexpr int stop_frame = 60;
 }
 
 GunshipBossMoveState::GunshipBossMoveState(std::weak_ptr<GunshipBoss> pBoss) :
@@ -20,13 +22,8 @@ GunshipBossMoveState::~GunshipBossMoveState()
 
 void GunshipBossMoveState::Enter()
 {
-	//移動の開始地点を保存
-	m_startPos = m_pBoss.lock()->GetPos();
-	//目標地点を入れる
-	//仮で開始地点から右に1000
-	m_endPos = m_startPos + Vector3(1000.0f, 0.0f, 0.0f);
-	//フレームをリセット
-	m_frame = 0;
+	//移動する準備を行う
+	StartMove();
 }
 
 void GunshipBossMoveState::Update()
@@ -34,8 +31,30 @@ void GunshipBossMoveState::Update()
 	//フレームの更新
 	m_frame++;
 
-	//移動を行う
-	Move();
+	//移動している間
+	if (m_isMoving)
+	{
+		//移動を行う
+		Move();
+		//移動にかける時間が過ぎたら動きを止める
+		//フレームもリセット
+		if (m_frame >= move_frame)
+		{
+			m_isMoving = false;
+			m_frame = 0;
+		}
+	}
+	//止まっている間
+	else
+	{
+		//止まっている時間が終了したらまた動き出す
+		//フレームもリセット
+		if (m_frame >= stop_frame)
+		{
+			//移動する準備を行う
+			StartMove();
+		}
+	}
 }
 
 void GunshipBossMoveState::Move()
@@ -48,11 +67,24 @@ void GunshipBossMoveState::Move()
 
 	//イースインアウトの関数を使って移動の割合を出す
 	float moveRatio = Easing::EaseInOutQuad(timeRatio);
-	
+
 	//位置をLerpで移動の割合を使って移動させる
 	Vector3 pos = Vector3::Lerp(m_startPos, m_endPos, moveRatio);
 	pos.z = pSharedBoss->GetPos().z;//zだけは通常の移動
 	pSharedBoss->SetPos(pos);
+}
+
+void GunshipBossMoveState::StartMove()
+{
+	//開始地点を現在の位置とする
+	m_startPos = m_pBoss.lock()->GetPos();
+
+	//目標地点を入れる
+	//仮で開始地点から右に1000
+	m_endPos = m_startPos + Vector3(1000.0f, 0.0f, 0.0f);
+	//移動する準備を行う
+	m_isMoving = true;
+	m_frame = 0;
 }
 
 void GunshipBossMoveState::Draw()

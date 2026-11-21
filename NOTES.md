@@ -2701,3 +2701,17 @@
 - **1面ボスが突進敵を召喚していた不具合(ユーザー実装)**: [SpiderBossSummonState.cpp](Game/GameObjects/Actors/Character/Enemy/Boss/SpiderBoss/SpiderBossSummonState.cpp)が`EnemyType`の`None`の次〜`Max`の手前から選んでいたので、あとから足した`RushEnemy`/`ButterflyEnemy`も選ばれていた。→召喚してよい敵の配列`summon_enemy_types[]`(浮遊・ワーム)から`std::size`と`GetRand`で選ぶ形に。C++の配列の`[]`は名前のうしろ(C#と逆)。残り(任意): `std::size`の戻り値に`static_cast<int>`、`#include <iterator>`、`switch`の不要な`static_cast`。
 - `TitleScene.cpp`の`first_stage_no`が0(1面から)になっている(ユーザーの確認用の変更)。
 - **次**: 2面ボスの移動の続き。候補は「地点で少し止まってから動く」(ボスを後から作るようにしたので見えなくなる不具合の対策としては不要になったが、止まる動きは作る予定。待つ時間の定数`wait_frame`/`stop_frame`、`m_isMoving`、`m_frame`の使い回し。出発地点と目標は動き出す瞬間に覚える)。ゲームで「ムービーのあとにボスが出て、右に動いて止まる」をまだ見ていない。その後: 候補の地点を乱数で選ぶ → 回数で攻撃へ → 網と放熱 → ロケット → 形態の切り替え → 扉。
+
+### 2026-11-21 【方針】制作を終えたら、Claudeに作らせたデバッグ関係を全部消す(ユーザー)
+- **ユーザーの方針(11/21)**: 制作を終えたときに、**Claudeが作ったデバッグ関係の処理は全部消す**。**テストプレイ機能(AIテストプレイ)も消す可能性がある**。そして**デバッグ用の表示(プレイヤーの位置など)は、ImGuiではなく、ゲームの中に`DrawString`などで書く昔のやり方に戻す**(ユーザー自身が戻す)。
+- **作るときの注意(Claude)**: デバッグ機能は、あとでまとめて消せるように**`#ifdef _DEBUG`で囲み、`DebugTools/`か、`DebugUI`への登録(`RegisterDebugItems`など)に寄せる**。ゲームの本体の流れの中に、デバッグ専用の処理を混ぜない。足したら、この下の「消す対象の一覧」に書き足す。
+- **消す対象の一覧(11/21時点。`_DEBUG`を使っているファイルから拾った)**:
+  - フォルダごと: [DebugTools/](DebugTools/)(`ImGui/`、`DebugUI/`、`AutoPlay/`=AIテストプレイ。`PlaytestRecorder`、`AutoPlayBot`/`AutoPlaySystem`/`AutoPlayWorld`)。[NovaWing.vcxproj](NovaWing.vcxproj)と`.filters`の登録、ReleaseのときのImGui除外(`ExcludedFromBuild`)、`.gitignore`の`imgui.ini`も。
+  - [Application.cpp](Main/Application.cpp): `DebugUI`の`Init`/`BeginFrame`/`Render`/`Terminate`、**シーン移動のデバッグボタン`RegisterSceneDebugItems`(11/21追加)**とその`#include`/定数、`SetAlwaysRunFlag`、`SetHookWinProc`(ImGui用)。
+  - [GameScene.cpp](Scene/GameScene.cpp)/[GameScene.h](Scene/GameScene.h): `RegisterDebugItems()`(最初からやり直す・チュートリアルをスキップ・ワープ・プレイヤー情報・ボス情報・**敵を全員倒す(11/21追加)**・ボスのHPを1/倒す)、デストラクタの`RemoveOwner`、`WarpPlayer`、AIテストプレイ関係。
+  - [TargetManager.cpp/.h](Manager/TargetManager.cpp): `DebugDefeatAllEnemies()`(11/21追加)。
+  - [Character.h](Game/GameObjects/Actors/Character/Character.h): `DebugSetHealth`。[DebugManager.h/.cpp](Manager/DebugManager.h)(`SetPlayerInvincible`、デバッグ表示の切り替え)と、[Player.cpp](Game/GameObjects/Actors/Character/Player/Player.cpp)の無敵の参照。[InputManager.cpp](Manager/InputManager.cpp)の「ImGuiで文字入力中はゲームの入力を空にする」処理。
+  - `_DEBUG`を使っているその他(当たり判定の球などの空間のデバッグ描画。表示の切り替えは「デバッグ表示」チェックボックス): [Building.cpp](Game/GameObjects/Actors/Building/Building.cpp)、[Rock.cpp](Game/GameObjects/Actors/Rock/Rock.cpp)、[BulletBase.cpp](Game/GameObjects/Bullet/BulletBase.cpp)、[ChargeBullet.cpp](Game/GameObjects/Bullet/ChargeBullet.cpp)、各敵(`SpiderBoss`/`SpiderBossBeamState`/`ButterflyEnemy`/`FloatingEnemy`/`RushEnemy`/`TurretEnemy`/`WormEnemy`)、[BossHPGaugeUI.cpp](Game/UI/BossHPGaugeUI.cpp)、[SpecialGaugeUI.cpp](Game/UI/SpecialGaugeUI.cpp)、[TitleScene.cpp](Scene/TitleScene.cpp)、[Game.h](Constants/Game.h)。
+  - VS Codeの[tasks.json](.vscode/tasks.json)の「AIテストプレイ」「テスト結果」(タスク2つと`autoPlay*`の入力4つ)。
+  - 消す前に確認: 本番の流れで使っている物が`_DEBUG`の中に混ざっていないか(消してReleaseがビルドできることを確認する)。
+- **戻し方(ユーザーがやる)**: 画面に出したい値は、`DrawFormatString`/`DrawString`でゲームの中に書く。その手前で、ImGuiに移したときに消した画面内のデバッグ表示([NOTES.md:1907](NOTES.md#L1907)の削除一覧: `GameScene`のFRAME、`Player`の座標・ゲージ・HP、`MovingState`のstick、`FloatingEnemy`の位置、など)が、git履歴から参照できる。

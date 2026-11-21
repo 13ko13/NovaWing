@@ -136,6 +136,22 @@ void TargetManager::Register(std::shared_ptr<EnemyBase> pEnemy)
 	m_pEnemies.push_back(pEnemy);
 }
 
+#ifdef _DEBUG
+void TargetManager::DebugDefeatAllEnemies()
+{
+	for (std::weak_ptr<EnemyBase> weakEnemy : m_pEnemies)
+	{
+		//消えている敵や、すでに死んでいる・死にかけている敵は飛ばす
+		std::shared_ptr<EnemyBase> pSharedEnemy = weakEnemy.lock();
+		if (pSharedEnemy == nullptr) continue;
+		if (pSharedEnemy->IsDead() || pSharedEnemy->IsDying()) continue;
+
+		//通常のダメージ処理を通すので、死亡演出や撃破数も本番と同じ流れになる
+		pSharedEnemy->TakeDamage(pSharedEnemy->GetHealth());
+	}
+}
+#endif
+
 void TargetManager::BeginLock()
 {
 	m_isLocking = true;

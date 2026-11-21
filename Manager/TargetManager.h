@@ -33,6 +33,11 @@ public:
 	//ロック機能をOFFにする
 	void EndLock();
 
+#ifdef _DEBUG
+	//登録されている敵を全員倒す(デバッグ用。ボスは登録されていないので倒さない)
+	void DebugDefeatAllEnemies();
+#endif
+
 private:
 	//物体がスクリーン上にいるか
 	bool IsOnScreen(const Vector3& worldPos);

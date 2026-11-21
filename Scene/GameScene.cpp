@@ -415,6 +415,10 @@ void GameScene::RegisterDebugItems()
 				m_pTutorialController->Skip();
 			});
 	}
+	debugUI.AddButton(this, L"Stage", L"敵を全員倒す(ボス以外)", [this]()
+	{
+		m_pTargetManager->DebugDefeatAllEnemies();
+	});
 	debugUI.AddSliderAction(this, L"Stage",
 		L"ステージ上のZ座標", 0.0f, m_pStageConfig->GetBossAppearZ(), L"プレイヤーをその位置へ移動",
 		[this](float stageZ) { WarpPlayer(stageZ); });

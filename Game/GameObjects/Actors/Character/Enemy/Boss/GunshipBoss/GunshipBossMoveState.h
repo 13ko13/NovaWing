@@ -17,7 +17,9 @@ public:
 private:
 	//移動
 	void Move();
-	
+	//移動地点を決める
+	void StartMove();
+
 private:
 	//移動開始地点
 	Vector3 m_startPos;
@@ -25,6 +27,8 @@ private:
 	Vector3 m_endPos;
 	//時間
 	int m_frame = 0;
+	//現在動いているか止まっているか
+	bool m_isMoving = true;
 
 	//移動した回数
 	int m_moveCount = 0;

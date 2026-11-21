@@ -12,12 +12,64 @@
 #include "../Manager/ResourceLoader.h"
 #include "../Scene/TitleScene.h"
 #ifdef _DEBUG
+#include "../Scene/GameScene.h"
+#include "../Scene/GameoverScene.h"
+#include "../Scene/ClearScene.h"
 #include "../DebugTools/DebugUI/DebugUI.h"
 #endif
 
 namespace
 {
+#ifdef _DEBUG
+	//デバッグのシーン移動でのフェードの長さ
+	constexpr float debug_scene_change_fade_frame = 30.0f;
+	//ステージ番号(1面=0)
+	constexpr int stage1_no = 0;
+	constexpr int stage2_no = 1;
 
+	/// <summary>
+	/// どのシーンからでも、デバッグ用ウィンドウでシーンを移動できるようにする
+	/// </summary>
+	/// <param name="controller">シーンを管理するオブジェクト(Runが終わるまで生きている物)</param>
+	void RegisterSceneDebugItems(SceneController& controller)
+	{
+		DebugUI& debugUI = DebugUI::GetInstance();
+		//登録者の目印にはcontrollerのアドレスを使う
+		const void* owner = &controller;
+
+		debugUI.AddButton(owner, L"Scene", L"タイトル", [&controller]()
+			{
+				controller.ChangeScene(
+					std::make_shared<TitleScene>(controller), debug_scene_change_fade_frame);
+			});
+		debugUI.AddButton(owner, L"Scene", L"1面", [&controller]()
+			{
+				controller.ChangeScene(
+					std::make_shared<GameScene>(controller, stage1_no), debug_scene_change_fade_frame);
+			});
+		debugUI.AddButton(owner, L"Scene", L"2面", [&controller]()
+			{
+				controller.ChangeScene(
+					std::make_shared<GameScene>(controller, stage2_no), debug_scene_change_fade_frame);
+			});
+		debugUI.AddButton(owner, L"Scene", L"ゲームオーバー(1面)", [&controller]()
+			{
+				controller.ChangeScene(
+					std::make_shared<GameoverScene>(controller, stage1_no), debug_scene_change_fade_frame);
+			});
+		debugUI.AddButton(owner, L"Scene", L"クリア(1面・仮の結果)", [&controller]()
+			{
+				//リザルトの数字は見た目の確認用の仮の値
+				ClearScene::ClearResultData data;
+				data.defeatedEnemyCount = 30;
+				data.clearTime = 60 * 120;
+				data.hitCount = 5;
+				data.stageNo = stage1_no;
+				controller.ChangeScene(
+					std::make_shared<ClearScene>(controller, data), debug_scene_change_fade_frame);
+			});
+	}
+#endif
 }
 
 Application::Application() :
@@ -90,6 +142,11 @@ void Application::Run()
 		std::make_shared<TitleScene>(
 			controller), 60.0f);
 
+#ifdef _DEBUG
+	//デバッグ用ウィンドウにシーン移動のボタンを登録する
+	RegisterSceneDebugItems(controller);
+#endif
+
 	while (ProcessMessage() != -1)
 	{
 		auto startTime = GetNowHiPerformanceCount();
@@ -124,6 +181,11 @@ void Application::Run()
 
 		}
 	}
+
+#ifdef _DEBUG
+	//controllerが消える前に、ボタンの登録を解除する
+	DebugUI::GetInstance().RemoveOwner(&controller);
+#endif
 }
 
 void Application::Terminate()
