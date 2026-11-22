@@ -13,12 +13,14 @@ public:
 	void Update() override;
 	void Draw() override;
 	void Exit() override;
-
+	
 private:
 	//移動
-	void Move();
+	void UpdateMoving();
 	//移動地点を決める
 	void StartMove();
+	//止まっている間の更新処理
+	void UpdateStopping();
 
 private:
 	//移動開始地点

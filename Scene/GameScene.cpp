@@ -761,7 +761,10 @@ void GameScene::CreateBoss()
 
 	//ボスの位置を改めてセットする
 	Vector3 bossPos = m_pBoss->GetPos();
-	bossPos.z += m_stageOffsetZ;
+	//CSVのZはプレイヤーが出現位置にいるときのボスまでの距離として読む
+	float bossDist = bossPos.z - m_pStageConfig->GetBossAppearZ();
+	//プレイヤーの今の位置から、その距離だけ先に出す
+	bossPos.z = m_pPlayer->GetPos().z + bossDist;
 	m_pBoss->SetPos(bossPos);
 
 	//HPゲージのUIをUIマネージャーに登録

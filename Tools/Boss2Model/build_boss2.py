@@ -1135,15 +1135,16 @@ def build_idle(arm_ob):
     for f in range(0, 121, 5):
         t = f / 120.0 * 2.0 * math.pi
         # 本体: 上下に揺れる(±20)、少し傾く(2つの軸をずらす)
-        pb["Body"].location = (0.0, 0.0, 0.20 * math.sin(t))
-        pb["Body"].rotation_euler = (r(0.8) * math.sin(t + 1.2), r(1.2) * math.sin(t + 0.5), 0.0)
+        # (遠くで小さく見えるので、第3版で大きめに: 上下±35、傾き1.5〜2.5度)
+        pb["Body"].location = (0.0, 0.0, 0.35 * math.sin(t))
+        pb["Body"].rotation_euler = (r(1.5) * math.sin(t + 1.2), r(2.5) * math.sin(t + 0.5), 0.0)
         # 腕: 本体より少し遅れて、左右対称にしなる
-        a = r(2.2) * math.sin(t - 0.9)
+        a = r(4.5) * math.sin(t - 0.9)
         pb["Arm_L"].rotation_euler = (0.0, a, 0.0)
         pb["Arm_R"].rotation_euler = (0.0, -a, 0.0)
         # ポッド: さらに遅れて、2つの軸で少しずらして揺れる
-        p1 = r(2.5) * math.sin(t - 1.6)
-        p2 = r(1.5) * math.sin(2.0 * t - 0.7)
+        p1 = r(5.0) * math.sin(t - 1.6)
+        p2 = r(3.0) * math.sin(2.0 * t - 0.7)
         pb["Pod_L"].rotation_euler = (p1, 0.0, p2)
         pb["Pod_R"].rotation_euler = (p1, 0.0, -p2)
         for name in ("Body", "Arm_L", "Arm_R", "Pod_L", "Pod_R"):
@@ -1179,7 +1180,7 @@ def build_action(arm_ob, name, length, keys):
     return act
 
 
-VENT = 40.0  # 放熱で装甲が開く角度
+VENT = 60.0  # 放熱で装甲が開く角度(遠くでも開いたとわかるよう大きく)
 
 
 def vent(a):
@@ -1189,9 +1190,9 @@ def vent(a):
 
 def ready_pose(k):
     """網の構え(k=1で最大)。腕を上げてポッドを前に向け、本体は少しのけぞる"""
-    return {"Body": {"rot": (4 * k, 0, 0)},
-            "Arm_L": {"rot": (0, 9 * k, 0)}, "Arm_R": {"rot": (0, -9 * k, 0)},
-            "Pod_L": {"rot": (-7 * k, 0, 0)}, "Pod_R": {"rot": (-7 * k, 0, 0)}}
+    return {"Body": {"rot": (12 * k, 0, 0), "loc": (0, -0.5 * k, 0.3 * k)},
+            "Arm_L": {"rot": (0, 28 * k, 0)}, "Arm_R": {"rot": (0, -28 * k, 0)},
+            "Pod_L": {"rot": (-22 * k, 0, 0)}, "Pod_R": {"rot": (-22 * k, 0, 0)}}
 
 
 def merge(*ds):
@@ -1206,23 +1207,32 @@ def build_attack_actions(arm_ob):
     acts = []
     # 構え 20F: 1フレーム目で大きく構える(構えは瞬時に極端に)、あとは少し震えながら保つ
     acts.append(build_action(arm_ob, "NetReady", 20, [
+        # 一瞬だけ逆に縮んでから(ため)、行き過ぎるほど大きく構え、小刻みに震えて力をためる
         (0, ready_pose(0.0)),
-        (2, ready_pose(1.1)),
-        (5, ready_pose(0.95)),
-        (8, ready_pose(1.02)),
-        (12, ready_pose(0.97)),
-        (16, ready_pose(1.01)),
+        (1, ready_pose(-0.3)),
+        (3, ready_pose(1.4)),
+        (6, ready_pose(0.92)),
+        (8, ready_pose(1.08)),
+        (10, ready_pose(0.96)),
+        (12, ready_pose(1.06)),
+        (14, ready_pose(0.97)),
+        (16, ready_pose(1.05)),
+        (18, ready_pose(0.99)),
         (20, ready_pose(1.0)),
     ]))
     # 発射 30F: 1Fで反動(ポッドがはね上がり、本体が後ろへ)、残りでゆっくり戻る
     acts.append(build_action(arm_ob, "NetFire", 30, [
         (0, ready_pose(1.0)),
-        (1, merge(ready_pose(0.6), {"Body": {"rot": (-3, 0, 0), "loc": (0, 0.7, 0)},
-                                    "Pod_L": {"rot": (12, 0, 0)}, "Pod_R": {"rot": (12, 0, 0)}})),
-        (6, merge(ready_pose(0.3), {"Body": {"rot": (-1.5, 0, 0), "loc": (0, 0.45, 0)},
-                                    "Pod_L": {"rot": (6, 0, 0)}, "Pod_R": {"rot": (6, 0, 0)}})),
-        (18, merge(ready_pose(0.05), {"Body": {"loc": (0, 0.1, 0)},
-                                      "Pod_L": {"rot": (1, 0, 0)}, "Pod_R": {"rot": (1, 0, 0)}})),
+        # 1Fで大きく反動(本体が200ほど後ろへ、ポッドが大きくはね上がる)、残りでゆっくり戻る
+        (1, merge(ready_pose(0.2), {"Body": {"rot": (-14, 0, 0), "loc": (0, 2.0, 0.2)},
+                                    "Arm_L": {"rot": (0, -10, 0)}, "Arm_R": {"rot": (0, 10, 0)},
+                                    "Pod_L": {"rot": (30, 0, 0)}, "Pod_R": {"rot": (30, 0, 0)}})),
+        (4, merge(ready_pose(0.1), {"Body": {"rot": (-7, 0, 0), "loc": (0, 1.4, 0.1)},
+                                    "Pod_L": {"rot": (16, 0, 0)}, "Pod_R": {"rot": (16, 0, 0)}})),
+        (9, merge(ready_pose(0.0), {"Body": {"rot": (-3, 0, 0), "loc": (0, 0.8, 0)},
+                                    "Pod_L": {"rot": (-6, 0, 0)}, "Pod_R": {"rot": (-6, 0, 0)}})),
+        (18, merge(ready_pose(0.0), {"Body": {"loc": (0, 0.25, 0)},
+                                     "Pod_L": {"rot": (2, 0, 0)}, "Pod_R": {"rot": (2, 0, 0)}})),
         (30, ready_pose(0.0)),
     ]))
     # 放熱: 開く 10F(素早く)/開いたまま 60F(小さく震える、ループ)/閉じる 15F(最後に少し行き過ぎて止まる)
@@ -1232,29 +1242,29 @@ def build_attack_actions(arm_ob):
     loop_keys = []
     for f in range(0, 61, 5):
         t = f / 60.0 * 2.0 * math.pi
-        loop_keys.append((f, vent(VENT + 2.5 * math.sin(2.0 * t))))
+        loop_keys.append((f, vent(VENT + 5.0 * math.sin(2.0 * t))))
     acts.append(build_action(arm_ob, "VentLoop", 60, loop_keys))
     acts.append(build_action(arm_ob, "VentClose", 15, [
         (0, vent(VENT)), (8, vent(VENT * 0.3)), (12, vent(-2.0)), (15, vent(0)),
     ]))
     # ロケットのハッチ(下あご): 開く 8F / 閉じる 12F(前が下へ開く)
     acts.append(build_action(arm_ob, "RocketOpen", 8, [
-        (0, {"RocketHatch": {"rot": (0, 0, 0)}}), (5, {"RocketHatch": {"rot": (58, 0, 0)}}),
-        (8, {"RocketHatch": {"rot": (55, 0, 0)}}),
+        (0, {"RocketHatch": {"rot": (0, 0, 0)}}), (5, {"RocketHatch": {"rot": (80, 0, 0)}}),
+        (8, {"RocketHatch": {"rot": (75, 0, 0)}}),
     ]))
     acts.append(build_action(arm_ob, "RocketClose", 12, [
-        (0, {"RocketHatch": {"rot": (55, 0, 0)}}), (9, {"RocketHatch": {"rot": (-3, 0, 0)}}),
+        (0, {"RocketHatch": {"rot": (75, 0, 0)}}), (9, {"RocketHatch": {"rot": (-5, 0, 0)}}),
         (12, {"RocketHatch": {"rot": (0, 0, 0)}}),
     ]))
     # 形態の切り替え 45F: 右上のポッドが壊れた衝撃で、大きく右に傾いてのけぞり、立て直す
     acts.append(build_action(arm_ob, "Stagger", 45, [
         (0, {"Body": {}}),
-        (3, {"Body": {"rot": (-10, 18, 0), "loc": (0.4, 0.8, -0.8)},
-             "Arm_R": {"rot": (0, -16, 0)}, "Arm_L": {"rot": (0, -6, 0)}}),
-        (12, {"Body": {"rot": (-6, 12, 0), "loc": (0.3, 0.5, -0.6)},
-              "Arm_R": {"rot": (0, -10, 0)}, "Arm_L": {"rot": (0, 4, 0)}}),
-        (28, {"Body": {"rot": (2, -3, 0), "loc": (0, 0.1, 0.1)},
-              "Arm_R": {"rot": (0, 2, 0)}, "Arm_L": {"rot": (0, -2, 0)}}),
+        (3, {"Body": {"rot": (-20, 34, 12), "loc": (0.9, 1.6, -1.6)},
+             "Arm_R": {"rot": (0, -30, 0)}, "Arm_L": {"rot": (0, -12, 0)}}),
+        (12, {"Body": {"rot": (-12, 22, 7), "loc": (0.6, 1.0, -1.1)},
+              "Arm_R": {"rot": (0, -18, 0)}, "Arm_L": {"rot": (0, 8, 0)}}),
+        (28, {"Body": {"rot": (4, -6, -2), "loc": (0, 0.2, 0.2)},
+              "Arm_R": {"rot": (0, 4, 0)}, "Arm_L": {"rot": (0, -4, 0)}}),
         (45, {"Body": {}, "Arm_R": {}, "Arm_L": {}}),
     ]))
     return acts

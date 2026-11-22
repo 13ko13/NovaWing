@@ -64,13 +64,31 @@ void GunshipBoss::Update()
 		myVel.y = 0.0f;
 		myVel.x = 0.0f;
 		SetVel(myVel);
-		//ステートの更新を呼ぶ
-		m_pState->Update();
+
+		//ステートの更新
+		UpdateState();
 	}
 	//BossBase(Character)の更新処理を呼ぶ
 	BossBase::Update();
 	//アニメーターを更新させる
 	m_pAnimator->Update(anim_blend_frame);
+}
+
+void GunshipBoss::UpdateState()
+{
+	//ステートの更新を呼ぶ
+	m_pState->Update();
+
+	//次のステートを取得する
+	std::shared_ptr<IGunshipBossState> nextState = m_pState->GetNextState();
+	//次のステートがあれば今のステートの終了処理をしてそのステートに切り替える
+	if (nextState != nullptr)
+	{
+		m_pState->Exit();//終了処理
+		//次のステートに切り替える
+		m_pState = nextState;
+		m_pState->Enter();//初期化
+	}
 }
 
 void GunshipBoss::Draw()

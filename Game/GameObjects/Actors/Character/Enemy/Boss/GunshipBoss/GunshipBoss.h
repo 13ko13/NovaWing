@@ -15,7 +15,7 @@ public:
 	
 	GunshipBoss(GunshipBossData& data);
 	virtual ~GunshipBoss();
-
+	
 	//初期化処理
 	void OnInit() override;
 	//更新
@@ -23,6 +23,13 @@ public:
 	//描画
 	void Draw() override;
 
+	//アニメーターを返す
+	ModelAnimator& GetAnimator() { return *m_pAnimator; }
+
+private:
+	//ステートの更新
+	void UpdateState();
+	
 private:
 	//第二形態になるときに表示する壊れたポッドのフレーム番号
 	int m_brokenPodFrameIdx = -1;

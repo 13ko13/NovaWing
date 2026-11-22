@@ -80,6 +80,9 @@ namespace
 			return EnemyFactory::EnemyType::None;
 		}
 	}
+
+	//敵を出現させる基準の高さ
+	constexpr float tutorial_enemy_y = 500.0f;
 }
 
 TutorialController::TutorialController(
@@ -275,8 +278,13 @@ void TutorialController::SpawnTaskEnemies(const Player& player)
 		for (const auto& data : m_steps[m_stepIndex].spawnData)
 		{
 			//生成した敵を持っておく
+			Vector3 spawnPos = Vector3(
+				data.offset.x,
+				tutorial_enemy_y + data.offset.y,
+				player.GetPos().z + data.offset.z
+			);
 			m_pTaskEnemies.push_back(pEnemyFactory->Create(
-				player.GetPos() + data.offset, data.type));
+				spawnPos, data.type));
 		}
 	}
 }

@@ -4,11 +4,14 @@
 #include "GunshipBossMoveState.h"
 #include "GunshipBoss.h"
 #include "Utility/Easing.h"
+#include "GunshipBossNetState.h"
 
 namespace
 {
 	//移動にかける時間
 	constexpr int move_frame = 60;
+	//何回移動するか
+	constexpr int max_move_count = 3;
 	//止まっている間の時間
 	constexpr int stop_frame = 120;
 
@@ -48,23 +51,29 @@ void GunshipBossMoveState::Update()
 	if (m_isMoving)
 	{
 		//移動を行う
-		Move();
-		//移動にかける時間が過ぎたら動きを止める
-		//フレームもリセット
-		if (m_frame >= move_frame)
-		{
-			m_isMoving = false;
-			m_frame = 0;
-			//移動した回数を増やす
-			m_moveCount++;
-		}
+		UpdateMoving();
 	}
 	//止まっている間
 	else
 	{
-		//止まっている時間が終了したらまた動き出す
-		//フレームもリセット
-		if (m_frame >= stop_frame)
+		UpdateStopping();
+	}
+}
+
+void GunshipBossMoveState::UpdateStopping()
+{
+	//止まっている時間が終了したらまた動き出す
+	//動いた回数が一定回数に達していたら攻撃を行う
+	//フレームもリセット
+	if (m_frame >= stop_frame)
+	{
+		//移動した回数が一定回数に到達したら攻撃を行う
+		if (m_moveCount >= max_move_count)
+		{
+			//攻撃のステートへ移る
+			ChangeState(std::make_shared<GunshipBossNetState>(m_pBoss));
+		}
+		else
 		{
 			//移動する準備を行う
 			StartMove();
@@ -72,7 +81,7 @@ void GunshipBossMoveState::Update()
 	}
 }
 
-void GunshipBossMoveState::Move()
+void GunshipBossMoveState::UpdateMoving()
 {
 	std::shared_ptr<GunshipBoss> pSharedBoss = m_pBoss.lock();
 
@@ -87,6 +96,16 @@ void GunshipBossMoveState::Move()
 	Vector3 pos = Vector3::Lerp(m_startPos, m_endPos, moveRatio);
 	pos.z = pSharedBoss->GetPos().z;//zだけは通常の移動
 	pSharedBoss->SetPos(pos);
+
+	//移動にかける時間が過ぎたら動きを止める
+	//フレームもリセット
+	if (m_frame >= move_frame)
+	{
+		m_isMoving = false;
+		m_frame = 0;
+		//移動した回数を増やす
+		m_moveCount++;
+	}
 }
 
 void GunshipBossMoveState::StartMove()
