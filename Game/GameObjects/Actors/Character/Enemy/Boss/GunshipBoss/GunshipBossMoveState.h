@@ -3,6 +3,7 @@
 #include "Utility/Vector3.h"
 
 class GunshipBoss;
+class ModelAnimator;
 class GunshipBossMoveState : public IGunshipBossState
 {
 public:
@@ -34,4 +35,7 @@ private:
 
 	//移動した回数
 	int m_moveCount = 0;
+
+	//アニメーター
+	ModelAnimator& m_animator;
 };

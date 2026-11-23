@@ -27,6 +27,8 @@ public:
 	void SetIsBossAppear(bool isAppear) { m_isAppear = isAppear; }
 	//ボス出現が終了しているかを返す
 	bool IsBossAppear() const { return m_isAppear; }
+	//ボスのモデルハンドル取得
+	int GetModelHandle() const { return m_modelHandle; }
 
 private:
 

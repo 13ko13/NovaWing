@@ -120,4 +120,7 @@ void GunshipBoss::Draw()
 
 	//スキンメッシュ(ボーンで部品を動かす)なのでtrueで描画
 	DrawWithLighting(textures, true);
+
+	//ステートごとの描画
+	m_pState->Draw();
 }

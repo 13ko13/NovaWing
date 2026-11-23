@@ -5,6 +5,7 @@
 #include "GunshipBoss.h"
 #include "Utility/Easing.h"
 #include "GunshipBossNetState.h"
+#include "Utility/ModelAnimator.h"
 
 namespace
 {
@@ -25,10 +26,14 @@ namespace
 		Vector3(1400.0f,650.0f,0.0f),//右下
 		Vector3(0.0f,600.0f,0.0f)//中央の下
 	};
+
+	//待機アニメーション名
+	constexpr const wchar_t* idle_anim_name = L"Boss2_Armature|Idle";
 }
 
 GunshipBossMoveState::GunshipBossMoveState(std::weak_ptr<GunshipBoss> pBoss) :
-	IGunshipBossState(pBoss)
+	IGunshipBossState(pBoss),
+	m_animator(pBoss.lock()->GetAnimator())
 {
 }
 
@@ -40,6 +45,8 @@ void GunshipBossMoveState::Enter()
 {
 	//移動する準備を行う
 	StartMove();
+	//待機アニメーションを再生
+	m_animator.Play(idle_anim_name, true);
 }
 
 void GunshipBossMoveState::Update()

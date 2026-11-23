@@ -31,8 +31,6 @@ public:
 	void Update() override;//更新処理
 	void Draw() override;//描画処理
 	void TakeDamage(int damage) override;//被弾処理
-	//ボスのモデルハンドル取得
-	int GetModelHandle() const { return m_modelHandle; }
 
 	//敵生産工場をセット
 	void SetEnemyFactory(std::weak_ptr<EnemyFactory> pEnemyFactory) { m_pEnemyFactory = pEnemyFactory; }
