@@ -2,13 +2,12 @@
 #include "GunshipBoss.h"
 #include "Utility/ModelAnimator.h"
 #include "GunshipBossMoveState.h"
+#include "Game/Collision/CapsuleShape.h"
 
 namespace
 {
 	//網攻撃の準備のアニメーション名
 	constexpr const wchar_t* net_ready_anim_name = L"Boss2_Armature|NetReady";
-	//準備アニメーションの再生スピード
-	constexpr float net_ready_anim_speed = 0.3f;
 	//網攻撃の発射のアニメーション名
 	constexpr const wchar_t* net_fire_anim_name = L"Boss2_Armature|NetFire";
 	//放熱開始(行動後の隙)のアニメーション名
@@ -17,6 +16,9 @@ namespace
 	constexpr const wchar_t* vent_loop_anim_name = L"Boss2_Armature|VentLoop";
 	//放熱終了用のアニメーション名
 	constexpr const wchar_t* vent_close_anim_name = L"Boss2_Armature|VentClose";
+
+	//準備アニメーションの再生スピード
+	constexpr float net_ready_anim_speed = 0.5f;
 
 	//放熱をどのぐらいのフレーム行うか
 	constexpr int vent_loop_frame = 180;
@@ -34,9 +36,11 @@ namespace
 	//網のビームを出すボーンの名前(右)
 	constexpr const wchar_t* muzzle_frame_name_right = L"Muzzle_Net_R";
 
-	//何フレームかけて網が伸び終わるか
-	constexpr int net_extend_frame = 120;
+	//どのぐらいの間網を出し続けるか
+	constexpr int net_active_frame = 90;
 
+	//線の判定の半径
+	constexpr float net_line_radius = 30.0f;
 }
 
 GunshipBossNetState::GunshipBossNetState(std::weak_ptr<GunshipBoss> pBoss) :
@@ -53,14 +57,52 @@ GunshipBossNetState::~GunshipBossNetState()
 void GunshipBossNetState::Enter()
 {
 	//網攻撃の準備アニメーション再生
-	m_animator.Play(net_ready_anim_name, false,net_ready_anim_speed);
+	m_animator.Play(net_ready_anim_name, false, net_ready_anim_speed);
 	//網の位置を発射時のボスの位置に置いておく
 	m_netPos = m_pBoss.lock()->GetPos();
+
+	//当たり判定を線の数ぶん初期化する
+	for (int i = -net_line_num; i < net_line_num; i++)
+	{
+		//1回ごとに線Aと線Bの始点と終点を出す
+		//Y座標は一定間隔で配置
+		float lineStartY = net_center_y + net_half_width + i * net_line_interval;
+
+		//網に使用する2本の線の始点
+		Vector3 lineStartA = Vector3(
+			m_netPos.x + net_half_width,
+			lineStartY, m_netPos.z - 1200.0f
+		);
+		Vector3 lineStartB = Vector3(
+			m_netPos.x - net_half_width,
+			lineStartY, m_netPos.z - 1200.0f
+		);
+		//網に使用する2本の線の終点
+		Vector3 lineEndA = Vector3(
+			m_netPos.x - net_half_width,
+			net_center_y - net_half_width + i * net_line_interval,
+			m_netPos.z - 1200.0f
+		);
+		Vector3 lineEndB = Vector3(
+			m_netPos.x + net_half_width,
+			net_center_y - net_half_width + i * net_line_interval,
+			m_netPos.z - 1200.0f
+		);
+
+		//始点と終点と半径をカプセルに渡して初期化させる
+		m_netCapsules.push_back(
+			std::make_shared<CapsuleShape>(lineStartA, lineEndA, net_line_radius)
+		);
+		m_netCapsules.push_back(
+			std::make_shared<CapsuleShape>(lineStartB, lineEndB, net_line_radius)
+		);
+	}
 }
 
 void GunshipBossNetState::Update()
 {
-	//網攻撃が始まってからのフレームを計測
+	//準備中は準備が始まってから計測
+	//そのあとは発射からのフレームを計測
 	m_netFrame++;
 
 	switch (m_phase)
@@ -95,6 +137,9 @@ void GunshipBossNetState::Update()
 
 void GunshipBossNetState::Draw()
 {
+	//網が完成し終わったら描画しない
+	if (m_phase != NetPhase::Ready && !IsNetHitActive()) return;
+
 	//網を作るためのビームの発射口のフレーム位置をとる
 	Vector3 muzzlePosLeft = GetMuzzlePos(muzzle_frame_name_left);
 	Vector3 muzzlePosRight = GetMuzzlePos(muzzle_frame_name_right);
@@ -106,6 +151,14 @@ void GunshipBossNetState::Draw()
 
 	//網を描画する
 	DrawNetLines(lineCol, muzzlePosLeft, muzzlePosRight);
+
+#ifdef _DEBUG
+	//デバッグとして当たり判定を描画
+	for (const auto& capsule : m_netCapsules)
+	{
+		capsule->Draw(0xff0000);
+	}
+#endif 
 }
 
 void GunshipBossNetState::DrawNetLines(unsigned int lineCol,
@@ -122,31 +175,21 @@ void GunshipBossNetState::DrawNetLines(unsigned int lineCol,
 
 	//線を描く
 	//網のようにする
-	for (int i = -net_line_num; i < net_line_num; i++)
+	//カプセルの配列を回す
+	//添字を2ずつ増やしていくことで奇数か偶数かを調べずに行うことができる
+	for (size_t i = 0; i < m_netCapsules.size(); i += 2)
 	{
-		//Y座標は一定間隔で配置
-		float lineStartY = net_center_y + net_half_width + i * net_line_interval;
-
-		//網に使用する2本の線の始点
-		Vector3 lineStartA = Vector3(
-			m_netPos.x + net_half_width,
-			lineStartY, m_netPos.z - 1200.0f
-		);
-		Vector3 lineStartB = Vector3(
-			m_netPos.x - net_half_width,
-			lineStartY, m_netPos.z - 1200.0f
-		);
-		//網に使用する2本の線の終点
-		Vector3 lineEndA = Vector3(
-			m_netPos.x - net_half_width,
-			net_center_y - net_half_width + i * net_line_interval,
-			m_netPos.z - 1200.0f
-		);
-		Vector3 lineEndB = Vector3(
-			m_netPos.x + net_half_width,
-			net_center_y - net_half_width + i * net_line_interval,
-			m_netPos.z - 1200.0f
-		);
+		//カプセルから始点と終点を取得
+		Vector3 lineStartA;
+		Vector3 lineEndA;
+		Vector3 lineStartB;
+		Vector3 lineEndB;
+		//右の発射口
+		lineStartA = m_netCapsules[i]->GetStartPos();
+		lineEndA = m_netCapsules[i]->GetEndPos();
+		//左の発射口
+		lineStartB = m_netCapsules[i + 1]->GetStartPos();
+		lineEndB = m_netCapsules[i + 1]->GetEndPos();
 
 		//右上から左下にかけて伸びる線
 		DrawLine3D(
@@ -172,6 +215,12 @@ void GunshipBossNetState::DrawNetLines(unsigned int lineCol,
 	}
 }
 
+bool GunshipBossNetState::IsNetHitActive() const
+{
+	//網の判定が出ている間かを返す
+	return m_netFrame < net_active_frame && m_phase != NetPhase::Ready;
+}
+
 void GunshipBossNetState::Exit()
 {
 }
@@ -182,6 +231,8 @@ void GunshipBossNetState::UpdateNetReady()
 	{
 		m_animator.Play(net_fire_anim_name, false);
 		m_phase = NetPhase::Fire;
+		//網用のフレームをリセットする
+		m_netFrame = 0;
 	}
 }
 

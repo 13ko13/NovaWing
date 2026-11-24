@@ -314,6 +314,8 @@
     <ClCompile Include="Utility\Easing.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\IGunshipBossState.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossNetState.cpp" />
+    <ClCompile Include="Game\Collision\CapsuleShape.cpp" />
+    <ClCompile Include="Game\Collision\GunshipBossNetCollider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Collision\ColliderShape.h" />
@@ -462,6 +464,8 @@
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossMoveState.h" />
     <ClInclude Include="Utility\Easing.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossNetState.h" />
+    <ClInclude Include="Game\Collision\CapsuleShape.h" />
+    <ClInclude Include="Game\Collision\GunshipBossNetCollider.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="BoostingEffectPS.hlsl">

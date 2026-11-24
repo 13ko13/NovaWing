@@ -7,6 +7,7 @@ enum class Shape
 {
 	Sphere,//球
 	Mesh,//メッシュ
+	Capsule,//カプセル(線分に太さを付けた形)
 };
 
 /// <summary>

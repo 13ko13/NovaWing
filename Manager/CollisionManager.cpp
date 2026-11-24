@@ -22,6 +22,7 @@
 #include "Game/Collision/MeshShape.h"
 #include "Game/Collision/BuildingCollider.h"
 #include "Game/GameObjects/Actors/Building/Building.h"
+#include "Game/Collision/CapsuleShape.h"
 
 namespace
 {
@@ -131,6 +132,22 @@ namespace
 					const MeshShape& mesh = static_cast<const MeshShape&>(*shapeA);
 					//球とメッシュの当たり判定
 					if (IsHitSphereAndMesh(sphere, mesh)) return true;
+				}
+				//Aが球、Bがカプセルの場合
+				else if (shapeA->GetShape() == Shape::Sphere && shapeB->GetShape() == Shape::Capsule)
+				{
+					const SphereShape& sphere = static_cast<const SphereShape&>(*shapeA);
+					const CapsuleShape& capsule = static_cast<const CapsuleShape&>(*shapeB);
+					//球とカプセルの当たり判定
+					if(capsule.HitCollision(sphere)) return true;
+				}
+				//Bが球、Aがカプセルの場合
+				else if (shapeA->GetShape() == Shape::Capsule && shapeB->GetShape() == Shape::Sphere)
+				{
+					const SphereShape& sphere = static_cast<const SphereShape&>(*shapeB);
+					const CapsuleShape& capsule = static_cast<const CapsuleShape&>(*shapeA);
+					//球とカプセルの当たり判定
+					if(capsule.HitCollision(sphere)) return true;
 				}
 			}
 		}

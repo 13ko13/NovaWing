@@ -2731,3 +2731,26 @@
 - **デバッグ(Claude)**: [GameScene.cpp](Scene/GameScene.cpp)の「Player」タブに、画面上のY(中心からの差、上が+)の機体・レティクルを表示(`ConvWorldPosToScreenPos`)。`#ifdef _DEBUG`の中で、上の「消す対象の一覧」の`RegisterDebugItems`に含まれる。
 - **次**: 網のレーザー本体(構えと発射の間)→ 攻撃のランダム選び(網・ロケット) → ロケット → 形態の切り替え → 扉。2面のボスのHP(今は仮2000)、ボスをディゾルブ対象から外す根本対応、`SpiderBoss`/`GunshipBoss`の追従の共通化、GunshipBossの追従ブロックの順番(1フレーム遅れ)、Unity側のボスの位置とCSVの値の同期(1面のz 67460・y 0、2面のz 60460・y 1000)は未。
 - **コミット前の注意**: `Log.txt`は`git checkout -- Log.txt`で戻す。
+
+### 2026-11-23 2面ボスの網の線を描く(準備段階、ユーザー実装、コミット`6c3973c`「2体目のボスの網攻撃準備」)
+- **網の線の描画**: [GunshipBossNetState.cpp](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossNetState.cpp)の`Draw()`→`DrawNetLines(lineCol, 左の発射口, 右の発射口)`。`DrawLine3D`で、斜めの線2本ずつ(右上→左下、左上→右下)を`-net_line_num`〜`net_line_num - 1`の12組、`net_line_interval`(400)ずつyをずらして並べ、ひし形の網にする。網の中心は`Enter()`で覚えたボスの位置`m_netPos`のx、高さ`net_center_y`(500)、zは`m_netPos.z - 1200`(仮の直書き)。発射口から網の端へ黄色い線も引く。
+  - **伸びる演出**: 構え(`Ready`)の間だけ、`extendRate = アニメーションの再生時間 / 長さ`(1.0で止める)で線の終点を`Vector3::Lerp`で伸ばす。構え中は灰色(`0x444444`)、それ以降は白。構えのアニメーションは`net_ready_anim_speed`(0.3)でゆっくり再生。
+  - **発射口の位置**: `GetMuzzlePos(フレーム名)`で`MV1SearchFrame`→`MV1GetFramePosition`(`Muzzle_Net_L`/`Muzzle_Net_R`)。そのために`GetModelHandle()`を`SpiderBoss.h`から[BossBase.h](Game/GameObjects/Actors/Character/Enemy/Boss/BossBase.h)へ移した(1面・2面共通)。
+  - [GunshipBoss.cpp](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBoss.cpp)の`Draw()`の最後で`m_pState->Draw()`を呼ぶようにした。
+  - 移動のステートの`Enter()`で待機アニメーション(`Boss2_Armature|Idle`)を再生するようにした(網から戻ったときに待機に戻すため)。
+  - 使っていない定数・変数: `net_extend_frame`(120)と`m_netFrame`(数えているが未使用)。網のzの`1200`は定数にしていない。
+- **まだ作っていない(網)**: 当たり判定、網が消える/プレイヤーへ向かって動くなどの本番の動き、予告と本番の見た目の差(今は色だけ)、放熱中の弱点、ダメージ。
+- **(11/24)Claudeのつまずき**: 「ノートを見て」で、11/20の項を最新だと思い込み、11/21〜23の進捗(移動・網)を見落として「地点で止まる動きを作ろう」と言ってしまった。NOTES.mdは大きいので、見出しを検索して一番下の項と`git log`を見る。
+- **次**: 網の続き(当たり判定と、網の本番の動き)→ 放熱中の弱点とダメージ → 攻撃のランダム選び(網・ロケット) → ロケット → 形態の切り替え → 扉。そのほかは11/22の「次」と同じ。
+
+### 2026-11-24 2面ボスの網の当たり判定(カプセルの形・網のステートに判定を持つ・網のコライダー、ユーザー実装、ビルドOK、まだ登録していない)
+- **カプセルの形**: [CapsuleShape.h](Game/Collision/CapsuleShape.h) / [CapsuleShape.cpp](Game/Collision/CapsuleShape.cpp)(形はClaude、中身はユーザーが整理)。線分の始点・終点・半径を持つ。`HitCollision(球)`はDxLibの`HitCheck_Sphere_Capsule`、デバッグ描画は`DrawCapsule3D`。[ColliderShape.h](Game/Collision/ColliderShape.h)の`Shape`に`Capsule`を追加。
+- **判定の振り分け**: [CollisionManager.cpp](Manager/CollisionManager.cpp)の`IsHit`に「球とカプセル」「カプセルと球」の2つを追加(`if (capsule.HitCollision(sphere)) return true;`)。
+- **網のステート**: [GunshipBossNetState.cpp](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossNetState.cpp)の`Enter()`で、線1本ごとにカプセル(半径`net_line_radius` 30)を作って`m_netCapsules`に入れる(偶数番=右の発射口の線A、奇数番=左の発射口の線B)。`DrawNetLines`は始点・終点をカプセルから取り、添字を2ずつ増やして回す。デバッグ時はカプセルを赤で描く(`#ifdef _DEBUG`)。
+  - `GetNetCapsules() const`(const参照で返す)と`IsNetHitActive() const`(発射から`net_active_frame` 90フレームの間。構え中は`false`)を`public`に。`m_netFrame`は構えが終わったら0に戻し、発射からの経過フレームとして使う。
+  - `Draw()`は「構え中でもなく、判定中でもなければ描かない」(`if (m_phase != NetPhase::Ready && !IsNetHitActive()) return;`)。Claudeが前に「IsNetHitActiveのちょうど逆」と言ったのは間違い(構え中の予告が消える)。
+  - ボスの[GunshipBoss.h](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBoss.h)に`GetCurrentState() const`を追加。
+- **網のコライダー**: [GunshipBossNetCollider.h](Game/Collision/GunshipBossNetCollider.h) / [GunshipBossNetCollider.cpp](Game/Collision/GunshipBossNetCollider.cpp)。1面の`SpiderBossBeamCollider`と同じ形で、持ち主`GunshipBoss&`を持つ。`IsCollisionActive`=ボスが生きている && 今のステートが網(`dynamic_pointer_cast`) && `IsNetHitActive()`。`GetCollision`はカプセルを`ColliderShape`の配列に詰め替えて返す(判定が有効なときだけ呼ばれる前提。変換を1回にまとめたのはユーザーの依頼でClaude)。
+  - つまずき: `std::vector<ColliderShape>`(抽象クラスは値で持てない→`shared_ptr`の配列)、`return`忘れ、`CapsuleShape.h`のinclude忘れ(前方宣言だけだと子クラスのポインタを親のポインタに変換できない)、`bool`の初期値なし。
+- **次**: `ColliderTag`に網のタグ(候補`BossNet`)を足して`GetTag()`で返す(今は`ColliderTag()`=`Player`扱いを返しているので要注意) → ボスにコライダーを持たせて`GetColliders`で返す → `CollisionManager`のペアに{網, プレイヤー} → `PlayerCollider`でダメージ → 多段ヒットのダメージ源。そのあと網の調整(`net_active_frame`、半径、zの`1200`の直書き、色)と、11/23の「次」の続き。
+- **コミットについて**: シェーダーの`.pso`/`.vso`はビルドで作り直されて変更扱いになるが、コミットには入れていない。

@@ -1,8 +1,11 @@
 ﻿#pragma once
+#include <vector>
+
 #include "IGunshipBossState.h"
 #include "Utility/Vector3.h"
 
 class ModelAnimator;
+class CapsuleShape;
 class GunshipBossNetState : public IGunshipBossState
 {
 public:
@@ -13,8 +16,14 @@ public:
 	void Update() override;
 	void Draw() override;
 	void Exit() override;
-	
-	private:
+
+	//カプセルの配列を返す
+	const std::vector<std::shared_ptr<CapsuleShape>>& GetNetCapsules() const { return m_netCapsules; }
+
+	//判定が出ているかを返す
+	bool IsNetHitActive() const;
+
+private:
 	//網攻撃の準備の更新処理
 	void UpdateNetReady();
 	//網攻撃の発射の更新処理
@@ -25,7 +34,7 @@ public:
 	void UpdateVentLoop();
 	//放熱終了中の更新処理
 	void UpdateVentClose();
-	
+
 	//発射口のフレーム名からワールド座標をとる
 	Vector3 GetMuzzlePos(const wchar_t* frameName) const;
 	//網を描画する
@@ -57,4 +66,7 @@ private:
 	Vector3 m_netPos;
 	//網攻撃が始まってからの経過フレーム
 	int m_netFrame = 0;
+
+	//網用にカプセルの当たり判定を配列で持つ
+	std::vector<std::shared_ptr<CapsuleShape>> m_netCapsules;
 };

@@ -26,6 +26,9 @@ public:
 	//アニメーターを返す
 	ModelAnimator& GetAnimator() { return *m_pAnimator; }
 
+	//現在のステートを返す
+	std::shared_ptr<IGunshipBossState> GetCurrentState() const { return m_pState; }
+
 private:
 	//ステートの更新
 	void UpdateState();
