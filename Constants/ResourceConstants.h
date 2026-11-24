@@ -191,6 +191,12 @@ namespace
 	constexpr const wchar_t* summon_worm_eff_path = L"Data/Effect/SummonWormEnemy/SummonWorm.efk";
 	//ボスのビーム
 	constexpr const wchar_t* boss_beam_eff_patgh = L"Data/Effect/BossBeam/BossBeam_2.efk";
+	//2面ボスの網の予告の線
+	constexpr const wchar_t* boss_net_warning_eff_path = L"Data/Effect/BossNet/NetWarning.efk";
+	//2面ボスの網の本番の線
+	constexpr const wchar_t* boss_net_laser_eff_path = L"Data/Effect/BossNet/NetLaser.efk";
+	//2面ボスの網の発射口の光
+	constexpr const wchar_t* boss_net_muzzle_eff_path = L"Data/Effect/BossNet/NetMuzzle.efk";
 	//ボスの無敵エフェクト
 	constexpr const wchar_t* boss_shield_effect_path = L"Data/Effect/BossShield/BossShield.efk";
 	//ヒットエフェクト(敵味方共通)
@@ -267,6 +273,10 @@ namespace
 	constexpr float summon_floating_eff_scale = 1.0f;
 	constexpr float summon_worm_eff_scale = 1.0f;
 	constexpr float boss_beam_eff_scale = 2.0f;
+	//網のエフェクトは拡大率50で書き出し済みなので読み込み倍率は1.0(動的パラメーターの単位もこの前提)
+	constexpr float boss_net_warning_eff_scale = 1.0f;
+	constexpr float boss_net_laser_eff_scale = 1.0f;
+	constexpr float boss_net_muzzle_eff_scale = 1.0f;
 	constexpr float boss_shield_eff_scale = 4.0f;
 	constexpr float hit_effect_scale = 4.0f;
 	constexpr float boss_death_eff_scale = 1.0f;

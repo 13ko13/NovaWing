@@ -1,7 +1,9 @@
 ﻿#pragma once
 #include <memory>
+#include <vector>
 
 #include "Game/GameObjects/Actors/Character/Enemy/Boss/BossBase.h"
+#include "Game/Collision/GunshipBossNetCollider.h"
 
 class ModelAnimator;
 class IGunshipBossState;
@@ -25,9 +27,11 @@ public:
 
 	//アニメーターを返す
 	ModelAnimator& GetAnimator() { return *m_pAnimator; }
-
 	//現在のステートを返す
 	std::shared_ptr<IGunshipBossState> GetCurrentState() const { return m_pState; }
+
+	//全ての当たり判定を配列で返す
+	std::vector<ICollider*> GetColliders() override;
 
 private:
 	//ステートの更新
@@ -40,4 +44,7 @@ private:
 	std::unique_ptr<ModelAnimator> m_pAnimator;
 	//現在のステート
 	std::shared_ptr<IGunshipBossState> m_pState;
+
+	//網攻撃のコライダー
+	GunshipBossNetCollider m_netCol;
 };

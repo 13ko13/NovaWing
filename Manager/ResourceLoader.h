@@ -176,6 +176,9 @@ public:
 		SummonFloating,//浮遊敵召喚時エフェクト
 		SummonWorm,//ワーム召喚時エフェクト
 		BossBeam,//ボスのビームエフェクト
+		BossNetWarning,//2面ボスの網の予告の線
+		BossNetLaser,//2面ボスの網の本番の線
+		BossNetMuzzle,//2面ボスの網の発射口の光
 		BossShield,//ボスのシールドエフェクト
 		HitEffect,//被弾時エフェクト(敵味方共通)
 		BossDeath,//ボスの死亡エフェクト

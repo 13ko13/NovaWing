@@ -31,11 +31,16 @@ std::vector<std::shared_ptr<ColliderShape>> GunshipBossNetCollider::GetCollision
 
 ColliderTag GunshipBossNetCollider::GetTag() const
 {
-	return ColliderTag();
+	return ColliderTag::BossNet;
 }
 
 void GunshipBossNetCollider::OnCollision(const ICollider& other)
 {
+}
+
+int GunshipBossNetCollider::GetOwnerID() const
+{
+	return m_owner.GetID();
 }
 
 bool GunshipBossNetCollider::IsCollisionActive() const

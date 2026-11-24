@@ -6,6 +6,7 @@ enum class DamageSourceType
 	Rock,//岩
 	Worm,//ワームエネミー
 	Beam,//ボスのビーム
+	Net,//2面ボスの網
 	Building,//ビル
 	RushEnemy,//突進する敵
 };

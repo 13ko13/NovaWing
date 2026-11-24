@@ -18,6 +18,9 @@ public:
 	//判定が有効かどうか
 	bool IsCollisionActive() const override;
 
+	//持ち主のIDを取得(多段ヒット防止の識別に使う)
+	int GetOwnerID() const;
+
 private:
 	GunshipBoss& m_owner;
 };

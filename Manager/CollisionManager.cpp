@@ -16,6 +16,7 @@
 #include "Game/Collision/EnemyCollider.h"
 #include "Game/Collision/RockCollider.h"
 #include "Game/Collision/SpiderBossBeamCollider.h"
+#include "Game/Collision/GunshipBossNetCollider.h"
 #include "Game/GameObjects/Bullet/ReflectedBullet.h"
 #include "Game/Collision/BulletCollider.h"
 #include "Main/Application.h"
@@ -67,6 +68,7 @@ namespace
 		{ ColliderTag::BossBeamReflect, ColliderTag::BossDamage },
 		{ ColliderTag::BossBeamTip, ColliderTag::Counter },
 		{ ColliderTag::BossBeam, ColliderTag::Player },
+		{ ColliderTag::BossNet, ColliderTag::Player },
 		{ ColliderTag::Worm, ColliderTag::Player },
 		{ ColliderTag::Rock, ColliderTag::Player },
 		{ ColliderTag::Building,ColliderTag::Player },
@@ -168,6 +170,9 @@ namespace
 			return true;
 		case ColliderTag::BossBeam:
 			outSource = { DamageSourceType::Beam, static_cast<const SpiderBossBeamCollider&>(collider).GetOwnerID() };
+			return true;
+		case ColliderTag::BossNet:
+			outSource = { DamageSourceType::Net, static_cast<const GunshipBossNetCollider&>(collider).GetOwnerID() };
 			return true;
 		case ColliderTag::Building:
 			outSource = { DamageSourceType::Building,static_cast<const BuildingCollider&>(collider).GetOwnerID() };

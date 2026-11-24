@@ -13,9 +13,11 @@ namespace
 	constexpr int hit_building_damage = 20;
 	//突進する敵に当たった時のダメージ
 	constexpr int hit_rush_enemy_damage = 20;
+	//2ステージ目のボスの網攻撃で食らうダメージ数
+	constexpr int hit_net_damage = 30;
 }
 
-PlayerCollider::PlayerCollider(Player& owner):
+PlayerCollider::PlayerCollider(Player& owner) :
 	m_owner(owner),
 	m_sphere(std::make_shared<SphereShape>())
 {
@@ -49,6 +51,10 @@ void PlayerCollider::OnCollision(const ICollider& other)
 	case ColliderTag::Building:
 		m_owner.TakeDamage(hit_building_damage);
 		break;
+	case ColliderTag::BossNet:
+		m_owner.TakeDamage(hit_net_damage);
+		break;
+		
 	default:
 		break;
 	}

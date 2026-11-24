@@ -73,11 +73,6 @@ public:
 	//ボスの無敵部分に当たった時の処理
 	void OnHitInvincibleCol(const Position3& effectPos, const int attackPower);
 
-	//サウンドマネージャー取得
-	std::weak_ptr<SoundManager> GetSoundManager() const { return m_pSoundManager; }
-	//エフェクトマネージャー取得
-	std::weak_ptr<EffectManager> GetEffectManager() const { return m_pEffectManager; }
-
 private:
 	//敵の描画(シェーダ適応も含めた)
 	void DrawEnemy();

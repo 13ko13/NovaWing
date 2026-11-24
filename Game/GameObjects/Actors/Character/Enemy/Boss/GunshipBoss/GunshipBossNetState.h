@@ -6,6 +6,7 @@
 
 class ModelAnimator;
 class CapsuleShape;
+class EffectManager;
 class GunshipBossNetState : public IGunshipBossState
 {
 public:
@@ -24,6 +25,9 @@ public:
 	bool IsNetHitActive() const;
 
 private:
+	//網攻撃の当たり判定初期化
+	void InitNetCol();
+	
 	//網攻撃の準備の更新処理
 	void UpdateNetReady();
 	//網攻撃の発射の更新処理
@@ -44,6 +48,9 @@ private:
 	);
 
 private:
+	//網の予測線用のエフェクト再生ハンドル
+	int m_warningEffectPlayH = -1;
+	
 	//網を発射するまでの流れ
 	enum class NetPhase
 	{
@@ -69,4 +76,7 @@ private:
 
 	//網用にカプセルの当たり判定を配列で持つ
 	std::vector<std::shared_ptr<CapsuleShape>> m_netCapsules;
+
+	//エフェクトマネージャーの弱参照を持つ
+	std::weak_ptr<EffectManager> m_pEffectManager;
 };

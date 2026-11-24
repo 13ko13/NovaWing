@@ -3,6 +3,8 @@
 #include "Utility/ModelAnimator.h"
 #include "GunshipBossMoveState.h"
 #include "Game/Collision/CapsuleShape.h"
+#include "Manager/EffectManager.h"
+#include "Manager/DebugManager.h"
 
 namespace
 {
@@ -62,6 +64,20 @@ void GunshipBossNetState::Enter()
 	m_netPos = m_pBoss.lock()->GetPos();
 
 	//当たり判定を線の数ぶん初期化する
+	InitNetCol();
+
+	//エフェクトのマネージャーを保持しておく
+	m_pEffectManager = m_pBoss.lock()->GetEffectManager();
+
+	//始点の位置にエフェクトを再生させる
+	m_warningEffectPlayH = m_pEffectManager.lock()->Play(
+		ResourceLoader::EffectID::BossNetWarning,
+		m_netCapsules[0]->GetStartPos()
+	);
+}
+
+void GunshipBossNetState::InitNetCol()
+{
 	for (int i = -net_line_num; i < net_line_num; i++)
 	{
 		//1回ごとに線Aと線Bの始点と終点を出す
@@ -149,14 +165,17 @@ void GunshipBossNetState::Draw()
 	//準備中は色を変える
 	if (m_phase == NetPhase::Ready) lineCol = 0x444444;
 
-	//網を描画する
-	DrawNetLines(lineCol, muzzlePosLeft, muzzlePosRight);
+	// 	//網を描画する
+	// 	DrawNetLines(lineCol, muzzlePosLeft, muzzlePosRight);
 
 #ifdef _DEBUG
-	//デバッグとして当たり判定を描画
-	for (const auto& capsule : m_netCapsules)
+	if (DebugManager::GetInstance().IsDebugDrawEnabled())
 	{
-		capsule->Draw(0xff0000);
+		//デバッグとして当たり判定を描画
+		for (const auto& capsule : m_netCapsules)
+		{
+			capsule->Draw(0xff0000);
+		}
 	}
 #endif 
 }

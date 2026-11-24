@@ -29,6 +29,10 @@ public:
 	bool IsBossAppear() const { return m_isAppear; }
 	//ボスのモデルハンドル取得
 	int GetModelHandle() const { return m_modelHandle; }
+	//サウンドマネージャー取得
+	std::weak_ptr<SoundManager> GetSoundManager() const { return m_pSoundManager; }
+	//エフェクトマネージャー取得
+	std::weak_ptr<EffectManager> GetEffectManager() const { return m_pEffectManager; }
 
 private:
 

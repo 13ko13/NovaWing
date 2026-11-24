@@ -1,5 +1,4 @@
-﻿#include <vector>
-#include <cassert>
+﻿#include <cassert>
 
 #include "GunshipBoss.h"
 #include "Manager/ResourceLoader.h"
@@ -21,7 +20,8 @@ namespace
 }
 
 GunshipBoss::GunshipBoss(GunshipBossData& data) :
-	BossBase(data)
+	BossBase(data),
+	m_netCol(*this)
 {
 	//位置を設定
 	SetPos(data.pos);
@@ -72,6 +72,12 @@ void GunshipBoss::Update()
 	BossBase::Update();
 	//アニメーターを更新させる
 	m_pAnimator->Update(anim_blend_frame);
+}
+
+std::vector<ICollider*> GunshipBoss::GetColliders()
+{
+	//ICollider*に変換して返す
+	return { &m_netCol };
 }
 
 void GunshipBoss::UpdateState()

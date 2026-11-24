@@ -15,6 +15,7 @@ enum class ColliderTag
 	BossDamage,//ボスのダメージ判定
 	BossShield,//ボスの無敵判定(弾を弾く)
 	BossBeam,//ボスのビーム
+	BossNet,//ボスの網のレーザー
 	Rock,//岩
 	EnemyBullet,//敵弾
 	PlayerBullet,//プレイヤーの弾

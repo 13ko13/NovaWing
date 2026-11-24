@@ -2754,3 +2754,36 @@
   - つまずき: `std::vector<ColliderShape>`(抽象クラスは値で持てない→`shared_ptr`の配列)、`return`忘れ、`CapsuleShape.h`のinclude忘れ(前方宣言だけだと子クラスのポインタを親のポインタに変換できない)、`bool`の初期値なし。
 - **次**: `ColliderTag`に網のタグ(候補`BossNet`)を足して`GetTag()`で返す(今は`ColliderTag()`=`Player`扱いを返しているので要注意) → ボスにコライダーを持たせて`GetColliders`で返す → `CollisionManager`のペアに{網, プレイヤー} → `PlayerCollider`でダメージ → 多段ヒットのダメージ源。そのあと網の調整(`net_active_frame`、半径、zの`1200`の直書き、色)と、11/23の「次」の続き。
 - **コミットについて**: シェーダーの`.pso`/`.vso`はビルドで作り直されて変更扱いになるが、コミットには入れていない。
+
+### 進捗（2026-11-24・2面ボス網のEffekseerエフェクト）
+- **成果物**: `Data/Effect/BossNet/` に `NetLaser`・`NetWarning`・`NetMuzzle` の `.efkefc`(編集用)と`.efk`(拡大率50で書き出し)、`Texture/NB_*.png`(自作4枚)。生成スクリプトは `tools/gen_net_tex.ps1`(テクスチャ)と `tools/make_efkproj.ps1`(`-Effect Laser|Warning|Muzzle`で`.efkproj`を作る。太さなどの数値はここ)。
+- **約束**: 線の長手方向=ローカル+X、原点=始点。動的パラメーターは生成時にしか効かないので、線の層は寿命1Fで毎フレーム出し直している。
+- **動的パラメーター**: NetLaser `@In0`=伸びた割合(0〜1)、`@In1`=線の長さ(エディタ単位=ゲーム単位÷50。読み込み倍率1.0のとき)。NetWarning `@In0`=線の長さ。NetMuzzleは無し。
+- **ゲーム側は未実装・未確認(実機)**。エディタでのプレビュー(曇り空色と暗い背景、距離3500ユニット相当)までは確認済み。引き継ぎメモは会話の最終報告を参照。
+
+### 2026-11-24 2面ボスの登場ムービー(BossAppear2)を作成(Claude、ユーザー依頼)
+- 成果物: `Data/Movie/BossAppear2.ogv`(Theora+無音vorbis、36.4MB)と `.mp4`(25.5MB)。1920x1080・30fps・180フレーム(6秒)。1面の `BossAppear.*` は未変更。コードは未編集(.h/.cpp/.hlsl)。
+- 作り方: [Tools/Boss2Model/movie/](Tools/Boss2Model/movie/) の `movie_lib.py`(空・ゲーム式マテリアル・街・雨)、`build_movie.py`(カット・カメラ・ボスの動き、`blender -b --python build_movie.py -- --out <dir>`、全フレーム約3分40秒)、`encode.ps1`(連番PNG→ogv/mp4)。
+- **指示書との違い: 2面は海がない(`hasSea=false`)** ので、海の式は使わず、足元は `Data/CSV/Stage2/Building.csv` の地面・線路・ビルを(ループ区間34000〜50000、1周16000)ボスのいる位置に合わせて再現した。ゲームの街は、カメラの後ろ3000〜前13000の範囲にしか無いので、同じ範囲(ワールドz -6000〜10400)だけ置いた。
+- 空はSkyBox::Drawと同じ面・UVで6面を正距円筒にして使用。ボスはLightingPS式(Boss2_Base/Normal/Emission/Metallic)。雨は `Rain.efkproj` の4層(NearL/NearR/Mid/Far)の数値(×50)を再現して60fpsで進め、カメラの位置から発生。色変換なし(Raw)。
+- カット: ①0〜1.3s遠くの影 ②〜2.3s望遠で飛来 ③〜3.5s道路から見上げて通過 ④〜4.55s回り込み ⑤〜5.25s発射口・顔のアップ ⑥〜6.0sゲームのカメラ位置へ引いて画角90°。最後の0.5秒(165F以降)は揺れなし。最後のコマはIdleの0フレーム目。
+
+### 2026-11-24 2面ボスの網: 筋・伸びる演出・当たり判定とダメージの登録・エフェクトの登録(ユーザー実装+一部Claude)
+- **見せ方の決定(ユーザー・11/23)**: 「なぜか網が出てきた」を避けるため、**発射口(`Muzzle_Net_L/R`)から網の始点へ光の筋が走り、そこから斜めの線が伸びる**。右のポッド→右上の始点(線A)、左のポッド→左上の始点(線B)。発射口の位置は`GetMuzzlePos(フレーム名)`(`MV1SearchFrame`→`MV1GetFramePosition`)。筋は外側へ扇状に広がる(交差はしない)。
+  - 構えの動きの長さ(`NetReady`は20フレーム)が短く、網が一瞬で出たので、`m_animator.Play(net_ready_anim_name, false, net_ready_anim_speed)`で**再生速度0.3**に。伸びる割合は`GetPlayTime() / GetAnimLength()`(`m_netFrame`は速度に関係なく進むのでずれた)。`DrawNetLines`にまとめ、関数に分けた(`GetMuzzlePos`、`DrawNetLines`、`InitNetCol`)。
+  - **最新の設計(ユーザー・11/24)**: 伸びる動きは「予告」ではなく**本番の線**に付ける。**予告=フェードインで全体が出る(伸びない)、本番=ビームとして始点から終点へ伸びる、発射口の筋は本番の線の先端に追尾**。※コードはまだ旧版(準備中に線が伸びる)のまま。エフェクトで置き換える。
+- **当たり判定とダメージ(11/24)**: `ColliderTag::BossNet`(ユーザー)、`GunshipBossNetCollider::GetTag()`が`BossNet`(ユーザー)、ボスが`m_netCol`を持つ(`GunshipBoss(.h/.cpp)`、初期化リストで`*this`)、`GunshipBoss::GetColliders() override`が`{ &m_netCol }`を返す、`hit_pairs`に`{BossNet, Player}`(CollisionManager.cpp)、`PlayerCollider`に`BossNet`のケース(ユーザー)。
+  - **多段ヒット防止の登録(Claude・ユーザー依頼)**: `DamageSourceType::Net`、`GunshipBossNetCollider::GetOwnerID()`、`CollisionManager::TryGetDamageSource`に`BossNet`のケース(`static_cast<const GunshipBossNetCollider&>`)。ビルドOK。**ゲームでの確認は未**(当たると1回だけ減るか、網が消えたあとまた当たると減るか、赤いカプセルと見た目が合うか)。
+- **`GetEffectManager()`を`BossBase`に引き上げ(ユーザー)**: `SpiderBoss.h`から`BossBase.h`へ(1面・2面共通)。
+- **エフェクト(別セッションで作成、11/24)**: [Data/Effect/BossNet/](Data/Effect/BossNet/)の`NetWarning`(予告、`@In0`=線の長さ)・`NetLaser`(本番、`@In0`=伸びた割合0〜1・`@In1`=線の長さ)・`NetMuzzle`(発射口の光、パラメーターなし)の`.efkefc`/`.efk`(拡大率50)。**約束**: 線の長手方向=ローカル+X、原点=始点。動的パラメーターは**エディタ単位=ゲーム単位÷50**(読み込み倍率1.0のとき)。**生成時にしか効かないので線の層は寿命1Fで出し直している→毎フレーム`SetDynamicInput`で渡せば効く**。色は`SetColor`の乗算(右=青寄り、左=紫寄り)。作り方は[tools/](Data/Effect/BossNet/tools/)。
+  - **登録(Claude・ユーザー依頼)**: `ResourceLoader::EffectID`に`BossNetWarning`/`BossNetLaser`/`BossNetMuzzle`、[ResourceConstants.h](Constants/ResourceConstants.h)にパス3つと倍率(1.0)3つ、`effect_infos`の対応表、`game.effects`の読み込み一覧。ビルドOK。
+  - **網のステートの途中(ユーザー)**: `m_pEffectManager`を持ち、`Enter()`で予告を1本だけ`m_netCapsules[0]`の始点に再生(`m_warningEffectPlayH`)。**見えなかった**。原因の見立て: ①`m_netCapsules[0]`(`i=-6`の線A)の始点は**網の中心からx+2500・y約100で、設計上、画面の外**(プレイヤーが飛べる範囲はx±1600・y100〜900) ②`@In0`(長さ)をまだ渡していない。確認のため、`DrawNetLines`の呼び出しと赤いカプセルの描画を**コメントアウト中**(`Draw()`、[GunshipBossNetState.cpp:168-176](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossNetState.cpp#L168-L176))。**戻すこと**。
+- **次(明日、学校で)**: 全部の線にエフェクトを出す。方針:
+  - メンバ: 予告のハンドル配列(`m_warningHandles`)、本番のハンドル配列(`m_laserHandles`)、発射口の光のハンドル(`m_muzzleHandles`、左右2つ)。`m_warningEffectPlayH`は消す。
+  - 定数: エディタ単位への換算(50)、本番の伸びるフレーム数(20)、色(右=青寄り、左=紫寄り)。
+  - 関数: `PlayWarningEffects()`(`Enter`でカプセルを回して予告を再生)、`PlayLaserEffects()`(準備→発射のとき、予告を止めて本番を再生、発射口の光も)、`UpdateLaserEffects()`(毎フレーム`@In0`=伸びた割合)、`StopNetEffects()`(`net_active_frame`に届いたとき・`Exit()`で全部止める。配列が空なら何もしない)。
+  - 1本の渡し方: カプセルの始点・終点から`angle = atan2f(end.y-start.y, end.x-start.x)`(`SetRotation(h, Vector3(0,0,angle))`、**向きが逆なら符号を反転**)、`length = (end-start).Length() / 50`、色はカプセルの添字が偶数=右(線A)、奇数=左(線B)。位置は`m_netCapsules[i]->GetStartPos()`(式を書き直さない)。
+  - そのあと: 発射口の筋の追従、予告のフェードイン(`SetColor`のアルファ)、判定が終わったあとのフェードアウト、`DrawNetLines`(仮の線)の削除、**網のzの`1200`の直書きを定数に**、線の本数を減らす(カバー範囲は網の中心からx±1600・y100〜900)。
+- **2面ボスの登場ムービー(別セッション、11/24)**: 上の「2面ボスの登場ムービー(BossAppear2)を作成」の項を参照。**ゲーム側は未接続**(`GraphicID`に`BossAppear2Movie`などを足し、`StageConfig`の2面の行のムービーID・距離・高さを差し替える。最終値は別セッションの報告を参照)。
+- **デバッグコード(消す対象に追加)**: `GunshipBossNetState::Draw()`の`DrawLine3D`による仮の網と筋(`DrawNetLines`)、赤いカプセルの描画(`#ifdef _DEBUG`)。エフェクトに置き換えたら消す。
+- **コミット前の注意**: `Log.txt`は`git checkout -- Log.txt`で戻す。シェーダーの`.pso`/`.vso`は入れない。
