@@ -24,6 +24,9 @@ public:
 	//判定が出ているかを返す
 	bool IsNetHitActive() const;
 
+	//現在弱点が見える状態か
+	bool IsVentOpen() const { return m_phase == NetPhase::VentLoop; }
+
 private:
 	//網攻撃の当たり判定初期化
 	void InitNetCol();

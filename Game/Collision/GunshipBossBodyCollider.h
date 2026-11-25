@@ -1,0 +1,22 @@
+﻿#pragma once
+#include "Game/Collision/ICollider.h"
+
+class GunshipBoss;
+class GunshipBossBodyCollider : public ICollider
+{
+public:
+	GunshipBossBodyCollider(GunshipBoss& owner);
+	virtual ~GunshipBossBodyCollider();
+
+	//当たり判定の形状取得
+	std::vector<std::shared_ptr<ColliderShape>> GetCollision() const override;
+	//自分のタグを取得
+	ColliderTag GetTag() const override;
+	//衝突時処理
+	void OnCollision(const ICollider& other) override;
+	//判定が有効かどうか
+	bool IsCollisionActive() const override;
+
+private:
+	GunshipBoss& m_owner;
+};

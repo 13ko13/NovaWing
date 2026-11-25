@@ -2831,3 +2831,28 @@
   - 前の版は会話のスクラッチパッドに退避しただけ(戻すならgitの前のコミットから)。
 - **(11/25)網の攻撃はいったん完成(ユーザー判断)**。残り: `BossNetMuzzle`の読み込み登録とファイル(NetMuzzle.efkefc/.efk)の片付け、ボスが倒されたときにエフェクトを止める(ボスの死亡の流れを作るとき)、Debugでエフェクトが重い(コスト表113行目)。
 - **(11/25)発射口の光(`BossNetMuzzle`)を片付けた(Claude、ユーザー依頼)**: `EffectID::BossNetMuzzle`([ResourceLoader.h](Manager/ResourceLoader.h#L180))、パスと倍率([ResourceConstants.h](Constants/ResourceConstants.h#L197))、表と読み込みリスト([ResourceLoader.cpp](Manager/ResourceLoader.cpp#L265))、`NetMuzzle.efkefc`/`.efk`、[make_efkproj.ps1](Data/Effect/BossNet/tools/make_efkproj.ps1)の`'Muzzle'`を削除。ビルドOK。
+
+### 2026-11-25 網のレーザーのエフェクトを軽くした(v6、Claude、ユーザー依頼。C++は変更なし、未コミット)
+- **ノード数**: 本番 29→4(Line/Arc/Head/Spark)、予告 3→2(Dark/Light)、筋 4→1(Streak)。24本で1フレームのノードは 約700→約96(+筋 96→24)。毎フレームの出し直しは本番1本あたり 約8.5個→3個(+スパーク約3個は同じ)、筋は4個→1個。`.efk` は本番 31KB→4.7KB。
+- **やったこと**([make_efkproj.ps1の'Laser'](Data/Effect/BossNet/tools/make_efkproj.ps1#L124)、[gen_net_tex.ps1の焼き込み](Data/Effect/BossNet/tools/gen_net_tex.ps1#L185)):
+  - 本番の Dark/Body/Glow/Core を1枚の Blend テクスチャ `NB_LineBake.png` に焼いた(光の明るさの揺れは明るさ違い8コマを乱数で選ぶ)。Arc+Arc2 は `NB_Arc3.png`、筋の Glow+Core は `NB_StreakBake.png` に焼いた。
+  - 線と筋は**Y軸固定ビルボード**(Billboard=1、Z回転-90で板の縦を+Xへ)。線を軸にカメラへ回るので横から見ても消えず、90度ずらした板(Cross)を全部外せた。長さは Scale の Y に入れる(式 `NetLaserScaleY`/`NetStreakScaleY`)。
+  - スパーク20か所→1つ([NetSparkMin/Max](Data/Effect/BossNet/tools/make_efkproj.ps1#L135))。**位置の最小/最大に別の式を入れると、その間の乱数になる**(エディタ1.80.7で確認。以前のメモ「同じ値になる」は誤り)。出す間隔0.2〜0.45F(平均3個/F、以前と同じ量)。
+  - 予告は LightCross だけ外した(正面から見るので)。
+- **わかったこと**: 寿命1Fで毎フレーム出し直す層は、消える前の1個と新しい1個が**重なって2回描かれる**(エディタで確認)。以前の加算の層は実際は2倍の明るさだったので、焼き込みもそれに合わせた。予告の暗い層の寿命を延ばすと薄くなるので、寿命1Fのまま。
+- **見た目の差**: 正面では線の断面の明るさが数%暗い程度(外していた Cross の分)。スパークの位置が20か所に固定でなく、線上のどこにでも出るようになった。筋は斜めから見ると少しだけ白さが減る(以前は板2枚が重なっていた)。横から見たときは本番の線も消えなくなった。比べた画像は `C:\Users\SakamotoKou\Documents\NovaWing_backup\BossNet_compare\compare_sheet.png`。
+- 使わなくなった `NB_Arc2.png`/`NB_Soft.png` は消した。
+- **戻し方**: 前の版(エフェクト・テクスチャ・スクリプト)を `C:\Users\SakamotoKou\Documents\NovaWing_backup\BossNet_before_20261125\` に置いた。中身を `Data/Effect/BossNet/` に上書きして、`NB_LineBake.png`/`NB_Arc3.png`/`NB_StreakBake.png` を消せば戻る(gitの前のコミットからでも可)。
+- **未確認**: ゲームでの見た目と、Debugでの重さの変化。
+
+### 2026-11-25 2面ボスの放熱の隙: 弱点・胴体の当たり判定、放熱中の赤い発光(コスト表36行目の途中。ユーザー実装+コライダーはClaude)
+- コスト表35行目「網のレーザー」を完了に(実コスト6、ユーザー申告)。
+- **弱点の球**(ユーザー): ボスに持たせる(A案。ロックオンや跳ね返したロケットが、ステートに関係なく位置を聞けるため)。`Weak_L`/`Weak_R`フレームに半径200の球([GunshipBoss.cpp](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBoss.cpp)の`InitWeakSphere`、毎フレームアニメーション更新の後に位置を取り直す)。デバッグ描画は赤。
+- **放熱中か**(ユーザー): `GunshipBossNetState::IsVentOpen()`=`VentLoop`の間だけ。ボス側は`GunshipBoss::IsWeakOpen()`(網のステートでなければfalse)。
+- **弱点のコライダー**(Claude): [GunshipBossWeakCollider.cpp](Game/Collision/GunshipBossWeakCollider.cpp)。タグ`BossDamage`(プレイヤーの弾・チャージとの組み合わせは登録済み)、`IsVentOpen()`の間だけ有効、ダメージは**2倍**(`weak_damage_rate`、ユーザー「せっかく弱点だから」)。
+- **胴体のコライダー**(Claude、ユーザー依頼): [GunshipBossBodyCollider.cpp](Game/Collision/GunshipBossBodyCollider.cpp)。`Body`フレームを中心に横向きのカプセル(±250、半径330、前(-Z)に250出す=「顔に当てると中でエフェクトが出て見える」対策)。1倍、生きていて登場が終わっていれば有効。デバッグ描画は黄色。`GetColliders()`は網→弱点→胴体の順。
+- **放熱中の発光**(ユーザー): `IsWeakOpen()`のとき`Boss2EmissionVent`。赤く光る間と弾が当たる間を同じにした(赤いのに効かない時間を作らない)。
+- 新しいファイルを作ったら: vcxproj/filtersへの登録と**UTF-8(BOM付き)**が要る(BOMなしだとC4819でコメントが壊れてエラー)。
+- **ロックオン(ユーザーが作る)**: 胴体はロックオンできず、**放熱中の弱点だけ**ロックオンできる(1面のボスは今のまま)。今はボスがTargetManagerに登録されていない。敵の位置を見ているのはTargetManager・ReticleUI・ChargeBullet・ReflectedBulletの`GetPos()`。ボスを登録すると`DebugDefeatAllEnemies`がボスも倒すので注意。
+- **網のエフェクトの軽量化**: Claude Desktop用のプロンプトを作った(見た目を変えずにノード数を減らす。コードは変えない)。変換ツールを[Tools/EffekseerEq/](Tools/EffekseerEq/Program.cs)に置いた(`dotnet build -c Release -o out`)。
+- 閉じた装甲に当たったときの火花と硬い音はベータに回す案(未決定)。

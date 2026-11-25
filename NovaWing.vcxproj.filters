@@ -436,6 +436,8 @@
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossNetState.cpp" />
     <ClCompile Include="Game\Collision\CapsuleShape.cpp" />
     <ClCompile Include="Game\Collision\GunshipBossNetCollider.cpp" />
+    <ClCompile Include="Game\Collision\GunshipBossWeakCollider.cpp" />
+    <ClCompile Include="Game\Collision\GunshipBossBodyCollider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants\Game.h">
@@ -868,6 +870,8 @@
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossNetState.h" />
     <ClInclude Include="Game\Collision\CapsuleShape.h" />
     <ClInclude Include="Game\Collision\GunshipBossNetCollider.h" />
+    <ClInclude Include="Game\Collision\GunshipBossWeakCollider.h" />
+    <ClInclude Include="Game\Collision\GunshipBossBodyCollider.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="LightingPS.hlsl" />
