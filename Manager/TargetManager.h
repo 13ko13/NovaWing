@@ -34,7 +34,7 @@ public:
 	void EndLock();
 
 #ifdef _DEBUG
-	//登録されている敵を全員倒す(デバッグ用。ボスは登録されていないので倒さない)
+	//登録されている敵を全員倒す(デバッグ用。ボスは登録されていても倒さない)
 	void DebugDefeatAllEnemies();
 #endif
 

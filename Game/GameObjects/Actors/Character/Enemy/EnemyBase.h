@@ -59,6 +59,11 @@ public:
 	//ビルに当たった時の処理(何もしない敵はそのまま)
 	virtual void OnHitBuilding() {};
 
+	//現在ロックオンが可能か
+	virtual bool CanLockOn() const { return true; }
+	//ロックオンできる位置を返す
+	virtual Vector3 GetLockablePos() const { return GetPos(); }
+
 private:
 
 protected:

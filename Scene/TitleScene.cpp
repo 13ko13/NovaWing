@@ -77,7 +77,7 @@ namespace
 	constexpr int frame_of_title_impact = 5;
 
 	//最初のステージ番号(仮)
-	constexpr int first_stage_no = 0;
+	constexpr int first_stage_no = 1;
 }
 
 TitleScene::TitleScene(SceneController& controller):

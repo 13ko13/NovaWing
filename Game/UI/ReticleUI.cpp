@@ -84,7 +84,7 @@ void ReticleUI::Draw()
 		// ターゲットが死んでいたら処理を行わない
 		if (sharedTarget && !sharedTarget->IsDead())
 		{
-			Vector3 targetPos = sharedTarget->GetPos();
+			Vector3 targetPos = sharedTarget->GetLockablePos();
 			// それをスクリーン座標に直す
 			VECTOR targetScreenPos = ConvWorldPosToScreenPos(targetPos.ToDxLib());
 

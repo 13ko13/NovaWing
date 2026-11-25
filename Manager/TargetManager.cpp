@@ -3,6 +3,7 @@
 #include "TargetManager.h"
 #include "Character/Player/Player.h"
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
+#include "Game/GameObjects/Actors/Character/Enemy/Boss/BossBase.h"
 #include "Main/Application.h"
 
 namespace
@@ -55,7 +56,7 @@ void TargetManager::Update()
 	if (pLockedEnemy != nullptr)
 	{
 		//この敵がプレイヤーより前にいるかを判定
-		Vector3 enemyPos = pLockedEnemy->GetPos();//敵位置
+		Vector3 enemyPos = pLockedEnemy->GetLockablePos();//敵位置
 		Vector3 playerPos = m_pPlayer.lock()->GetPos();//プレイヤー位置
 		//プレイヤーから敵までのベクトル
 		Vector3 playerToEnemy = enemyPos - playerPos;
@@ -66,24 +67,25 @@ void TargetManager::Update()
 		bool isFlont = Vector3::Dot(playerToEnemy, playerForward) > 0.0f;
 
 		//画面内にいるか
-		bool isOnScreen = IsOnScreen(pLockedEnemy->GetPos());
+		bool isOnScreen = IsOnScreen(enemyPos);
 
 		//生きているか
 		bool isAlive = !pLockedEnemy->IsDead();
 
+		//その敵がロックオンできるか
+		bool canLockOn = pLockedEnemy->CanLockOn();
+
 		//どれか一つでもfalseになっていればロックオンを行わない
 		if (!isFlont ||
 			!isOnScreen ||
-			!isAlive)
+			!isAlive ||
+			!canLockOn)
 		{
 			m_pFocusTarget.reset();
 			m_isForcus = false;
 		}
-		else
-		{
-			//当てはまっていればロックオンを確定させる
-			return;
-		}
+		//当てはまっていればロックオンを確定させる
+		else return;
 	}
 
 	//ここに来るのはロック機能中だが対象が未確定の場合
@@ -99,17 +101,22 @@ void TargetManager::Update()
 		std::shared_ptr<EnemyBase> pSharedEnemy = weakEnemy.lock();
 		if (pSharedEnemy == nullptr) continue;
 		if (pSharedEnemy->IsDead()) continue;
+		//ロックオンできない敵もcontinue
+		if(!pSharedEnemy->CanLockOn()) continue;
+
+		//ロックオンで狙う位置(普通の敵は中心、2面のボスは弱点)
+		Vector3 lockablePos = pSharedEnemy->GetLockablePos();
 
 		//プレイヤーの前方にいない場合もcontinue
 		Vector3 playerForward = -m_pPlayer.lock()->GetForward();
-		Vector3 playerToEnemy = pSharedEnemy->GetPos() - m_pPlayer.lock()->GetPos();
+		Vector3 playerToEnemy = lockablePos - m_pPlayer.lock()->GetPos();
 		if (Vector3::Dot(playerForward, playerToEnemy) <= 0.0f) continue;
 
 		//画面外の場合もcontinue
-		if (!IsOnScreen(pSharedEnemy->GetPos())) continue;
+		if (!IsOnScreen(lockablePos)) continue;
 
 		//レティクルからこの敵までのベクトル
-		Vector3 reticleToEnemy = pSharedEnemy->GetPos() - m_reticlePos;
+		Vector3 reticleToEnemy = lockablePos - m_reticlePos;
 		float distance = reticleToEnemy.Length();//その距離
 		if (distance < minDistance)
 		{
@@ -145,6 +152,8 @@ void TargetManager::DebugDefeatAllEnemies()
 		std::shared_ptr<EnemyBase> pSharedEnemy = weakEnemy.lock();
 		if (pSharedEnemy == nullptr) continue;
 		if (pSharedEnemy->IsDead() || pSharedEnemy->IsDying()) continue;
+		//ボス(2面はロックオンのために登録している)は倒さない
+		if (std::dynamic_pointer_cast<BossBase>(pSharedEnemy) != nullptr) continue;
 
 		//通常のダメージ処理を通すので、死亡演出や撃破数も本番と同じ流れになる
 		pSharedEnemy->TakeDamage(pSharedEnemy->GetHealth());

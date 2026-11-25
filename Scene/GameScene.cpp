@@ -754,6 +754,11 @@ void GameScene::CreateBoss()
 		m_pStageConfig->GetCSVFolderName());
 	}
 	m_pBoss->Init();
+	//2面のボスだけターゲットマネージャーに登録する(放熱中の弱点をロックオンするため。1面のボスはロックオンしない)
+	if (m_pStageConfig->GetBossType() != StageConfig::BossType::Spider)
+	{
+		m_pTargetManager->Register(m_pBoss);
+	}
 
 	//SpiderBossであればボスに工場をセットする
 	std::shared_ptr<SpiderBoss> pSpider = std::dynamic_pointer_cast<SpiderBoss>(m_pBoss);

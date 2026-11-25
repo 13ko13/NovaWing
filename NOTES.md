@@ -2856,3 +2856,13 @@
 - **ロックオン(ユーザーが作る)**: 胴体はロックオンできず、**放熱中の弱点だけ**ロックオンできる(1面のボスは今のまま)。今はボスがTargetManagerに登録されていない。敵の位置を見ているのはTargetManager・ReticleUI・ChargeBullet・ReflectedBulletの`GetPos()`。ボスを登録すると`DebugDefeatAllEnemies`がボスも倒すので注意。
 - **網のエフェクトの軽量化**: Claude Desktop用のプロンプトを作った(見た目を変えずにノード数を減らす。コードは変えない)。変換ツールを[Tools/EffekseerEq/](Tools/EffekseerEq/Program.cs)に置いた(`dotnet build -c Release -o out`)。
 - 閉じた装甲に当たったときの火花と硬い音はベータに回す案(未決定)。
+
+### 2026-11-25 2面ボスの弱点のロックオン(コスト表36行目の途中。ユーザー実装+一部Claude)
+- **しくみ**(ユーザー): `EnemyBase`に仮想関数を2つ追加。[CanLockOn()](Game/GameObjects/Actors/Character/Enemy/EnemyBase.h#L63)(普通の敵はtrue)と[GetLockablePos()](Game/GameObjects/Actors/Character/Enemy/EnemyBase.h#L65)(普通の敵は`GetPos()`)。
+- **2面のボス**: [CanLockOn](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBoss.cpp#L188)は`IsWeakOpen()`をそのまま返す(ユーザー)。[GetLockablePos](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBoss.cpp#L194)はプレイヤーに近い方の弱点の球の位置を返す(Claude、ユーザー依頼)。**第二形態で右のポッドが壊れたら左だけを返すようにする**(コメントで残してある)。
+- **TargetManager**: ロック中の敵を外す条件に`CanLockOn()`を追加([TargetManager.cpp:76](Manager/TargetManager.cpp#L76)、ユーザー)、候補探しで`CanLockOn()`がfalseなら飛ばす([105行目](Manager/TargetManager.cpp#L105)、ユーザー)。前・画面内・距離の判定を全部`GetLockablePos()`に置き換えた([59行目](Manager/TargetManager.cpp#L59)、[108〜119行目](Manager/TargetManager.cpp#L108-L119)、Claude)。照準の表示も`GetLockablePos()`([ReticleUI.cpp:87](Game/UI/ReticleUI.cpp#L87)、ユーザー)。
+- **ボスの登録**: [GameScene.cpp:757](Scene/GameScene.cpp#L757)で、**1面(Spider)以外のボスだけ**TargetManagerに登録(Claude。1面のボスは今のままロックオンしない)。
+- **デバッグの全滅**: [DebugDefeatAllEnemies](Manager/TargetManager.cpp#L156)はボスを飛ばす(登録したボスまで倒してしまうため、Claude)。
+- ビルドOK。**ゲームでの確認はまだ**: 放熱中だけ弱点に照準が付く・放熱が終わると外れる、胴体と弱点のダメージ、胴体のカプセルの大きさと前への出し方。
+- **次の手**: チャージショットと跳ね返した弾が弱点を追いかけるように、[ChargeBullet.cpp:80](Game/GameObjects/Bullet/ChargeBullet.cpp#L80)と[ReflectedBullet.cpp:45](Game/GameObjects/Bullet/ReflectedBullet.cpp#L45)の`GetPos()`を`GetLockablePos()`にする(ユーザーが書く)。
+- **注意**: [TitleScene.cpp:80](Scene/TitleScene.cpp#L80)の`first_stage_no`が**1(2面から始まる)**になっている。2面のテスト用。終わったら0に戻す。

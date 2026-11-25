@@ -47,6 +47,11 @@ public:
 	//胴体のカプセルを返す
 	std::shared_ptr<CapsuleShape> GetBodyCapsule() const { return m_pBodyCapsule; }
 
+	//ロックオン可能か
+	bool CanLockOn() const override;
+	//ロックオンできる位置
+	Vector3 GetLockablePos() const override;
+
 private:
 	//ステートの更新
 	void UpdateState();

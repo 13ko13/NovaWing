@@ -185,6 +185,31 @@ bool GunshipBoss::IsWeakOpen() const
 	return netState != nullptr && isVentOpen;
 }
 
+bool GunshipBoss::CanLockOn() const
+{
+	//弱点が出ていたらロックオン可能
+	return IsWeakOpen();
+}
+
+Vector3 GunshipBoss::GetLockablePos() const
+{
+	//プレイヤーに近い弱点を返す
+	//(第二形態で右のポッドが壊れたら、左だけを返すようにする)
+	//プレイヤーの位置
+	Vector3 playerPos = m_pPlayer.lock()->GetPos();
+	//左右の弱点の位置
+	Vector3 weakPosLeft = m_pWeakSphereLeft->GetPos();
+	Vector3 weakPosRight = m_pWeakSphereRight->GetPos();
+
+	//プレイヤーから左右の弱点までの距離
+	float distLeft = (weakPosLeft - playerPos).Length();
+	float distRight = (weakPosRight - playerPos).Length();
+
+	//近い方を返す
+	if (distLeft <= distRight) return weakPosLeft;
+	return weakPosRight;
+}
+
 void GunshipBoss::UpdateState()
 {
 	//ステートの更新を呼ぶ
