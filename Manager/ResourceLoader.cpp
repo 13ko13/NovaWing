@@ -263,7 +263,7 @@ namespace
 		{ ResourceLoader::EffectID::BossBeam,{ boss_beam_eff_patgh, boss_beam_eff_scale } },//ビーム
 		{ ResourceLoader::EffectID::BossNetWarning,{ boss_net_warning_eff_path, boss_net_warning_eff_scale } },//網の予告の線
 		{ ResourceLoader::EffectID::BossNetLaser,{ boss_net_laser_eff_path, boss_net_laser_eff_scale } },//網の本番の線
-		{ ResourceLoader::EffectID::BossNetMuzzle,{ boss_net_muzzle_eff_path, boss_net_muzzle_eff_scale } },//網の発射口の光
+		{ ResourceLoader::EffectID::BossNetStreak,{ boss_net_streak_eff_path, boss_net_streak_eff_scale } },//網の発射口から線の先端への光の筋
 		{ ResourceLoader::EffectID::BossShield,{ boss_shield_effect_path, boss_shield_eff_scale } },//無敵シールド
 		{ ResourceLoader::EffectID::BossDeath,{ boss_death_eff_path, boss_death_eff_scale } },//死亡
 
@@ -568,7 +568,7 @@ void ResourceLoader::InitSceneResources()
 		EffectID::FloatingDeath, EffectID::WormDeath,
 		EffectID::SummonFloating, EffectID::SummonWorm,
 		EffectID::BossBeam, EffectID::BossShield, EffectID::BossDeath, EffectID::Splash,
-		EffectID::BossNetWarning, EffectID::BossNetLaser, EffectID::BossNetMuzzle,
+		EffectID::BossNetWarning, EffectID::BossNetLaser, EffectID::BossNetStreak,
 		EffectID::Rain
 	};
 	game.sounds = {

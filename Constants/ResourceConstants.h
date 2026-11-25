@@ -195,8 +195,8 @@ namespace
 	constexpr const wchar_t* boss_net_warning_eff_path = L"Data/Effect/BossNet/NetWarning.efk";
 	//2面ボスの網の本番の線
 	constexpr const wchar_t* boss_net_laser_eff_path = L"Data/Effect/BossNet/NetLaser.efk";
-	//2面ボスの網の発射口の光
-	constexpr const wchar_t* boss_net_muzzle_eff_path = L"Data/Effect/BossNet/NetMuzzle.efk";
+	//2面ボスの網の発射口から線の先端へ伸びる光の筋
+	constexpr const wchar_t* boss_net_streak_eff_path = L"Data/Effect/BossNet/NetStreak.efk";
 	//ボスの無敵エフェクト
 	constexpr const wchar_t* boss_shield_effect_path = L"Data/Effect/BossShield/BossShield.efk";
 	//ヒットエフェクト(敵味方共通)
@@ -276,7 +276,7 @@ namespace
 	//網のエフェクトは拡大率50で書き出し済みなので読み込み倍率は1.0(動的パラメーターの単位もこの前提)
 	constexpr float boss_net_warning_eff_scale = 1.0f;
 	constexpr float boss_net_laser_eff_scale = 1.0f;
-	constexpr float boss_net_muzzle_eff_scale = 1.0f;
+	constexpr float boss_net_streak_eff_scale = 1.0f;
 	constexpr float boss_shield_eff_scale = 4.0f;
 	constexpr float hit_effect_scale = 4.0f;
 	constexpr float boss_death_eff_scale = 1.0f;

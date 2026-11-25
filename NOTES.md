@@ -2787,3 +2787,47 @@
 - **2面ボスの登場ムービー(別セッション、11/24)**: 上の「2面ボスの登場ムービー(BossAppear2)を作成」の項を参照。**ゲーム側は未接続**(`GraphicID`に`BossAppear2Movie`などを足し、`StageConfig`の2面の行のムービーID・距離・高さを差し替える。最終値は別セッションの報告を参照)。
 - **デバッグコード(消す対象に追加)**: `GunshipBossNetState::Draw()`の`DrawLine3D`による仮の網と筋(`DrawNetLines`)、赤いカプセルの描画(`#ifdef _DEBUG`)。エフェクトに置き換えたら消す。
 - **コミット前の注意**: `Log.txt`は`git checkout -- Log.txt`で戻す。シェーダーの`.pso`/`.vso`は入れない。
+
+### 2026-11-25 網のエフェクトの長さをゲーム単位で渡せるようにした(Claude、ユーザー依頼)・Effekseer MCPの入れ直し
+- **きっかけ**: 予告を全部の線に出す一歩目で「エディタ単位への換算の定数(50)」を作ろうとしたら、ユーザーが「わざわざ倍率を作らなくていいようにできないの？」。
+- **やったこと**: [NetWarning.efkefc](Data/Effect/BossNet/NetWarning.efkefc)・[NetLaser.efkefc](Data/Effect/BossNet/NetLaser.efkefc)の動的パラメーターの式で、長さを`* 0.02`(=÷50)するようにした(中心は`* 0.01`)。`.efk`も書き出し直し(倍率50は前と同じ)。確認用の入力値は140→7000。[make_efkproj.ps1](Data/Effect/BossNet/tools/make_efkproj.ps1)の式とコメントも合わせた。
+  - **ゲーム側は長さをゲーム単位のまま`SetDynamicInput`に渡す**(予告=`@In0`に長さ、本番=`@In0`に伸びた割合0〜1・`@In1`に長さ)。換算の定数は作らない。
+  - やり方: Effekseer MCPには動的パラメーターの式を変える機能がないので、`EffekseerCore.dll`(1.80.7。網のエフェクトは1.80.7で保存されていて1.80.6では開けない)を使う小さなプログラムで`Core.LoadFrom`→`Core.Dynamic.Equations`の`Code.SetValue`→`Core.SaveTo`→`Binary.Exporter().Export(Root, 50f)`。
+- **Effekseer MCP**: この学校PCで`%LOCALAPPDATA%\EffekseerMcp`が丸ごと消えていて接続できなかった。`C:\dev\EffekseerMcp\tools\setup.ps1 -EffekseerTool <Downloads\Effekseer1.80.7Win\Effekseer1.80.7Win\Tool>`で入れ直し(サーバーは応答OK)。セッションへの再接続は`/mcp`。
+- **次**: 予告のハンドルの配列(`m_warningHandles`など)と`PlayWarningEffects()`の宣言 → `Enter()`でカプセルを回して予告を再生(位置=始点、向き=`atan2f`、`@In0`=長さ)。
+
+### 2026-11-25 網のエフェクトを緑+ビリビリに(Claude、ユーザー依頼「黒っぽくではなく緑っぽく、ちょっとビリビリ」)
+- **色**: 黒っぽく見えた原因は外側の暗い層(紺黒 `(30,32,52)`/`(25,28,45)`)。深い緑にして濃さも下げ、本体・光・芯・先端・発射口を緑系に。値は[make_efkproj.ps1](Data/Effect/BossNet/tools/make_efkproj.ps1#L100-L145)。
+- **ビリビリ**: 新テクスチャ`Texture/NB_Arc.png`(ギザギザの電気を縦8コマ、所々途切れる。[gen_net_tex.ps1](Data/Effect/BossNet/tools/gen_net_tex.ps1#L60)の`NetArc`)。本番の線に`Arc`(2Fごと)・`Arc2`(3Fごと、上下反転)を足し、出し直すたびにコマと明るさを乱数で選んでチラつかせる。光の層`Glow`と発射口の光も明るさを乱数で揺らす。予告にも弱い`Arc`(3Fごと)を足した(本番より弱くして差を残す)。
+- `Node`関数に`-colMax`(色の乱数)と`-sheets`(コマを乱数で選ぶ)を追加。動的パラメーターの式・倍率50・ゲーム側の渡し方は変更なし(コード変更不要)。
+- 前の版(紺黒)は会話のスクラッチパッドに退避しただけ(消えることがある)。戻すならgitの前のコミットから。
+- **未確認**: 実機での見え方、発射口の光のキャプチャ(色だけの変更)。
+- **v2(同日、ユーザー「全然ビリビリしてない。がっつりでいい」)**: ゲームで見えていたのは予告の線で、その電気をいちばん弱くしていたのが原因。
+  - 電気の画像を`NB_Arc2.png`に(振れ幅・芯の太さを上げ、筋3本、途切れを減らす)。本番の`Arc`は太さ5.0・毎フレーム出し直し、予告の`Arc`も太さ3.5・2Fごとで強く。
+  - 線から飛び出す枝分かれの稲妻`NB_Spark2.png`(4x2コマ)を追加。**線上20か所の発生点**(`Spark0`〜`Spark19`、線の長さの(k+0.5)/20の位置の式)から、2〜8F(予告は3〜10F)ごとに、向き・大きさ・コマを乱数で出す。[make_efkproj.ps1](Data/Effect/BossNet/tools/make_efkproj.ps1)の`Sparks`/`SparkNode`。
+  - **分かったこと**: 動的パラメーターの式では乱数が作れない(`rand()`・`@P`の乱数範囲・最小/最大に別の式、どれも毎回同じ値)。線上のランダムな位置に出したいときは、決まった位置を複数用意して出す間隔を乱数にする。
+  - エディタでは線の始点(x=0)付近にもスパークが固まって見えた(原因未確定。網の線の始点は画面外なので実害は小さい見込み)。本番の線は電気がほぼ白に見える(緑を強めたければ`Arc`とスパークの色を下げる)。
+- **v3(同日、ユーザー「まぶしすぎる」)**: 電気(`Arc`/`Arc2`)とスパークの明るさ(アルファ)を約半分にし、色を白から緑寄りに。スパークも少し小さく・少なく(予告4〜12Fごと、本番3〜10Fごと)。電気の形・本数・線の本体はv2のまま。
+- **(11/25続き・ユーザー実装)予告を全部の線に出す・止める**: `PlayWarningEffects()`(カプセルを回して始点に`BossNetWarning`を再生、`atan2f(向き.y, 向き.x)`を`SetRotationAxis(h, (0,0,1), 角度)`、`SetDynamicInput(h, 0, 長さ)`、ハンドルを`m_warningEffectHandles`へ)。`StopWarningEffects()`(全部`Stop`して`clear`)を構え→発射の切り替えと`Exit()`で呼ぶ。ゲームで網の形に出て、発射で消えることを確認OK。
+  - ユーザー評価: **予告の主張が強くて本番に見える**→あとでエフェクト側で薄く・細く(フェードインと合わせて)。
+  - ボスが倒されたときに予告を止める処理はまだない(ボスの死亡の流れを作るときにそこから止める)。
+  - 別タスク: Debug時にエフェクトが多いと重い(Effekseerの`_d`ライブラリのため。コスト表113行目、2コスト・C・ベータ)。止めていなかった予告が網のたびに24本ずつ増えていたのも重さの一因だった(止める処理で解消)。
+- **次**: 発射のときに本番(`BossNetLaser`、0番=伸びた割合・1番=長さ)を出す→毎フレーム伸ばす→判定が終わったら止める→発射口の光→色(右=青寄り、左=紫寄り)→予告の見た目の調整。
+
+### 2026-11-25 網の本番の線を伸ばす・発射口から先端への光の筋(ユーザー実装+登録とハンドルはClaude)
+- **本番の線**: [PlayLaserEffects()](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossNetState.cpp#L292)でカプセルごとに`BossNetLaser`を始点に再生(向きは予告と同じ`atan2f`、0番=伸びた割合0、1番=長さ)。[UpdateLaserEffects()](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossNetState.cpp#L354)で毎フレーム`progress = m_netFrame / laser_extend_frame`(0〜1にclamp)を0番に渡し、カプセルも`Lerp(始点, m_lineEndPositions[i], progress)`まで伸ばす(元の終点は`InitNetCol()`で`m_lineEndPositions`に保存)。判定が終わったら(`!IsNetHitActive()`)止める。
+- **発射口の光(`BossNetMuzzle`)はやめた**: ユーザーが欲しかったのは「発射口から網まで伸びる光の線」で、発射口で光るだけのエフェクトは不要(コードから削除、読み込み登録とファイルは残してある。網の攻撃が完成したら片付ける)。
+- **光の筋(`BossNetStreak`)を新規作成**: [NetStreak.efkefc](Data/Effect/BossNet/NetStreak.efkefc)(緑、板2枚を90度ずらし、`@In0`=長さ(ゲーム単位)、寿命1Fで毎フレーム出し直し)。読み込み登録([ResourceLoader.h:182](Manager/ResourceLoader.h#L182)、[ResourceConstants.h:201](Constants/ResourceConstants.h#L201))とハンドルの配列`m_streakEffectHandles`はClaude。
+  - 線の順番はA(右の発射口)→B(左の発射口)なので、`i`が偶数なら右・奇数なら左。[GetStreakStartPos(i)](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossNetState.cpp#L465)にまとめた。
+  - `PlayLaserEffects()`で線と同じ数だけ再生、`StopLaserEffects()`で止める。
+  - [UpdateLaserEffects()の373〜396行目](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossNetState.cpp#L373-L396)で毎フレーム: 位置を発射口に`SetPos` → 発射口→今の線の先端(`newEndPos`)のベクトル → 長さと向き → **3Dの回転は軸=`Cross(+X, 向き)`、角度=`acosf(clamp(Dot(向き, +X), -1, 1))`で`SetRotationAxis`** → 0番に長さ。
+- ゲームで、筋が発射口から線の先端に届いて一緒に伸びることを確認OK。
+- **次の候補**: 色(右=青寄り、左=紫寄り)、予告の見た目を弱く(フェードイン)、`DrawNetLines`とデバッグの線の片付け、z 1200の定数化、線の本数を減らすか、ボスが倒されたときにエフェクトを止める。
+- **(11/25続き)予告を弱くした(v4、Claude、ユーザー依頼「予告の主張が強くて本番に見える」→「細く薄く+電気なし」を選択)**: [make_efkproj.ps1の'Warning'](Data/Effect/BossNet/tools/make_efkproj.ps1#L157)で、電気(`Arc`)とスパーク20か所を外し、太さを暗い層0.9→0.45・光0.3→0.15、明るさ(アルファ)を120/140/90→70/110/70に。**「ビリビリしたら当たる」で本番と見分ける**。[NetWarning.efkefc](Data/Effect/BossNet/NetWarning.efkefc)と`.efk`を作り直し(式・倍率50・ゲーム側の渡し方は変更なし)。前の版(v3)はスクラッチパッドに退避しただけ(戻すならgitの前のコミットから)。
+  - 発射口の光(`BossNetMuzzle`)はコードから外した(読み込み登録とファイルは網の攻撃の完成時に片付け)。
+- **(11/25続き)予告の点滅(v5)と本番を細く・暗く(v4)(Claude、ユーザー依頼)**
+  - 予告: 暗い層は出しっぱなし、明るい芯(`Light`/`LightCross`)だけ寿命6Fで12Fごとに出す=6F光る→6F消える(1秒に約5回)。[make_efkproj.ps1](Data/Effect/BossNet/tools/make_efkproj.ps1)の`$blinkOn`/`$blinkCycle`で速さを変えられる。予告は長さが変わらないので、出し直しが毎フレームでなくても問題ない。
+  - 本番(「まだ少しまぶしい、ちょっと太すぎる」): **本体の太さ1.0は当たり判定(半径30=エディタで直径1.2)に近いので変えない**(見た目を判定より細くすると「当たってないのに当たる」になる)。外側の暗い層1.7→1.4、光1.8→1.4、芯0.5→0.4、電気5.0→3.5、先端3.5→3.0、スパークを少し小さく。光る層(Add)のアルファを約3/4に。もっと細くしたいときは当たり判定の`net_line_radius`(30)も一緒に小さくする。
+  - 前の版は会話のスクラッチパッドに退避しただけ(戻すならgitの前のコミットから)。
+- **(11/25)網の攻撃はいったん完成(ユーザー判断)**。残り: `BossNetMuzzle`の読み込み登録とファイル(NetMuzzle.efkefc/.efk)の片付け、ボスが倒されたときにエフェクトを止める(ボスの死亡の流れを作るとき)、Debugでエフェクトが重い(コスト表113行目)。
+- **(11/25)発射口の光(`BossNetMuzzle`)を片付けた(Claude、ユーザー依頼)**: `EffectID::BossNetMuzzle`([ResourceLoader.h](Manager/ResourceLoader.h#L180))、パスと倍率([ResourceConstants.h](Constants/ResourceConstants.h#L197))、表と読み込みリスト([ResourceLoader.cpp](Manager/ResourceLoader.cpp#L265))、`NetMuzzle.efkefc`/`.efk`、[make_efkproj.ps1](Data/Effect/BossNet/tools/make_efkproj.ps1)の`'Muzzle'`を削除。ビルドOK。

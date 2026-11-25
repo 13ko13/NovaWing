@@ -41,16 +41,33 @@ private:
 
 	//発射口のフレーム名からワールド座標をとる
 	Vector3 GetMuzzlePos(const wchar_t* frameName) const;
+	//渡されたfor文の添え字が偶数なら右、奇数なら左の発射口の位置を返す
+	Vector3 GetStreakStartPos(const size_t i) const;
 	//網を描画する
 	void DrawNetLines(unsigned int lineCol,
 		const Vector3& muzzlePosLeft,
 		const Vector3& muzzlePosRight
 	);
 
+	//網の予測線のエフェクトを全部再生する
+	void PlayWarningEffects();
+	//網の予測線のエフェクトを全部止める
+	void StopWarningEffects();
+	//網の本番のエフェクトを全部再生する
+	void PlayLaserEffects();
+	//網の本番のエフェクトを全部止める
+	void StopLaserEffects();
+	//網の本番用のエフェクトを更新する
+	void UpdateLaserEffects();
+
 private:
 	//網の予測線用のエフェクト再生ハンドル
-	int m_warningEffectPlayH = -1;
-	
+	std::vector<int> m_warningEffectHandles;
+	//網の本番用のエフェクト再生ハンドル
+	std::vector<int> m_netLaserEffectHandles;
+	//発射口から本番の線の先端へ伸びる光の筋のエフェクトの再生ハンドル(網の線と同じ順番)
+	std::vector<int> m_streakEffectHandles;
+
 	//網を発射するまでの流れ
 	enum class NetPhase
 	{
@@ -79,4 +96,7 @@ private:
 
 	//エフェクトマネージャーの弱参照を持つ
 	std::weak_ptr<EffectManager> m_pEffectManager;
+
+	//割合の計算に使用するために網の線の終点を配列で持つ
+	std::vector<Vector3> m_lineEndPositions;
 };
