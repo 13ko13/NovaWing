@@ -116,6 +116,8 @@ bool Application::Init()
 	{
 		return false;
 	}
+	//歪みを使うために必要な関数
+	Effekseer_InitDistortion();
 #ifdef _DEBUG
 	//デバッグ用ウィンドウ(Dear ImGui)を初期化
 	if (!DebugUI::GetInstance().Init())
