@@ -3,6 +3,7 @@
 
 class CameraBase;
 class ChargeExplosionCollider;
+class EnemyBase;
 class ChargeBullet : public BulletBase
 {
 public:
@@ -10,7 +11,7 @@ public:
 		const Vector3& pos,
 		const Vector3& vel,
 		int attackPower,
-		std::weak_ptr<GameObject> pTarget,
+		std::weak_ptr<EnemyBase> pTarget,
 		std::weak_ptr<CameraBase> pCamera,
 		std::weak_ptr<EffectManager> pEffectManager);
 	~ChargeBullet();
@@ -34,7 +35,7 @@ public:
 
 private:
 	//ターゲットのオブジェクト
-	std::weak_ptr<GameObject> m_pTarget;
+	std::weak_ptr<EnemyBase> m_pTarget;
 
 	//受け取った弾の速度を保存しておく
 	float m_speed = 0.0f;

@@ -2,6 +2,7 @@
 
 #include "BulletBase.h"
 
+class EnemyBase;
 class ReflectedBullet : public BulletBase {
 public:
     struct ReflectBulletData
@@ -9,7 +10,7 @@ public:
         Vector3 pos;
         Vector3 vel;
         int attackPower;
-        std::weak_ptr<GameObject> pTarget;
+        std::weak_ptr<EnemyBase> pTarget;
         float homingStrength;
         std::weak_ptr<CameraBase> pCamera;
     };
@@ -23,7 +24,7 @@ public:
 
 private:
     //ホーミング先のターゲット
-    std::weak_ptr<GameObject> m_pTarget;
+    std::weak_ptr<EnemyBase> m_pTarget;
     //ホーミングの強さ
     float m_homingStrength = 0.0f;
     //受け取った弾の速度

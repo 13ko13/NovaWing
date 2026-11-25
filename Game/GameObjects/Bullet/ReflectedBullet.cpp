@@ -1,5 +1,6 @@
 ﻿#include "ReflectedBullet.h"
 #include "Manager/EffectManager.h"
+#include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
 
 namespace
 {
@@ -35,14 +36,14 @@ void ReflectedBullet::Update()
 	//基底クラスの更新処理
 	BulletBase::Update();
 
-	std::shared_ptr<GameObject> pTarget = m_pTarget.lock();
+	std::shared_ptr<EnemyBase> pTarget = m_pTarget.lock();
 
 	//Nullじゃなければ、ターゲットが生きているかを取得して、
 	//生きていればターゲットの方向に少しずつ向きを変える
 	if (pTarget && !pTarget->IsDead())
 	{
 		//ターゲットの位置
-		Vector3 targetPos = pTarget->GetPos();
+		Vector3 targetPos = pTarget->GetLockablePos();
 		//ターゲットへの方向を計算
 		Vector3 toTargetDir = targetPos - m_pos;
 		toTargetDir.Normalize();

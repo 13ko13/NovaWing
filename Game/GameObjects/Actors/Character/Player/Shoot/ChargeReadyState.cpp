@@ -31,8 +31,8 @@ ChargeReadyState::ChargeReadyState(
 	const std::weak_ptr<Player> pPlayer,
 	std::weak_ptr<BulletManager> pBulletManager,
 	std::weak_ptr<SoundManager> pSoundManager,
-	std::weak_ptr<TargetManager> pTargetManager) : 
-	IShootState(pPlayer, pBulletManager, pSoundManager,pTargetManager),
+	std::weak_ptr<TargetManager> pTargetManager) :
+	IShootState(pPlayer, pBulletManager, pSoundManager, pTargetManager),
 	m_effectScale(first_effect_scale)
 {
 }
@@ -88,8 +88,9 @@ void ChargeReadyState::Update()
 			// プレイヤーからターゲットを受け取る
 			std::weak_ptr<EnemyBase> pTarget = m_pPlayer.lock()->GetForcusTarget();
 
-			pBulletManager->CreateBullet(BulletManager::BulletType::ChargeBullet,
-										 pos, vel, attack_power, pPlayer->GetCamera(), pTarget);
+			pBulletManager->CreateBullet(
+				BulletManager::BulletType::ChargeBullet,
+				pos, vel, attack_power, pPlayer->GetCamera(), pTarget);
 
 			// チャージショット発射音を鳴らす
 			m_pSoundManager.lock()->Play(SoundManager::SoundType::ChargeShoot);
@@ -116,7 +117,7 @@ void ChargeReadyState::Update()
 		if (m_effectScale.x == 0.0f)
 		{
 			// ノーマルステートに戻す
-			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager,m_pTargetManager));
+			ChangeState(std::make_shared<NormalShootState>(m_pPlayer, m_pBulletManager, m_pSoundManager, m_pTargetManager));
 		}
 	}
 }

@@ -169,18 +169,6 @@ void GunshipBossNetState::Draw()
 	//網が完成し終わったら描画しない
 	if (m_phase != NetPhase::Ready && !IsNetHitActive()) return;
 
-	//網を作るためのビームの発射口のフレーム位置をとる
-	Vector3 muzzlePosLeft = GetMuzzlePos(muzzle_frame_name_left);
-	Vector3 muzzlePosRight = GetMuzzlePos(muzzle_frame_name_right);
-
-	//網の色
-	unsigned int lineCol = 0xffffff;
-	//準備中は色を変える
-	if (m_phase == NetPhase::Ready) lineCol = 0x444444;
-
-	// 	//網を描画する
-	// 	DrawNetLines(lineCol, muzzlePosLeft, muzzlePosRight);
-
 #ifdef _DEBUG
 	if (DebugManager::GetInstance().IsDebugDrawEnabled())
 	{

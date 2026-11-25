@@ -2866,3 +2866,10 @@
 - ビルドOK。**ゲームでの確認はまだ**: 放熱中だけ弱点に照準が付く・放熱が終わると外れる、胴体と弱点のダメージ、胴体のカプセルの大きさと前への出し方。
 - **次の手**: チャージショットと跳ね返した弾が弱点を追いかけるように、[ChargeBullet.cpp:80](Game/GameObjects/Bullet/ChargeBullet.cpp#L80)と[ReflectedBullet.cpp:45](Game/GameObjects/Bullet/ReflectedBullet.cpp#L45)の`GetPos()`を`GetLockablePos()`にする(ユーザーが書く)。
 - **注意**: [TitleScene.cpp:80](Scene/TitleScene.cpp#L80)の`first_stage_no`が**1(2面から始まる)**になっている。2面のテスト用。終わったら0に戻す。
+
+### 2026-11-25 跳ね返した弾・チャージショットが放熱中の弱点を追う(「放熱の隙・弱点・ロックオン位置」完了)
+- **変更(ユーザー+Claude)**: `ChargeBullet`と`ReflectedBullet`がターゲットを`std::weak_ptr<GameObject>`で持っていて`GetLockablePos()`(`EnemyBase`の関数)を呼べなかったので、**持つ型を`std::weak_ptr<EnemyBase>`に変更**(前方宣言+`EnemyBase.h`のinclude)。ホーミング先を`GetPos()`→`GetLockablePos()`に。`ChargeBullet`はユーザー、`ReflectedBullet`はClaude(ユーザー依頼)。呼び出し側(`ChargeReadyState`の`GetForcusTarget`、`CollisionManager`の`pShooter`)はもう`EnemyBase`なので変更なし。ビルドOK。
+- **ゲームで確認OK(ユーザー)**: 放熱中だけ弱点に照準が付く、弱点と胴体のダメージ、弾の追従、ほかの敵・1面ボスへの影響なし。
+- **コスト表**: 「放熱の隙・弱点・ロックオン位置」を実コスト2・完了に(Claude、ユーザー申告)。控えは`%TEMP%\NovaWing_詳細_backup_20261125.xlsx`。
+- **注意(次に使うとき)**: 反射弾は開閉を見ずに近い方の弱点を狙う(`GetLockablePos`が開閉を見ないため)。2面ボスのロケットを跳ね返せるようにするとき、閉じている間は胴体を狙わせたいかを決める。
+- **次**: 形態変化(ポッドが壊れる、3h)・扉(4h)・ロケット(2h)・攻撃のランダム選び・第二形態のリズム(1h)・2面の登場演出(登場ムービーの接続、2h)・ボスの死亡(1h)。`TitleScene.cpp`の`first_stage_no`が1(2面から)のまま。

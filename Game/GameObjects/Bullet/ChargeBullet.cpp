@@ -4,6 +4,7 @@
 #include "Manager/EffectManager.h"
 #include "Game/Collision/ChargeExplosionCollider.h"
 #include "Manager/DebugManager.h"
+#include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
 
 namespace
 {
@@ -30,7 +31,7 @@ ChargeBullet::ChargeBullet(
 	const Vector3& pos,
 	const Vector3& vel,
 	int attackPower,
-	std::weak_ptr<GameObject> pTarget,
+	std::weak_ptr<EnemyBase> pTarget,
 	std::weak_ptr<CameraBase> pCamera,
 	std::weak_ptr<EffectManager> pEffectManager):
 	BulletBase(pos,vel,attackPower,radius,pCamera,ColliderTag::ChargeBullet,pEffectManager),
@@ -67,7 +68,7 @@ void ChargeBullet::Update()
 		//基底クラスの更新処理
 		BulletBase::Update();
 
-		std::shared_ptr<GameObject> pTarget = m_pTarget.lock();
+		std::shared_ptr<EnemyBase> pTarget = m_pTarget.lock();
 
 		//分身の集まり具合(0:散っている、1:本体に重なる)
 		float gatherRate = 0.0f;
@@ -77,7 +78,7 @@ void ChargeBullet::Update()
 		if (pTarget && !pTarget->IsDead())
 		{
 			//ターゲットの位置
-			Vector3 targetPos = pTarget->GetPos();
+			Vector3 targetPos = pTarget->GetLockablePos();
 			//ターゲットへの方向を計算
 			Vector3 toTargetDir = targetPos - m_pos;
 
