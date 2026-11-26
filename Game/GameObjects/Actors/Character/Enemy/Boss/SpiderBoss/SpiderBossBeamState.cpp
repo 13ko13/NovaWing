@@ -15,8 +15,8 @@
 namespace
 {
 	//発射口のボーンの名前
-	constexpr const wchar_t* muzzle_frame_name_r = L"ShotgunTop_R";//右
-	constexpr const wchar_t* muzzle_frame_name_l = L"ShotgunTop_L";//左 
+	constexpr const wchar_t* muzzle_bone_name_r = L"ShotgunTop_R";//右
+	constexpr const wchar_t* muzzle_bone_name_l = L"ShotgunTop_L";//左 
 	//どのぐらいの割合で線形補間するか
 	constexpr float beam_pos_ratio = 0.01f;
 
@@ -96,10 +96,10 @@ void SpiderBossBeamState::Enter()
 	//ボスの発射口を取得する
 	//右の発射口
 	m_muzzlePosR = MV1GetFramePosition(
-		handle, MV1SearchFrame(handle, muzzle_frame_name_r));
+		handle, MV1SearchFrame(handle, muzzle_bone_name_r));
 	//左の発射口
 	m_muzzlePosL = MV1GetFramePosition(
-		handle, MV1SearchFrame(handle, muzzle_frame_name_l));
+		handle, MV1SearchFrame(handle, muzzle_bone_name_l));
 
 	//ビームの先端位置を発射口に設置
 	m_beamPosL = m_muzzlePosL;

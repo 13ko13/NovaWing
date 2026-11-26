@@ -40,9 +40,6 @@ public:
 		return m_pEnemyFactory;
 	}
 
-	//プレイヤー取得
-	std::weak_ptr<Player> GetPlayer() const { return m_pPlayer; }
-
 	//自分の無敵当たり判定を返す
 	std::shared_ptr<SphereShape> GetInvinsibleSphere() const { return m_invincibleHitCol; }
 	//自分のダメージ当たり判定を返す

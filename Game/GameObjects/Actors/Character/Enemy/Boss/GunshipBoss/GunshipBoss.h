@@ -18,7 +18,16 @@ public:
 	{
 		Vector3 pos;
 	};
-	
+
+	//攻撃の種類
+	enum class AttackType
+	{
+		Net,//網
+		Rocket,//ロケット
+
+		Max,//攻撃の種類の数
+	};
+
 	GunshipBoss(GunshipBossData& data);
 	virtual ~GunshipBoss();
 	
@@ -52,6 +61,18 @@ public:
 	//ロックオンできる位置
 	Vector3 GetLockablePos() const override;
 
+	//前の攻撃の種類を取得
+	AttackType GetPrevAttackType() const { return m_prevAttackType; }
+	//現在同じ攻撃が何回続いたかを取得
+	int GetSameAttackCount() const { return m_sameAttackCount; }
+	//今回の攻撃を記録する
+	void RecordAttack(AttackType currentAttackType);
+
+	//バレットマネージャーを取得
+	std::weak_ptr<BulletManager> GetBulletManager() const { return m_pBulletManager; }
+	//カメラを返す
+	std::weak_ptr<CameraBase> GetCamera() const { return m_pCamera; }
+
 private:
 	//ステートの更新
 	void UpdateState();
@@ -59,12 +80,12 @@ private:
 	void InitWeakSphere();
 	//胴体のカプセルの初期化
 	void InitBodyCapsule();
-	//胴体のカプセルを胴体のフレームの位置に合わせる
+	//胴体のカプセルを胴体のボーンの位置に合わせる
 	void UpdateBodyCapsule();
 
 private:
-	//第二形態になるときに表示する壊れたポッドのフレーム番号
-	int m_brokenPodFrameIdx = -1;
+	//第二形態になるときに表示する壊れたポッドのボーン番号
+	int m_brokenPodBoneIdx = -1;
 	//アニメーター
 	std::unique_ptr<ModelAnimator> m_pAnimator;
 	//現在のステート
@@ -75,9 +96,9 @@ private:
 	//弱点(放熱中のポッド)のコライダー
 	std::unique_ptr<GunshipBossWeakCollider> m_pWeakCol;
 
-	//弱点となるフレームの番号
-	int m_weakFrameIdxLeft = -1;
-	int m_weakFrameIdxRight = -1;
+	//弱点となるボーンの番号
+	int m_weakBoneIdxLeft = -1;
+	int m_weakBoneIdxRight = -1;
 
 	//弱点となる球のコライダー
 	//左
@@ -87,8 +108,13 @@ private:
 
 	//胴体のコライダー
 	std::unique_ptr<GunshipBossBodyCollider> m_pBodyCol;
-	//胴体のフレームの番号
-	int m_bodyFrameIdx = -1;
+	//胴体のボーンの番号
+	int m_bodyBoneIdx = -1;
 	//胴体の当たり判定のカプセル(横向き)
 	std::shared_ptr<CapsuleShape> m_pBodyCapsule;
+
+	//前の攻撃
+	AttackType m_prevAttackType = AttackType::Max;
+	//同じ攻撃が続いた回数
+	int m_sameAttackCount = 0;
 };

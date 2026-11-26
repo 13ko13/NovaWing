@@ -290,8 +290,11 @@ SURF = {}
 
 
 def make_mat(name, base=None, spec=0.3, panel=1.0, wear=1.0, dirt=1.0, pscale=1.0,
-             emit=None, emit_vent=None, base_fn=None, emit_fn=None, surface=True, smooth=0.4):
+             emit=None, emit_vent=None, emit_dmg=None, base_fn=None, emit_fn=None, emit_dmg_fn=None,
+             surface=True, smooth=0.4):
     """base: PNGに入るベース色。spec: ツヤ(アルファ。SPEC_IN_ALPHA のときだけ使う)。emit: 通常の発光。emit_vent: 放熱中の発光(省略時は emit)
+    emit_dmg: 弱点にダメージが入ったときの発光(省略時は放熱中と同じ。ダメージが入るのは放熱中だけなので、放熱中の画像が土台)
+    emit_dmg_fn(g): ダメージの発光をノードで作る関数(省略時は emit_fn と同じ)
     smooth: 滑らかさ(Boss2_Metallic.png の R)。ゲームのシェーダーで ツヤ = dot^(R*34+1)。
             このシェーダーは滑らかさが低いほどツヤが広く明るく出るので、白く飛ばないよう高めにする
     base_fn(g) / emit_fn(g): ノードで色を作る関数(縞模様・レンズのグラデーション)"""
@@ -328,14 +331,18 @@ def make_mat(name, base=None, spec=0.3, panel=1.0, wear=1.0, dirt=1.0, pscale=1.
     emit_sock = emit_fn(g) if emit_fn is not None else None
     oe = g.node("ShaderNodeEmission", name="OUT_EMIT")
     ov = g.node("ShaderNodeEmission", name="OUT_EMIT_VENT")
+    od = g.node("ShaderNodeEmission", name="OUT_EMIT_DAMAGE")
     black = (0.0, 0.0, 0.0, 1.0)
     if emit_sock is not None:
         g.set(oe.inputs["Color"], emit_sock)
         g.set(ov.inputs["Color"], emit_sock)
+        g.set(od.inputs["Color"], emit_dmg_fn(g) if emit_dmg_fn is not None else emit_sock)
     else:
         oe.inputs["Color"].default_value = (*emit, 1.0) if emit is not None else black
         ev = emit_vent if emit_vent is not None else emit
         ov.inputs["Color"].default_value = (*ev, 1.0) if ev is not None else black
+        ed = emit_dmg if emit_dmg is not None else ev
+        od.inputs["Color"].default_value = (*ed, 1.0) if ed is not None else black
     on = g.node("ShaderNodeBsdfPrincipled", name="OUT_NORMAL")
     if nrm is not None:
         g.set(on.inputs["Normal"], nrm)
@@ -373,8 +380,11 @@ def build_materials():
     SURF["surface"] = build_surface_group(SURF["panels"])
     lens_l = Vector((-POD_X, -3.93, POD_Z))
     lens_r = Vector((POD_X, -3.93, POD_Z))
-    glow_l = (0.62, 0.3, 0.95)
-    glow_r = (0.2, 0.72, 0.95)
+    # ポッド(弱点)の色: 黄色に統一(有効な部位・弱点=黄色)。ダメージを受けたときは赤
+    # 発光は「ベース色×明るさ + 発光」の足し算なので、赤に変わったとき黄色が残らない(橙にならない)よう、
+    # ベース色は暗めの黄土色にして、黄色の大部分を発光で出す
+    pod_yellow = (0.62, 0.5, 0.14)
+    pod_red = (0.95, 0.1, 0.05)
     return {
         # 主装甲: 青みのある暗い灰色(曇り空 168,174,183 より十分暗い)
         "hull": make_mat("B2_Hull", (0.2, 0.215, 0.235), spec=0.3, smooth=0.42),
@@ -388,19 +398,25 @@ def build_materials():
         "scorch": make_mat("B2_Scorch", (0.05, 0.045, 0.042), spec=0.1, panel=0.0, wear=0.3, smooth=0.3),
         # ポッドの装甲の下(放熱口の周り)。焼けた金属の色
         "core": make_mat("B2_Core", (0.13, 0.105, 0.115), spec=0.25, panel=0.4, pscale=0.5, smooth=0.35),
-        # 放熱口: 通常の発光では光らず、放熱中だけ赤く光る
+        # 放熱口: 通常の発光では光らず、放熱中だけ黄色く光る。ダメージを受けたときは赤
         # 光る所は滑らかさを最大にして、ツヤが色にかぶって白くならないようにする
-        "vent": make_mat("B2_Vent", (0.2, 0.05, 0.04), spec=0.1, emit=(0.0, 0.0, 0.0),
-                         emit_vent=(1.0, 0.13, 0.05), surface=False, smooth=1.0),
-        "vent_hot": make_mat("B2_VentHot", (0.25, 0.07, 0.04), spec=0.1, emit=(0.0, 0.0, 0.0),
-                             emit_vent=(1.0, 0.42, 0.16), surface=False, smooth=1.0),
-        # 光る所。左上ポッド=紫、右上ポッド=水色。白く飛ばない強さ
-        "glow_l": make_mat("B2_GlowL", (0.22, 0.1, 0.32), spec=0.05, emit=glow_l, surface=False, smooth=1.0),
-        "glow_r": make_mat("B2_GlowR", (0.08, 0.25, 0.32), spec=0.05, emit=glow_r, surface=False, smooth=1.0),
-        "lens_l": make_mat("B2_LensL", (0.22, 0.1, 0.32), spec=0.05, surface=False, smooth=1.0,
-                           emit_fn=lens_fn(lens_l, (0.58, 0.22, 0.95), (1.0, 0.9, 1.0))),
-        "lens_r": make_mat("B2_LensR", (0.08, 0.25, 0.32), spec=0.05, surface=False, smooth=1.0,
-                           emit_fn=lens_fn(lens_r, (0.12, 0.65, 0.95), (0.88, 1.0, 1.0))),
+        "vent": make_mat("B2_Vent", (0.16, 0.13, 0.04), spec=0.1, emit=(0.0, 0.0, 0.0),
+                         emit_vent=(0.82, 0.6, 0.12), emit_dmg=(1.0, 0.1, 0.04), surface=False, smooth=1.0),
+        "vent_hot": make_mat("B2_VentHot", (0.2, 0.17, 0.05), spec=0.1, emit=(0.0, 0.0, 0.0),
+                             emit_vent=(1.0, 0.92, 0.42), emit_dmg=(1.0, 0.38, 0.22), surface=False, smooth=1.0),
+        # 放熱の装甲(開く蓋): くすんだ黄色の塗装。機体になじむよう、ほかの装甲と同じ汚れ・塗装はがれを入れ、
+        # 発光はごく弱く(陰影が残る)。ダメージのときだけ強い赤を足す
+        "pod_armor": make_mat("B2_PodArmor", (0.34, 0.27, 0.09), spec=0.3, panel=1.0, wear=1.0, dirt=1.0,
+                              emit=(0.08, 0.06, 0.01), emit_dmg=(0.95, 0.02, 0.02), smooth=0.45),
+        # ポッドの光る所(左右とも同じ黄色)。白く飛ばない強さ
+        "pod_glow": make_mat("B2_PodGlow", (0.25, 0.2, 0.04), spec=0.05, emit=pod_yellow, emit_dmg=pod_red,
+                             surface=False, smooth=1.0),
+        "lens_l": make_mat("B2_LensL", (0.25, 0.2, 0.04), spec=0.05, surface=False, smooth=1.0,
+                           emit_fn=lens_fn(lens_l, pod_yellow, (1.0, 0.95, 0.7)),
+                           emit_dmg_fn=lens_fn(lens_l, pod_red, (1.0, 0.55, 0.45))),
+        "lens_r": make_mat("B2_LensR", (0.25, 0.2, 0.04), spec=0.05, surface=False, smooth=1.0,
+                           emit_fn=lens_fn(lens_r, pod_yellow, (1.0, 0.95, 0.7)),
+                           emit_dmg_fn=lens_fn(lens_r, pod_red, (1.0, 0.55, 0.45))),
         # 目: 青白く(赤は使わない)。白く飛ばない強さ
         "eye": make_mat("B2_Eye", (0.12, 0.13, 0.15), spec=0.0, emit=(0.62, 0.76, 0.86), surface=False, smooth=1.0),
         "engine": make_mat("B2_Engine", (0.15, 0.25, 0.32), spec=0.05, emit=(0.4, 0.68, 0.9), surface=False,
@@ -862,10 +878,10 @@ def armor_band(w, t, c):
 
 
 def build_pod(P, M, side):
-    """網の発射口のポッド。side: -1=左上(紫), +1=右上(水色)"""
+    """網の発射口のポッド(弱点)。side: -1=左上, +1=右上。光る所・蓋・放熱口は左右とも黄色"""
     tag = "L" if side < 0 else "R"
     cx, cz = side * POD_X, POD_Z
-    glow = M["glow_l"] if side < 0 else M["glow_r"]
+    glow = M["pod_glow"]
     lens = M["lens_l"] if side < 0 else M["lens_r"]
     pod = "Pod_" + tag
 
@@ -908,7 +924,7 @@ def build_pod(P, M, side):
     P.add(lambda bm: ring_loft(bm, oct_rings_y(cx, cz, [(3.0, 1.59, 1.59, 0.58), (3.2, 1.59, 1.59, 0.58)])),
           M["brass"], pod)
     P.add(lambda bm: cylinder(bm, (cx, 4.32, cz), 0.75, 0.05, axis="Y", segments=16), glow, pod)
-    # 放熱口の中: へこみの表面(焼けた色)と、赤く光る羽板(装甲の内側 1.76 には届かない)
+    # 放熱口の中: へこみの表面(焼けた色)と、放熱中に光る羽板(装甲の内側 1.76 には届かない)
     P.add(lambda bm: ring_loft(bm, oct_rings_y(cx, cz, [(-1.31, 1.22, 1.22, 0.46), (2.01, 1.22, 1.22, 0.46)])),
           M["core"], pod)
     def slats(bm):
@@ -932,7 +948,7 @@ def build_pod(P, M, side):
             for y in (-1.6, HINGE_Y):
                 rings.append([(cx + u, y, cz + half * v) for (u, v) in band])
             ring_loft(bm, rings)
-        P.add(shell, M["accent"], bone, bevel=0.035)
+        P.add(shell, M["pod_armor"], bone, bevel=0.035)
         # 前の縁の光る線(閉じていると、レンズの周りに色の輪が見える)
         glow_band = armor_band(ARMOR_W - 0.03, 0.09, 0.7)
 
@@ -944,7 +960,7 @@ def build_pod(P, M, side):
         def ridge(bm, half=half):
             pts = [(-1.35, -0.3), (-1.1, -0.52), (2.0, -0.52), (2.0, 0.52), (-1.1, 0.52), (-1.35, 0.3)]
             plate(bm, pts, 0.12, (cx, 0.0, cz + half * (ARMOR_W + 0.05)), (0, 1, 0), (1, 0, 0))
-        P.add(ridge, M["hull"], bone, bevel=0.03)
+        P.add(ridge, M["pod_armor"], bone, bevel=0.03)
         # 付け根の蝶番
         P.add(lambda bm, half=half: cylinder(bm, (cx, HINGE_Y, cz + half * (ARMOR_W - 0.05)), 0.2, 1.4,
                                              axis="X", segments=10), M["dark"], bone)

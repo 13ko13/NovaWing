@@ -36,13 +36,6 @@ public:
 	//当たり判定インターフェースを返す
 	std::vector<ICollider*> GetColliders() override { return { &m_collider }; }
 
-	//プレイヤーの位置を返す
-	Vector3 GetPlayerPos() const;
-	//プレイヤー速度を返す
-	Vector3 GetPlayerVel() const;
-	//プレイヤーの前方向
-	Vector3 GetPlayerFoward() const;
-
 	//弾の管理者を取得する
 	std::shared_ptr<BulletManager> GetBulletManager() const;
 

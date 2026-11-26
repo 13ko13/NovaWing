@@ -13,9 +13,9 @@ namespace
 {
 	//モデルのサイズ
 	const Vector3 model_scale = { 3.0f,3.0f,3.0f };
-	//フレームの番号がいくつ進むごとに足のフレームがあるか
-	constexpr int leg_frame_stride = 6;
-	//右脚の最初のフレーム番号
+	//ボーンの番号がいくつ進むごとに足のボーンがあるか
+	constexpr int leg_bone_stride = 6;
+	//右脚の最初のボーン番号
 	constexpr int first_left_leg_idx = 30;
 	//片側の足の本数
 	constexpr int one_side_leg_num = 3;
@@ -114,7 +114,7 @@ void SpiderBoss::GetAllLegPos()
 	{
 		//脚の位置を取得
 		VECTOR rightLegPos = MV1GetFramePosition(
-			m_modelHandle, leg_frame_stride * i
+			m_modelHandle, leg_bone_stride * i
 		);
 		//配列に格納
 		m_prevLegPositions.push_back(rightLegPos);
@@ -126,7 +126,7 @@ void SpiderBoss::GetAllLegPos()
 	{
 		//脚の位置を取得
 		VECTOR leftLegPos = MV1GetFramePosition(
-			m_modelHandle, first_left_leg_idx + leg_frame_stride * i
+			m_modelHandle, first_left_leg_idx + leg_bone_stride * i
 		);
 		//配列に格納
 		m_prevLegPositions.push_back(leftLegPos);
@@ -260,7 +260,7 @@ void SpiderBoss::Update()
 	{
 		//脚の位置を取得
 		VECTOR rightLegPos = MV1GetFramePosition(
-			m_modelHandle, leg_frame_stride * i
+			m_modelHandle, leg_bone_stride * i
 		);
 		//配列に格納
 		m_currentLegPositions[i - 1] = rightLegPos;
@@ -270,7 +270,7 @@ void SpiderBoss::Update()
 	{
 		//脚の位置を取得
 		VECTOR leftLegPos = MV1GetFramePosition(
-			m_modelHandle, first_left_leg_idx + leg_frame_stride * i
+			m_modelHandle, first_left_leg_idx + leg_bone_stride * i
 		);
 		//配列に格納
 		m_currentLegPositions[i + one_side_leg_num] = leftLegPos;

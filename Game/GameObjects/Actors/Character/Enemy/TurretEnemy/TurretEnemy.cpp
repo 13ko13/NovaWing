@@ -14,10 +14,10 @@ namespace
 	//当たり判定のずれ
 	const Vector3 col_offset = Vector3(0.0f, 150.0f, 0.0f);
 
-	//砲塔のフレーム名
-	constexpr const wchar_t* turret_frame_name = L"Turret";
-	//発射口のフレーム名
-	constexpr const wchar_t* barrel_frame_name = L"Barrel";
+	//砲塔のボーン名
+	constexpr const wchar_t* turret_bone_name = L"Turret";
+	//発射口のボーン名
+	constexpr const wchar_t* barrel_bone_name = L"Barrel";
 	//弾の速度
 	constexpr float bullet_speed = 15.0f;
 	//弾の攻撃力
@@ -165,8 +165,8 @@ void TurretEnemy::UpdateAim(const Vector3& playerPos)
 		m_aimPos = playerPos;
 		//回転を行う
 		UpdateAimAngle(playerPos);
-		//角度をフレームに反映する
-		ApplyFrameRotation();
+		//角度をボーンに反映する
+		ApplyBoneRotation();
 	}
 
 	//予備動作の時間が過ぎたら弾を発射
@@ -188,11 +188,11 @@ bool TurretEnemy::CanAttack(const Vector3& playerPos) const
 
 void TurretEnemy::Shoot(const Vector3& playerPos)
 {
-	int barrelFrameIndex = MV1SearchFrame(m_modelHandle, barrel_frame_name);
+	int barrelBoneIndex = MV1SearchFrame(m_modelHandle, barrel_bone_name);
 
 	//弾がちゃんと銃口から出るようにしたいので
 	//砲身の行列を取得
-	MATRIX barrelMatrix = MV1GetFrameLocalWorldMatrix(m_modelHandle, barrelFrameIndex);
+	MATRIX barrelMatrix = MV1GetFrameLocalWorldMatrix(m_modelHandle, barrelBoneIndex);
 	//銃口までの距離
 	//モデルの作り上砲身の正面が-Zなので-を付ける
 	VECTOR barrelToMuzzle = VGet(0.0f, 0.0f, -barrel_to_muzzle_distance);
@@ -297,19 +297,19 @@ void TurretEnemy::UpdateAimAngle(const Vector3& playerPos)
 	m_barrelAngleX += barrelAngleDelta;
 }
 
-void TurretEnemy::ApplyFrameRotation()
+void TurretEnemy::ApplyBoneRotation()
 {
-	int turretFrameIndex = MV1SearchFrame(m_modelHandle, turret_frame_name);
-	int barrelFrameIndex = MV1SearchFrame(m_modelHandle, barrel_frame_name);
+	int turretBoneIndex = MV1SearchFrame(m_modelHandle, turret_bone_name);
+	int barrelBoneIndex = MV1SearchFrame(m_modelHandle, barrel_bone_name);
 
 	//初期状態の行列を取得
 	//砲塔
 	MATRIX turretBaseMatrix = MV1GetFrameBaseLocalMatrix(
-		m_modelHandle,turretFrameIndex
+		m_modelHandle,turretBoneIndex
 	);
 	//砲身
 	MATRIX barrelBaseMatrix = MV1GetFrameBaseLocalMatrix(
-		m_modelHandle,barrelFrameIndex
+		m_modelHandle,barrelBoneIndex
 	);
 
 	MATRIX rotateTurretMatrix;
@@ -319,6 +319,6 @@ void TurretEnemy::ApplyFrameRotation()
 	rotateTurretMatrix = MMult(MGetRotY(m_turretAngleY), turretBaseMatrix);
 	rotateBarrelMatrix = MMult(MGetRotX(m_barrelAngleX), barrelBaseMatrix);
 
-	MV1SetFrameUserLocalMatrix(m_modelHandle, turretFrameIndex, rotateTurretMatrix);
-	MV1SetFrameUserLocalMatrix(m_modelHandle, barrelFrameIndex, rotateBarrelMatrix);
+	MV1SetFrameUserLocalMatrix(m_modelHandle, turretBoneIndex, rotateTurretMatrix);
+	MV1SetFrameUserLocalMatrix(m_modelHandle, barrelBoneIndex, rotateBarrelMatrix);
 }

@@ -42,8 +42,8 @@ private:
 	//放熱終了中の更新処理
 	void UpdateVentClose();
 
-	//発射口のフレーム名からワールド座標をとる
-	Vector3 GetMuzzlePos(const wchar_t* frameName) const;
+	//発射口のボーン名からワールド座標をとる
+	Vector3 GetMuzzlePos(const wchar_t* boneName) const;
 	//渡されたfor文の添え字が偶数なら右、奇数なら左の発射口の位置を返す
 	Vector3 GetStreakStartPos(const size_t i) const;
 	//網を描画する

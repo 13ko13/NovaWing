@@ -2968,3 +2968,138 @@
 - **ロケットのステート(雛形はClaude、中身はユーザー)**: [GunshipBossRocketState.h](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossRocketState.h)/[.cpp](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossRocketState.cpp)(`New-GameClass.ps1`で作成・vcxproj登録)。段階`RocketPhase`(Open/Close)。`Enter()`で`Boss2_Armature|RocketOpen`を再生→`IsEnd()`で`RocketClose`を再生→`IsEnd()`で`GunshipBossMoveState`へ戻す(網のステートと同じ形)。**撃つ処理はまだない**(`Open`と`Close`の間に「撃つ」の段階を挟む予定)。**ゲームでの確認はまだ**(ハッチの開閉アニメーションが見えるか)。
 - **次(学校で)**: 移動のステートの攻撃への移り([GunshipBossMoveState.cpp:80-86](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossMoveState.cpp#L80-L86))を、`GetRand(1)`で網/ロケットのランダムにする(`GunshipBossRocketState.h`をinclude)→ゲームでハッチの開閉を確認。「同じ攻撃は2回まで」はボスに前の攻撃と続いた回数を覚えさせて足す。そのあと: 撃つ段階(`Muzzle_Rocket_0〜3`から間隔をあけて、最初はまっすぐ飛ぶ`EnemyBullet`)→少し追う弾(`EnemyBullet`を継ぐ新しいクラス)→跳ね返したロケットのボスへのダメージ(仕様書4-3の【跳ね返したロケットのダメージ】)。
 - **2面ボスをプレイヤーへ近づけた(ユーザー依頼)**: [Stage2/Boss.csv](Data/CSV/Stage2/Boss.csv)のzを60460→**58460**(-2000)。出現Z 56300からの距離は4160→**2160**。**Unityから書き出すとCSVが戻るので、Unity側のボスの位置も同じ値(z 58460)に直す**。ムービー(`BossAppear2`)の最後のカメラ(ボスの2700手前)や、網のz(ボスの手前1200)との位置関係が、ボスが近くなって変わるので、ゲームで見え方を確認する(網がプレイヤーに近すぎないか、ムービー明けのボスの大きさ)。
+
+### 2026-11-26 2面ボスの攻撃をランダムで選ぶ(ユーザー実装)
+- [GunshipBossMoveState.cpp](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossMoveState.cpp#L83)の`NextAction()`: 3回移動したら`GetRand(AttackType::Max - 1)`で網/ロケットを選ぶ。`AttackType`(Net/Rocket/Max)は[GunshipBossMoveState.h](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossMoveState.h#L30)のprivate。攻撃を足すときはenumに1行と`case`を1つ。
+- ゲームで確認OK: 網とロケット(ハッチの開閉)の両方が出て、どちらの後も移動に戻る。
+- **次**: 同じ攻撃は2回まで。移動のステートは攻撃のたびに作り直されるので、前の攻撃と続いた回数はボスに覚えさせる。
+
+### 2026-11-26 2面ボスのポッド(弱点)を黄色に統一、ダメージ用の赤い発光を追加(Claude、ユーザー依頼。モデルだけ)
+- ユーザーの指定: 有効な部位・弱点は黄色にする。左右のポッド(紫と水色)を黄色に統一し、開く蓋と、開いた中の放熱口も黄色にする。ダメージのときは蓋と中の両方を赤にする。
+- **色**([build_boss2.py:386](Tools/Boss2Model/build_boss2.py#L386)〜): ポッドの光る所は左右とも`pod_glow`(黄色)。レンズは中心が白っぽい黄色。蓋(放熱の装甲と上の板)は新しいマテリアル`pod_armor`([build_boss2.py:408](Tools/Boss2Model/build_boss2.py#L408)。今までは肩と同じ灰色`accent`)。放熱口の羽板`vent`/`vent_hot`は放熱中に黄色く光る([build_boss2.py:403](Tools/Boss2Model/build_boss2.py#L403))。角・爪・蝶番・ポッドの胴は今までどおり暗い色(シルエットと黄色の対比のため)。
+- 蓋は**閉じていても黄色く光る**(発光あり)。発光は「ベース色×明るさ＋発光」の**足し算**なので、ベース色を明るい黄色にすると、ダメージの赤を足しても橙にしかならない。そのためベース色は暗い黄土色にして、黄色の大部分を発光で出した(ダメージのとき、ほぼ赤になる)。そのぶん蓋の陰影は弱く、平たく光って見える。
+- **発光の画像は3枚**(`make_mat`に`emit_dmg`/`emit_dmg_fn`、出力`OUT_EMIT_DAMAGE`を追加。[bake_boss2.py:182-184](Tools/Boss2Model/bake_boss2.py#L182-L184)):
+  - `Boss2_Emission.png`(通常): ポッドの光る所と蓋が黄色、放熱口は光らない。
+  - `Boss2_Emission_Vent.png`(放熱中): 放熱口も黄色(今までは赤)。
+  - **`Boss2_Emission_Damage.png`(新規・弱点にダメージ)**: 放熱中の画像のうち、ポッドの黄色(蓋・放熱口・光る所)を全部赤にしたもの。ダメージが入るのは放熱中だけなので、放熱中の画像が土台。目・胴の噴射口・壊れたポッドの水色の火花は変えていない。
+- 作り直し: build→bake→プレビュー→export(Blender 5.2をバックグラウンドで実行)→`make_all.ps1`。`Data/Model/Boss2.mv1`と`Boss2.fbm/`の6枚を差し替えた。DxLibで確認: フレーム23・アニメーション9本・三角形13064枚は同じ、法線マップあり(接線つき)。プレビューに`game_zoom_damage`/`vent_open_near_damage`を足した([render_preview.py](Tools/Boss2Model/render_preview.py))。
+- **ゲーム側(ユーザーが書く)**: ダメージの画像の登録(名前の候補`Boss2EmissionDamage`/`Boss2EmissionHit`)。`Boss2EmissionVent`と同じ4か所: [ResourceConstants.h:130](Constants/ResourceConstants.h#L130)の隣にパス、[ResourceLoader.h:132](Manager/ResourceLoader.h#L132)の隣に`GraphicID`、[ResourceLoader.cpp:90](Manager/ResourceLoader.cpp#L90)の表、[ResourceLoader.cpp:549](Manager/ResourceLoader.cpp#L549)の読み込み一覧。描画の切り替えは[GunshipBoss.cpp:247-255](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBoss.cpp#L247-L255)。**胴体に当たったとき(`GunshipBossBodyCollider`)にも赤くすると、弱点でない所に当てたのにポッドが赤くなる**。
+- 気になる点(未決定): ロケットのハッチの前の縁が**黄と黒の縞**(`hazard`)。弱点=黄色のルールにすると、ハッチも弱点に見える可能性がある。跳ね返したロケットを当てる場所でないなら、色を変える案がある。
+- **未確認**: ゲームの中での見え方(雨・曇り空の中での黄色の目立ち方、ダメージの赤)。
+- **(同日・ユーザー「黄色すぎる、機体から浮いている」)黄色をくすませた**: 蓋`pod_armor`はベース色(0.34,0.27,0.09)のくすんだ黄色の塗装にし、汚れ・塗装はがれ・パネル割りをほかの装甲と同じ強さで入れ、発光はごく弱く(0.08,0.06,0.01)した(陰影が残る)。光る所`pod_yellow`は(0.75,0.6,0.08)→(0.62,0.5,0.14)、放熱口は(0.95,0.72,0.06)→(0.82,0.6,0.12)。ダメージの赤はそのまま(蓋のベース色が明るくなったぶん、少し橙寄り)。形・UVは同じなので、差し替えたのは画像6枚だけ(`.mv1`はそのまま)。
+
+### 2026-11-26 ポッドにいつでも当たるように(Claude、ユーザー依頼)・コスト表に3行
+- `AttackType`を[GunshipBoss.h:22-29](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBoss.h#L22-L29)のpublicへ移した(Claude。前の攻撃をボスが覚えるため)。移動のステートは`GunshipBoss::AttackType`で使う。関数名は`DecideNextAction`(ユーザー)。
+- **ポッドの当たり判定**([GunshipBossWeakCollider.cpp](Game/Collision/GunshipBossWeakCollider.cpp)): 有効になる条件を胴体と同じ「生きていて登場が終わっている」に。ダメージは`IsWeakOpen()`なら2倍(`weak_open_damage_rate`)、閉じていれば**1/10**(`weak_closed_damage_rate`、通常弾10→1、チャージ100→10)。攻撃力が10より小さい弾だと0になる。胴体は1倍のまま。網のステートのincludeは要らなくなったので外した。コンパイルOK(ゲームが起動中でリンクだけ失敗)。**ゲームで未確認**。
+- **コスト表に追加(すべてS・アルファ・未完了)**: 37行目「攻撃を受けたら放熱部分を赤く点滅(1面のボスと同じ仕組み)」1、38行目「ポッドにいつでも当たる」0.5、101行目「チャージショットがボスに当たったときも爆発の見た目を出す(当たり判定は出さない)」0.5。今はボスに当たると、わざと爆発を出さずに弾を消している([ChargeBullet.cpp:143-149](Game/GameObjects/Bullet/ChargeBullet.cpp#L143-L149))。控えは`%TEMP%\NovaWing_詳細_backup_20261126.xlsx`。
+- **途中**: 同じ攻撃は2回まで。「2回続いた攻撃を外して残りからランダム」に決定(ユーザー)。`GetRand(Max - 2)`で選び、出た数字を外した番号を飛ばして直す所を考えている。
+- **(決定)閉じているポッドに当たったときも赤くする**(ユーザー)。注意: 今の`Boss2_Emission_Damage.png`は放熱中の画像が土台なので、閉じているときに使うと放熱口の光も一緒に出てしまう。37行目を作るときに、閉じている用の赤い画像が要るか確かめる。
+
+### 2026-11-26 通常弾の形を「回る三枚刃」に作り直した(Claude、ユーザー依頼。案の選択はClaudeに任せる、と言われた)
+- **(同日、ユーザー「もっとダサくなった」→ 下の「らせんの軌跡」に作り直した。このエントリの三枚刃・テクスチャはもう使っていない)**
+- **理由**: 菱形(`NW_Diamond`)＋十字の閃光(`NW_Cross`)がクリスタルに見える。丸(敵の弾)・菱形・前の形(`PB_Core`、`BulletHead_v1b`=緑のぼやけた玉)は使わない、という条件。
+- **形**: 白い芯から、鉤のように曲がった緑の刃が3枚出る風車の形(`NW_Pinwheel.png` 128px、刃の中心に白い筋、縁は緑30,255,120)。エフェクトの中で1フレームに15°回る(3枚なので8フレームで同じ形に戻る)。ゲームは位置しか渡していない([PlayerBullet.cpp:36](Game/GameObjects/Bullet/PlayerBullet.cpp#L36))ので、どの向きでも同じに見える形にした。
+- **敵の弾との違い**: 形(止まった丸 ↔ とがった三角の風車)、動き(回らない ↔ 回る)、色(マゼンタ ↔ 白と緑)。
+- **ノード**([PlayerBullet.efkefc](Data/Effect/PlayerBullet/PlayerBullet.efkefc)。構成と寿命は前と同じ):
+  - Muzzle: `NW_Pinwheel`、発射位置に残る、5F、5.5→1倍、60°から-24°/Fで逆向きに回る、白→緑で消える(前は十字7.5倍)。
+  - Shadow: 同じ形をひと回り太らせた`NW_PinwheelShadow.png`(白。ノードの色で深い緑0,40,20,200)、通常ブレンド。Headと同じ大きさ・同じ回転で重ねる(前は大きめの菱形だったが、曲がった刃を拡大すると形がずれて縁が片側にしか出なかったため、太らせた専用の絵にした)。
+  - Head: `NW_Pinwheel`、加算。0Fで3.6倍→4Fで1.85倍(出た直後に速く縮むカーブ)。刃の先は半径約41(Shadowの縁で約44)で、当たり判定の半径45の内側。
+  - Trail: 変更なし(`NW_Trail`、Track、2Fごと、寿命10)。
+- **数値**: ノード 4→4、同時インスタンス 約8→約8/発(構成が同じなので数えた値。エディタでは測っていない)、テクスチャ 3枚(128,128,64×16)→3枚(128,128,64×16)。
+- **テクスチャ**: `NW_Pinwheel.png`と`NW_PinwheelShadow.png`を追加。PlayerBulletの`NW_Diamond.png`/`NW_Cross.png`は、どの`.efk`からも参照されていないことを確かめて削除した(Charging・PlayerChargeBullet・StarFlareなどは自分のフォルダにある同じ名前の画像を使っているので、影響しない)。生成スクリプトはリポジトリの外(`%TEMP%\nw_pb\tools\gen_triblade.ps1`。`-Width 0.27 -Sweep 0.95`で出力)。
+- `.efk`は拡大率50で書き出し、参照している3枚がすべてあることを確認した。エディタを再起動しても新しいテクスチャで表示された。
+- **確認(エディタ)**: ゲームのカメラを再現(機体の約410後ろ・250上、弾は機体の200前から出て、カメラから見て72/Fで離れる。エディタ距離=ゲーム距離×0.0244)。明るい空(215,222,232)と海(40,110,160)で、今の菱形・新しい形・敵の弾を0/6/12/18Fで並べた。比較画像はチャットに添付(リポジトリには置いていない)。
+- **未確認**: ゲームの中での見え方。特に、①連射したとき(5Fごと)に刃が重なってごちゃごちゃしないか、②回転(15°/F)が速すぎたり遅すぎたりしないか、③発射の閃光(Muzzle)が機体にかぶらないか、④遠くで小さくなったときに丸く見えないか。
+- **提案(未着手)**: チャージ弾(PlayerChargeBullet)・Chargingはまだ菱形。統一するなら、チャージ弾の大きな菱形を大きな三枚刃(刃を太く・回転をゆっくり)に替えると、通常弾と同じ仲間に見える。
+### 2026-11-26 通常弾を作り直し(2回目): 動きを軌跡に入れた「らせんの軌跡」(Claude、ユーザー依頼)
+- **(同日、ユーザー「やっぱ丸型でいいかも。いいのが出来上がらない」→ 下の「丸型」に作り直した。このエントリのらせん・プラズマのテクスチャはもう使っていない)**
+- **経緯**: 三枚刃は「もっとダサくなった」。ユーザーの説明は「クリスタルは固形に見えたが、三枚刃はそういう形のものが飛んでいるように見えた。そういう形にするなら動きをつけてほしい。クリスタルは動きがなくても納得できた」。次に揺れるプラズマの光弾(フリップブック)と、こぼれる光の粒を試したが、ゲームのカメラでは6F後に弾が約30px、18Fで20px以下になり、揺れも粒も見えず、菱形と同じ「点＋軌跡」になった。**飛んでいる間の見た目は、ほぼ軌跡と色で決まる**ので、ユーザーの選択で「動きを軌跡で見せる」方向にした。
+- **構成**([PlayerBullet.efkefc](Data/Effect/PlayerBullet/PlayerBullet.efkefc)、6ノード):
+  - Muzzle: `NW_Burst.png`(128px。長さの不ぞろいな7本の光の筋。十字ではない)、発射位置に残る、5F、5→1倍、回転は乱数で+6°/F、白→緑で消える。
+  - Shadow: `NW_PlasmaShadow.png`(下の光弾を太らせた形、白。ノードの色で深い緑0,40,20,200)、通常ブレンド。Headと同じ大きさ・同じコマ。
+  - Head: `NW_Plasma.png`(512×512、128pxのコマを4×4=16コマ。白い芯の頭から緑の尾が後ろへ流れ、輪郭が波打ち、頭が脈打つ。整数周期なのでつなぎ目なくループ)、加算、フリップブックは1F/コマでループ。0Fで3.8倍→4Fで2.0倍。上が頭・下が尾(画面では弾が上=奥へ進むので、尾が後ろに来る)。
+  - Spin(None): Z軸まわりに48°/Fで回る。子のStrandA/Bを、弾の通り道から半径0.5(ゲームで25)の左右に置く。
+  - Spin/StrandA・StrandB: Track、2Fごと、寿命10、`NW_Trail.png`、加算、曲線の分割(SplineDivision)6。**位置も回転も「生成したとき」(WhenCreating)で固定**するのが要点(回転を追従にすると、残った点がすべて今の角度に並んで、まっすぐな平行線になった)。こうすると、残った点がらせん状に並び、2本がからみ合う二重らせんになる。
+  - 前のまっすぐな軌跡(Trail)は削除した。
+- **前提**: ゲームはエフェクトに位置しか渡さない([PlayerBullet.cpp:36](Game/GameObjects/Bullet/PlayerBullet.cpp#L36))ので、らせんの軸はエディタのZ軸に固定(ゲームの前方＝エディタの-Z)。弾は機体の前方へ飛ぶので、軸とだいたいそろう。機体が左右を向いて(最大22.5°)撃つと、軸が少し斜めになる。
+- **数値**: ノード 4→6(描かれるのは5。SpinはNone)。同時インスタンス 約8→**約14**/発(Muzzle1・Shadow1・Head1・Spin1・筋5×2。数えた値で、エディタでは測っていない)。テクスチャ 3枚(128,128,64×16)→4枚(**512×512を2枚**,128,64×16)。目安(4〜5ノード、約8個)を超えているのは、軌跡を2本にしたため(ユーザーには事前に約14と伝えた)。
+- **テクスチャの整理**: `NW_Plasma.png`/`NW_PlasmaShadow.png`/`NW_Burst.png`を追加。途中の`NW_Pinwheel*`/`NW_PlasmaBolt*`、元の`NW_Diamond`/`NW_Cross`(PlayerBulletのフォルダの分だけ)は、どの`.efk`からも参照されていないことを確かめて削除。生成スクリプトはリポジトリの外(`%TEMP%\nw_pb\tools\gen_bolt.ps1`)。
+- `.efk`は拡大率50で書き出し、参照している4枚がすべてあることを確認。エディタを再起動しても正しく表示された。
+- **確認(エディタ、ゲームのカメラ再現。明るい空・海)**: 後ろから見ると、軌跡が小さなカールに見え、毎フレーム形が変わる(回って見える)。敵の弾(まっすぐな尾の丸)とは形も動きも違う。明るい空では、加算の筋が白っぽく薄くなる(前のまっすぐな軌跡と同じ程度)。
+- **未確認**: ゲームの中での見え方。特に、①連射(5Fごと)でらせんが重なってうるさくないか、②らせんの回る速さ(48°/F)と太さ、③明るい空での筋の見え方、④機体が横を向いて撃ったときに、らせんの軸のずれが気にならないか、⑤発射の瞬間の光弾(0〜4Fの大きな姿)の見た目。
+- **提案(未着手)**: チャージ弾(PlayerChargeBullet)・Chargingはまだ菱形。通常弾と仲間に見せるなら、チャージ弾の太い軌跡を3本のらせんにする、など。
+### 2026-11-26 同じ攻撃は2回まで(ユーザー実装)
+- ボス([GunshipBoss.h](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBoss.h#L65-L70)): `m_prevAttackType`(最初は`Max`=まだ攻撃していない)、`m_sameAttackCount`、`RecordAttack()`([GunshipBoss.cpp:213-226](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBoss.cpp#L213-L226)。同じなら+1、違えば入れ替えて1)。移動のステートは攻撃のたびに作り直されるのでボスに持たせた。
+- 移動のステート: [DecideRandomAttack()](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossMoveState.cpp#L98)。回数が`max_same_attack_count`(2)以上なら`GetRand(Max - 2)`で選び、**外した番号 <= 出た数字なら1足す**(どの攻撃を外しても使える。ユーザーが導いた)。それ以外は`GetRand(Max - 1)`。選んだら`RecordAttack`→`ChangeState`。`Max - 2`の2は「GetRandが0〜n」と「1つ外す」の−1が2つなので定数にしない(コメントで理由を書いた)。
+- ビルドOK、ゲームで確認OK(ユーザー「たぶん大丈夫」)。
+### 2026-11-26 通常弾とチャージ弾を丸型に(3回目。Claude、ユーザー依頼)
+- **(同日の続きで、小さく・鋭くした。テクスチャはNW_OrbEdge/NW_OrbEdgeShadow/NW_BladeRingに替わり、このエントリのNW_Orb/NW_OrbShadow/NW_ArcRingは削除済み。下を参照)**
+- **依頼**: 「丸でいいからかっこよくして。チャージショットもクリスタルだから丸型にして」「主要な形は丸で、それ以外の部分でかっこよさを出そう」。敵の弾(マゼンタの丸)とは、色(緑と白)・まわりを回る弧のリング・まっすぐな緑の軌跡で見分ける。
+- **共通テクスチャ**(どちらのTextureフォルダにも同じものを置いた。生成スクリプトはリポジトリの外`%TEMP%\nw_pb\tools\gen_orb.ps1`): `NW_Orb.png`(128。白い芯→緑の球、内側に明るい縁の線、外に短いにじみ)、`NW_OrbShadow.png`(64。ふちのやわらかい円。ノードの色で深い緑にする)、`NW_ArcRing.png`(256。円周上の3本の弧(両端が細い)と、内側の6つの小さな目盛り)、`NW_Burst.png`(128。長さの不ぞろいな7本の光の筋)。
+- **通常弾**([PlayerBullet.efkefc](Data/Effect/PlayerBullet/PlayerBullet.efkefc)、5ノード、描画順): Trail(Track、2Fごと、寿命10、`NW_Trail`、加算、太さ0.04/0.5/0.9) → Shadow(`NW_OrbShadow`、通常ブレンド、0,40,20,200、0Fで2.9倍→4Fで1.55倍) → Head(`NW_Orb`、加算、3.8倍→2.0倍) → Arcs(`NW_ArcRing`、加算、60,255,140,235、-20°/Fで回る、4.6倍→5Fで2.1倍) → Muzzle(`NW_Burst`、発射位置に残る、5F、5→1倍。暗い影に隠れないよう最後に描く)。見た目の大きさ: 球の直径約62・弧のリングの直径約88(当たり判定の直径90の内側)。
+- **チャージ弾**([PlayerChargeBullet.efkefc](Data/Effect/PlayerChargeBullet/PlayerChargeBullet.efkefc)、ノード構成は9のまま): Head(菱形→`NW_Orb`、8.0倍→6Fで4.2倍)、Shadow(菱形→`NW_OrbShadow`、6.2倍→3.3倍)、Halo(十字→`NW_ArcRing`、緑60,255,140,235、-9°/F、9.5倍→7Fで4.6倍)、LaunchFlash(十字→`NW_Burst`、回転は乱数)、PhantomArm/PhantomHead(菱形→`NW_Orb`)。LaunchRing・Trail・PhantomTrailと、分身の集まり具合の式はそのまま。球の直径は約130(当たり判定の半径は32。前の菱形と同じくらいの見た目の大きさにした)。
+- **数値**: 通常弾 ノード4→5、同時インスタンス 約8→**約9**/発(数えた値)。テクスチャ3枚→5枚(128,64,256,128,64×16)。チャージ弾 ノード9→9、同時数は変わらない。テクスチャは菱形・十字(128,128)を消して、球・影・弧・筋(128,64,256,128)を足した。
+- **テクスチャの整理**: どの`.efk`からも参照されていないことを確かめて削除: PlayerBulletの`NW_Plasma*`(らせん版のもの)、PlayerChargeBulletの`NW_Diamond`/`NW_Cross`。ほかのエフェクト(Charging・StarFlareなど)は自分のフォルダの同じ名前の画像を使っているので影響しない。
+- 2つとも`.efk`を拡大率50で書き出し、参照しているテクスチャがすべてあることを確認。エディタを再起動しても正しく表示された。
+- **確認(エディタ、ゲームのカメラ再現。明るい空・海)**: 遠くでも「緑の球＋白い縁取り＋まっすぐな軌跡」で、敵のマゼンタの球とは色で見分けられる。明るい空では、加算の弧のリングが白っぽくなる。比較画像はチャットに添付(リポジトリには置いていない)。
+- **未確認**: ゲームの中での見え方。特に、①連射したときに弧のリングがうるさくないか、②敵の弾と同じ丸なので、弾が多い場面で見分けられるか(色だけに頼っていないか)、③チャージ弾の発射の瞬間の大きさ(直径約400)、④明るい空での弧のリング。
+- **提案(未着手)**: Charging(溜め中)はまだ菱形と十字。溜めた玉がそのまま飛ぶ流れなので、Chargingも`NW_Orb`＋`NW_ArcRing`にそろえるとつながる。
+### 2026-11-26 弾を小さく・鋭く、Chargingも丸型に(Claude、ユーザー依頼「ちょっと弾でかいかも。もうちょっと鋭さが欲しい。チャージングも直して」)
+- **(同日、ユーザー「ちゃっちい。丸っぽいとかっこよくない。丸でもいいが丸っぽいと思わせないように」→ 下の「光点＋光芒」に作り直した。このエントリの球・刃のリングのテクスチャは削除済み)**
+- **新しいテクスチャ**(3つのTextureフォルダに同じものを置いた。生成スクリプトはリポジトリの外`%TEMP%\nw_pb\tools\gen_sharp.ps1`):
+  - `NW_OrbEdge.png`(128): 縁が硬い球(半径0.80)。縁のすぐ内側に白い細い線、白い芯、縁に向かって深くなる緑、外のにじみはごく短い。
+  - `NW_OrbEdgeShadow.png`(64): 縁のはっきりした円(半径0.88)。
+  - `NW_BladeRing.png`(256): 3枚の三日月の刃。進む側の頭は太く、まっすぐに切り落とし、後ろは針のように細くなる(明るさも後ろへ少し落とす)。前の四角い目盛りはやめた。
+- **通常弾**([PlayerBullet.efkefc](Data/Effect/PlayerBullet/PlayerBullet.efkefc)): Head 3.8→2.0倍 を **2.5→1.25倍**(球の直径 約62→約50)、Shadow 1.28倍、Arcs(刃のリング) 2.1→**1.7倍**(直径 約88→約72)・回転 -20→**-24°/F**、Trailの太さ 0.04/0.5/0.9→**0.02/0.32/0.6**。ノード5・同時数約9は同じ。
+- **チャージ弾**([PlayerChargeBullet.efkefc](Data/Effect/PlayerChargeBullet/PlayerChargeBullet.efkefc)): Head 8.0→4.2倍 を **5.0→2.6倍**(球の直径 約130→約104)、Shadow 4.95→2.57倍、Halo(刃のリング) 7.6→**3.7倍**・-12°/F、分身の頭(PhantomHead)を`NW_OrbEdge`の0.75倍に。
+- **Charging**([Charging.efkefc](Data/Effect/Charging/Charging.efkefc)、8ノードのまま、溜め完了20Fは変えていない): Core 菱形→`NW_OrbEdge`(大きさのカーブはそのまま。0F 0.3→19F 1.9→21F 3.0→27F 2.1)、Shadow 菱形→`NW_OrbEdgeShadow`(0.41→1.87→2.87→2.05)、ChargedFlash 十字→`NW_Burst`(回転は乱数)、ChargedStar 十字→`NW_BladeRing`(緑60,255,140,230、-10°/F、2.7↔3.2倍で16Fごとに脈打つ)。Converge・Inflow/Spark・ChargedRingはそのまま。
+- **削除**(どの`.efk`からも参照されていないことを確認): PlayerBullet・PlayerChargeBulletの`NW_Orb`/`NW_OrbShadow`/`NW_ArcRing`、Chargingの`NW_Diamond`/`NW_Cross`。これで自機の弾まわりに菱形・十字は残っていない(StarFlareなどは自分のフォルダに持っているので別)。
+- 3つとも`.efk`を拡大率50で書き出し、参照しているテクスチャがすべてあることを確認。エディタを再起動しても正しく表示された。
+- **確認**: ゲームのカメラ再現は、今回は海の背景だけで撮った(明るい空は前回の版で確認済み。縁の白い線と暗い影は残っているので同じように見えるはず、ただし未確認)。
+- **未確認**: ゲームの中での見え方。特に、①通常弾の大きさ(まだ大きい/小さすぎるか)、②刃のリングの回る速さ、③溜め中の球からチャージ弾の球へのつながり(溜め完了後は直径約1.7、発射の瞬間は約4.0→約2.1)、④明るい空。- **(同日・ユーザー依頼)閉じたポッドを1/15に、小数も使う**: `weak_closed_damage_rate = 1.0f / 15.0f`。HPは`int`なので、小数のダメージを[GunshipBossWeakCollider.h](Game/Collision/GunshipBossWeakCollider.h)の`m_storedDamage`にため、整数の部分だけ`TakeDamage`して小数は持ち越す(通常弾10→約0.67、3発で2。チャージ100→約6.67)。0ダメージでも`TakeDamage`を呼ぶ(赤い点滅など当たった反応をあとで足せるように)。ビルドOK、**ゲームで未確認**。
+### 2026-11-26 自機の弾を「光点＋光芒」に(5回目。Claude、ユーザー依頼「丸っぽいと思わせないように」→ 試作を見て「光点で進める」)
+- **考え方**: 球やリングは輪郭のはっきりした「図形」なので、照準マークのようで安っぽく見えた。丸は白熱したごく小さな点だけにして、そこから**上下に細い光芒**(後ろ側を長く。画面では弾が奥＝上へ進むので、進む向きと形がそろう)を伸ばし、緑のにじみで包む。光芒の長さが毎フレーム変わって瞬く。
+- **ぶつかる点(重要)**: 明るい空で見えることと、図形っぽく見えないことはぶつかる。元の菱形が空で見えたのは、はっきりした暗い縁取りがあったから(その硬い輪郭が「固形」に見せていた)。今回は、**光点と光芒の形にそった暗いぼかし**(`NW_LightBoltDark`)を後ろに敷き、外側の広い緑のにじみを弱めた(広い加算のにじみは空で白く飛び、暗い層を打ち消すため)。暗い芯をくっきりした円にすると、輪「o」に見えて丸い図形に戻ったので、ぼかしにした。
+- **テクスチャ**(3つのTextureフォルダに同じもの。生成スクリプトはリポジトリの外`%TEMP%\nw_pb\tools\gen_flare.ps1`):
+  - `NW_LightBolt.png`(256、128pxの2×2=4コマ): 白い点、緑のにじみ、白い光芒(上0.50〜0.68、下0.80〜0.95でコマごとに長さが違う)、光芒を包む緑。
+  - `NW_LightBoltDark.png`(同じ4コマ): 芯の後ろのやわらかい暗いぼかし＋光芒の暗いさや(光芒の0.82倍の長さ)。ノードの色で深い緑0,40,20,240。
+  - 本体と暗い層は、同じコマ割り(1F/コマ、ループ、開始コマ0)にして、コマがずれないようにした。
+- **通常弾**([PlayerBullet.efkefc](Data/Effect/PlayerBullet/PlayerBullet.efkefc)、4ノード): Trail(変更なし: 0.02/0.32/0.6) → Shadow(`NW_LightBoltDark`、通常ブレンド) → Head(`NW_LightBolt`、加算) → Muzzle(`NW_Burst`)。Head・Shadowとも0Fで6.0倍→4Fで3.2倍。回る刃のリング(Arcs)は削除。同時インスタンス 約9→**約8**/発。テクスチャ4枚(256,256,128,64×16)。見た目: 光芒の上下の端まで約±75、緑のにじみの半径は約20(当たり判定の半径45)。
+- **チャージ弾**([PlayerChargeBullet.efkefc](Data/Effect/PlayerChargeBullet/PlayerChargeBullet.efkefc)、9ノード): Head・Shadowを光点に(13倍→6Fで8倍)、Halo(刃のリング→`NW_Burst`の放射状の光の筋、緑60,255,140,220、-3°/F、10倍→7Fで5.5倍)、分身の頭(PhantomHead)も光点(1.6倍、開始コマは乱数)。LaunchFlash・LaunchRing・Trail・分身の軌跡と式はそのまま。
+- **Charging**([Charging.efkefc](Data/Effect/Charging/Charging.efkefc)、8ノード、溜め完了20Fは同じ): Core・Shadowを光点に(0F 0.8→19F 4.3→21F 6.8→27F 4.8倍)、ChargedStar(刃のリング→`NW_Burst`、緑60,255,140,200、-3°/F、3.4↔4.0倍で16Fごとに脈打つ)。ChargedFlashは`NW_Burst`のまま。
+- **削除**: 3つのフォルダの`NW_OrbEdge*`/`NW_BladeRing`と、途中の試作(`NW_Flare*`/`NW_FlareBolt*`)。どの`.efk`からも参照されていないことを確認した。
+- 3つとも`.efk`を拡大率50で書き出し、参照しているテクスチャがすべてあることを確認。エディタを再起動しても正しく表示された。
+- **確認(エディタ、ゲームのカメラ再現。明るい空・海)**: 通常弾は、空でも海でも「緑の光点＋白い光芒＋軌跡」として見える。ただし6F以降は20〜30pxの小さな点で、元の菱形と同じくらいの目立ち方。チャージ弾は、発射の瞬間は大きな星形の閃光、そのあとは光点を分身の軌跡が回る見え方。
+- **未確認**: ゲームの中での見え方。特に、①通常弾が小さすぎないか(遠くで点になる)、②明るい空で埋もれないか(実際のスカイボックスと海)、③チャージ弾の光点が分身の軌跡に負けていないか、④瞬き(1F/コマ)がうるさくないか、⑤溜め中から発射へのつながり。
+### 2026-11-26 軌跡が板に見える → やわらかい光の筋に(Claude、ユーザー依頼「軌跡が板すぎるように見える」)
+- **原因**: `NW_Trail.png`(64×16)が、幅いっぱいにほぼ同じ濃さの緑の帯で、縁が硬かった。Trackは平たい帯なので、そのまま板に見えた。
+- **対応**: 新しい`NW_TrailGlow.png`(64×16。中心に細い白い線、外へ緑がガウスぼかしで消え、端で完全に透明)に差し替えた(生成スクリプトはリポジトリの外`%TEMP%\nw_pb\tools\gen_trailglow.ps1`)。重さは変わらない(テクスチャの差し替えだけ)。
+  - 通常弾 [PlayerBullet.efkefc](Data/Effect/PlayerBullet/PlayerBullet.efkefc) のTrail: 太さ 0.02/0.32/0.6 → **0.04/0.7/1.25**(縁が透明になって細く見える分を広げた)。
+  - チャージ弾 [PlayerChargeBullet.efkefc](Data/Effect/PlayerChargeBullet/PlayerChargeBullet.efkefc) のTrailとPhantomArm/PhantomTrail: テクスチャを差し替え、曲線の分割(SplineDivision)を3に。分身の軌跡の太さ 0.04/0.35/0.55 → **0.06/0.5/0.8**。
+- 使わなくなった`NW_Trail.png`は、2つのフォルダとも`.efk`から参照されていないことを確かめて削除。2つとも`.efk`を拡大率50で書き出し、参照しているテクスチャがすべてあることを確認。エディタの再起動後も正しく表示された。
+- **未確認**: ゲームの中での見え方(細くなりすぎていないか、明るい空で軌跡が見えるか)。
+### 2026-11-26 2面ボスを1.5倍に、プレイヤーから1500遠ざけた(Claude、ユーザー依頼「網に着くまでが速すぎてよけにくい」と指摘を受けた)
+- 大きさ: [GunshipBoss.cpp](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBoss.cpp#L33-L34)に`boss_scale = 1.5f`、コンストラクタで`SetScale`。CSVの`scaleX〜Z`はどのDataSetterも読んでいないので、コードの定数にした。弱点の球の半径・胴体のカプセル(長さ・半径・前に出す量)も`* boss_scale`。弱点・胴体・発射口の位置はフレームから取るので、そのまま大きさに付いてくる。
+- 距離: [Stage2/Boss.csv](Data/CSV/Stage2/Boss.csv)のzを58460→**59960**(+1500)。出現Z 56300からの距離は2160→3660。**Unity側のボスの位置もz 59960に直す**(Unityから書き出すとCSVが戻る)。
+- ビルドOK、**ゲームで未確認**: 網に着くまでの時間、網の出始め(網はボスの中心の400手前に出るが、1.5倍だとボスの前の面が約500手前なので、出た瞬間は網がボスの中に入って見えるかもしれない。ボスはプレイヤーと同じ速さで進むので、すぐ離れる)、左右に動いたとき(x ±1400)に画面からはみ出さないか、登場ムービー明け(カメラはボスの2700手前)のボスの大きさ。- **(同日)コスト表に追加**: 79行目「ブースト中はカメラレンズの水滴が速く流れる」0.5・A・ベータ・未完了(ユーザー依頼)。`ShaderEffect/WaterDropEffect`にブースト中かを渡して流れる速さを変える想定。
+- **(同日)ボス1.5倍・+1500はゲームで確認OK**(ユーザー「大丈夫そう」)。
+
+### 2026-11-26 モデルの「フレーム」を「ボーン」にそろえた(Claude、ユーザー依頼「時間のフレームと見間違える」)
+- 名前の変更(中身は同じ): GunshipBoss(`weak_bone_name_left/right`、`body_bone_name`、`broken_pod_bone_name`、`m_weakBoneIdxLeft/Right`、`m_bodyBoneIdx`、`m_brokenPodBoneIdx`、`weakBonePosL/R`)、網のステート(`muzzle_bone_name_left/right`、`GetMuzzlePos(boneName)`)、ロケットのステート(`rocket_muzzle_bone_names`、`boneIdx`。`born`の打ち間違いも直した)、SpiderBoss(`leg_bone_stride`)、SpiderBossBeamState(`muzzle_bone_name_r/l`)、TurretEnemy(`turret_bone_name`、`barrel_bone_name`、`turretBoneIndex`/`barrelBoneIndex`、`ApplyBoneRotation()`)。コメントの「フレーム名・番号・位置」も「ボーン」に。
+- `Actor::DrawFrameWithLighting`は残した(DxLibの`MV1DrawFrame`で部品ごとに描画する意味で、ボーンではないため)。DxLibの関数名(`MV1SearchFrame`など)もそのまま。
+- これからは名前でも説明でも、モデルの目印は「ボーン」、「フレーム」は時間だけ。
+### 2026-11-26 プレイヤーの取得をEnemyBaseにまとめた(Claude、ユーザー依頼)
+- [EnemyBase.h](Game/GameObjects/Actors/Character/Enemy/EnemyBase.h#L67-L68)に`std::weak_ptr<Player> GetPlayer() const`を足した(`m_pPlayer`はもともとEnemyBaseにある)。全部の敵・ボスで使える。
+- SpiderBossの同じ関数は消した(EnemyBaseのものを使う)。FloatingEnemyの`GetPlayerPos`/`GetPlayerVel`/`GetPlayerFoward`を消し、ActiveState・HideStateを`GetPlayer().lock()->GetPos()`などに変えた(`Player.h`をinclude)。
+- ロケットのステート([GunshipBossRocketState.cpp:125](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossRocketState.cpp#L125))はユーザーが書いている途中なので触っていない。
+### 2026-11-26 ロケットの撃つ段階(ユーザー実装)
+- [GunshipBossRocketState.cpp](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossRocketState.cpp): `RocketPhase`にFireを追加し、Open→Fire→Closeを`switch`で関数に分けた。開き終わったら1発目→`rocket_fire_interval`(30F)ごとに撃つ→`max_rocket_fire_num`(3発)撃ったら閉じる。撃つ位置は`rocket_muzzle_bone_names`(Muzzle_Rocket_0〜3)を撃った数%4で順番に。向きはタレットと同じ(プレイヤーへの向き×`rocket_move_speed`(20)+プレイヤーのzの速さ)、攻撃力`rocket_attack_power`(15)。`EnemyBullet`で撃ち、`pTarget`(撃った敵)にボスを渡したので、跳ね返すとボス(の`GetLockablePos`=近い弱点)へ飛ぶ。
+- ボスに`GetBulletManager()`/`GetCamera()`を追加(ユーザー)。
+- ゲームで確認OK(ユーザー「問題ありません」)。
+- **次**: 少し追うロケット(`EnemyBullet`を継ぐ新しいクラス、仕様書4-3【ロケットの追いかける強さ】)→跳ね返したロケットのボスへのダメージ(【跳ね返したロケットのダメージ】)。見た目は今は普通の敵の弾(ロケットのモデルは仕様書「長さ約150、正面は-Z」)。
+### 2026-11-26 追うロケットの弾 RocketBullet の土台(ユーザー実装)・SpiralBulletのコンストラクタを構造体に(Claude、ユーザー依頼「引数多すぎ」)
+- **撃ち方を変えた**: ロケットの速度に足していた「プレイヤーのzの速さ」をやめた(ユーザー「プレイヤーの場所に合わせて撃たなくていい」)。[GunshipBossRocketState.cpp](Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossRocketState.cpp#L142-L151)は「プレイヤーへの向き×`rocket_move_speed`」だけ。プレイヤーは前へ約18で進むので、プレイヤーから見るとロケットは約38で迫ってくる(タレットの弾の約2倍の感覚)。**ゲームで速すぎないか確認**、速ければ`rocket_move_speed`を下げる。
+  - zの速さを足さないので、追うときは`ReflectedBullet`と同じく速度全体を`Lerp`で曲げればよい(足していると、曲げる前にzの速さを引いて足し戻す必要があった)。
+- [RocketBullet.h](Game/GameObjects/Bullet/RocketBullet.h)/[.cpp](Game/GameObjects/Bullet/RocketBullet.cpp)(ユーザー): `EnemyBullet`を継ぐ。`RocketBulletData`(pos, vel, attackPower, pCamera, pShooter(shared_ptr), pEffectManager)を受け取るコンストラクタ、`m_speed = vel.Length()`。`New-GameClass.ps1`で作成・vcxproj登録。ビルドOK。
+- [SpiralBullet.h](Game/GameObjects/Bullet/SpiralBullet.h#L8-L18): `SpiralBulletData`(pos, vel, attackPower, pCamera, pShooter(weak_ptr), startAngle)＋エフェクトの管理者を受け取る形に(ReflectedBulletと同じ形)。[BulletManager.cpp](Manager/BulletManager.cpp#L110-L127)の`CreateSpiralBullet`の中でデータを詰める。`CreateSpiralBullet`の引数は変えていない(構造体で受けるにはBulletManager.hにSpiralBullet.hのincludeが要るため)。蝶の敵の弾は**ゲームで未確認**。
+- **次**: RocketBulletの`Update`(`EnemyBullet::Update()`のあと、撃った時のプレイヤーとの距離の8割を進むまでプレイヤーへ`Lerp`で曲げる。撃った時の距離をコンストラクタで覚える)→BulletManagerにロケットの作り方を足す(`m_pEnemyBullets`と`m_pAllBullets`に入れる)→ロケットのステートで使う。

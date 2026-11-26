@@ -7,6 +7,7 @@
 #include "Manager/BulletManager.h"
 #include "Manager/SoundManager.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
+#include "Character/Player/Player.h"
 
 namespace
 {
@@ -51,7 +52,7 @@ void ActiveState::Update()
 	vel.y = sinf(m_frame * wave_speed) * move_speed;
 	//プレイヤーの前方向と同じ方向に一緒に進む
 	std::shared_ptr<FloatingEnemy> pEnemy = m_pEnemy.lock();
-	Vector3 forward = pEnemy->GetPlayerFoward();
+	Vector3 forward = pEnemy->GetPlayer().lock()->GetForward();
 	vel += -forward * move_speed;
 
 	//敵の速度に適用する
@@ -69,7 +70,7 @@ void ActiveState::Update()
 		Vector3 shootPos = pEnemy->GetPos();
 		//速度
 		//プレイヤーの位置
-		Vector3 playerPos = pEnemy->GetPlayerPos();
+		Vector3 playerPos = pEnemy->GetPlayer().lock()->GetPos();
 		//敵自身の位置
 		Vector3 enemyPos = shootPos;
 
@@ -80,7 +81,7 @@ void ActiveState::Update()
 		Vector3 shootVel = toPlayerDir * bullet_speed;
 		//プレイヤーと同じzの速度分足すことでプレイヤーが左右上下に動いていなければ
 		//絶対に当たるようにする
-		shootVel.z += pEnemy->GetPlayerVel().z;
+		shootVel.z += pEnemy->GetPlayer().lock()->GetVel().z;
 
 		//敵からカメラを取得
 		std::shared_ptr<CameraBase> pCamera = m_pEnemy.lock()->GetCamera().lock();

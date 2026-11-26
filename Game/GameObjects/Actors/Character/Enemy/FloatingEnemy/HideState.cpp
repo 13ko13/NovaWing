@@ -3,6 +3,7 @@
 #include "FloatingEnemy.h"
 #include "ActiveState.h"
 #include "Utility/ModelAnimator.h"
+#include "Character/Player/Player.h"
 
 namespace
 {
@@ -35,7 +36,7 @@ void HideState::Update()
 {
 	//プレイヤーの位置を取得
 	std::shared_ptr<FloatingEnemy> pEnemy = m_pEnemy.lock();
-	Vector3 playerPos = pEnemy->GetPlayerPos();
+	Vector3 playerPos = pEnemy->GetPlayer().lock()->GetPos();
 	//敵自身の位置を取得
 	Vector3 enemyPos = pEnemy->GetPos();
 	//距離が一定(出現条件)以下になったらステートを変更

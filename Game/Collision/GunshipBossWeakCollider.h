@@ -22,4 +22,7 @@ public:
 
 private:
 	GunshipBoss& m_owner;
+
+	//まだボスに与えていないダメージ
+	float m_storedDamage = 0.0f;
 };

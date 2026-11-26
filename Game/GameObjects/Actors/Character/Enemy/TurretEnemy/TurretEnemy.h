@@ -54,8 +54,8 @@ private:
 
 	//角度を目標へ近づける
 	void UpdateAimAngle(const Vector3& playerPos);
-	//角度をフレームに反映する
-	void ApplyFrameRotation();
+	//角度をボーンに反映する
+	void ApplyBoneRotation();
 
 private:
 	//ステート

@@ -140,33 +140,6 @@ void FloatingEnemy::DrawEnemy()
     DrawWithLighting(textures);
 }
 
-Vector3 FloatingEnemy::GetPlayerPos() const
-{
-	//shared_ptrに変換
-	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
-
-	//位置を取得して返す
-	return pPlayer->GetPos();
-}
-
-Vector3 FloatingEnemy::GetPlayerVel() const
-{
-	//shared_ptrに変換
-	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
-
-	//速度を取得して返す
-	return pPlayer->GetVel();
-}
-
-Vector3 FloatingEnemy::GetPlayerFoward() const
-{
-	//shared_ptrに変換
-	std::shared_ptr<Player> pPlayer = m_pPlayer.lock();
-
-	//前方向を取得して返す
-	return pPlayer->GetForward();
-}
-
 std::shared_ptr<BulletManager> FloatingEnemy::GetBulletManager() const
 {
 	std::shared_ptr<BulletManager> pBulletManager = m_pBulletManager.lock();

@@ -16,32 +16,35 @@
 
 namespace
 {
-	//第二形態になるときに表示する壊れたポッドのフレーム名
-	constexpr const wchar_t* broken_pod_frame_name = L"Boss2_PodR_Broken";
+	//第二形態になるときに表示する壊れたポッドのボーン名
+	constexpr const wchar_t* broken_pod_bone_name = L"Boss2_PodR_Broken";
 	//待機アニメーション名
 	constexpr const wchar_t* idle_anim_name = L"Boss2_Armature|Idle";
 
-	//左右の弱点のフレーム名
+	//左右の弱点のボーン名
 	//左の弱点
-	constexpr const wchar_t* weak_frame_name_left = L"Weak_L";
+	constexpr const wchar_t* weak_bone_name_left = L"Weak_L";
 	//右の弱点
-	constexpr const wchar_t* weak_frame_name_right = L"Weak_R";
+	constexpr const wchar_t* weak_bone_name_right = L"Weak_R";
 
 	//アニメーションのブレンドの速さ
 	constexpr float anim_blend_frame = 16.0f;
 
-	//弱点の球の半径
-	constexpr float weak_sphere_radius = 200.0f;
+	//ボスの大きさ
+	constexpr float boss_scale = 1.5f;
 
-	//胴体のフレーム名(原点は胴体の中心)
-	constexpr const wchar_t* body_frame_name = L"Body";
+	//弱点の球の半径
+	constexpr float weak_sphere_radius = 200.0f * boss_scale;
+
+	//胴体のボーン名(原点は胴体の中心)
+	constexpr const wchar_t* body_bone_name = L"Body";
 	//胴体のカプセルの、中心から両端までの横の長さ(腕の付け根が±400あたり)
-	constexpr float body_capsule_half_length = 250.0f;
+	constexpr float body_capsule_half_length = 250.0f * boss_scale;
 	//胴体のカプセルの半径(胴体の高さ約650を覆う)
-	constexpr float body_capsule_radius = 330.0f;
+	constexpr float body_capsule_radius = 330.0f * boss_scale;
 	//胴体のカプセルを胴体の中心からどれだけ前(-Z、プレイヤー側)に出すか
 	//中心のままだと前の面がz=-330で、顔(前面)より奥で弾が当たって見えるため
-	constexpr float body_capsule_front_offset = 250.0f;
+	constexpr float body_capsule_front_offset = 250.0f * boss_scale;
 }
 
 GunshipBoss::GunshipBoss(GunshipBossData& data) :
@@ -50,6 +53,8 @@ GunshipBoss::GunshipBoss(GunshipBossData& data) :
 {
 	//位置を設定
 	SetPos(data.pos);
+	//大きさを設定
+	SetScale(Vector3(boss_scale, boss_scale, boss_scale));
 	//アニメーターのポインタを作成
 	m_pAnimator = std::make_unique<ModelAnimator>(m_modelHandle);
 	//弱点のコライダーを作成
@@ -68,9 +73,9 @@ void GunshipBoss::OnInit()
 	CreateShaderBuffers();
 
 	//第二形態に入ってから表示する壊れたポッドを非表示にしておく
-	m_brokenPodFrameIdx = MV1SearchFrame(m_modelHandle, broken_pod_frame_name);
-	assert(m_brokenPodFrameIdx >= 0 && "ポッドのフレーム名を間違えている");
-	MV1SetFrameVisible(m_modelHandle, m_brokenPodFrameIdx, FALSE);
+	m_brokenPodBoneIdx = MV1SearchFrame(m_modelHandle, broken_pod_bone_name);
+	assert(m_brokenPodBoneIdx >= 0 && "ポッドのボーン名を間違えている");
+	MV1SetFrameVisible(m_modelHandle, m_brokenPodBoneIdx, FALSE);
 
 	//弱点の球の初期化
 	InitWeakSphere();
@@ -91,15 +96,15 @@ void GunshipBoss::OnInit()
 void GunshipBoss::InitWeakSphere()
 {
 	//弱点の位置を取得
-	m_weakFrameIdxLeft = MV1SearchFrame(m_modelHandle, weak_frame_name_left);
-	m_weakFrameIdxRight = MV1SearchFrame(m_modelHandle, weak_frame_name_right);
-	assert(m_weakFrameIdxLeft >= 0 && "弱点のフレーム名を間違えている");
-	assert(m_weakFrameIdxRight >= 0 && "弱点のフレーム名を間違えている");
+	m_weakBoneIdxLeft = MV1SearchFrame(m_modelHandle, weak_bone_name_left);
+	m_weakBoneIdxRight = MV1SearchFrame(m_modelHandle, weak_bone_name_right);
+	assert(m_weakBoneIdxLeft >= 0 && "弱点のボーン名を間違えている");
+	assert(m_weakBoneIdxRight >= 0 && "弱点のボーン名を間違えている");
 
 	Vector3 spherePosLeft;
 	Vector3 spherePosRight;
-	spherePosLeft = MV1GetFramePosition(m_modelHandle, m_weakFrameIdxLeft);
-	spherePosRight = MV1GetFramePosition(m_modelHandle, m_weakFrameIdxRight);
+	spherePosLeft = MV1GetFramePosition(m_modelHandle, m_weakBoneIdxLeft);
+	spherePosRight = MV1GetFramePosition(m_modelHandle, m_weakBoneIdxRight);
 
 	//弱点の位置に球を配置
 	m_pWeakSphereLeft = std::make_shared<SphereShape>(
@@ -110,9 +115,9 @@ void GunshipBoss::InitWeakSphere()
 
 void GunshipBoss::InitBodyCapsule()
 {
-	//胴体のフレームを探す
-	m_bodyFrameIdx = MV1SearchFrame(m_modelHandle, body_frame_name);
-	assert(m_bodyFrameIdx >= 0 && "胴体のフレーム名を間違えている");
+	//胴体のボーンを探す
+	m_bodyBoneIdx = MV1SearchFrame(m_modelHandle, body_bone_name);
+	assert(m_bodyBoneIdx >= 0 && "胴体のボーン名を間違えている");
 
 	//位置はUpdateBodyCapsuleで合わせるので、ここでは形だけ作る
 	m_pBodyCapsule = std::make_shared<CapsuleShape>(
@@ -122,9 +127,9 @@ void GunshipBoss::InitBodyCapsule()
 
 void GunshipBoss::UpdateBodyCapsule()
 {
-	//胴体の中心(アニメーションでのけぞると動くのでフレームから取る)
+	//胴体の中心(アニメーションでのけぞると動くのでボーンから取る)
 	Vector3 bodyPos;
-	bodyPos = MV1GetFramePosition(m_modelHandle, m_bodyFrameIdx);
+	bodyPos = MV1GetFramePosition(m_modelHandle, m_bodyBoneIdx);
 	//顔(前面)で弾が当たるように、前(-Z)に出す
 	bodyPos.z -= body_capsule_front_offset;
 
@@ -152,13 +157,13 @@ void GunshipBoss::Update()
 	//アニメーターを更新させる
 	m_pAnimator->Update(anim_blend_frame);
 
-	Vector3 weakFramePosL;
-	Vector3 weakFramePosR;
-	weakFramePosL = MV1GetFramePosition(m_modelHandle, m_weakFrameIdxLeft);
-	weakFramePosR = MV1GetFramePosition(m_modelHandle, m_weakFrameIdxRight);
+	Vector3 weakBonePosL;
+	Vector3 weakBonePosR;
+	weakBonePosL = MV1GetFramePosition(m_modelHandle, m_weakBoneIdxLeft);
+	weakBonePosR = MV1GetFramePosition(m_modelHandle, m_weakBoneIdxRight);
 	//弱点の球の更新
-	m_pWeakSphereLeft->Update(weakFramePosL, weak_sphere_radius);
-	m_pWeakSphereRight->Update(weakFramePosR, weak_sphere_radius);
+	m_pWeakSphereLeft->Update(weakBonePosL, weak_sphere_radius);
+	m_pWeakSphereRight->Update(weakBonePosR, weak_sphere_radius);
 	//胴体のカプセルの更新
 	UpdateBodyCapsule();
 }
@@ -210,6 +215,21 @@ Vector3 GunshipBoss::GetLockablePos() const
 	return weakPosRight;
 }
 
+void GunshipBoss::RecordAttack(AttackType currentAttackType)
+{
+	//前と同じ攻撃ならm_sameAttackCountをインクリメント
+	if (m_prevAttackType == currentAttackType)
+	{
+		m_sameAttackCount++;
+	}
+	//違う攻撃なら前の攻撃を入れ替えて回数を1にする
+	else
+	{
+		m_prevAttackType = currentAttackType;
+		m_sameAttackCount = 1;
+	}
+}
+
 void GunshipBoss::UpdateState()
 {
 	//ステートの更新を呼ぶ
@@ -229,7 +249,7 @@ void GunshipBoss::UpdateState()
 
 void GunshipBoss::Draw()
 {
-	//モデルに行列を適用(大きさはActorのm_scale、2面のボスは1倍)
+	//モデルに行列を適用
 	ApplyMatrix(m_scale, m_pos, m_rotation, m_modelHandle);
 
 	//シェーダに渡すカメラ情報を更新

@@ -5,11 +5,17 @@
 class SpiralBullet : public EnemyBullet
 {
 public:
-	SpiralBullet(const Vector3& pos, const Vector3& vel,
-		const int attackPower, std::weak_ptr<CameraBase> pCamera,
-		std::shared_ptr<EnemyBase> pShooter,
-		std::weak_ptr<EffectManager> pEffectManager,
-		float startAngle);
+	//回転する弾に必要なデータ
+	struct SpiralBulletData
+	{
+		Vector3 pos;
+		Vector3 vel;
+		int attackPower;
+		std::weak_ptr<CameraBase> pCamera;
+		std::weak_ptr<EnemyBase> pShooter;
+		float startAngle;
+	};
+	SpiralBullet(const SpiralBulletData& data, std::weak_ptr<EffectManager> pEffectManager);
 	virtual ~SpiralBullet();
 
 	//更新処理

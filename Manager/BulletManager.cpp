@@ -109,10 +109,18 @@ void BulletManager::CreateReflectedBullet(const ReflectedBullet::ReflectBulletDa
 
 void BulletManager::CreateSpiralBullet(const Vector3& pos, const Vector3& vel, const int attackPower, std::weak_ptr<CameraBase> pCamera, float startAngle, std::weak_ptr<EnemyBase> pTarget)
 {
+	//回転する弾のデータをまとめる
+	SpiralBullet::SpiralBulletData data;
+	data.pos = pos;
+	data.vel = vel;
+	data.attackPower = attackPower;
+	data.pCamera = pCamera;
+	data.pShooter = pTarget;
+	data.startAngle = startAngle;
+
 	//インスタンスを作成
 	std::shared_ptr<SpiralBullet> pBullet =
-		std::make_shared<SpiralBullet>(
-			pos, vel, attackPower, pCamera, pTarget.lock(), m_pEffectManager, startAngle);
+		std::make_shared<SpiralBullet>(data, m_pEffectManager);
 
 	//初期化
 	pBullet->Init();

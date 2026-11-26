@@ -22,7 +22,11 @@ private:
 	void StartMove();
 	//止まっている間の更新処理
 	void UpdateStopping();
-
+	//次の行動を決める
+	void DecideNextAction();
+	//攻撃をランダムに決める
+	void DecideRandomAttack();
+	
 private:
 	//移動開始地点
 	Vector3 m_startPos;

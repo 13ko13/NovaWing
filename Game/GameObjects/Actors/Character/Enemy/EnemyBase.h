@@ -64,6 +64,9 @@ public:
 	//ロックオンできる位置を返す
 	virtual Vector3 GetLockablePos() const { return GetPos(); }
 
+	//プレイヤーを取得
+	std::weak_ptr<Player> GetPlayer() const { return m_pPlayer; }
+
 private:
 
 protected:

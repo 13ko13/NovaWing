@@ -6,6 +6,7 @@
 #include "Utility/Easing.h"
 #include "GunshipBossNetState.h"
 #include "Utility/ModelAnimator.h"
+#include "GunshipBossRocketState.h"
 
 namespace
 {
@@ -29,6 +30,9 @@ namespace
 
 	//待機アニメーション名
 	constexpr const wchar_t* idle_anim_name = L"Boss2_Armature|Idle";
+
+	//同じ攻撃を最大何回できるか
+	constexpr int max_same_attack_count = 2;
 }
 
 GunshipBossMoveState::GunshipBossMoveState(std::weak_ptr<GunshipBoss> pBoss) :
@@ -69,22 +73,71 @@ void GunshipBossMoveState::Update()
 
 void GunshipBossMoveState::UpdateStopping()
 {
-	//止まっている時間が終了したらまた動き出す
-	//動いた回数が一定回数に達していたら攻撃を行う
-	//フレームもリセット
+	//止まっている時間が終了したら次の行動を決める
 	if (m_frame >= stop_frame)
 	{
-		//移動した回数が一定回数に到達したら攻撃を行う
-		if (m_moveCount >= max_move_count)
+		//次の行動を決める
+		DecideNextAction();
+	}
+}
+
+void GunshipBossMoveState::DecideNextAction()
+{
+	//移動した回数が一定回数に到達したら攻撃を行う
+	if (m_moveCount >= max_move_count)
+	{
+		DecideRandomAttack();
+	}
+	else
+	{
+		//移動する準備を行う
+		StartMove();
+	}
+}
+
+void GunshipBossMoveState::DecideRandomAttack()
+{
+	std::shared_ptr<GunshipBoss> pBoss = m_pBoss.lock();
+	int randNum = 0;//ランダムな数字
+
+	//ボスの同じ攻撃をした回数が定数以上であれば
+	//その攻撃を外したランダムな攻撃を行う
+	//同じ攻撃をした回数を取得
+	int sameAttackCount = pBoss->GetSameAttackCount();
+	if (sameAttackCount >= max_same_attack_count)
+	{
+		//定数以上だったらその攻撃は行わなくなるので種類が一つ減る
+		//GetRandは0~nの値を返す。Maxは攻撃の種類数なので合計で-2する
+		randNum = GetRand(static_cast<int>(GunshipBoss::AttackType::Max) - 2);
+
+		//出た攻撃が外した番号以上なら出た数字に1を足す
+		if (randNum >= static_cast<int>(pBoss->GetPrevAttackType()))
 		{
-			//攻撃のステートへ移る
-			ChangeState(std::make_shared<GunshipBossNetState>(m_pBoss));
+			randNum++;
 		}
-		else
-		{
-			//移動する準備を行う
-			StartMove();
-		}
+	}
+	else
+	{
+		//GetRandでランダムな攻撃番号を受け取る
+		randNum = GetRand(static_cast<int>(GunshipBoss::AttackType::Max) - 1);
+	}
+	//種類に変換
+	GunshipBoss::AttackType randAttackType = static_cast<GunshipBoss::AttackType>(randNum);
+
+	//今回の攻撃をボスに記録させる
+	pBoss->RecordAttack(randAttackType);
+
+	//番号によって攻撃を決める
+	switch (randAttackType)
+	{
+	case GunshipBoss::AttackType::Net:
+		//網攻撃のステートへ移る
+		ChangeState(std::make_shared<GunshipBossNetState>(m_pBoss));
+		break;
+	case GunshipBoss::AttackType::Rocket:
+		//ロケット攻撃のステートへ移る
+		ChangeState(std::make_shared<GunshipBossRocketState>(m_pBoss));
+		break;
 	}
 }
 

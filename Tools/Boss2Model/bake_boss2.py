@@ -6,8 +6,9 @@
 #                           メタリックの画像は渡さない(-1)ので、アルファがないとツヤは広く強く出る
 #   Boss2_Metallic.png      滑らかさ(R)。ゲームではメタリックの画像(tex_metalic)として渡す。
 #                           -1 のままだとツヤが dot^1 で広く出て、正面が白く飛ぶ。これを渡すと角やボルトに細く光るだけになる
-#   Boss2_Emission.png      発光(通常。放熱口は光らない)
-#   Boss2_Emission_Vent.png 発光(放熱中。放熱口が赤く光る)
+#   Boss2_Emission.png      発光(通常。ポッドの光る所と蓋は黄色、放熱口は光らない)
+#   Boss2_Emission_Vent.png 発光(放熱中。放熱口も黄色く光る)
+#   Boss2_Emission_Damage.png 発光(弱点にダメージ。放熱中の画像のポッドの黄色を、蓋・放熱口・光る所すべて赤にしたもの)
 #   Boss2_Normal.png        法線(タンジェント空間、DirectX式=緑がテクスチャの下向き)
 #                           ゲームは従法線を cross(N, T) で作るので、DxLibの座標では下向きになる
 # 値は「PNGに入る値」をそのまま焼く(画像は Non-Color。ゲームはガンマ空間のまま計算する)。
@@ -178,8 +179,9 @@ def main():
         save_png("Boss2_Metallic", m, p)
         out["metallic"] = p
 
-        # 発光(通常 / 放熱中)
-        for kind, fname in (("OUT_EMIT", "Boss2_Emission.png"), ("OUT_EMIT_VENT", "Boss2_Emission_Vent.png")):
+        # 発光(通常 / 放熱中 / 弱点にダメージ)
+        for kind, fname in (("OUT_EMIT", "Boss2_Emission.png"), ("OUT_EMIT_VENT", "Boss2_Emission_Vent.png"),
+                            ("OUT_EMIT_DAMAGE", "Boss2_Emission_Damage.png")):
             img_e = new_image("B2Bake_" + kind)
             set_output(kind)
             bake("EMIT", img_e, 1)

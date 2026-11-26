@@ -439,6 +439,7 @@
     <ClCompile Include="Game\Collision\GunshipBossWeakCollider.cpp" />
     <ClCompile Include="Game\Collision\GunshipBossBodyCollider.cpp" />
     <ClCompile Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossRocketState.cpp" />
+    <ClCompile Include="Game\GameObjects\Bullet\RocketBullet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants\Game.h">
@@ -874,6 +875,7 @@
     <ClInclude Include="Game\Collision\GunshipBossWeakCollider.h" />
     <ClInclude Include="Game\Collision\GunshipBossBodyCollider.h" />
     <ClInclude Include="Game\GameObjects\Actors\Character\Enemy\Boss\GunshipBoss\GunshipBossRocketState.h" />
+    <ClInclude Include="Game\GameObjects\Bullet\RocketBullet.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="LightingPS.hlsl" />

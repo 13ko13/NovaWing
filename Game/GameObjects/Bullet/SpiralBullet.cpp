@@ -12,13 +12,9 @@ namespace
 	constexpr float rotation_per_frame = DX_TWO_PI_F / 120.0f;
 }
 
-SpiralBullet::SpiralBullet(const Vector3& pos, const Vector3& vel,
-		const int attackPower, std::weak_ptr<CameraBase> pCamera,
-		std::shared_ptr<EnemyBase> pShooter,
-		std::weak_ptr<EffectManager> pEffectManager,
-		float startAngle) :
-	EnemyBullet(pos, vel, attackPower, pCamera, pShooter, pEffectManager),
-	m_bulletAngle(startAngle)
+SpiralBullet::SpiralBullet(const SpiralBulletData& data, std::weak_ptr<EffectManager> pEffectManager) :
+	EnemyBullet(data.pos, data.vel, data.attackPower, data.pCamera, data.pShooter.lock(), pEffectManager),
+	m_bulletAngle(data.startAngle)
 {
 }
 

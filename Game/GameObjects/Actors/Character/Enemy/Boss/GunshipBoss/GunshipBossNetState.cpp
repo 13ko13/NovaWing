@@ -36,9 +36,9 @@ namespace
 	//網の中心の高さ
 	constexpr float net_center_y = 500.0f;
 	//網のビームを出すボーンの名前(左)
-	constexpr const wchar_t* muzzle_frame_name_left = L"Muzzle_Net_L";
+	constexpr const wchar_t* muzzle_bone_name_left = L"Muzzle_Net_L";
 	//網のビームを出すボーンの名前(右)
-	constexpr const wchar_t* muzzle_frame_name_right = L"Muzzle_Net_R";
+	constexpr const wchar_t* muzzle_bone_name_right = L"Muzzle_Net_R";
 
 	//どのぐらいの間網を出し続けるか
 	constexpr int net_active_frame = 120;
@@ -50,7 +50,7 @@ namespace
 	constexpr int laser_extend_frame = 20;
 
 	//網をボスのどのぐらい前に出すか
-	constexpr float net_pos_offset_z = 1200.0f;
+	constexpr float net_pos_offset_z = 400.0f;
 }
 
 GunshipBossNetState::GunshipBossNetState(std::weak_ptr<GunshipBoss> pBoss) :
@@ -455,16 +455,16 @@ void GunshipBossNetState::UpdateVentClose()
 	}
 }
 
-Vector3 GunshipBossNetState::GetMuzzlePos(const wchar_t* frameName) const
+Vector3 GunshipBossNetState::GetMuzzlePos(const wchar_t* boneName) const
 {
 	//ボスのモデルハンドル
 	int bossModelH = m_pBoss.lock()->GetModelHandle();
 
-	//発射口のフレームの位置を取得して返す
+	//発射口のボーンの位置を取得して返す
 	Vector3 muzzlePos;
 	muzzlePos = MV1GetFramePosition(
 	   bossModelH,
-	   MV1SearchFrame(bossModelH, frameName)
+	   MV1SearchFrame(bossModelH, boneName)
 	);
 
 	return muzzlePos;
@@ -477,11 +477,11 @@ Vector3 GunshipBossNetState::GetStreakStartPos(const size_t i) const
 	//偶数だったら右の発射口、奇数なら左の発射口
 	if (i % 2 == 0)
 	{
-		streakStartPos = GetMuzzlePos(muzzle_frame_name_right);
+		streakStartPos = GetMuzzlePos(muzzle_bone_name_right);
 	}
 	else
 	{
-		streakStartPos = GetMuzzlePos(muzzle_frame_name_left);
+		streakStartPos = GetMuzzlePos(muzzle_bone_name_left);
 	}
 
 	return streakStartPos;

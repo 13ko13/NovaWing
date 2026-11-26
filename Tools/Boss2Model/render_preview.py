@@ -281,6 +281,9 @@ SHOT_LIST = [
     ("near_3q_silhouette", (-14.0, -20.0, 5.0), (0.0, 0.0, 1.0), 90, "rest", "Boss2_Emission", True),
     ("near_front_low", (3.0, -15.0, -2.5), (0.0, 0.0, 1.2), 70, "rest", "Boss2_Emission", False),
     ("vent_open_near", (-20.0, -14.0, 7.0), (-12.6, 0.0, 4.4), 60, "vent", "Boss2_Emission_Vent", False),
+    # 弱点にダメージが入ったとき(放熱中に当たる)
+    ("game_zoom_damage", (0.0, -30.0, -1.5), (0.0, 0.0, 1.5), 32, "vent", "Boss2_Emission_Damage", False),
+    ("vent_open_near_damage", (-20.0, -14.0, 7.0), (-12.6, 0.0, 4.4), 60, "vent", "Boss2_Emission_Damage", False),
     ("pod_close", (-17.5, -9.0, 5.0), (-12.6, -0.5, 4.4), 45, "rest", "Boss2_Emission", False),
     ("hatch_open", (4.0, -14.0, -6.0), (0.0, -3.0, -2.5), 50, "hatch", "Boss2_Emission", False),
     ("side", (-30.0, 0.0, 2.0), (0.0, 0.0, 1.0), 60, "rest", "Boss2_Emission", False),

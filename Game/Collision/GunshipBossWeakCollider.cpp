@@ -1,13 +1,14 @@
 ﻿#include "GunshipBossWeakCollider.h"
-#include "Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBossNetState.h"
 #include "Game/GameObjects/Actors/Character/Enemy/Boss/GunshipBoss/GunshipBoss.h"
 #include "Game/Collision/SphereShape.h"
 #include "Game/Collision/BulletCollider.h"
 
 namespace
 {
-	//弱点に当たったときのダメージ倍率(胴体は1倍)
-	constexpr int weak_damage_rate = 2;
+	//放熱中のポッドに当たったときのダメージ倍率
+	constexpr float weak_open_damage_rate = 2.0f;
+	//閉じているポッドに当たったときのダメージ倍率
+	constexpr float weak_closed_damage_rate = 1.0f / 15.0f;
 }
 
 GunshipBossWeakCollider::GunshipBossWeakCollider(GunshipBoss& owner) :
@@ -37,16 +38,25 @@ void GunshipBossWeakCollider::OnCollision(const ICollider& other)
 		other.GetTag() == ColliderTag::ChargeBullet)
 	{
 		const BulletCollider& bullet = static_cast<const BulletCollider&>(other);
-		m_owner.TakeDamage(bullet.GetAttackPower() * weak_damage_rate);
+		//ポッドが閉じているか開いているかでダメージ倍率を変える
+		float damageRate = weak_closed_damage_rate;
+		if (m_owner.IsWeakOpen())
+		{
+			damageRate = weak_open_damage_rate;
+		}
+
+		//小数のダメージも使うためにfloatでためておく
+		m_storedDamage += static_cast<float>(bullet.GetAttackPower()) * damageRate;
+		//ためたダメージの整数部分だけボスに与える
+		int damage = static_cast<int>(m_storedDamage);
+		//与えた分を引いて、小数部分は次に持ち越す
+		m_storedDamage -= static_cast<float>(damage);
+		m_owner.TakeDamage(damage);
 	}
 }
 
 bool GunshipBossWeakCollider::IsCollisionActive() const
 {
-	//ボスが生きていて、今のステートが網攻撃のステートかつ
-	//弱点が出ていたらtrueを返す
-	std::shared_ptr<GunshipBossNetState> netState =
-		std::dynamic_pointer_cast<GunshipBossNetState>(m_owner.GetCurrentState());
-
-	return !m_owner.IsDead() && netState != nullptr && netState->IsVentOpen();
+	//ボスが生きていて、登場が終わっていたらtrueを返す
+	return !m_owner.IsDead() && m_owner.IsBossAppear();
 }
