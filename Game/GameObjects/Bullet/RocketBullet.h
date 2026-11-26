@@ -18,6 +18,8 @@ public:
 	RocketBullet(const RocketBulletData& data);
 	virtual ~RocketBullet();
 
+	void Update() override;
+
 private:
 	//弾の速さ
 	float m_speed = 0.0f;
