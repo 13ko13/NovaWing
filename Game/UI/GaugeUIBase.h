@@ -37,6 +37,7 @@ protected:
 		int frameHandle,
 		int gaugeHandle,
 		const Vector2& drawPos,
+		Vector2 gaugePosInFrame,
 		float ratio,
 		bool isBoss = false
 	);

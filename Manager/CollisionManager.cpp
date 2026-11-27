@@ -472,10 +472,11 @@ void CollisionManager::ReflectEnemyBullet(BulletCollider& bulletCollider)
 	ReflectedBullet::ReflectBulletData data;
 	data.pos = pos;
 	data.vel = toShooterDir * speed * reflect_bullet_speed_rate;
-	data.attackPower = pEnemyBullet->GetAttackPower();
+	data.attackPower = pEnemyBullet->GetReflectAttackPower();
 	data.pTarget = pShooter;
 	data.homingStrength = 1.0f;
 	data.pCamera = m_pCamera;
+	data.isDamageReduced = pEnemyBullet->IsDamageReduced();
 
 	//弾の管理者に反射用の弾を生み出させる
 	m_pBulletManager.lock()->CreateReflectedBullet(data);

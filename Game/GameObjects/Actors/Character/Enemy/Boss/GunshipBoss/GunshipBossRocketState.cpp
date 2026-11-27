@@ -21,7 +21,7 @@ namespace
 	//ロケットを打つ間隔
 	constexpr int rocket_fire_interval = 30;
 	//ロケットの速さ
-	constexpr float rocket_move_speed = 20.0f;
+	constexpr float rocket_move_speed = 0.005f;
 	//ロケットの攻撃力
 	constexpr int rocket_attack_power = 15;
 
@@ -144,7 +144,7 @@ void GunshipBossRocketState::FireRocket()
 	Vector3 toPlayerVelocity = toPlayerDir * rocket_move_speed;
 	//弾の管理者に弾を生成させる
 	pBulletManager->CreateBullet(
-		BulletManager::BulletType::EnemyBullet,
+		BulletManager::BulletType::RocketBullet,
 		firePos, toPlayerVelocity, rocket_attack_power,
 		pCamera, pBoss
 	);

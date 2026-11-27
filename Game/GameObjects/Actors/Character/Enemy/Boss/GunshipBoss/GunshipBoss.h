@@ -11,6 +11,7 @@ class SphereShape;
 class GunshipBossWeakCollider;
 class CapsuleShape;
 class GunshipBossBodyCollider;
+class BulletBase;
 class GunshipBoss : public BossBase
 {
 public:
@@ -55,6 +56,9 @@ public:
 
 	//胴体のカプセルを返す
 	std::shared_ptr<CapsuleShape> GetBodyCapsule() const { return m_pBodyCapsule; }
+
+	//弾のダメージを受ける
+	void TakeBulletDamage(const BulletBase& bullet, bool isPodHit);
 
 	//ロックオン可能か
 	bool CanLockOn() const override;
@@ -112,6 +116,9 @@ private:
 	int m_bodyBoneIdx = -1;
 	//胴体の当たり判定のカプセル(横向き)
 	std::shared_ptr<CapsuleShape> m_pBodyCapsule;
+
+	//まだボスに与えていないダメージ
+	float m_storedDamage = 0.0f;
 
 	//前の攻撃
 	AttackType m_prevAttackType = AttackType::Max;

@@ -34,10 +34,15 @@ public:
 	//エフェクトマネージャー取得
 	std::weak_ptr<EffectManager> GetEffectManager() const { return m_pEffectManager; }
 
+	//受けたダメージの合計を返す
+	float GetTotalHitDamage() const { return m_totalHitDamage; }
+
 private:
 
 protected:
 	//ボスが出現完了しているか
 	//ゲームシーン側からセットさせる
 	bool m_isAppear = false;
+	//受けたダメージの合計
+	float m_totalHitDamage = 0.0f;
 };

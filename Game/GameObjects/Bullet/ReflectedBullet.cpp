@@ -10,15 +10,27 @@ namespace
 
 ReflectedBullet::ReflectedBullet(
 	const ReflectBulletData& data, std::weak_ptr<EffectManager> pEffectManager) :
-	BulletBase(data.pos,data.vel,data.attackPower,
-		hit_col_radius,data.pCamera,ColliderTag::PlayerBullet,pEffectManager),
+	BulletBase(data.pos, data.vel, data.attackPower,
+		hit_col_radius, data.pCamera, ColliderTag::PlayerBullet, pEffectManager),
 	m_pTarget(data.pTarget),
-	m_homingStrength(data.homingStrength)
+	m_homingStrength(data.homingStrength),
+	m_isDamageReduced(data.isDamageReduced)
 {
 	m_speed = data.vel.Length();
 
-	//エフェクトの再生を依頼する(見た目は敵弾のまま)
-	m_effectPlayH = m_pEffectManager.lock()->Play(ResourceLoader::EffectID::EnemyBullet, data.pos);
+	//敵の弾がモデルなしだった場合はエフェクトを再生
+	if (data.pModel == nullptr)
+	{
+		//エフェクトの再生を依頼する(見た目は敵弾のまま)
+		m_effectPlayH = m_pEffectManager.lock()->Play(
+			ResourceLoader::EffectID::EnemyBullet, data.pos);
+	}
+	//敵の弾がモデルありだった場合モデルを受け取る
+	else
+	{
+		//モデルを受け取る
+		m_pModel = data.pModel;
+	}
 }
 
 ReflectedBullet::~ReflectedBullet()
@@ -49,17 +61,29 @@ void ReflectedBullet::Update()
 		toTargetDir.Normalize();
 		//ターゲットの方向へ少しずつ向かわせる
 		Vector3 homingDir = Vector3::Lerp(m_velocity.Normalized(), toTargetDir, m_homingStrength);
-		m_velocity = homingDir * m_speed; 
+		m_velocity = homingDir * m_speed;
 	}
 
-	//エフェクトの位置の調整する
-	m_pEffectManager.lock()->SetPos(m_effectPlayH, GetPos());
+	//モデルがないときだけエフェクトの位置を調整する
+	if (!m_pModel)
+	{
+		//エフェクトの位置の調整する
+		m_pEffectManager.lock()->SetPos(m_effectPlayH, GetPos());
+	}
 }
 
 void ReflectedBullet::Draw()
 {
 	//親クラスの描画処理
 	BulletBase::Draw();
+
+	//モデルがある場合だけSetPos,LookAtDir,Drawを呼ぶ
+	if(m_pModel)
+	{
+		SetPos(m_pos);
+		// LookAtDir(m_velocity);
+		Draw();
+	}
 }
 
 void ReflectedBullet::OnHitEnemy(ColliderTag hitTag)

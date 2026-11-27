@@ -6,7 +6,7 @@
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
 #include "Game/GameObjects/Camera/CameraBase.h"
 #include "Game/GameObjects/Bullet/SpiralBullet.h"
-
+#include "Game/GameObjects/Bullet/RocketBullet.h"
 
 BulletManager::BulletManager(std::weak_ptr<EffectManager> pEffectManager) :
 	m_pEffectManager(pEffectManager)
@@ -86,6 +86,29 @@ void BulletManager::CreateBullet(const BulletType bulletType, const Vector3& pos
 
 		//それを配列に格納する
 		m_pChargeBullets.push_back(pBullet);
+		m_pAllBullets.push_back(pBullet);
+		break;
+	}
+	case BulletType::RocketBullet:
+	{
+		//ロケットに必要な情報を詰める
+		RocketBullet::RocketBulletData data;
+		data.attackPower = attackPower;
+		data.pCamera = pCamera;
+		data.pEffectManager = m_pEffectManager;
+		data.pos = pos;
+		data.vel = vel;
+		data.pShooter = pTarget.lock();
+
+		//インスタンスを作成
+		std::shared_ptr<RocketBullet> pBullet =
+			std::make_shared<RocketBullet>(data);
+
+		//初期化
+		pBullet->Init();
+
+		//それを配列に格納する
+		m_pEnemyBullets.push_back(pBullet);
 		m_pAllBullets.push_back(pBullet);
 		break;
 	}

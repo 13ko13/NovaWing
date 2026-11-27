@@ -16,6 +16,8 @@ namespace
 	//スキャンラインを入れる周期
 	constexpr float scanline_frequency = 74.0f;
 	const Vector2 special_frame_pos_ratio = Vector2(0.02f, 0.83f);
+	//ゲージを置く位置
+	const Vector2 gauge_pos_in_frame = Vector2(48.0f, 25.0f);
 }
 
 PlayerHPGaugeUI::PlayerHPGaugeUI(std::weak_ptr<Player> pPlayer) :
@@ -56,5 +58,6 @@ void PlayerHPGaugeUI::Draw()
 		hpFrameHandle,
 		hpGaugeHandle,
 		frameDrawPos,
+		gauge_pos_in_frame,
 		ratio);
 }

@@ -42,6 +42,11 @@ namespace
 		{ ResourceLoader::GraphicID::ButterflyEnemyMetalicMap, butterfly_enemy_metalic_map_path },//メタリックマップ
 		{ ResourceLoader::GraphicID::ButterflyEnemyEmissionMap, butterfly_enemy_emission_map_path },//エミッションマップ
 
+		//ロケット
+		{ ResourceLoader::GraphicID::RocketNormalMap, rocket_normal_map_path },//法線マップ
+		{ ResourceLoader::GraphicID::RocketMetalicMap, rocket_metalic_map_path },//メタリックマップ
+		{ ResourceLoader::GraphicID::RocketEmissionMap, rocket_emission_map_path },//エミッションマップ
+
 		//レティクル
 		{ ResourceLoader::GraphicID::NormalReticle, normal_reticle_path },//ノーマルレティクル
 		{ ResourceLoader::GraphicID::ChargeReticle, charge_reticle_path },//チャージレティクル
@@ -139,6 +144,7 @@ namespace
 		{ ResourceLoader::ModelID::RushEnemy, rush_enemy_model_path },//突進する敵
 		{ ResourceLoader::ModelID::TurretEnemy, turret_enemy_model_path },//固定砲台の敵
 		{ ResourceLoader::ModelID::ButterflyEnemy, butterfly_enemy_model_path },//蝶型の敵
+		{ ResourceLoader::ModelID::Rocket, rocket_model_path },//2面のボスのロケット
 		{ ResourceLoader::ModelID::SceneryIslandA, scenery_islanda_model_path },//景色用の島(IslandA)
 		{ ResourceLoader::ModelID::SceneryIslandB, scenery_islandb_model_path },//景色用の島(IslandB)
 		{ ResourceLoader::ModelID::SceneryIslandC, scenery_islandc_model_path },//景色用の島(IslandC)
@@ -535,6 +541,8 @@ void ResourceLoader::InitSceneResources()
 		ModelID::OverpassCross, ModelID::OverpassCrossBroken, ModelID::SignGantry,
 		//2ステージ目の敵
 		ModelID::RushEnemy, ModelID::TurretEnemy, ModelID::ButterflyEnemy,
+		//2ステージ目のボスのロケット
+		ModelID::Rocket,
 	};
 	game.graphics = {
 		GraphicID::SkyBoxFront, GraphicID::SkyBoxBack, GraphicID::SkyBoxLeft,
@@ -550,6 +558,7 @@ void ResourceLoader::InitSceneResources()
 		GraphicID::RushEnemyNormalMap, GraphicID::RushEnemyMetalicMap, GraphicID::RushEnemyEmissionMap,
 		GraphicID::TurretEnemyNormalMap, GraphicID::TurretEnemyMetalicMap, GraphicID::TurretEnemyEmissionMap,
 		GraphicID::ButterflyEnemyNormalMap, GraphicID::ButterflyEnemyMetalicMap, GraphicID::ButterflyEnemyEmissionMap,
+		GraphicID::RocketNormalMap, GraphicID::RocketMetalicMap, GraphicID::RocketEmissionMap,
 		GraphicID::NormalReticle, GraphicID::ChargeReticle,
 		GraphicID::PlayerHPFrame, GraphicID::PlayerHPGauge,
 		GraphicID::BossHPFrame, GraphicID::BossHPGauge,

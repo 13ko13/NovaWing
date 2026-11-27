@@ -13,6 +13,7 @@
 #include "GunshipBossNetState.h"
 #include "Game/Collision/CapsuleShape.h"
 #include "Game/Collision/GunshipBossBodyCollider.h"
+#include "Game/GameObjects/Bullet/BulletBase.h"
 
 namespace
 {
@@ -45,6 +46,11 @@ namespace
 	//胴体のカプセルを胴体の中心からどれだけ前(-Z、プレイヤー側)に出すか
 	//中心のままだと前の面がz=-330で、顔(前面)より奥で弾が当たって見えるため
 	constexpr float body_capsule_front_offset = 250.0f * boss_scale;
+
+	//放熱中のポッドに当たったときのダメージ倍率
+	constexpr float weak_open_damage_rate = 2.0f;
+	//ダメージが減らされる弾のダメージ倍率
+	constexpr float reduced_damage_rate = 1.0f / 20.0f;
 }
 
 GunshipBoss::GunshipBoss(GunshipBossData& data) :
@@ -188,6 +194,35 @@ bool GunshipBoss::IsWeakOpen() const
 
 	//nullではなく弱点が開いていたらtrueを返す
 	return netState != nullptr && isVentOpen;
+}
+
+void GunshipBoss::TakeBulletDamage(const BulletBase& bullet, bool isPodHit)
+{
+	//当たった場所とポッドの状態でダメージ倍率を変える
+	float damageRate = 1.0f;
+	//放熱中のポッドに当たったら倍率を上げる
+	if (isPodHit && IsWeakOpen())
+	{
+		damageRate = weak_open_damage_rate;
+	}
+	//それ以外で、ダメージが減らされる弾なら倍率を下げる
+	else if (bullet.IsDamageReduced())
+	{
+		damageRate = reduced_damage_rate;
+	}
+
+	//受けた弾の攻撃力とダメージの倍率から最終的なダメージを計算
+	float finalDamage = static_cast<float>(bullet.GetAttackPower()) * damageRate;
+	//ダメージをためておく
+	m_storedDamage += finalDamage;
+	//今までの受けたダメージの合計も計算
+	m_totalHitDamage += finalDamage;
+
+	//ためたダメージの整数部分だけ与える
+	int damage = static_cast<int>(m_storedDamage);
+	//与えた分を引いて、小数部分は次に持ち越す
+	m_storedDamage -= static_cast<float>(damage);
+	TakeDamage(damage);
 }
 
 bool GunshipBoss::CanLockOn() const

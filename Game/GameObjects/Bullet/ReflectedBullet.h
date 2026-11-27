@@ -3,7 +3,9 @@
 #include "BulletBase.h"
 
 class EnemyBase;
-class ReflectedBullet : public BulletBase {
+class RocketModel;
+class ReflectedBullet : public BulletBase
+{
 public:
     struct ReflectBulletData
     {
@@ -12,8 +14,10 @@ public:
         int attackPower;
         std::weak_ptr<EnemyBase> pTarget;
         float homingStrength;
-        std::weak_ptr<CameraBase> pCamera;
-    };
+		std::weak_ptr<CameraBase> pCamera;
+		bool isDamageReduced = true;
+		std::shared_ptr<RocketModel> pModel;
+	};
     ReflectedBullet(const ReflectBulletData& data, std::weak_ptr<EffectManager> pEffectManager);
     virtual ~ReflectedBullet();
 
@@ -21,6 +25,8 @@ public:
     void Draw() override;
     //敵にヒットした時の処理
     void OnHitEnemy(ColliderTag hitTag) override;
+    //ダメージが減らされるか
+    bool IsDamageReduced() const override { return m_isDamageReduced; }
 
 private:
     //ホーミング先のターゲット
@@ -29,6 +35,10 @@ private:
     float m_homingStrength = 0.0f;
     //受け取った弾の速度
     float m_speed = 0.0f;
+    //ダメージが減らされるか
+    bool m_isDamageReduced = true;
     //Effekseerエフェクト再生ハンドル
-    int m_effectPlayH = -1;
+	int m_effectPlayH = -1;
+	//ロケットのモデル
+	std::shared_ptr<RocketModel> m_pModel = nullptr;
 };

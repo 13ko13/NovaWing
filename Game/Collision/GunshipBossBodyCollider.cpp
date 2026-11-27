@@ -26,12 +26,13 @@ ColliderTag GunshipBossBodyCollider::GetTag() const
 
 void GunshipBossBodyCollider::OnCollision(const ICollider& other)
 {
-	//プレイヤーの弾とチャージショットで、そのままのダメージを受ける
+	//プレイヤーの弾とチャージショットでダメージを受ける
 	if (other.GetTag() == ColliderTag::PlayerBullet ||
 		other.GetTag() == ColliderTag::ChargeBullet)
 	{
 		const BulletCollider& bullet = static_cast<const BulletCollider&>(other);
-		m_owner.TakeDamage(bullet.GetAttackPower());
+		//顔に当たったダメージを受ける
+		m_owner.TakeBulletDamage(bullet.GetOwner(), false);
 	}
 }
 

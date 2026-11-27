@@ -21,6 +21,9 @@ public:
 	//発射元のエネミーを取得
 	std::weak_ptr<EnemyBase> GetShooter() const { return m_pShooter; }
 
+	//跳ね返したときの攻撃力を取得
+	virtual int GetReflectAttackPower() const { return m_attackPower; }
+
 private:
 	//発射元のエネミーを持っておく(プレイヤーのカウンター対象)
 	std::weak_ptr<EnemyBase> m_pShooter;

@@ -58,6 +58,8 @@ namespace
 	constexpr const wchar_t* rush_enemy_model_path = L"Data/Model/RushEnemy/RushEnemy.mv1";
 	constexpr const wchar_t* turret_enemy_model_path = L"Data/Model/TurretEnemy/TurretEnemy.mv1";
 	constexpr const wchar_t* butterfly_enemy_model_path = L"Data/Model/ButterflyEnemy/ButterflyEnemy.mv1";
+	//2ステージ目のボスのロケット
+	constexpr const wchar_t* rocket_model_path = L"Data/Model/Rocket/Rocket.mv1";
 
 	//---------- 画像のパス ----------
 	//プレイヤー
@@ -83,6 +85,10 @@ namespace
 	//蝶型の敵
 	constexpr const wchar_t* butterfly_enemy_normal_map_path = L"Data/Model/ButterflyEnemy/ButterflyEnemy_Normal.png";
 	constexpr const wchar_t* butterfly_enemy_metalic_map_path = L"Data/Model/ButterflyEnemy/ButterflyEnemy_Metallic.png";
+	//ロケット
+	constexpr const wchar_t* rocket_normal_map_path = L"Data/Model/Rocket/Rocket_Normal.png";
+	constexpr const wchar_t* rocket_metalic_map_path = L"Data/Model/Rocket/Rocket_Metallic.png";
+	constexpr const wchar_t* rocket_emission_map_path = L"Data/Model/Rocket/Rocket_Emission.png";
 	constexpr const wchar_t* butterfly_enemy_emission_map_path = L"Data/Model/ButterflyEnemy/ButterflyEnemy_Emission.png";
 	//レティクル
 	constexpr const wchar_t* normal_reticle_path = L"Data/Image/NormalReticle.png";

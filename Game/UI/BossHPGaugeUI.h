@@ -15,6 +15,11 @@ public:
     void Update() override;
 
 private:
-    std::weak_ptr<BossBase> m_pBoss;
+	std::weak_ptr<BossBase> m_pBoss;
+
+	//前のフレームの合計ダメージ
+	float m_prevTotalHitDamage = 0.0f;
+	//揺れの残りフレーム数
+	int m_shakeFrame = 0;
 };
 

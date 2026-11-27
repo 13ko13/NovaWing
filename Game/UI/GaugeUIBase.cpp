@@ -13,25 +13,25 @@
 
 namespace
 {
-    //HP枠画像
-    constexpr double hp_frame_size = 0.55;//HP枠画像の大きさ
+	//HP枠画像
+	constexpr double hp_frame_size = 0.55;//HP枠画像の大きさ
 
-    //HPゲージ画像
-    constexpr double hp_gauge_size = 0.55;//HPゲージの大きさ
+	//HPゲージ画像
+	constexpr double hp_gauge_size = 0.55;//HPゲージの大きさ
 
-    //シェーダにフレームを渡すときに値が大きすぎるので小さくするための値
-    constexpr float time_speed = 0.1f;
+	//シェーダにフレームを渡すときに値が大きすぎるので小さくするための値
+	constexpr float time_speed = 0.1f;
 }
 
 GaugeUIBase::GaugeUIBase()
 {
-    //グリッチシェーダをロード
-    m_glitchPSH = LoadPixelShader(L"GlitchPS.pso");
-    assert(m_glitchPSH >= 0);
+	//グリッチシェーダをロード
+	m_glitchPSH = LoadPixelShader(L"GlitchPS.pso");
+	assert(m_glitchPSH >= 0);
 
-    //シェーダバッファを作成
-    m_cbufferGlitch = CreateShaderConstantBuffer(sizeof(GlitchBuffer));
-    m_pCBuffGlitchData = static_cast<GlitchBuffer*>(GetBufferShaderConstantBuffer(m_cbufferGlitch));
+	//シェーダバッファを作成
+	m_cbufferGlitch = CreateShaderConstantBuffer(sizeof(GlitchBuffer));
+	m_pCBuffGlitchData = static_cast<GlitchBuffer*>(GetBufferShaderConstantBuffer(m_cbufferGlitch));
 }
 
 GaugeUIBase::~GaugeUIBase()
@@ -40,74 +40,77 @@ GaugeUIBase::~GaugeUIBase()
 
 void GaugeUIBase::Update()
 {
-    //フレームを更新
-    m_frame++;
-    //シェーダに時間を渡す
-    m_pCBuffGlitchData->time = m_frame * time_speed;
-    UpdateShaderConstantBuffer(m_cbufferGlitch);
+	//フレームを更新
+	m_frame++;
+	//シェーダに時間を渡す
+	m_pCBuffGlitchData->time = m_frame * time_speed;
+	UpdateShaderConstantBuffer(m_cbufferGlitch);
 }
 
 void GaugeUIBase::DrawGauge(
-    int frameHandle,
-    int gaugeHandle,
-    const Vector2& drawPos,
-    float ratio,
-    bool isBoss
-)
+	int frameHandle,
+	int gaugeHandle,
+	const Vector2& drawPos,
+	Vector2 gaugePosInFrame,
+	float ratio,
+	bool isBoss)
 {
-    //グリッチシェーダを適用
-    SetUsePixelShader(m_glitchPSH);
-    SetShaderConstantBuffer(m_cbufferGlitch, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
+	//グリッチシェーダを適用
+	SetUsePixelShader(m_glitchPSH);
+	SetShaderConstantBuffer(m_cbufferGlitch, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
 
-    //UIの見た目の大きさをDebug/Releaseで揃えるためのスケール
-    float uiScale = Application::GetInstance().GetUIScale();
+	//UIの見た目の大きさをDebug/Releaseで揃えるためのスケール
+	float uiScale = Application::GetInstance().GetUIScale();
 
-    //枠の画像サイズを取得
-    Size frameSize;
-    GetGraphSize(frameHandle, &frameSize.width, &frameSize.height);
-    SizeF frameSizeF = {
-        static_cast<float>(frameSize.width) * static_cast<float>(hp_frame_size) * uiScale,
-        static_cast<float>(frameSize.height) * static_cast<float>(hp_frame_size) * uiScale
-    };
+	//枠の画像サイズを取得
+	Size frameSize;
+	GetGraphSize(frameHandle, &frameSize.width, &frameSize.height);
+	SizeF frameSizeF = {
+		static_cast<float>(frameSize.width) * static_cast<float>(hp_frame_size) * uiScale,
+		static_cast<float>(frameSize.height) * static_cast<float>(hp_frame_size) * uiScale
+	};
 
-    //枠の画像を描画
-    DrawRectHorizontalGraphToShader(
-        drawPos.x,
-        drawPos.y,
-        frameSizeF, 1.0f,
-        frameHandle
-    );
+	//枠の画像を描画
+	DrawRectHorizontalGraphToShader(
+		drawPos.x,
+		drawPos.y,
+		frameSizeF, 1.0f,
+		frameHandle
+	);
 
-    //HPゲージ画像の大きさを取得
-    Size gaugeSize;
-    GetGraphSize(gaugeHandle, &gaugeSize.width, &gaugeSize.height);
-    SizeF gaugeSizeF = {
-        static_cast<float>(gaugeSize.width) * static_cast<float>(hp_gauge_size) * uiScale,
-        static_cast<float>(gaugeSize.height) * static_cast<float>(hp_gauge_size) * uiScale
-    };
+	//HPゲージ画像の大きさを取得
+	Size gaugeSize;
+	GetGraphSize(gaugeHandle, &gaugeSize.width, &gaugeSize.height);
+	SizeF gaugeSizeF = {
+		static_cast<float>(gaugeSize.width) * static_cast<float>(hp_gauge_size) * uiScale,
+		static_cast<float>(gaugeSize.height) * static_cast<float>(hp_gauge_size) * uiScale
+	};
 
-    //ゲージ位置を定義(左上座標は枠の場所と同じ)
-    Vector2 gaugePos = Vector2(drawPos.x, drawPos.y);
+	//ゲージ位置を定義
+	//枠の画像の中でゲージをどこに置きたいか
+	//オフセットにもスケールをかける必要があるためかけてあげる
+	Vector2 gaugePos = drawPos + gaugePosInFrame *
+		static_cast<float>(hp_gauge_size) * uiScale;
 
-    //ゲージを描画
-    //ボスじゃない場合
-    if (isBoss)
-    {
-        DrawRectVerticalGraphToShader(
-            gaugePos.x,
-            gaugePos.y,//位置
-            gaugeSizeF, ratio, gaugeHandle
-        );
-    }
-    else
-    {
-        DrawRectHorizontalGraphToShader(
-            gaugePos.x,
-            gaugePos.y,//位置
-            gaugeSizeF, ratio, gaugeHandle
-        );
-    }
+	//ゲージを描画
+	//ボスじゃない場合
+	if (isBoss)
+	{
+		DrawRectVerticalGraphToShader(
+			gaugePos.x,
+			gaugePos.y,//位置
+			gaugeSizeF, ratio, gaugeHandle
+		);
+	}
+	else
+	{
+		DrawRectHorizontalGraphToShader(
+			gaugePos.x,
+			gaugePos.y,//位置
+			gaugeSizeF, ratio, gaugeHandle
+		);
+	}
 
-    SetUsePixelShader(-1);
-    SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
+	SetUsePixelShader(-1);
+	SetShaderConstantBuffer(-1, DX_SHADERTYPE_PIXEL, ShaderRegister::glitch_buffer);
 }

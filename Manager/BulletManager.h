@@ -29,6 +29,7 @@ public:
 		PlayerBullet,//プレイヤーの弾
 		ChargeBullet,//プレイヤーのチャージ弾
 		EnemyBullet,//敵の弾
+		RocketBullet,//ロケット弾
 	};
 
 	//別クラスから種類を指定してもらってその弾を作成する

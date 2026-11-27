@@ -66,6 +66,8 @@ public:
 		RushEnemy,//突進する敵
 		TurretEnemy,//固定砲台の敵
 		ButterflyEnemy,//蝶型の敵
+		//2ステージ目のボスのロケット
+		Rocket,//ロケット
 	};
 
 	//グラフィックの種類
@@ -92,6 +94,9 @@ public:
 		ButterflyEnemyNormalMap,//蝶型の敵の法線マップ
 		ButterflyEnemyMetalicMap,//蝶型の敵のメタリックマップ
 		ButterflyEnemyEmissionMap,//蝶型の敵のエミッションマップ
+		RocketNormalMap,//ロケットの法線マップ
+		RocketMetalicMap,//ロケットのメタリックマップ
+		RocketEmissionMap,//ロケットのエミッションマップ
 
 		NormalReticle,//ノーマル状態のレティクル
 		ChargeReticle,//チャージ状態のレティクル

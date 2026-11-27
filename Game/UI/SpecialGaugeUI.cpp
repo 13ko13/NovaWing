@@ -12,6 +12,8 @@ namespace
 {
     //ゲージ画像の位置
     const Vector2 special_frame_pos_ratio = { 0.02f,0.9f };
+    //ゲージを置く位置
+    const Vector2 gauge_pos_in_frame = { 38.0f,27.0f };
     //スキャンラインを入れる周期
     constexpr float scanline_frequency = 655.0f;
 }
@@ -61,6 +63,7 @@ void SpecialGaugeUI::Draw()
 		gaugeFrameHandle,
 		gaugeHandle,
 		frameDrawPos,
+		gauge_pos_in_frame,
 		ratio);
 
 #ifdef _DEBUG

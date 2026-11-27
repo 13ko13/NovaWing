@@ -38,6 +38,9 @@ public:
 	//まだ何かに当たることができるか
 	virtual bool CanHit() const { return !IsDead(); }
 
+	//ダメージが減らされるか
+	virtual bool IsDamageReduced() const { return true; }
+
 protected:
 	//当たり判定用の球
 	std::shared_ptr<SphereShape> m_sphere = std::make_shared<SphereShape>();
