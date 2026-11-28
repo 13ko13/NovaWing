@@ -62,7 +62,8 @@ void RocketModel::Draw()
 	textures.push_back({ ShaderRegister::tex_noise,-1 });//ノイズテクスチャはなし
 
 	//モデルを描画
-	DrawWithLighting(textures);
+	//カメラの手前でも消えないように、ディゾルブはしない
+	DrawWithLighting(textures, false, false);
 }
 
 void RocketModel::LookAtDir(const Vector3& dir)

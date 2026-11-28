@@ -113,13 +113,13 @@ void Actor::SetTexturesToShader(const std::vector<std::pair<int, int>>& textures
 }
 
 void Actor::DrawWithLighting(const std::vector<std::pair<int, int>>& textures,
-	bool isSkinned)
+	bool isSkinned,bool isDisolve)
 {
 	//テクスチャをセット
 	SetTexturesToShader(textures);
 
 	//シェーダを適用
-	LightingManager::GetInstance().ApplyShader(isSkinned);
+	LightingManager::GetInstance().ApplyShader(isSkinned, isDisolve);
 	BindShaderBuffers();//シェーダをセットする
 	//モデルを描画
 	MV1DrawModel(m_modelHandle);

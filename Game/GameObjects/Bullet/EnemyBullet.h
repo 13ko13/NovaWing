@@ -23,6 +23,10 @@ public:
 
 	//跳ね返したときの攻撃力を取得
 	virtual int GetReflectAttackPower() const { return m_attackPower; }
+	//跳ね返したときの速度を取得
+	virtual float GetReflectSpeed() const;
+	//ヒットエフェクトのIDを取得
+	ResourceLoader::EffectID GetHitEffectID() const { return m_hitEffectID; }
 
 private:
 	//発射元のエネミーを持っておく(プレイヤーのカウンター対象)

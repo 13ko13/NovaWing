@@ -6,6 +6,8 @@ namespace
 {
 	//当たり判定の球の半径
 	constexpr float radius = 32.0f;
+	//反射弾をもとの弾のどれぐらいの速度で反射させるか
+	constexpr float reflect_bullet_speed_rate = 5.5f;
 }
 
 EnemyBullet::EnemyBullet(
@@ -67,4 +69,9 @@ void EnemyBullet::OnHitEnemy(ColliderTag hitTag)
 
 	//消す処理
 	OnDead();
+}
+
+float EnemyBullet::GetReflectSpeed() const
+{
+	return GetVel().Length() * reflect_bullet_speed_rate;
 }

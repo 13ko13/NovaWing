@@ -24,6 +24,8 @@
 #include "Game/Collision/BuildingCollider.h"
 #include "Game/GameObjects/Actors/Building/Building.h"
 #include "Game/Collision/CapsuleShape.h"
+#include "Game/GameObjects/Bullet/RocketBullet.h"
+#include "Game/GameObjects/Bullet/RocketModel.h"
 
 namespace
 {
@@ -184,9 +186,6 @@ namespace
 			return false;
 		}
 	}
-
-	//反射弾をもとの弾のどれぐらいの速度で反射させるか
-	constexpr float reflect_bullet_speed_rate = 5.5f;
 
 	//カウンター中のスローの速さ
 	constexpr float counter_slow_scale = 0.2f;
@@ -465,18 +464,27 @@ void CollisionManager::ReflectEnemyBullet(BulletCollider& bulletCollider)
 	//現在位置から発射元の敵への方向を反射方向とする
 	Vector3 pos = pEnemyBullet->GetPos();
 	Vector3 toShooterDir = (pShooter->GetPos() - pos).Normalized();
-	//元の弾より速い速度で反射
-	float speed = pEnemyBullet->GetVel().Length();
+	//跳ね返したときの速度
+	//弾によって速度は変わる
+	float speed = pEnemyBullet->GetReflectSpeed();
 
 	//反射弾用の情報を入れる
 	ReflectedBullet::ReflectBulletData data;
 	data.pos = pos;
-	data.vel = toShooterDir * speed * reflect_bullet_speed_rate;
+	data.vel = toShooterDir * speed;
 	data.attackPower = pEnemyBullet->GetReflectAttackPower();
 	data.pTarget = pShooter;
 	data.homingStrength = 1.0f;
 	data.pCamera = m_pCamera;
 	data.isDamageReduced = pEnemyBullet->IsDamageReduced();
+	data.hitEffectID = pEnemyBullet->GetHitEffectID();
+
+	//その弾がロケットだった場合はモデルが必要なのでモデルを入れる
+	RocketBullet* pRocket = dynamic_cast<RocketBullet*>(pEnemyBullet);
+	if (pRocket)
+	{
+		data.pModel = std::make_shared<RocketModel>(m_pCamera);
+	}
 
 	//弾の管理者に反射用の弾を生み出させる
 	m_pBulletManager.lock()->CreateReflectedBullet(data);

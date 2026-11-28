@@ -3155,3 +3155,18 @@
   4. ゲームで確認: 跳ね返したロケットがロケットの見た目のままボスへ飛ぶか、普通の敵の弾(砲台・蝶)は今までどおりエフェクトか。
 - **その後**: コスト表の38行(文を「1/20、顔も同じ」に直して完了)・41行(ロケットの攻撃、完了)の実際の時間をユーザーに聞いて完了にする。次の大きいものは39行の形態変化(3h)→42行の第二形態のリズム。
 - 今日の残りの確認待ち: 跳ね返したロケットでHPが50ずつ減るか(顔でも50)、ロケットの速さ。
+### 2026-11-28 跳ね返したロケットの見た目・速さ・爆発、ロケットが見えなくなる件の原因(ユーザー実装、原因探しはClaude)
+- **見た目**: [ReflectedBullet.cpp](Game/GameObjects/Bullet/ReflectedBullet.cpp#L83-L88)の`Draw`を`m_pModel->SetPos/LookAtDir(m_velocity)/Draw`に(`RocketModel.h`をinclude)。[CollisionManager.cpp](Manager/CollisionManager.cpp#L482-L488)の`ReflectEnemyBullet`で、元の弾を`dynamic_cast<RocketBullet*>`で調べ、ロケットなら`RocketModel`を新しく作って`data.pModel`に入れる(方針D)。向きは速度のまま(跳ね返した弾はボスへ飛ぶので、プレイヤーの速度は引かない)。
+- **跳ね返した後が遅かった原因**: 跳ね返す速さを「元の弾の速さ×5.5」で決めていたが、ロケットの地面から見た速さは、プレイヤーの前進とほぼ打ち消し合ってほぼ0だった。ボスはプレイヤーと同じ速さで進むので追いつけなかった。
+  - 直し(ユーザーが案Bを選択): [EnemyBullet.h](Game/GameObjects/Bullet/EnemyBullet.h#L26-L29)に`virtual float GetReflectSpeed() const`(ふだんは`GetVel().Length()×5.5`。倍率はCollisionManagerから[EnemyBullet.cpp](Game/GameObjects/Bullet/EnemyBullet.cpp#L10)へ移した)。[RocketBullet.cpp:17](Game/GameObjects/Bullet/RocketBullet.cpp#L17)で`reflect_speed`(60、固定)を返す上書き。CollisionManagerは`GetReflectSpeed()`を使う。
+- **当たったときの爆発**: ロケットが当たったときは、敵が死ぬときの爆発(`FloatingDeath`)を出す(専用エフェクトは作らない、ユーザー決定)。
+  - 置き方: BulletBaseの`protected`に`m_hitEffectID`(初期値`HitEffect`)だけを持たせ、公開の仮想関数は足さない(ユーザー指摘「何でもBulletBaseに置いていいのか」への答え)。[EnemyBullet.h:29](Game/GameObjects/Bullet/EnemyBullet.h#L29)の非仮想`GetHitEffectID()`で読み、跳ね返した弾は[ReflectedBullet.h](Game/GameObjects/Bullet/ReflectedBullet.h#L20)の`hitEffectID`で受け取る。ロケットはコンストラクタで`FloatingDeath`を入れる([RocketBullet.cpp:35](Game/GameObjects/Bullet/RocketBullet.cpp#L35))。
+  - **カウンターのときは火花**(爆発だと食らったと見えてしまうため、ユーザー指摘): [BulletBase.cpp:84-97](Game/GameObjects/Bullet/BulletBase.cpp#L84-L97)で`hitTag`が`Counter`なら`HitEffect`、それ以外は`m_hitEffectID`。
+  - ユーザーが`floating_death_effect_scale`を1.5→4.0に([ResourceConstants.h:272](Constants/ResourceConstants.h#L272))。**浮遊敵が死ぬときの爆発も4倍になる**(ロケットの爆発を大きくしたいだけなら、専用のIDを足して倍率を分ける手がある)。
+- **ロケットが見えなくなる件の原因(解決)**: 見えなくなるだけで死んではいなかった(デバッグ表示の球は残り、プレイヤーには当たる)。原因は**ディゾルブ**。
+  - [LightingPS.hlsl:40-54](LightingPS.hlsl#L40-L54): カメラからの距離が`startDisolveDist`より近い画素を、ノイズの値が閾値より小さければ描かない。`startDisolveDist`は[GameCamera.cpp:117-119](Game/GameObjects/Camera/GameCamera.cpp#L117-L119)で「カメラからプレイヤーまでの距離」。[LightingManager::ApplyShader](Manager/LightingManager.cpp#L37)の`isDisolve`の初期値が1(オン)で、切っているのはプレイヤーだけ。ロケットはノイズに`-1`(なし)を渡していて値が0になるため、プレイヤーよりカメラに近い画素が全部消えていた。
+  - 一番左で起きやすい理由: カメラのxはプレイヤーより小さくしか動かないので、一番左だと横ずれの分だけ「カメラからプレイヤーまで」が長くなり、消える範囲が広がる。
+  - 直し: [Actor.h:87-88](Game/GameObjects/Actors/Actor.h#L87-L88)・[Actor.cpp:115-122](Game/GameObjects/Actors/Actor.cpp#L115-L122)の`DrawWithLighting`に`bool isDisolve = true`を足して`ApplyShader`に渡し、[RocketModel.cpp:64-66](Game/GameObjects/Bullet/RocketModel.cpp#L64-L66)だけ`false`。ゲームで確認OK(ユーザー「消えなくなった」)。
+  - 調べるときの実験(元に戻した): `camera_near`を50→5にするとボスの目が暗くなった(nearを下げると深度の精度が粗くなる副作用と思われる)。ロケットの件の原因はnearではなかった。
+- **ゲームで確認OK**: 跳ね返したロケットの見た目・速さ(ユーザー「良い感じ」)、ロケットが見えなくなる件。爆発の大きさ(4.0)とカウンターのとき火花になるかも、ユーザーが確認OK。
+- **コスト表**: 38行(ポッドにいつでも当たる)を実コスト0.5で完了、41行(ロケットの攻撃)を実コスト5で完了にした(ユーザーの申告)。ロケットの見た目・爆発・見えなくなる件は41行に含めた。次の大きいものは39行の形態変化(3h)→42行の第二形態のリズム。

@@ -28,6 +28,8 @@ public:
 	bool IsDamageReduced() const override { return false; }
 	//跳ね返したときの攻撃力を取得
 	int GetReflectAttackPower() const override;
+	//跳ね返したときの速度
+	float GetReflectSpeed() const override;
 
 private:
 	//プレイヤーを追跡する

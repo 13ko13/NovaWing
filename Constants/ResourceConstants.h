@@ -269,7 +269,7 @@ namespace
 	//---------- エフェクトの再生スケール ----------
 	constexpr float player_bullet_effect_scale = 2.0f;
 	constexpr float worm_death_effect_scale = 1.0f;
-	constexpr float floating_death_effect_scale = 1.5f;
+	constexpr float floating_death_effect_scale = 4.0f;
 	constexpr float player_charge_bullet_effect_scale = 1.0f;
 	//1.0で外周の半径が400(爆発の判定半径÷400にする)
 	constexpr float charge_explosion_effect_scale = 1.75f;

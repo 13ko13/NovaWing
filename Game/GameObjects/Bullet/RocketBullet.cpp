@@ -13,6 +13,8 @@ namespace
 	constexpr float homing_strength = 0.02f;
 	//跳ね返したときの攻撃力
 	constexpr int reflect_attack_power = 50;
+	//跳ね返したときの速度
+	constexpr float reflect_speed = 60.0f;
 }
 
 RocketBullet::RocketBullet(const RocketBulletData& data) :
@@ -29,6 +31,8 @@ RocketBullet::RocketBullet(const RocketBulletData& data) :
 	m_pEffectManager.lock()->Stop(m_effectPlayHandle);
 	//ロケットのモデルを作る
 	m_pModel = std::make_unique<RocketModel>(data.pCamera);
+	//当たった時のヒットエフェクトを火花ではなく爆発に変える
+	m_hitEffectID = ResourceLoader::EffectID::FloatingDeath;
 }
 
 RocketBullet::~RocketBullet()
@@ -38,6 +42,11 @@ RocketBullet::~RocketBullet()
 int RocketBullet::GetReflectAttackPower() const
 {
 	return reflect_attack_power;
+}
+
+float RocketBullet::GetReflectSpeed() const
+{
+	return reflect_speed;
 }
 
 void RocketBullet::Update()

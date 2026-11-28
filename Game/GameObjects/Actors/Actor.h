@@ -85,7 +85,7 @@ protected:
 
 	//テクスチャをテクスチャレジスタにセットして描画する
 	void DrawWithLighting(const std::vector<std::pair<int,int>>& textures,
-		bool isSkinned = false);
+		bool isSkinned = false,bool isDisolve = true);
 	//フレームごとにライティングを適用して描画する
 	void DrawFrameWithLighting(const std::vector<std::pair<int, int>>& textures);
 };

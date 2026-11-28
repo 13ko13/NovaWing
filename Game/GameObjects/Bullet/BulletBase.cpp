@@ -83,6 +83,16 @@ void BulletBase::Draw()
 
 void BulletBase::OnHitEnemy(ColliderTag hitTag)
 {
-	//ヒットエフェクトは共通なのでここで行う
-	m_pEffectManager.lock()->PlayOneShot(ResourceLoader::EffectID::HitEffect, m_pos);
+	//カウンター用のコライダーと当たった時は
+	//カウンターできていないと錯覚してしまうので
+	//爆発が起きないようにする
+	//カウンターは火花、それ以外は弾ごとのエフェクト
+	if (hitTag == ColliderTag::Counter)
+	{
+		m_pEffectManager.lock()->PlayOneShot(ResourceLoader::EffectID::HitEffect, m_pos);
+	}
+	else
+	{
+		m_pEffectManager.lock()->PlayOneShot(m_hitEffectID, m_pos);
+	}
 }

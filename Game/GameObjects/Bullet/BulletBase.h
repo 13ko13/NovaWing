@@ -58,6 +58,11 @@ protected:
 	//エフェクトのマネージャー
 	std::weak_ptr<EffectManager> m_pEffectManager;
 
+	//ヒットエフェクト
+	//弾ごとに変更可能とする
+	ResourceLoader::EffectID m_hitEffectID =
+		ResourceLoader::EffectID::HitEffect;
+
 private:
 	//当たり判定インターフェース
 	BulletCollider m_collider;

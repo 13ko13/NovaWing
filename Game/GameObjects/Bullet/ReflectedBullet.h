@@ -17,6 +17,7 @@ public:
 		std::weak_ptr<CameraBase> pCamera;
 		bool isDamageReduced = true;
 		std::shared_ptr<RocketModel> pModel;
+		ResourceLoader::EffectID hitEffectID = ResourceLoader::EffectID::HitEffect;
 	};
     ReflectedBullet(const ReflectBulletData& data, std::weak_ptr<EffectManager> pEffectManager);
     virtual ~ReflectedBullet();

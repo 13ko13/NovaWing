@@ -1,6 +1,7 @@
 ﻿#include "ReflectedBullet.h"
 #include "Manager/EffectManager.h"
 #include "Game/GameObjects/Actors/Character/Enemy/EnemyBase.h"
+#include "Game/GameObjects/Bullet/RocketModel.h"
 
 namespace
 {
@@ -31,6 +32,8 @@ ReflectedBullet::ReflectedBullet(
 		//モデルを受け取る
 		m_pModel = data.pModel;
 	}
+	//ヒットエフェクトを受け取る
+	m_hitEffectID = data.hitEffectID;
 }
 
 ReflectedBullet::~ReflectedBullet()
@@ -80,9 +83,9 @@ void ReflectedBullet::Draw()
 	//モデルがある場合だけSetPos,LookAtDir,Drawを呼ぶ
 	if(m_pModel)
 	{
-		SetPos(m_pos);
-		// LookAtDir(m_velocity);
-		Draw();
+		m_pModel->SetPos(m_pos);
+		m_pModel->LookAtDir(m_velocity);
+		m_pModel->Draw();
 	}
 }
 
